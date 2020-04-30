@@ -1,0 +1,20 @@
+Ok -- we got a good ways toward building a Gourmet React and now I
+think it's time to possibly give that up and start anew in svelte + a
+new DB. The real issue was the backend DB was driving me bonkers.
+
+So, what would the new architecture look like?
+
+UI
+- Widgets
+- Style
+- Main
+- Browser Extension
+
+BACKEND
+- lambda function interface? Let's just go in on netlify and use faunadb? As a temporary measure? Try to define an agnostic API for making calls...
+- Handle syncing?
+
+Proper Tests from the ground up...
+-> Jest?
+-> Maybe we'll mock the backend before we bother building it legitimately?
+-> https://timdeschryver.dev/blog/how-to-test-svelte-components
