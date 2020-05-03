@@ -12,7 +12,7 @@
 //         return frac_to_float(string);
 //     }
 // });
-import {Amounts} from './Amounts.js'; 
+import Amounts from './Amounts.js'; 
 
 var NUMBER_FRACTIONS = [
     {numerator:1,
@@ -71,7 +71,7 @@ function getFraction (n, d) {
     return n+'/'+d
 }
 
-function float_to_frac (n, denominators=[2,3,4,6,8,10,16], approx=0.01) {
+function float_to_frac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2}={}) {
     var i, f
     if (n >= 1) {
 	i = Math.floor(n).toString()
@@ -97,7 +97,7 @@ function float_to_frac (n, denominators=[2,3,4,6,8,10,16], approx=0.01) {
 	    }
 	}
 	// If we failed, we just format...
-	return n.toFixed(2);
+	return n.toFixed(fallbackDigits);
     }
 }
 
