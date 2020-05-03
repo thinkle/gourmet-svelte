@@ -1,0 +1,13 @@
+* set up initial testing framework (x)
+* set up mocking framework (x)
+* set up simple widget demos/tests for quick development cycles (x)
+* set up initial svelte stuff (x)
+* create side-by-side scrolly ingredient view (x)
+* define basic API mocks to show how we will retrieve recipe data (x)
+* define basic API mocks to show how we will save recipe data (x)
+* Mock up basic UI for editing recipe ______ (x)
+* Decide on some kind of store/data model. We will eventually need to deal with some significant complexity / support the possibility of auto-save, offline vs. online saving, yada yada yada
+* Set up basic code for caching recipe changes / working offline
+* Set up faunadb and netlify for testing / initial implementation of recipe db
+* Build out chrome extension / translation of react extension
+* Build editor widget types for recipe editing
