@@ -1,11 +1,17 @@
 <script>
  export let ingredients;
- export let maxWidth=175;
-
+ export let maxWidth=250;
+ export let editable = true;
+ export let editMode = false;
+ import NumberUnitImport from '../../widgets/NumberUnitInput.svelte'
+ import {float_to_frac} from '../../utils/Numbers.js';
  import {onMount} from 'svelte';
  let uwidth=5;
  let iwidth=5;
  let awidth=5;
+ export function setEditMode (v) {
+    editMode = v;
+ }
  const padding = 3;
  onMount(
      ()=>{
@@ -40,19 +46,35 @@
 </script>
 
 <div style="max-width:{maxWidth}px;">
-    <ul class="inglist" style="--uwidth:{uwidth}px;--awidth:{awidth}px;--iwidth:{iwidth}px;--padding:{padding}px">
-	{#each ingredients as i}
+    <ul class:edit-mode={editMode} class="inglist" style="--uwidth:{uwidth}px;--awidth:{awidth}px;--iwidth:{iwidth}px;--padding:{padding}px">
+	{#each ingredients as i,n}
 	<li class='ing'>
-	    <span bind:clientWidth={i.awidth} class='amount'>{i.amount}</span>
-	    <span bind:clientWidth={i.uwidth} class='unit'>{i.unit}</span>
+            {#if editMode}
+            
+             <NumberUnitImport label={false} bind:value={i}/>
+             <input bind:value={i.item}>
+             <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}"><i class="material-icons" >delete</i>
+             </button>
+        {:else}
+	    <span bind:clientWidth={i.awidth} class='amount'>{i.amount&&float_to_frac(i.amount)||''}</span>
+	    <span bind:clientWidth={i.uwidth} class='unit'>{i.unit||''}</span>
 	    <span bind:clientWidth={i.iwidth} class='item'>{i.item}</span>
+        {/if}
 	</li>
 	{/each}
+        {#if editMode}
+        <button
+            on:click="{()=>{ingredients.push({item:''});ingredients=ingredients}}"
+            type="icon"><i class='material-icons'>add</button>
+            {/if}
     </ul>
     
 </div>
 
 <style>
+.edit-mode {
+  font-size : 0.8em
+}
  .inglist {
      padding: 0;
  }
