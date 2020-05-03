@@ -2,6 +2,7 @@
  import Tester from './Tester.svelte';
  import ipsum from '../common/mocks/ipsum.js';
  import SideBySide from './SideBySide.svelte';
+ import RichText from './RichText.svelte';
  
  let sideBySideOptions = {
      left : {
@@ -30,7 +31,10 @@
 </script>
 <div>
     <h3>Widget Tests...</h3>
-    <Tester let:option="{option}" name="Tester" options="[1,2,3,4,5,6,7]" >
+    <Tester let:option="{option}" name="Editor" options="{[1,5,10,25]}">
+        <RichText initialValue={ipsum.generateParagraphs(option)}/>
+    </Tester>
+    <Tester let:option="{option}" name="Tester" options={[1,2,3,4,5,6,7]} >
         <div>
             They chose test number {option}
         </div>
