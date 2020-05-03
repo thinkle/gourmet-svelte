@@ -64,3 +64,34 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+input {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+button.icon {
+    border: none;
+    background-color: transparent;
+    border-radius: 10px;
+    transition: all 0.8s;
+}
+button.icon:hover {
+    background-color: #7474f4;
+    color: white;
+}
+button.icon:active {
+    border: 1px solid #222;
+}
+button.toggle {
+    border: 1px solid grey;
+    transition: all 0.8s;
+}
+
+button.toggle:hover {
+    background-color: #a9a9a9;
+}
+button.active-toggle {
+    background-color: #747474;
+    color: white;
+}
