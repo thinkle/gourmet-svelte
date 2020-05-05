@@ -1,5 +1,6 @@
 <script>
  import router from 'page';
+ import Landing from './Landing.svelte';
  import Recipe from './recDisplay/Recipe.svelte';
  import RecipeList from './recDisplay/RecipeList.svelte';
  import Demo from './Demo.svelte';
@@ -9,8 +10,15 @@
  let name = 'Gourmet';
  let page;
  let params = {};
- router('/',()=>{page = RecipeList; params={}});
+ router('/',()=>{page = Landing; params={}});
+ router('/rl',()=>{page = RecipeList; params={}});
  router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
+ router('/demo/',(ctx)=>{
+     console.log('Demo...',ctx);
+     page = Demo
+     params = {}
+ });
+
  router('/demo/:demo',(ctx)=>{
      console.log('Demo...',ctx);
      page = Demo
