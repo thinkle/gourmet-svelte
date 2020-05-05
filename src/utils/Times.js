@@ -68,6 +68,11 @@ export default {
     },
 
     getHMS (seconds) {
+        if (isNaN(seconds)) {
+            new Error(
+                `getHMS requires a number but got ${seconds}`
+            );
+        }
         let hours = Math.floor(seconds / H)
         let remainder = seconds - (hours*H)
         let minutes = Math.floor(remainder / M);
