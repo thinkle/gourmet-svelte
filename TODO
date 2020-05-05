@@ -6,8 +6,13 @@
 * define basic API mocks to show how we will retrieve recipe data (x)
 * define basic API mocks to show how we will save recipe data (x)
 * Mock up basic UI for editing recipe ______ (x)
-* Decide on some kind of store/data model. We will eventually need to deal with some significant complexity / support the possibility of auto-save, offline vs. online saving, yada yada yada
-* Set up basic code for caching recipe changes / working offline
-* Set up faunadb and netlify for testing / initial implementation of recipe db
-* Build out chrome extension / translation of react extension
+* Decide on some kind of store/data model. We will eventually need to deal with some significant complexity / support the possibility of auto-save, offline vs. online saving, yada yada yada (x)
+* Bind ingredients list the same way you do recprop and rectext (x)
+* Simplify the damned data model already (? - maybe did that?) (ish) (x)
+* Set up basic code for caching recipe changes / working offline (Hey - that works!) (x)
+* Set up faunadb and netlify for testing (x)
+* Implement user authentication model (https://docs.fauna.com/fauna/current/tutorials/authentication/user.html)
+* initial implementation of a remote recipe db implementation
+
+* Build out chrome extension / translation of react extension for importing recipes
 * Build editor widget types for recipe editing
