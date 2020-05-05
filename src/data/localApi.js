@@ -82,7 +82,8 @@ const api = {
             }
         }
     },
-    updateRecipe (recipe,user) {
+    async updateRecipe (recipe,user) {
+        await api._getRecStore();
         return P(api.recStore.put(recipe));
     },
     async updateRecipes (recipes,user) {
@@ -92,6 +93,12 @@ const api = {
         }
         return results;
     },
+
+    async deleteRecipe (id, user) {
+        console.log('deleteRecipe',id)
+        await api._getRecStore();
+        return P(api.recStore.delete(id))
+    }
 }
 
 export default api 
