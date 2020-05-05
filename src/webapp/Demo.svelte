@@ -24,13 +24,10 @@
     {#if demo}
     <svelte:component this="{demos[demo]}" initialShow={true} />
     {:else}
-    <Tester name="Widgets" >
-        <WidgetTests/>
-    </Tester>
-    <Tester name="Recipe Display" >
-        <RecDisplayTests/>
-    </Tester>
+    <WidgetTests/>
+    <RecDisplayTests/>
     <LocalDataTester/>
+    <RecipeDataTester/>
     {/if}
 </div>
 <style>
