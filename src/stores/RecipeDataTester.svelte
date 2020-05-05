@@ -32,7 +32,8 @@
     <Tester name="Recipe Store" {initialShow}>
         <br>$recipeData.connected {$recipeData.connected}
         <br>
-        <button on:click={()=>{s();recipeActions.createRecipe(testRecs.standard)}}>Create</button>
+        <button on:click={()=>{s();recipeActions.createRecipe(testRecs.standard)}}>Create Standard</button>
+        <button on:click={()=>{s();recipeActions.createRecipe(testRecs.empty)}}>Create Empty</button>
         <button on:click={()=>{s();recipeActions.getRecipe(theRec.id)}}>Get Recipe</button>
         <button on:click={()=>{s();recipeActions.getRecipes()}}>Get Recipe<u>s</u></button>
         <button on:click={()=>{s();recipeActions.deleteRecipe(theRec.id)}}>Delete Recipe</button>
