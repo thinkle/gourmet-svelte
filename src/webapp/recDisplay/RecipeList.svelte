@@ -1,5 +1,6 @@
 <script>
  import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
+ import {testRecs} from '../../common/mocks/recipes.js'
  import Recipe from './Recipe.svelte'
  $: {
      if ($connected) {
@@ -33,6 +34,11 @@
             {:else}
             <div>
                 No recipes yet? Maybe import some or create them!
+                {#if $connected}<button on:click={()=>recipeActions.createRecipe(testRecs.empty)}>Create Your First Recipe</button>
+                    {:else}(Connecting...)
+                {/if}
+
+                <a href="broken">Install the Chrome Plugin to make it easy to import from webpages</a>
             </div>
         {/each}
         {#each open as recipe}
