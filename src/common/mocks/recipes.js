@@ -2,9 +2,11 @@ let testRecs = {
     empty : {
         title : "My First Recipe",
         properties : {
+            preptime : {seconds:60*30},
+            categories : ['Dessert']
         },
         text : {
-            instructions : "Text goes here..."
+            instructions : "Your text goes here..."
         },
         images : {
         },
