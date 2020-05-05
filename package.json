@@ -24,6 +24,7 @@
     "svelte-jester": "^1.0.3"
   },
   "dependencies": {
+    "deepcopy": "^2.0.0",
     "page": "^1.11.6",
     "quill": "^1.3.7",
     "sirv-cli": "^0.4.4",
