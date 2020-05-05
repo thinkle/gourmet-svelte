@@ -23,6 +23,9 @@
  
  let lasttheta = 0;
 
+ $: if (value.seconds==undefined) {
+     value.seconds = 0;
+ }
 
  let direction = 0;
  let startVal = undefined
@@ -71,7 +74,7 @@
 
  function changeSeconds (event) {
      let n = event.target.value
-     const curtime = Times.getHMS(value.seconds)
+     const curtime = Times.getHMS(value.seconds||0)
      curtime.seconds = Number(n)
      value.seconds = Times.HMStoSeconds(curtime)
      change()
@@ -79,7 +82,7 @@
  
  function changeMinutes (event) {
      let n = event.target.value
-     const curtime = Times.getHMS(value.seconds)
+     const curtime = Times.getHMS(value.seconds||0)
      curtime.minutes = Number(n)
      value.seconds = Times.HMStoSeconds(curtime)
      change()
@@ -87,7 +90,7 @@
 
  function changeHours (event) {
      let n = event.target.value
-     const curtime = Times.getHMS(value.seconds)
+     const curtime = Times.getHMS(value.seconds||0)
      curtime.hours = Number(n)
      value.seconds = Times.HMStoSeconds(curtime)
      change()
