@@ -1,4 +1,17 @@
 let testRecs = {
+    empty : {
+        title : "My First Recipe",
+        properties : {
+        },
+        text : {
+            instructions : "Text goes here..."
+        },
+        images : {
+        },
+        ingredients : [
+        ],
+        
+    },
     standard :         {
             "title": "Asparagus Custard Tart",
             "text": {
