@@ -3,7 +3,10 @@
  export let name
  export let options=[];
  export let initialOption=0;
- var hidden = !initialShow
+ var hidden
+ $: hidden = !initialShow
+
+
  var option = initialOption||options&&options[0];
 </script>
 <div class="test">
