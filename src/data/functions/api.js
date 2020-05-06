@@ -8,7 +8,6 @@ const functions = {
 
 const handler = async (event, context) => {
     let params = event.queryStringParameters;
-    console.log('handler got params:',params)
     const {
         // this magic documented here:
         // https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/#bonus-points-authenticated-lambda-functions-for-your-gatsby-app
@@ -40,7 +39,9 @@ const handler = async (event, context) => {
 
 
 function echo (event,context,user,params) {
-    return {params,user,context,event}
+    return {params,
+            user:user||'no user logged in',
+            context,event}
 }
 
 function throwError () {

@@ -80,7 +80,7 @@
 </script>
 <Tester name="Test Remote API">
     {#if isLoggedIn}
-        Howdy {username} 
+        Howdy {username} (JSON.stringify({$user}))
         <div>
             <button on:click={() => doLogout()}>Log Out</button>
         </div>

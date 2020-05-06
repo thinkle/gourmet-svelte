@@ -4,6 +4,7 @@ export default async function (event, context, user) {
         return {message:'Congratulations, you are allowed via my hard-coded non-secure security magic!'}
     }
     else {
-        return {message:'No way sir, no how no go!'};
+        return {message:'No way sir, no how no go: user not permitted!!,',
+                user:user||'no user logged in'}
     }
 }
