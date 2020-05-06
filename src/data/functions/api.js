@@ -10,7 +10,7 @@ const handler = async (event, context) => {
     } = context.clientContext
     return {
         statusCode:200,
-        body:`Params: ${JSON.stringify(params)} and user ${user}`
+        body:`Params: ${JSON.stringify(params)} and user ${JSON.stringify(user)}`
     }
 }
 
