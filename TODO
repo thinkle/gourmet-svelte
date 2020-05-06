@@ -12,6 +12,8 @@
 * Set up basic code for caching recipe changes / working offline (Hey - that works!) (x)
 * Set up faunadb and netlify for testing (x)
 * Implement user authentication model (https://docs.fauna.com/fauna/current/tutorials/authentication/user.html)
+  -> Actually, we set up netlify identity service as a stand-in... might be worth abstracting this out a bit... presumably we'll change
+     identity solutions in time.
 * initial implementation of a remote recipe db implementation
 
 * Build out chrome extension / translation of react extension for importing recipes
