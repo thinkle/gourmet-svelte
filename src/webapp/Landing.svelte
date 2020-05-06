@@ -15,7 +15,7 @@
          headers: {
              Accept: "application/json",
              "Content-Type": "application/json",
-             Authorization: "Bearer " + ($user && $user.token && $user.token.access_token), // like this
+             Authorization: "Bearer " + ($user && $user.access_token), // like this
          },
      })
      console.log('apiTest is now a promise?',apiTest);
@@ -64,7 +64,7 @@
     <button on:click={testApi}>Test API</button>
     <div>
         {#await apiTest}
-            Fetching data from {url} with access token {user && user.token && user.token.access_token}
+            Fetching data from {url} with access token {user && user.access_token}
         {:then response}
             {#if response}
                 {#await response.text()}
