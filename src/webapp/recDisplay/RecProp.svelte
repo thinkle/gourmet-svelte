@@ -22,7 +22,7 @@
  }
  console.log('propInput:',propInput);
  var displayValue;
- $: displayValue = prop.toHtml && prop.toHtml(value) || value
+ $: displayValue = value && prop.toHtml && prop.toHtml(value) || value || '?'
 
  var edit;
  var editOn = false;
