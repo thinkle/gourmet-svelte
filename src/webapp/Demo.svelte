@@ -6,6 +6,7 @@
  import WidgetTests from '../widgets/WidgetTests.svelte';
  import LocalDataTester from './LocalDataTester.svelte';
  import RecipeDataTester from '../stores/RecipeDataTester.svelte';
+ import RemoteApiTester from '../data/RemoteApiTester.svelte';
  export let demo
  
  let demos = {
@@ -22,12 +23,13 @@
 </script>
 <div>
     {#if demo}
-    <svelte:component this="{demos[demo]}" initialShow={true} />
+        <svelte:component this="{demos[demo]}" initialShow={true} />
     {:else}
-    <WidgetTests/>
-    <RecDisplayTests/>
-    <LocalDataTester/>
-    <RecipeDataTester/>
+        <WidgetTests/>
+        <RecDisplayTests/>
+        <LocalDataTester/>
+        <RecipeDataTester/>
+        <RemoteApiTester/>
     {/if}
 </div>
 <style>
