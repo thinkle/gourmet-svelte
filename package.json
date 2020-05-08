@@ -25,10 +25,14 @@
   },
   "dependencies": {
     "deepcopy": "^2.0.0",
+    "faunadb": "^2.13.1",
+    "mongodb": "^3.5.7",
     "netlify-identity-widget": "^1.5.6",
+    "node-fetch": "^2.6.0",
     "page": "^1.11.6",
     "querystring": "^0.2.0",
     "quill": "^1.3.7",
+    "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "sirv-cli": "^0.4.4",
     "svelte-quill": "^1.2.0"
