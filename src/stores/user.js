@@ -12,6 +12,7 @@ const mock = {
     username: "Joe Schmoe",
 }
 function createUser() {
+    console.log('createUser...');
     const localUser = JSON.parse(localStorage.getItem('gotrue.user'))
 
     let u = null
