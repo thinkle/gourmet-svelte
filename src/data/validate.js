@@ -51,7 +51,7 @@ export function prepRecs (recs,user) {
 
     recs.recipes.forEach(
         (r)=>{
-            r.owner = user.user;
+            r.owner = user;
             r._id = makeId(r.localid);
             crawlIngsForIds(r.ingredients);
             validateRec(r)
