@@ -29,7 +29,8 @@
  function setup () {
      apiResponse = remoteApi.doFetch(
          'setup',
-         $user
+         $user,
+         {action:'has_access'}
      );
  }
 

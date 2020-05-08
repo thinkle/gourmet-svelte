@@ -8,11 +8,17 @@ const functions = {
 
 const handler = async (event, context) => {
     let params = event.queryStringParameters;
-    const {
+    var {
         // this magic documented here:
         // https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/#bonus-points-authenticated-lambda-functions-for-your-gatsby-app
         user, // actual user info you can use for your serverless functions
     } = context.clientContext
+    if (!user && event.headers.referer.indexOf('localhost')>-1) {
+        user = {
+            name:'Fake Local User',
+            email:'tmhinkle@gmail.com',
+        }
+    }
     let f = functions[params.mode]
     if (!f) {
         return {
