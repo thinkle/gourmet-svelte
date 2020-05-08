@@ -3,6 +3,7 @@ import builtins from 'rollup-plugin-node-builtins';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
+import json from 'rollup-plugin-json';
 import { terser } from 'rollup-plugin-terser';
 
 
@@ -18,6 +19,7 @@ export default [
 	    file: 'public/build/bundle.js'
         },
         plugins: [
+            json(),
 	    svelte({
 	        // enable run-time checks when not in production
 	        dev: !production,
@@ -37,6 +39,7 @@ export default [
 	        browser: true,
 	        dedupe: ['svelte']
 	    }),
+
 	    commonjs(),
             builtins(),
 	    // In dev mode, call `npm run start` once
@@ -62,7 +65,8 @@ export default [
             format: 'cjs',
             name : 'functions',
             file : 'functions/api.js'
-        }
+        },
+        plugins : [json()],
     },
 ];
 
