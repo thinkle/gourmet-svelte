@@ -7,7 +7,8 @@
  let adminMode = false;
  netlifyIdentity.init();
 
- $: isLoggedIn = !!$user || window.location.host.indexOf('localhost')>-1
+ $: isLoggedIn = !!$user;
+ // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
 
  function doLogout () {
@@ -33,6 +34,21 @@
                             if ($redirectURL !== '') {
                                 console.log('Got redirect: ',$redirectURL);
                             }
+     });
+ }
+
+ if (window.location.host.indexOf('localhost')>-1) {
+     console.log('Fake login...');
+     user.login({
+         email : 'tmhinkle@gmail.com',
+         user_metadata : {
+             full_name : 'Thomas Hinkle',
+         },
+         token : {
+             expires_at : new Date().getTime()+60*1000*60*3,
+             token_type : 'bearer',
+             access_token : 'fake-access-token-yadyadyadyadya'
+         }
      });
  }
 
