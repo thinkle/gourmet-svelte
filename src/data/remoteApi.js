@@ -30,6 +30,13 @@ async function doFetch (mode, user, params) {
         e.url = u(mode,params)
         e.error = await result.json();
         console.log('Throwing an error everyone',e);
+        try {
+            console.log(JSON.stringify(e))
+            console.log(e.toString());
+        }
+        catch (ee) {
+            console.log('Cannot toString that baby?');
+        }
         throw e;
     }
 }
