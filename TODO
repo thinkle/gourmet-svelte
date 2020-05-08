@@ -13,7 +13,17 @@
 * Set up faunadb and netlify for testing (x)
 * Implement user authentication model (https://docs.fauna.com/fauna/current/tutorials/authentication/user.html)
   -> Actually, we set up netlify identity service as a stand-in... might be worth abstracting this out a bit... presumably we'll change
-     identity solutions in time.
+     identity solutions in time. (x)
+  -> Ok, actually, faunadb + GraphQL is kind of a time-suck and then faunadb doesn't support
+     custom interfaces anyway and ends up creating a whole bunch of collections for my schema
+     which kind of feels like SQL anyway and defeats the whole purpose of using a NoSQL DB, right?
+     So I'm switching course to MongoDB.
+
+     - MongoDB seems simple, open source, so far so good.
+     - Not sure it's worth using "Mongoose" and schema with it. If I understand it, this puts a bunch
+       of validation and stuff in the middle layer. I may regret this later, but since the middle layer
+       is the layer I'm potentially paying for, I might rather push validation onto clients where their
+       computers can run the logic and keep my netlify function layer as thin as possible.
 * initial implementation of a remote recipe db implementation
 
 * Build out chrome extension / translation of react extension for importing recipes
