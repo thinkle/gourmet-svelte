@@ -1,9 +1,12 @@
 //import faunadb from 'faunadb';
 import setupHandler from './setupDB.js';
+import {getUser} from './users.js';
 const functions = {
     setup : setupHandler,
     echo : echo,
     throwError : throwError,
+    getUser : getUser
+    
 }
 
 const handler = async (event, context) => {
@@ -19,6 +22,7 @@ const handler = async (event, context) => {
             email:'tmhinkle@gmail.com',
         }
     }
+    console.log('API GET USER: ',user);
     let f = functions[params.mode]
     if (!f) {
         return {
