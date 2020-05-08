@@ -1,63 +1,72 @@
 //import {fquery,q} from './faunaUtil.js';
 //import {runQuery,runImport} from './gql.js';
-import {runTest} from './mongoConnect.js';
+import {loadDB,runTest,insertOne,insertMany,queryCollection} from './mongoConnect.js';
 import recs from '../recs.json'
-
-function prepRecs () {
-
-    const salt = '1771'
-
-    function makeId (id) {
-        return `$recs.metadata.name+'-'+${salt}+'-'{id}`
-    }
-
-    recs.recipes.forEach(
-        (r)=>{
-            r.id = makeId(r.localid);
-            crawlIngsForIds(r);
-        }
-    );
-
-    function crawlIngsForIds (ii) {
-        ii.forEach(
-            (i) => {
-                if (i.reference) {
-                    i.reference = makeId(i.reference);
-                }
-            }
-        );
-    }
-}
+import {validateRec,prepRecs} from '../validate.js'
 
 const functions = {
     mongoConnect : runTest,
-    has_access : ()=>({access:true}),
-    create_users : async ()=>{
-        let result1 = await fquery(q.CreateCollection({name:'users'}));
-        let result2 = await fquery(q.CreateCollection({name:'recipes'}));
-        return {results:[result1,result2]}
+    setupIndexes : async function () {
+        let results = []
+        results.push(await functions.create_recipe_index());
+        results.push(await functions.create_user_index());
+        return results;
     },
-    create_user_index : () => {
-        return fquery(q.CreateIndex(
-            {
-                name: "users-by-email",
-                source: q.Collection("users"),
-                terms: [{field:['email']}],
+    has_access : async (event,context,user,params)=>{
+        if (user.email=='tmhinkle@gmail.com') {
+            return {access:true}
+        }
+        else {
+            return {
+                access:false
             }
-        ));
+        }
     },
-    create_recipes : (event,context,user,params)=>{
-        fquery(q.Collection('users'))
+    create_user_index : async ()=>{
+        const {client,db} = await loadDB();
+        const c= db.collection('users')
+        await c.createIndex({name:1});
+        return await c.createIndex({email:1})
     },
-    create_schema : ()=>runImport(),
-    create_recipe_index : () => {
-        q.CreateIndex(
-            {
-                name: "recipes_by_collection",
-                source: q.Class("users"),
-                terms: [{ field: [q.Term('data'), q.Term('email')] }],
-                unique: true
-    })
+    query_recipes : async ()=>{
+        return queryCollection(
+            'recipes',
+            {'fullText':/oven/i},
+            {});
+    },
+    create_recipes : async (event,context,user,params)=>{
+        //fquery(q.Collection('users'))
+        let {client,db} = await loadDB();
+        try {
+            let result = await db.collection('recipes').drop();
+            console.log('dropped with result',result);
+        }
+        catch (err) {
+            console.log('unable to drop recipes - maybe does not exist yet?');
+        }
+        prepRecs(recs,user);
+        return await insertMany('recipes',recs.recipes);
+    },
+    create_recipe_index : async () => {
+        const {client,db} = await loadDB();
+        const c= db.collection('recipes')
+        const results = []
+        for (let [index,options] of [
+            [{'title':1},{}],
+            [{'fullText.item':'text'},{name:'fulltext'}],
+            [{'categories.name':1},{name:'category'}],
+            [{'flatIngredients.item':1},{name:'ingredients'}],
+        ]) {
+            try {
+                results.push(await c.createIndex(index,options));
+            }
+            catch (err) {
+                console.log(err)
+                console.log('Message:',err.errmsg)
+                results.push(err)
+            }
+        }
+        return results
     },
 }
 
