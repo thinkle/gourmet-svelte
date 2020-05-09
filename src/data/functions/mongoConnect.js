@@ -17,7 +17,6 @@ export function loadDB (name=DB) {
                 reject(err)
             }
             const db = client.db(name);
-            console.log('Got DB',db)
             resolve({
                 client,db
             });
@@ -55,13 +54,24 @@ export async function updateOne (collection, query, values) {
     return result;
 }
 
-export async function queryCollection (collection, query, options) {
+export async function queryCollection (collection, query, {fields, limit=100}={}) {
     const {db,client} = await loadDB(DB)
+    console.log('query',collection,'for',query)
+    if (Array.isArray(fields)) {
+        let _fields = {}
+        fields.forEach((f)=>_fields[f]=1)
+        fields = _fields
+    }
+    console.log(query,fields);
     let cursor = await db.collection(collection)
-        .find(query,options);
+        .find(query);
     let count = await cursor.count()
-    console.log("COUNT",count)
-    cursor.limit(100)
+    console.log("COUNT",count,'limit',Number(limit))
+    cursor.limit(Number(limit))
+    if (fields) {
+        console.log('projecting to ',fields);
+        cursor = cursor.project(fields)
+    }
     let result = await cursor.toArray()
     return {
         count:count,
