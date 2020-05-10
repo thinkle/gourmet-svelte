@@ -128,7 +128,8 @@
  }
 
 </script>
-
+<span>
+    <input type="text"  class="text" bind:value={value.name} on:change="{change}">
 <span class="container">
     <div class="hms" >
         <input width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
@@ -144,6 +145,7 @@
     </div>
     <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
     <input class="text" on:change={change} type="text" bind:value={value.text}>
+</span>
 </span>
 
 <style>
@@ -169,7 +171,7 @@
  input {
      width: 3em;
      text-align: center;
-     border-bottom: 0;
+     /*border-bottom: 0;*/
  }
  canvas {
 
