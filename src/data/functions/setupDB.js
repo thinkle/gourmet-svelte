@@ -56,6 +56,7 @@ const functions = {
             [{'fullText.item':'text'},{name:'fulltext'}],
             [{'categories.name':1},{name:'category'}],
             [{'flatIngredients.item':1},{name:'ingredients'}],
+            [{'last_modified':1},{}],
         ]) {
             try {
                 results.push(await c.createIndex(index,options));
