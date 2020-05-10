@@ -24,7 +24,13 @@
        of validation and stuff in the middle layer. I may regret this later, but since the middle layer
        is the layer I'm potentially paying for, I might rather push validation onto clients where their
        computers can run the logic and keep my netlify function layer as thin as possible.
-* initial implementation of a remote recipe db implementation
+* initial implementation of a remote recipe db implementation (x)
+* Update recipe model to handle syncing to remote DB
+  -> Grab from remote DB
+     - how to sync the ID's / version #'s... ? (let's just use modified time stamps for now...)
+  -> Compare to local DB
+  -> Maybe come up with some way to version / avoid grabbing remote data if we don't need to?
+* Update display to handle new layout
 
 * Build out chrome extension / translation of react extension for importing recipes
 * Build editor widget types for recipe editing
