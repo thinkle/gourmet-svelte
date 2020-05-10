@@ -5,9 +5,6 @@ import {MongoClient,Server} from 'mongodb';
 import {testRecs} from '../../common/mocks/recipes.js'
 const DB = 'devtest'
 
-console.log('Hello beautiful world');
-console.log('Using URL',url);
-
 export function loadDB (name=DB) {
     return new Promise ((resolve,reject)=>{
         const client = new MongoClient(url, { useNewUrlParser: true });
@@ -54,7 +51,7 @@ export async function updateOne (collection, query, values) {
     return result;
 }
 
-export async function queryCollection (collection, query, {fields, limit=100}={}) {
+export async function queryCollection (collection, query, {fields, limit=100,page=0}={}) {
     const {db,client} = await loadDB(DB)
     console.log('query',collection,'for',query)
     if (Array.isArray(fields)) {
@@ -67,15 +64,20 @@ export async function queryCollection (collection, query, {fields, limit=100}={}
         .find(query);
     let count = await cursor.count()
     console.log("COUNT",count,'limit',Number(limit))
+    if (page) {
+        cursor.skip(page);
+    }
     cursor.limit(Number(limit))
     if (fields) {
         console.log('projecting to ',fields);
         cursor = cursor.project(fields)
     }
     let result = await cursor.toArray()
-    return {
+    console.log('Page:',result.length + page);
+    return { // FIXME: handle pagination
         count:count,
-        result:result
+        result:result,
+        page:result.length+page,
     }
 }
 
