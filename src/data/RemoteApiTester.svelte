@@ -3,6 +3,7 @@
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
  import remoteApi from '../data/remoteApi.js'
+ import api from '../data/api.js';
 
  let apiResponse
  netlifyIdentity.init();
@@ -62,6 +63,13 @@
      handleLogin();
  }
 
+ function fakeLogin () {
+     user.fake({
+         name : 'Thomas Hinkle the Fake',
+         email : 'tmhinkle@gmail.com'
+     });
+ }
+
  function doSignup () {
      netlifyIdentity.open('signup');
      handleLogin();
@@ -78,6 +86,10 @@
      });
  }
 
+ function doApiTest(mode,params) {
+     apiResponse = remoteApi.doFetch(mode,$user,params);
+ }
+
 </script>
 <Tester name="Test Remote API">
     {#if isLoggedIn}
@@ -90,12 +102,26 @@
         <div>
             <button on:click={() => doLogin() }>Log In</button>
             <button on:click={() => doSignup() }>Sign Up</button>
+            <button on:click={()=>fakeLogin()}>Fake Log In</button>
         </div>
     {/if}
     <button on:click={testApi}>Test API</button> 
     <button on:click="{setup}">Setup DB</button>
     <button on:click="{throwError}">Throw Error</button>
     <button on:click="{doBadModeRequest}">Bad Mode</button>
+    <hr>
+    <button on:click={
+                     ()=>doApiTest(
+                     'getRecipes',
+                     {
+                     fields:['owner','title','last_modified'],
+                     query: {
+                        'owner.email':'tmhinkle@gmail.com'
+                     },
+                     limit:500})}
+    >Get recipes with limited fields...</button>
+    <button on:click="{()=>doApiTest('getRecipes',{query:{'owner.email':'katharine.hinkle@gmail.com'},fields:['owner','title','last_modified'],limit:500})}">Get recipes with limited fields... (Katharine)</button>
+    <button on:click={()=>api.sync($user||{email:'tmhinkle@gmail.com'})}>api.sync($user)</button>
     <div>
         {#await apiResponse}
             Fetching data from with access token {$user && $user.access_token}
