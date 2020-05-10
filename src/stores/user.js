@@ -31,6 +31,9 @@ function createUser() {
 
     return {
         subscribe,
+        fake (user) {
+            set(user);
+        },
         login(user) {
             const currentUser = {
                 username: user.user_metadata.full_name,
