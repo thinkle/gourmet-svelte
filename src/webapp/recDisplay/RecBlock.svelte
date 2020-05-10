@@ -8,7 +8,7 @@
  import RichText from '../../widgets/RichText.svelte';
 
  var displayValue;
- $: displayValue = prop.toHtml && prop.toHtml(value) || value
+ $: displayValue = value.body //prop.toHtml && prop.toHtml(value) || value
  let initialValue;
 
  $: {
@@ -49,17 +49,19 @@
  function handleChange (event) {
      if (!editedThisTime) {console.log('Setting editedThisTime to true!')}
      editedThisTime = true;
-     value = event.detail || event.target.value;
+     value.body = event.detail || event.target.value;
  }
  
 </script>
 <div>
     <div class="top">
-        <h3>
-            {#if showLabel}
-            {prop.label}
+        {#if showLabel}
+            {#if edit}
+                <input bind:value={value.header}>
+            {:else}
+                <h3>{value.header}</h3>
             {/if}
-        </h3>
+        {/if}
         {#if editable && !edit}
         <button class="icon" on:click={turnEditOn}>
             <i class="material-icons">edit</i>
@@ -67,7 +69,7 @@
         {/if}
         {#if edit && !forceEdit}
         <button class="icon" on:click={turnEditOff}>
-            <i class="material-icons">close</i>
+            <i class="material-icons">done</i>
         </button>
         {/if}
     </div>

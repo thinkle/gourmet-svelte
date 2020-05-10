@@ -8,6 +8,8 @@
  import PlainInput from '../../widgets/PlainInput.svelte';
  import DurationInput from '../../widgets/DurationInput.svelte';
  import UrlInput from '../../widgets/UrlInput.svelte';
+ import ComboInput from '../../widgets/ComboInput.svelte';
+ import CategoryInput from '../../widgets/CategoryInput.svelte';
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte';
  let modes = RecDef.EditModes
  let ref;
@@ -16,13 +18,19 @@
      [modes.RCH] : PlainInput,
      [modes.CMB] : PlainInput,
      [modes.DUR] : DurationInput,
-     [modes.CMB] : PlainInput,
+     [modes.CMB] : ComboInput,
+     [modes.MCMB] : CategoryInput,
      [modes.LNK] : UrlInput,
      [modes.NUMUNIT] : NumberUnitInput,
  }
- console.log('propInput:',propInput);
+ $: console.log('Value=',value);
  var displayValue;
- $: displayValue = value && prop.toHtml && prop.toHtml(value) || value || '?'
+ function getDisplayVal (v) {
+     return v && prop.toHtml && prop.toHtml(v) || v
+ }
+ $: displayValue = prop.array && value.map(getDisplayVal) || getDisplayVal(value);
+
+ $: console.log('Display val=',displayValue);
 
  var edit;
  var editOn = false;
@@ -43,36 +51,78 @@
 
  function handleChange (event) {
      value = event.detail || event.target.value;
- } 
+ }
+
+ function makeArrayHandler (n) {
+     return function (event) {
+         value[n] = event.detail || event.target.value;
+         value = value;
+     }
+ }
  
 </script>
 <div>
     <div>
         {#if showLabel}
-        <div class="top" >
-            <label on:click={()=>ref.focus()}>{prop.label}</label>
-            {#if editable && !edit}
-            <button class="icon" on:click={turnEditOn}>
-                <i class="material-icons">edit</i>
-            </button>
-            {/if}
-            {#if edit && !forceEdit}
-            <button class="icon" on:click={turnEditOff}>
-                <i class="material-icons">done</i>
-            </button>
-            {/if}
-        </div>
+            <div class="top" >
+                <label on:click={()=>ref.focus()}>{prop.label}</label>
+                {#if editable && !edit}
+                    <button class="edit icon" on:click={turnEditOn}>
+                        <i class="material-icons">edit</i>
+                    </button>
+                {/if}
+                {#if edit && !forceEdit}
+                    <button class="icon" on:click={turnEditOff}>
+                        <i class="material-icons">done</i>
+                    </button>
+                {/if}
+            </div>
         {/if}
         <div>
             {#if edit}
-            <svelte:component this={propInput[prop.edit]}
-                              on:change={handleChange}
-                              displayValue={displayValue}
-                              value={value}
-                              bind:this={ref}
-            />
+                {#if prop.array}
+                    <div class="multiContainer">
+                        {#each value as subval,n}
+                            <button class="icon"
+                                    on:click={()=>{
+                                        value.splice(n,1)
+                                        value = value;
+                                    }}
+                            >
+                                <i class="material-icons">remove
+                                </i>
+                            </button>
+                            <svelte:component this="{propInput[prop.edit]}"
+                                              on:change="{makeArrayHandler(n)}"
+                                              displayValue="{displayValue[n]}"
+                                              value="{value[n]}"/>
+                        {/each}
+                        <button class="icon"
+                                on:click={()=>value=[...value,...prop.empty]}
+                        ><i class="material-icons">add</i></button>
+                    </div>
+                {:else}
+                    <svelte:component
+                        this={propInput[prop.edit]}
+                             options={prop.options}
+                        on:change={handleChange}
+                             displayValue={displayValue}
+                        value={value}
+                             bind:this={ref}
+                    />
+                {/if}
             {:else}
-            <b>{@html displayValue}</b>
+                {#if prop.array}
+                    {#each displayValue as v}
+                    <b>
+                        {@html v}
+                    </b>
+                    {/each}
+                {:else}
+                <b>
+                    {@html displayValue}
+                </b>
+                {/if}
             {/if}
             {#if !showLabel}
               {#if editable && !edit}
@@ -109,11 +159,23 @@
  input {
      margin-bottom: 0;
  }
- button {
+ button.edit {
      align-self: flex-end;
      margin-bottom: 0}
  input {
      color: var(--black);
      background-color: var(--white);}
+
+ .multiContainer {
+     display: grid;
+     grid-template-columns: 4em auto;
+     row-gap: 20px;
+ }
+
+ .multiContainer > button {
+     align-self: center;
+     justify-self: center;
+ }
+
 
 </style>

@@ -9,9 +9,8 @@
  let changed;
 
  export let rec={ingredients : [],
-                properties : {},
-                text : {},
-                images : {},
+                text : [],
+                images : [],
                 };
  export var editMode = false;
  export let editable = true;
@@ -20,13 +19,6 @@
  $: if (rec.id) {
      console.log('Recipe calls updateCurrent');
      recipeActions.updateCurrent(rec.id,rec)
-     /*
-      * $recipeData[rec.id].title = rec.title
-      * $recipeData[rec.id].ingredients = rec.ingredients
-      * $recipeData[rec.id].properties = rec.properties
-      * $recipeData[rec.id].text = rec.text
-      * $recipeData[rec.id].images = rec.images
-      * changed = recipeActions.checkChanges(rec.id) */
  }
  
      
@@ -46,7 +38,7 @@
         <button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
             Edit{#if editMode}ing{/if}
             Recipe <i class="material-icons">edit</i></button>
-        {#if $recipeData && rec && rec.id && $recipeData[rec.id].changed}
+        {#if $recipeData && rec && rec.id && $recipeData[rec.id] && $recipeData[rec.id].changed}
             <button
                 class:busy={$recipeData[rec.id].localState=='updating'}
                            on:click="{()=>recipeActions.updateRecipe(rec)}">
@@ -71,23 +63,24 @@
 	</div>		
 	
 	<div slot="right">
-            {#if rec.images && rec.images.image}
-                <img alt={rec.title} src={rec.images.image}/>
-            {/if}
+            {#each rec.images as image}
+                <!-- Small: <img alt={image.alt||rec.title} src={image.thumbnailUrl}/> -->
+                Big: <img alt={image.alt||rec.title} src={image.url}/>
+            {/each}
             {#each RecDef.recProps as prop}
-                {#if rec.properties.hasOwnProperty(prop.name)}
-                    <RecProp editable={editable} forceEdit={editMode} prop={prop} bind:value={rec.properties[prop.name]}></RecProp>
-                {:else}
-                    {#if editMode}<div class="small"><button on:click={()=>rec.properties[prop.name]=prop.empty}>Add {prop.label}?</button></div>{/if}
+                {#if rec.hasOwnProperty(prop.name)}
+                    <RecProp editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/>
+                {/if}
+                {#if editMode}
+                    {#if !rec.hasOwnProperty(prop.name)}
+                        <div class="small"><button on:click={()=>rec[prop.name]=prop.empty}>Add {prop.label}?</button></div>
+                    {/if}
                 {/if}
             {/each}
-            {#each RecDef.recBlocks as block}
-                {#if rec.text.hasOwnProperty(block.name)}
-                    <RecBlock prop={block} bind:value="{rec.text[block.name]}" forceEdit="{editMode}"/>
-                {:else}
-                    {#if editMode}<div class="small"><button on:click={()=>rec.text[block.name]=""}>Add {block.label}?</button></div>{/if}
-                {/if}
+            {#each rec.text as textBlock}
+                <RecBlock bind:value="{textBlock}" forceEdit="{editMode}"/>
             {/each}
+            {#if editMode}<div class="small"><button on:click={()=>rec.text.push({header:'More Text',text:''})}>Add more text</button></div>{/if}
 	</div>
     </SideBySide>
 </div>
