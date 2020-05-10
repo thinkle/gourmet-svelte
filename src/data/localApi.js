@@ -1,5 +1,5 @@
 // see : https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-const VERSION = 8
+const VERSION = 18
 if (!window.indexedDB) {
     window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 }
@@ -19,50 +19,62 @@ function P (response) {
                       );
 }
 
-function DB () {
-    return new Promise((resolve,reject)=>{
-        var request = window.indexedDB.open('Recipes',VERSION)
-        var db;
-        request.onerror = (err) => {
-            console.log('Why was I not allowed to open a DB?',err);
-            reject(err)
-        }
-        request.onupgradeneeded = api._initialize
-        request.onsuccess = (event) => {
-            console.log('Loaded DB')
-            db = event.currentTarget.result;
-            resolve(db);
-        }
-    })
-}
-
 const api = {
-    async connect () {
-        this.db = await DB();
-        return this.db;
+    connect () {
+        return new Promise((resolve,reject)=>{
+            api.request = window.indexedDB.open('Recipes',VERSION)
+            api.request.onerror = (err) => {
+                console.log('Why was I not allowed to open a DB?',err);
+                reject(err)
+            }
+            api.request.onupgradeneeded = api._initialize
+            api.request.onsuccess = (event) => {
+                console.log('Loaded DB')
+                api.db = event.currentTarget.result;
+                resolve(api.db);
+            }
+        });
     },
     async _initialize (event) {
-        const db = event.target.result
+        api.db = event.target.result
+        console.log('run _initialize');
         console.log('_initializing DB');
-        await P(db.createObjectStore('recipes',
-                                     {keyPath:'id', autoIncrement:true})
-               );
+        let recStore
+        try {
+            recStore = api.db.createObjectStore('recipes',
+                                                    {keyPath:'id', autoIncrement:true})
+        }
+        catch (err) {
+            console.log('Unable to create recipes store - maybe already exists?');
+            console.log(err);
+            recStore = api.request.transaction.objectStore('recipes');
+        }
+        console.log('Creating index on ',recStore);
+        recStore
+            .createIndex('mongoid','_id',{unique:true});
+        console.log('Created index');
     },
     
     async _getRecStore () {
-        this.transaction = this.db.transaction(['recipes'],'readwrite');
-        this.recStore = this.transaction.objectStore('recipes');
+        api.transaction = api.db.transaction(['recipes'],'readwrite');
+        api.recStore = api.transaction.objectStore('recipes');
     },
 
-    async addRecipe (recipe, user) {
+    async addRecipe (recipe) {
         await api._getRecStore();
         return P(api.recStore.add(recipe));
     },
-    async getRecipe (recid, user) {
-        await api._getRecStore();
-        return P(api.recStore.get(recid))
+    async getRecipe (recid, {mongoId}={}) {
+        if (mongoId) {
+            await api._getRecStore();
+            return P(api.recStore.index('mongoid').get(mongoId))
+        }
+        else {
+            await api._getRecStore();
+            return P(api.recStore.get(recid))
+        }
     },
-    async getRecipes (page,user) {
+    async getRecipes ({query, fields, limit, page}={}) {
         await api._getRecStore();
         if (!page) {
             let result = await P(api.recStore.getAll(undefined,100))
@@ -82,19 +94,22 @@ const api = {
             }
         }
     },
-    async updateRecipe (recipe,user) {
-        await api._getRecStore();
+    async updateRecipe (recipe) {
+        await api._getRecStore();        
         return P(api.recStore.put(recipe));
     },
-    async updateRecipes (recipes,user) {
+    async updateRecipes (recipes) {
         let results = [];
+        recipes.forEach(
+                (r)=>{if (!r.id) {r.id = r._id}}
+            );
         for (let r of recipes) {
-            results.push(await api.updateRecipe(r,user));
+            results.push(await api.updateRecipe(r));
         }
         return results;
     },
 
-    async deleteRecipe (id, user) {
+    async deleteRecipe (id) {
         console.log('deleteRecipe',id)
         await api._getRecStore();
         return P(api.recStore.delete(id))
