@@ -1,5 +1,5 @@
 import { writable,get } from 'svelte/store';
-import localApi from '../data/localApi.js';
+import localApi from '../data/api.js';
 import deepcopy from 'deepcopy';
 
 const connected = writable(false);
@@ -13,6 +13,7 @@ localApi.connect().then(
         connected.update(()=>true)
     }
 );
+
 function sanitize (recipe) {
     return {title:recipe.title,
             text:recipe.text||{},
@@ -83,6 +84,9 @@ const recipeActions =  {
 
     updateCurrent (recid, rec) {
         console.log('update',recid,rec);
+        if (!get(recipeData)[recid]) {
+            return;
+        }
         const newChanged = JSON.stringify(diffRecs(rec,get(recipeData)[recid].local))
         const oldChanged = JSON.stringify(get(recipeData)[recid].changed);
         if (newChanged != oldChanged) {
