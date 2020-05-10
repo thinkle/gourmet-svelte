@@ -1,0 +1,74 @@
+Ok -- this is a place for some notes about recipe data.
+
+We're going to assume recipe data looks like a JSON store of some kind.
+
+We'll support browser-side storage, server-side storage, and syncing
+between them. This format could also be our export format, because
+after all why not? JSON is a reasonable export format for a recipe.
+
+Indexes can be built by moving over the JSON data and producing it.
+
+Our JSON data structure can be relatively flexible and expanded in the future as needed.
+
+Hard tasks are:
+- syncing
+- duplicate detection
+- validation
+
+Here's what I've got so far...
+
+Local Memory -> Recipes exist in the "store" as a mutable object/list of objects that could disappear on any page refresh.
+IndexedDB -> Stores locally in browser. Good for caching/offline work/responsiveness. Automatically generates unique IDs when you insert.
+MongoDB -> Stores remotely. Seems like a good home for our data long-term. *Also* generates a unique ID when you insert. 
+Import/Export -> Will need IDs for internal references. This will make for a *third* ID of course...
+Autosave -> If we want to support auto-saving, we will either need to add a versioning database or support a diff system...
+
+
+We'll use a last_modified timestamp field in IndexedDB and MongoDB to keep track of when we need to fetch data...
+
+OK -- SIMPLIFYING THIS BABY...
+
+MONGODB <--> INDEXEDDB <--> LOCAL STATE <-- USER INTERFACE
+
+So the local state will only ever display what's IN the IndexedDB.
+
+The IndexedDB layer will fetch remote data directly as needed.
+The user interface will need to know what's been saved locally and/or offline and allow the user to manage accordingly.
+-> One downside here is that IndexedDB is substantially less full-featured than MongoDB, so we may be a little unhappy there...
+
+
+Here are our use-cases and what needs to happen to the data in each case:
+
+1. New Recipe
+
+- Pretty much as soon as we have data, we store to local memory, initializing a .localid
+- (Future: On significant state changes we will write to the IndexedDB versioning database to save "autosave" copies.)
+- On user save we will write to both IndexedDB and MongoDB and update
+  the state of the recipe. We also write to IndexedDB, so we should
+  have identical copies at this point in both DBs. Once the MongoDB
+  write is complete we update the IndexedDB with the new _id value
+  from MongoDB
+
+
+2. Update a recipe
+
+- We fetch a recipe from IndexedDB. We then trigger a fetch to MongoDB
+  to see if the cached copy has a more recent last_modified date, if
+  it does, we fetch that copy and update accordingly. If not, we don't
+  touch MongoDB.
+- (Future: On significant state changes we will write to the IndexedDB versioning database to save "autosave" copies.)
+- When the saves makes changes, we update IndexedDB document
+- If the user saves, we update last_modified
+- When the user saves changes, we update MongoDB and both version are now identical.
+
+
+3. List/Search recipes
+- We send an initial search to IndexedDB to grab local changes
+- We send an identical search to MongoDB, requesting only last_modified and ID to minimize data traffic
+- We list results from local search...
+- We compare MongoDB version stamps to local stamps... if MongoDB is more recent, we fetch full data, update IndexedDB, and update our display
+
+4. Offline mode gets back online...
+- We have been updating IndexedDB but unable to reach MongoDB
+- We get a connection to MongoDB
+- We make the connection
