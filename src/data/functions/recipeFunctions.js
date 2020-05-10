@@ -29,13 +29,9 @@ export default {
         let result = await queryCollection(
             'recipes',
             query,
-            {fields, limit}
+            {fields, limit, page}
         );
-        let nextPage;        
-        return {
-            result,
-            nextPage
-        }
+        return result
     },
 
     async deleteRecipe (event, context, user, params) {
