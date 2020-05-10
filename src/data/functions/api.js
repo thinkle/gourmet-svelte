@@ -1,4 +1,3 @@
-//import faunadb from 'faunadb';
 import setupHandler from './setupDB.js';
 import {getUser} from './users.js';
 import recipeApi from './recipeFunctions.js';
@@ -11,9 +10,18 @@ const functions = {
 }
 
 const handler = async (event, context) => {
-    let params = event.queryStringParameters;    
-    params = {...JSON.parse(event.body),...params}
-    
+    let params = event.queryStringParameters;
+    let jsonBody = {}
+    if (event.body) {
+        try {
+            jsonBody = JSON.parse(event.body);
+        }
+        catch (err) {
+            console.log(`ERROR PARSING "${event.body}"`);
+            throw err;
+        }
+    }
+    params = {...jsonBody,...params}
     var {
         // this magic documented here:
         // https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/#bonus-points-authenticated-lambda-functions-for-your-gatsby-app
