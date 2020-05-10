@@ -80,9 +80,11 @@ button.icon:hover {
     background-color: #7474f4;
     color: white;
 }
-button.icon:active {
-    border: 1px solid #222;
+button.icon:focus {
+    background-color: #7474f4;
+    color: white;
 }
+
 button.toggle {
     border: 1px solid grey;
     transition: all 0.8s;
