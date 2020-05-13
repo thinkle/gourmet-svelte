@@ -4,15 +4,21 @@ import {validateRec}  from '../validate.js';
 export default {
     async addRecipe (event, context, user, params) {
         let {recipe} = params
+        let result = await insertOne('recipes',
+                                     recipe);
+        return result;
     },
 
     async updateRecipe (event,context,user,params) {
-        let {recipe} = params
+        let {recipe} = params;
+        let result = await updateOne('recipes',
+                                     {_id:recipe._id},
+                                     recipe);
+        return result;        
     },
 
     async updateRecipes (event,context,user,params) {
-        let {recipe} = params;
-        
+        let {recipes} = params
     },
     
     async getRecipe (event,context,user,params) {
