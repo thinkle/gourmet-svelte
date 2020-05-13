@@ -55,16 +55,23 @@ var Metadata = {
          testValue:'sugar, granulated',
          options:['Sugar','Flour','Water','Garlic','Carrot']
         },
-        {name:'item',
+        {name:'text',
          label:'Ingredient Item & Prep',
          edit:TXT,
          testValue:'granulated sugar, divided',
         },
-        {name:'unit',label:'Unit',
+        {name:'amount',label:'Amount',
+         edtit:NUMUNIT,
+         multipliable:true,
+         testValue:{
+             amount:1,
+             unit:'cup'
+         }},
+        {name:'amount.unit',label:'Unit',
          edit:CMB,options:['cup','tsp','Tbs','l','ml','g','oz','quart','lb'],
          testValue:'cup',
         },
-        {name:'amount',
+        {name:'amount.amount',
          label:'Amount',
          edit:NUM,
          testValue:'3 1/2',
@@ -77,6 +84,11 @@ var Metadata = {
          testValue:'A Very Fine Recipe Indeed',
          toHtml:(s)=>s.trim(),
         },
+    ],
+    idProps : [
+        {name:'id',purpose:'indexedDB'},
+        {name:'localid',purpose:'import/export'},
+        {name:'_id',purpose:'mongoDB'}
     ],
     recProps : [
         {name:'yields',
@@ -101,6 +113,7 @@ var Metadata = {
 	{name:'categories',
 	 label:'Categories',
          edit:MCMB,
+         summaryView:true,
          options:['Dessert','Entree','Salad','Soup'],
          empty:[{name:''}],
          testValue:[{name:'Dessert'}],
@@ -108,6 +121,7 @@ var Metadata = {
         },
 	{name:'sources',
 	 label:'Source',
+         summaryView:true,
          testValue:{url:'http://tomhinkle.net/',name:'Fake Source'},
 	 toHtml:(s)=>s&&s.url&&`<span><a href=${s.url}>${s.name||s.url.substr(0,30)}</a></span>`||s.name||'',
          empty:[{name:'',url:''}],
@@ -117,6 +131,7 @@ var Metadata = {
 	{name:'times',
 	 label:'Time',
          array:true,
+         summaryView:true,
          testValue:{seconds:4250},
 	 toHtml:(s)=>`${s.name}: ${s.text||Units.secondsToTimeString(s.seconds)||''}`,
          empty:[{name:'',seconds:0}],
@@ -146,7 +161,7 @@ Metadata.EditModes = {
     IMG,
     DUR,
     LNK,
-    NUMUNIT,
+    NUMUNIT,    
 }
 
 export default Metadata;
