@@ -1,10 +1,27 @@
 // see : https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-const VERSION = 18
+import {prepRecLocal} from '../data/validate.js';
+
+
+const VERSION = 23
 if (!window.indexedDB) {
     window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 }
 if (!window.indexedDB) {
     console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+}
+
+function incrementChar (c) {
+    return String.fromCharCode(c.charCodeAt(0) + 1);
+}
+
+function incrementWord (word) {
+    let start = word.substr(0,word.length-1);
+    let end = word.substr(word.length-1)
+    return start + incrementChar(end);
+}
+
+function getWordBound (word) {
+    return IDBKeyRange.bound(word,incrementWord(word))
 }
 
 // Promise wrapper 
@@ -18,6 +35,33 @@ function P (response) {
     }
                       );
 }
+
+function getAllFromIndex (index, keyrange, limit) {
+    let results = [];
+    let ids = [];
+    return new Promise((resolve,reject)=>{
+        index.openCursor(keyrange).onsuccess = function (event) {
+            var cursor = event.target.result;
+            if(cursor) {
+                if (ids.indexOf(cursor.value.id)==-1) {
+                    results.push(cursor.value);
+                    ids.push(cursor.value.id);
+                }
+                if (!limit || results.length < limit) {
+                    cursor.continue();
+                }
+                else {
+                    resolve(results)
+                }
+            }
+            else {
+                resolve(results)
+            }
+        }
+        
+    });
+}
+
 
 const api = {
     connect () {
@@ -49,10 +93,20 @@ const api = {
             console.log(err);
             recStore = api.request.transaction.objectStore('recipes');
         }
-        console.log('Creating index on ',recStore);
+        console.log('Creating indexes on ',recStore);
         recStore
             .createIndex('mongoid','_id',{unique:true});
-        console.log('Created index');
+        console.log('mongo index');
+        recStore
+            .createIndex('category','categories',{multiEntry:true});
+        console.log('cat index');
+        recStore
+            .createIndex('words','words',{multiEntry:true});
+        console.log('word index');
+        recStore
+            .createIndex('ings','ings',{multiEntry:true});
+        console.log('ing index');
+        console.log('Created indexes');
     },
     
     async _getRecStore () {
@@ -74,10 +128,23 @@ const api = {
             return P(api.recStore.get(recid))
         }
     },
-    async getRecipes ({query, fields, limit, page}={}) {
+
+    async getRecipes ({query, fields, limit=undefined, page}={}) {
+        console.log('!!!local getRecipes call');
         await api._getRecStore();
+        if (query&&query.fulltext) {
+            let result = await getAllFromIndex(
+                api.recStore.index('words'),
+                getWordBound(query.fulltext),
+            );
+            console.log('Returning ',result.length,'recipes')
+            return {
+                result
+            }
+        }
+
         if (!page) {
-            let result = await P(api.recStore.getAll(undefined,100))
+            let result = await P(api.recStore.getAll(undefined,limit))
             let count = await P(api.recStore.count());
             if (result.length < count) {
                 // fix me
@@ -96,7 +163,7 @@ const api = {
     },
     async updateRecipe (recipe) {
         await api._getRecStore();        
-        return P(api.recStore.put(recipe));
+        return P(api.recStore.put(prepRecLocal(recipe)));
     },
     async updateRecipes (recipes) {
         let results = [];
