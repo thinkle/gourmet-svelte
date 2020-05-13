@@ -122,19 +122,29 @@ function Timer ({ctx,timerSize,
             ctx.strokeStyle = clockColor
             ctx.stroke();
             ctx.beginPath();
-            let even = true;
+            let bigMark = true;
+            let numberOfMarks = Math.floor(this.circleSize / this.unit); // how many marks are we making...
+            let everyOther
+            if (numberOfMarks % 12 == 0) {
+                everyOther = 3;
+            }
+            else {
+                everyOther = 2
+            }
+            let markCount = 0;
             for (let unitMark=0; unitMark < this.circleSize; unitMark += this.unit) {
                 let percentage = unitMark / this.circleSize;
                 let angle = Math.PI/2 + Math.PI*2*percentage
-                let x1 = cx + Math.cos(angle) * (even&&majorTick||tickCircle)*this.timerSize/2;
+                let x1 = cx + Math.cos(angle) * (bigMark&&majorTick||tickCircle)*this.timerSize/2;
                 let x2 = cx + Math.cos(angle) * outerCircle*this.timerSize/2;
-                let y1 = cy + Math.sin(angle) * (even&&majorTick||tickCircle)*this.timerSize/2;
+                let y1 = cy + Math.sin(angle) * (bigMark&&majorTick||tickCircle)*this.timerSize/2;
                 let y2 = cy + Math.sin(angle) * outerCircle*this.timerSize/2;
                 ctx.beginPath();
                 ctx.moveTo(x1,y1);
                 ctx.lineTo(x2,y2);
                 ctx.stroke();
-                even = !even
+                markCount += 1;
+                bigMark = (markCount % everyOther) == 0;
             }
             for (let second=0; second < 60; second++) {
                 let percentage = second / 60;
