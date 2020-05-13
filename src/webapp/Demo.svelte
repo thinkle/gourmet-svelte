@@ -4,6 +4,7 @@
  import Recipe from './recDisplay/Recipe.svelte';
  import RecDisplayTests from './recDisplay/DemoRecDisplay.svelte';
  import WidgetTests from '../widgets/WidgetTests.svelte';
+ import widgetTestPaths from '../widgets/widgetTests.js';
  import LocalDataTester from './LocalDataTester.svelte';
  import RecipeDataTester from '../stores/RecipeDataTester.svelte';
  import RemoteApiTester from '../data/RemoteApiTester.svelte';
@@ -15,15 +16,24 @@
      widgets : WidgetTests,
      tester : Tester,
      rd : RecipeDataTester,
+     ...widgetTestPaths,
  }
 
  $: {
      console.log('Demo is',demo);
+     console.log('Demos are',demos);
  }
 </script>
 <div>
     {#if demo}
-        <svelte:component this="{demos[demo]}" initialShow={true} />
+        {#if !demos[demo]}
+            Oops - no demo named {demo}. Maybe you meant...
+            {#each Object.keys(demos) as name}
+                <li><a href={`/demo/${name}`}>{name}</a></li>
+            {/each}
+        {:else}
+            <svelte:component this="{demos[demo]}" initialShow={true} />
+        {/if}
     {:else}
         <WidgetTests/>
         <RecDisplayTests/>
@@ -31,6 +41,9 @@
         <RecipeDataTester/>
         <RemoteApiTester/>
     {/if}
+    {#each Object.keys(demos) as name}
+        <li><a href={`/demo/${name}`}>{name}</a></li>
+    {/each}
 </div>
 <style>
 </style>
