@@ -5,9 +5,11 @@
  import {getAngle,deg} from '../utils/TrigHelper.js'
  export let value
  export let timerSize=50
+ export let minimal=false;
+
  let fref
  export function focus () {
-        fref.focus()
+     fref.focus()
  }
 
  import { createEventDispatcher } from 'svelte';
@@ -35,6 +37,7 @@
 
  function onmousemove (event) {
      if (event.which==1) {
+         //button down
          mouseChangeStart = true;
          if (lasttheta) {
              // Our timer is a circle...
@@ -51,18 +54,17 @@
              }
              else {
                  curVal = Math.max(0,curVal + (timer.circleSize * percentChange))
-                 value.seconds = Math.round(curVal / timer.unit) * timer.unit
+                 value.seconds = curVal && Math.round(curVal / timer.unit) * timer.unit
              }
          }
          lasttheta = getAngle(event.offsetX-cx,event.offsetY-cy)
      }
      else {
-         startVal = value.seconds;
-         curVal = value.seconds;
+         startVal = Number(value.seconds);
+         curVal = Number(value.seconds);
          lasttheta = undefined;
          if (mouseChangeStart) {change();}
          mouseChangeStart = false;
-
      }
  }
  
@@ -110,6 +112,11 @@
          let cy = cx;
          if (lasttheta) {
              // just draw a knob?
+             ctx.beginPath();
+             ctx.lineWidth = 1;
+             ctx.strokeStyle = '#a8a8a8';
+             ctx.arc(cx,cy,0.65*(timerSize/2),0,Math.PI*2)
+             ctx.stroke();
              let knobWidth = (Math.PI*2)*0.025
              ctx.beginPath();
              ctx.arc(cx,cy,0.65*(timerSize/2),lasttheta-knobWidth,lasttheta+knobWidth)
@@ -127,25 +134,34 @@
      }
  }
 
+ function getInputStyle () {
+     if (minimal) {
+         return `width:${timerSize*29/100}px;
+         font-size:${timerSize*12/100}px;
+         padding-left : 0; padding-right: 0;
+         `
+     }
+ }
+
 </script>
 <span>
-    <input type="text"  class="text" bind:value={value.name} on:change="{change}">
-<span class="container">
-    <div class="hms" >
-        <input width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
-               step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
-        >
-        <span class="colon" >:</span>
-        <input bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
-               step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
-        >    <span class="colon" >:</span>
-        <input width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
-               step="{timer.unit < 60 && timer.unit || 15}"
-        >
-    </div>
-    <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
-    <input class="text" on:change={change} type="text" bind:value={value.text}>
-</span>
+    {#if !minimal}<input type="text"  class="text" bind:value={value.name} on:change="{change}">{/if}
+    <span class="container" class:minimal>
+        <div class="hms" >
+            <input style={getInputStyle()} width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
+                         step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
+            >
+            <span class="colon" >:</span>
+            <input style={getInputStyle()} bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
+                         step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
+            >    <span class="colon" >:</span>
+            <input style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
+                         step="{timer.unit < 60 && timer.unit || 15}"
+            >
+        </div>
+        <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
+        {#if !minimal}<input class="text" on:change={change} type="text" bind:value={value.text}>{/if}
+    </span>
 </span>
 
 <style>
@@ -156,6 +172,13 @@
          "text timer"
          ;
  }
+
+ .container.minimal {
+     display: flex;
+     flex-direction: column-reverse;
+     align-items: center;
+ }
+
  .hms {
      grid-template-area: hms
  }
