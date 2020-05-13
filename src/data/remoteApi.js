@@ -48,7 +48,7 @@ async function doFetch (mode, user, params) {
 
 function RecipeApi (user) {
     
-    return {
+    const api = {
         connect () {
             // eventually we should probably check if the user is logged in
             // and can access the MongoDB or something...
@@ -63,8 +63,22 @@ function RecipeApi (user) {
                 {recipe}
             );
         },
-        updateRecipe (recipe) {
-            
+        async updateRecipe (recipe) {
+            if (!recipe._id) {
+                const result = await api.addRecipe(recipe);
+                console.log('RemoteAPI Update Got result!',result)
+                return result
+            }
+            else {
+                console.log('Ok, remove actually needs to update...');
+                const result = await doFetch(
+                    'updateRecipe',
+                    user,
+                    {recipe}
+                );
+                console.log('Update got result',result);
+                return result;
+            }
         },
         updateRecipes (recipes) {
             return doFetch(
@@ -99,6 +113,8 @@ function RecipeApi (user) {
         deleteRecipe (id) {
         }
     }
+
+    return api;
 
 }
 export {doFetch}
