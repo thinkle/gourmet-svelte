@@ -1,7 +1,7 @@
 import { writable,get } from 'svelte/store';
 import localApi from '../data/api.js';
 import deepcopy from 'deepcopy';
-
+import RecDef from '../common/RecDef.js';
 const connected = writable(false);
 const recipeData = writable({});
 const fetchData = writable({});
@@ -15,19 +15,54 @@ localApi.connect().then(
 );
 
 function sanitize (recipe) {
-    return {title:recipe.title,
-            text:recipe.text||{},
-            properties:recipe.properties||{},
-            ingredients:recipe.ingredients&&recipe.ingredients.map(sanitizeIngredient)||[],
-            images:recipe.images||{},
-            id:recipe.id
-           }; // only the stuff we care about
+    console.log('Called sanitize!');
+    let sanitized = {}
+    
+    RecDef.titleProps.forEach(
+        (p)=>{
+            if (recipe[p.name]) {
+                sanitized[p.name] = recipe[p.name]
+            }
+        }
+    );
+    RecDef.recProps.forEach(
+        (p)=>{
+            if (recipe[p.name]) {
+                sanitized[p.name] = recipe[p.name]
+            }
+        }
+    );
+    RecDef.idProps.forEach(
+        (p)=>{
+            if (recipe[p.name]) {
+                sanitized[p.name] = recipe[p.name]
+            }
+        }
+    );
+    sanitized.images = recipe.images || [];
+    sanitized.text = recipe.text;
+    sanitized.ingredients = deepcopy(recipe.ingredients) || [];
+    sanitized.ingredients.forEach(sanitizeIngredient);
+
+    return sanitized
+    // {
+    //     title:recipe.title,
+    //     text:recipe.text||{},
+    //     ingredients:recipe.ingredients&&recipe.ingredients.map(sanitizeIngredient)||[],
+    //     images:recipe.images||[],
+    //     id:recipe.id,
+    //     _id:recipe._id,
+    //     localid:recipe.localid,
+    // }; // only the stuff we care about
 
     function sanitizeIngredient (i) {
         i = {...i}
         delete i.awidth;
         delete i.uwidth;
         delete i.iwidth;
+        if (i.ingredients) {
+            i.ingredients.forEach((i)=>sanitizeIngredient(i));
+        }
         return i
     }
 }
@@ -76,14 +111,31 @@ function diffRecs (r1,r2) {
 }
 
 const recipeActions =  {
-
     
-    setUser (user) {
-        this.user = user;
+    async doSync () {
+        this.syncing = true;
+        try {
+            await localApi.sync();
+        }
+        catch (err) {
+            console.log('Error syncing :(');
+            this.syncing = false;
+        }
+        console.log('Done syncing')
+        recipeActions.getRecipes()
+        this.synced = true;
     },
 
+    // async setUser (user) {
+    //     this.user = user;
+    //     if (!this.synced && !this.syncing && this.user) {
+    //         console.log('Sync with the latest data');
+    //         this.doSync();
+    //     }
+    // },
+
     updateCurrent (recid, rec) {
-        console.log('update',recid,rec);
+        //console.log('update',recid,rec);
         if (!get(recipeData)[recid]) {
             return;
         }
@@ -134,7 +186,7 @@ const recipeActions =  {
 
     async createRecipe (recipe) {
         setLocalFetchState({state:'creating',recipe});
-        let recid = await localApi.addRecipe(recipe,this.user);
+        let recid = await localApi.addRecipe(recipe);
         recipeData.update((data)=>{
             setLocalFetchState({state:'done',newId:recid,recipe})
             updateLocalData(
@@ -150,7 +202,7 @@ const recipeActions =  {
         recipe = sanitize(recipe)
         setLocalFetchState({state:'updating',recipe:recipe})
         try {
-            let recid = await localApi.updateRecipe(recipe,this.user)
+            let recid = await localApi.updateRecipe(recipe)
             recipeData.update((data)=>{
                 recipe.id = recid
                 updateLocalData(
@@ -179,28 +231,28 @@ const recipeActions =  {
     async saveDraft (recipe) {
     },
 
-    async getRecipes ({search=undefined,
-                         page=undefined,
-                         count=20,
-                      }={}) {
-        setLocalFetchState({state:'fetching',search,page,count});
-        let response = await localApi.getRecipes(search,this.user);
+    async getRecipes ({query,fields,limit,page,initial=false}={}) {
+        setLocalFetchState({state:'fetching',query,page,limit});
+        let response = await localApi.getRecipes({query,fields,limit,page});
         let now = new Date();
         recipeData.update(
             (data)=>{
-                response.result.forEach(
-                    (rec)=>{
-                        console.log('got response',rec);
-                        updateLocalData(data,rec.id,{local:rec,fetched:now});
-                    }
-                );
+                if (initial) {
+                    response.result.forEach(
+                        (rec)=>{
+                            console.log('got response',rec);
+                            updateLocalData(data,rec.id,{local:rec,fetched:now});
+                        }
+                    );
+                }
+                data.searchResults = response.result;
                 return data;
             });
-        setLocalFetchState({state:'fetched',search,page,count,response})
+        setLocalFetchState({state:'fetched',query,page,limit,response})
     },
 
     async getRecipe (id) {
-        let rec = await localApi.getRecipe(id,this.user)
+        let rec = await localApi.getRecipe(id)
         recipeData.update((data)=>{
             updateLocalData(data,id,{local:rec})
             return data;
@@ -213,7 +265,7 @@ const recipeActions =  {
     async deleteRecipe (id) {
         console.log('RD say delete',id)
         try {
-            await localApi.deleteRecipe(id,this.user);
+            await localApi.deleteRecipe(id);
             setLocalFetchState({state:'deleted',id:id})
             recipeData.update((data)=>{delete data[id]; return data});
         }
