@@ -16,6 +16,9 @@ function f (n) {
 
 export default {
     getTimeLabel (s) {
+        if (s < 0) {
+            return '-' + this.getTimeLabel(-1*s);
+        }
         if (s < H) {
             return `${f2(s / 60)}:${f2(s % 60)}`
         }
