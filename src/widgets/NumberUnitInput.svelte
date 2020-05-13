@@ -1,33 +1,61 @@
 <script>
- import { createEventDispatcher } from 'svelte';
+ import { createEventDispatcher, setContext, getContext } from 'svelte';
+ import AmountInput from './AmountInput.svelte';
+ import {float_to_frac} from '../utils/Numbers.js';
+ export let mode='inline'
  const dispatch = createEventDispatcher();
  // name and url
  export let value
+ export let multipliable=true
+ 
  let nref
  let uref
  export function focus () {
      nref.focus()
  }
  
+ function changeMultiplier () {
+     dispatch('multiply',value);
+ }
+
  function change () {
      dispatch('change',value);
  }
  
+ let multiplier = getContext('multiplier');
+
+ function onNumberChange (e) {
+     console.log('Number changed',e);
+     value.amount = e.detail;
+     change();
+ }
+
 </script>
-<span> <!-- -  style="--awidth:{awidth}px;--uwidth:{uwidth}px"> -->
+<div>
     <label on:click={()=>nref.focus()}>Number:</label> 
+    <AmountInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={value.amount}/>
+    <i>
+        {#if multipliable && $multiplier!=1}
+            (&times;{float_to_frac($multiplier)}={float_to_frac(value.amount*$multiplier)})
+        {/if}
+    </i>
+</div>
+<div>
     <label on:click={()=>uref.focus()}>Unit:</label> 
-    <input bind:this={nref} on:change={change} class="url" type="number" bind:value={value.amount}>
     <input bind:this={uref} on:change={change} class="name" type="text" bind:value={value.unit}>
-</span>
+</div>
+
 <style>
- span {
-     display: inline-grid;
-     grid-template-columns: 6em auto;
-     grid-template-columns: calc(3em + var(--awidth)) calc(2em + var(--uwidth));
-     grid-column-gap: 4px;
+ i {
+     font-size: 0.7rem;
+     display: block;
+     text-align: center;
  }
- .url {
-     font-family: monospace;
+ div {
+     display: table-cell;
  }
+ input {
+     width: 5em;
+ }
+
 </style>
