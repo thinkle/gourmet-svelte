@@ -62,16 +62,25 @@ var NUMBER_FRACTIONS = [
      word:'\u215E'},
 ]
 
-function getFraction (n, d) {
-    for (var f of NUMBER_FRACTIONS) {
-	if (n==f.numerator && d==f.denominator) {
-	    return f.word
-	}
+function getFraction (n, d, unicodeFractions=true) {
+    if (unicodeFractions) {
+        for (var f of NUMBER_FRACTIONS) {
+	    if (n==f.numerator && d==f.denominator) {
+	        return f.word
+	    }
+        }
     }
     return n+'/'+d
 }
 
-function float_to_frac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2}={}) {
+function float_to_frac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2,
+                            unicodeFractions=true}={}) {
+    if (n===0) {
+        return '0'
+    }
+    else if (!n) {
+        return ''
+    }
     var i, f
     if (n >= 1) {
 	i = Math.floor(n).toString()
@@ -89,10 +98,10 @@ function float_to_frac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbac
 	    var result = fractify(rem,den)
 	    if (result) {
                 if (i) {
-		    return i+' '+getFraction(...result);
+		    return i+' '+getFraction(...result,unicodeFractions);
                 }
                 else {
-                    return getFraction(...result);
+                    return getFraction(...result,unicodeFractions);
                 }
 	    }
 	}
@@ -121,6 +130,10 @@ function fractify (decimal, divisor, approx=0.01) {
 function frac_to_float (s) {
     if (!s.split) {
         return Number(s); // if we are not a string, just use Number...
+    }
+    if (s[s.length-1]=='/') {
+        // if we end with a slash, we are not a number...
+        return NaN
     }
     var parts = s.split(/ +/);
     if (parts.length==2) {
@@ -158,4 +171,112 @@ var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
 var numMatchString = `${numMatchString}(\\s+${numMatchString})?`
 var numberMatcher = new RegExp(numMatchString);
 
-export {float_to_frac, frac_to_float, numberMatcher, numMatchString}
+function incrementOld (value) {
+     var nextOne = false;
+     if (value < 1) {
+         for (let f of fractions) {
+             if (value < f) {
+                 return f
+             }
+         }
+         return 1 // up to one if nothing else
+     }
+     else if (value < 10) {
+         return value + 1;
+     }
+     else if (value < 50) {
+         return round(value,5) + 5;
+     }
+     else if (value < 200) {
+         return round(value,10) + 10;
+     }
+     else {
+         return round(value,50) + 50;
+     }
+ }
+
+ function roundDown (v, n) {
+     return Math.floor(v/n)*n
+ }
+ function roundUp (v, n) {
+     return Math.ceil(v/n)*n
+ }
+
+function increment (n) {
+    if (n > 100) {
+        return roundDown(n,25)+25
+    }
+    else if (n > 50) {
+        return roundDown(n,10)+10
+    }
+    else if (n > 10) {
+        return roundDown(n,5)+5
+    }
+    else if (n > 5) {
+        return roundDown(n,1)+1
+    }
+    else {
+        let fraction = getNearestFraction(n);
+        if (!fraction) {
+            return n * 2
+        }
+        else {
+            const [top,bottom] = fraction;
+            return (top + 1)/bottom
+        }
+    }
+}
+
+function getNearestFraction (n, options=[1,2,3,4,8,16],approx=0.1) {
+    for (let o of options) {
+        let answer =  fractify(n,o,approx);
+        if (answer) {
+            return answer
+        }
+    }
+}
+
+function decrement (n) {
+    if (n > 100) {
+        return roundUp(n,25)-25
+    }
+    else if (n > 50) {
+        return roundUp(n,10)-10
+    }
+    else if (n > 10) {
+        return roundUp(n,5)-5
+    }
+    else if (n > 5) {
+        return roundUp(n,1)-1
+    }
+    else {
+        let fraction = getNearestFraction(n);
+        if (!fraction) {
+            return n / 2
+        }
+        else {
+            const [top,bottom] = fraction;
+            if (top > 1) {
+                return (top - 1)/bottom
+            }
+            else {
+                return 1 / nextBottom(bottom)
+            }
+        }
+    }
+
+
+    function nextBottom (bottom) {
+        const bottoms = [1,2,3,4,8,16]
+        let curIndex = bottoms.indexOf(bottom)
+        if (!curIndex || curIndex > bottoms.length) {
+            return bottom * 2
+        }
+        else {
+            return bottoms[curIndex+1]
+        }
+    }
+}
+
+
+export {float_to_frac, frac_to_float, numberMatcher, numMatchString, increment, decrement}
