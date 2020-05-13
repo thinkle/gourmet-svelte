@@ -1,6 +1,8 @@
-import localApi from './localApi.js';
+import localApi from './dexieApi.js';
 import {RecipeApi} from './remoteApi.js';
 import {user} from '../stores/user.js';
+import status from '../stores/status.js';
+import {prepRecLocal} from '../data/validate.js';
 // Our "glue" layer between local data and remote data.
 // This layer will handle syncing of data between remote and local storage
 
@@ -29,6 +31,7 @@ const api = {
             console.log('Update remote');
             remoteRec.savedRemote = true;
             recipe.savedRemote = true; // update the object we were handed in case it sticks around...
+            console.log('Save local copy of remote...');
             await localApi.updateRecipe(remoteRec);
             return remoteRec;
         }
@@ -41,9 +44,10 @@ const api = {
     async updateRecipe (recipe) {
         recipe.last_modified = new Date().getTime();
         try {
-            await remoteApi.updateRecipe(recipe);
+            let remoteRec = await remoteApi.updateRecipe(recipe);
             recipe.savedRemote = true;
-            console.log('Saved remote',recipe);
+            console.log('Saved remote',remoteRec);
+            recipe._id = remoteRec._id;
         }
         catch (err) {
             console.log("Failed to save remote",err);            
@@ -55,20 +59,25 @@ const api = {
     async updateRecipes (recipes) {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
-    async sync () {
+    async sync (test=false) {
         if (!localApi.db) {
             console.log('Connect to local DB');
             await localApi.connect();
         }
+        let statusId = status.createStatus('Syncing Recipes from database...',{type:'recipe'});
 
         let keepFetchingIDs = true;
         let idPage = 0;
         let result = []
-
+        
         while (keepFetchingIDs) {
             console.log('Fetch IDs of recs from remote server... PAGE#',idPage);
+            status.start(statusId);
             let remoteResponse = await remoteApi.getRecipes({fields:['_ID','id','last_modified','owner'],page:idPage});
             let remoteRecs = remoteResponse.result;
+            status.progress(statusId,{name:'Fetching recipes from server',
+                                      amount:remoteResponse.page,
+                                      total:remoteResponse.count});
             let recsToFetch = [];
             for (let remoteRec of remoteRecs) {
                 // What if we have remote but no local?
@@ -83,10 +92,17 @@ const api = {
                     recsToFetch.push(remoteRec)
                 }
             }
-            console.log('Fetching recipes from remote database to sync ',recsToFetch.length,'of',remoteRecs.length,'possible...');
+            console.log('Checking recipes on server',recsToFetch.length,'of',remoteRecs.length,'possible...');
             let keepGoing = true;
             let page = 0;
             while (keepGoing && recsToFetch.length > 0) {
+                status.progress(
+                    statusId,
+                    {name:'Fetching more recent data from server...',
+                     amount:page,
+                     total:recsToFetch.length
+                    }
+                );
                 let fullRecResponse = await remoteApi.getRecipes({
                     query:{_id:{$in:recsToFetch.map((r)=>r._id)}},
                     limit:10, page, 
@@ -94,6 +110,11 @@ const api = {
                 console.log('updating with local recipes...');
                 await localApi.updateRecipes(fullRecResponse.result);
                 console.log('Done...');
+                if (test) {
+                    console.log('SYNC EXITING EARLY - THIS IS JUST A TEST BABY');
+                    status.complete(statusId,{name:'Exiting early - testing mode!'});
+                    return
+                }
                 result.push(fullRecResponse.result)
                 page = fullRecResponse.page;
                 if (page < fullRecResponse.count) {
@@ -107,6 +128,9 @@ const api = {
             keepFetchingIDs = remoteResponse.page < remoteResponse.count
             idPage = remoteResponse.page
         }
+        status.complete(statusId,{name:`Done syncing recipes: fetched ${result.length} updated items.`,
+                                  amount:result.length.count,
+                                  total:result.length})
         return {recs:result}
     },
 }
