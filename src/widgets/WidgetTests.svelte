@@ -1,13 +1,12 @@
 <script>
  export let initialShow
+ import InputTests from './InputTests.svelte';
  import Tester from './Tester.svelte';
  import ipsum from '../common/mocks/ipsum.js';
  import SideBySide from './SideBySide.svelte';
- import RichText from './RichText.svelte';
- import ComboInput from './ComboInput.svelte';
- import MultiComboInput from './MultiComboInput.svelte';
- let testStringVal = '' 
- let testArrayString = ['Apple']
+ import Status from './Status.svelte';
+ import status from '../stores/status.js';
+ import paths from './widgetTests.js';
  let sideBySideOptions = {
      left : {
          growLeft:true,
@@ -32,25 +31,40 @@
 
      }
  }
-</script>
-<div>
-    <h3>Widget Tests...</h3>
-    <Tester name="MultiCombo" initialShow={initialShow}>
-        <MultiComboInput bind:value={testArrayString} options={['Apple','Almond','Anchovies','Bread','Banana','Grapes','Fruit','Sugar','Fruitcake','Dumplings']}/>
-        Result: {testStringVal}
-    </Tester>
 
-    <Tester name="Combo" initialShow={initialShow}>
-        <ComboInput bind:value={testStringVal} options={['Apple','Almond','Anchovies','Bread','Banana','Grapes','Fruit','Sugar','Fruitcake','Dumplings']}/>
-        Result: {testStringVal}
-    </Tester>
-    <Tester let:option="{option}" name="Editor" options="{[1,5,10,25]}" initialShow={initialShow}>
-        <RichText initialValue={ipsum.generateParagraphs(option)}/>
-    </Tester>
-    <Tester let:option="{option}" name="Tester" options={[1,2,3,4,5,6,7]} initialShow={initialShow}>
-        <div>
-            They chose test number {option}
-        </div>
+ function randoStatuses () {
+     for (let type of ['recipe','user','other']) {
+         let id = status.createStatus('test',{type});
+         console.log('Created status',id);
+         setTimeout(()=>status.start(id),500+Math.random()*1000);
+         setTimeout(()=>status.progress(id,20,100),1000+Math.random()*2000);
+         for (let i=20; i<80; i+=20) {
+             let percentage = Math.floor(i+Math.random()*20);
+             let delay = i*100 + Math.random()*1000;
+             console.log('set',percentage,'in',delay);
+             setTimeout(()=>status.progress(id,percentage,100),
+                        delay)
+         }
+         setTimeout(()=>status.complete(id,100,100),8000+Math.random()*10000);
+     }
+ }
+
+ 
+</script>
+
+
+<div>
+
+    <h3>Widget Tests...</h3>
+    {#each Object.keys(paths) as key}
+        <h4>{key}</h4>
+        <svelte:component this={paths[key]} initialShow="{initialShow}"/>
+    {/each}
+    <Tester name="Status" initialShow="{initialShow}">
+        <button on:click={randoStatuses}>Kick off some random status magic</button>
+        All: <Status/>
+        Only "recipe" <Status type="recipe" />
+        Only "user" <Status type="user" />
     </Tester>
     <Tester name="Side by Side with all the heads" initialShow={initialShow}
                   options={Object.keys(sideBySideOptions)}
