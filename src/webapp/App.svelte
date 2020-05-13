@@ -4,6 +4,7 @@
  import Recipe from './recDisplay/Recipe.svelte';
  import RecipeList from './recDisplay/RecipeList.svelte';
  import Demo from './Demo.svelte';
+ import Sidebar from './Sidebar.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
 
@@ -11,25 +12,26 @@
  let page;
  let params = {};
  router('/',()=>{page = Landing; params={}});
+ router('/sidebar',()=>{page = Sidebar; params={}});
  router('/rl',()=>{page = RecipeList; params={}});
  router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
  router('/demo/',(ctx)=>{
      console.log('Demo...',ctx);
      page = Demo
      params = {}
- });
+              });
 
- router('/demo/:demo',(ctx)=>{
-     console.log('Demo...',ctx);
-     page = Demo
-     params = ctx.params
- });
+     router('/demo/:demo',(ctx)=>{
+         console.log('Demo...',ctx);
+         page = Demo
+         params = ctx.params
+     });
 
- router.start();
- $: {
-     console.log('params:',params);
-     console.log('page:',page);
- }
+     router.start();
+     $: {
+         console.log('params:',params);
+         console.log('page:',page);
+     }
 </script>
 
 <div>
