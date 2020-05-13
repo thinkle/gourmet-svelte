@@ -81,8 +81,7 @@ button.icon:hover {
     color: white;
 }
 button.icon:focus {
-    background-color: #7474f4;
-    color: white;
+    border: 1px solid #7474f4;
 }
 
 button.toggle {
