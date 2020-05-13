@@ -1,6 +1,6 @@
 <script>
  import ComboInput from './ComboInput.svelte';
-
+ import IB from './IconButton.svelte';
  import { tick } from 'svelte';
  import { fly } from 'svelte/transition';
  import { flip } from 'svelte/animate';
@@ -31,13 +31,13 @@
 
 </script>
 <span>
-    <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <button class="icon" on:click={addValue}><i  class='material-icons'>add</i></button></span>
+    <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue}>add</IB></span>
     <span>
-    {#each value as v}
-        <span class="tag">{v.name}
-            <button class="icon" on:click={()=>remove(v)}><i class='material-icons'>close</i></button>
-        </span>
-    {/each}
+        {#each value as v}
+            <span class="tag">{v.name}
+                <IB on:click={()=>remove(v)}>close</IB>
+            </span>
+        {/each}
     </span>
 </span>
 <style>
@@ -58,7 +58,7 @@
      align-items: center;
      margin-right: 5px;
  }
-     
+ 
  .current {
      background-color: yellow;
      font-weight: bold;
