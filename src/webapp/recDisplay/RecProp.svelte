@@ -1,8 +1,9 @@
 <script>
+ import {getContext} from 'svelte'
  export let value
  export let prop
- export let editable
- export let forceEdit
+ export let editable=false;
+ export let forceEdit=false;
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
  import PlainInput from '../../widgets/PlainInput.svelte';
@@ -11,34 +12,49 @@
  import ComboInput from '../../widgets/ComboInput.svelte';
  import CategoryInput from '../../widgets/CategoryInput.svelte';
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte';
+ import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
  let modes = RecDef.EditModes
+ let recipeChanges = getContext('recipeChanges');
  let ref;
  const propInput = {
      [modes.TXT] : PlainInput,
      [modes.RCH] : PlainInput,
-     [modes.CMB] : PlainInput,
      [modes.DUR] : DurationInput,
      [modes.CMB] : ComboInput,
      [modes.MCMB] : CategoryInput,
      [modes.LNK] : UrlInput,
      [modes.NUMUNIT] : NumberUnitInput,
  }
- $: console.log('Value=',value);
+
+ const propDisplay = {
+     [modes.NUMUNIT] : NumberUnitDisplay,
+ }
+
  var displayValue;
  function getDisplayVal (v) {
      return v && prop.toHtml && prop.toHtml(v) || v
  }
- $: displayValue = prop.array && value.map(getDisplayVal) || getDisplayVal(value);
+ 
+ $: if (prop.array) {
+     if (!value) {
+         value = []
+     }
+ }
 
- $: console.log('Display val=',displayValue);
+ /* $: {
+  *     if (prop.array) {
+  *         displayValue = value && prop.array && value.map(getDisplayVal) || []
+  *     }
+  *     else {
+  *         displayValue = getDisplayVal(value,$multiplier);
+  *     }
+  * } */
+
 
  var edit;
  var editOn = false;
  $: edit = editOn || forceEdit;
 
- $: {
-     console.log('Edit',edit,'editOn',editOn,'force',forceEdit)
- }
  
  function turnEditOn () {
      console.log('Edit on - was ',editOn)
@@ -51,12 +67,14 @@
 
  function handleChange (event) {
      value = event.detail || event.target.value;
+     $recipeChanges += 1;
  }
 
  function makeArrayHandler (n) {
      return function (event) {
          value[n] = event.detail || event.target.value;
          value = value;
+         $recipeChanges += 1;
      }
  }
  
@@ -92,10 +110,11 @@
                                 <i class="material-icons">remove
                                 </i>
                             </button>
-                            <svelte:component this="{propInput[prop.edit]}"
-                                              on:change="{makeArrayHandler(n)}"
-                                              displayValue="{displayValue[n]}"
-                                              value="{value[n]}"/>
+                            <div>
+                                <svelte:component this="{propInput[prop.edit]}"
+                                                  on:change="{makeArrayHandler(n)}"
+                                                  value="{value[n]}"/>
+                            </div>
                         {/each}
                         <button class="icon"
                                 on:click={()=>value=[...value,...prop.empty]}
@@ -106,22 +125,35 @@
                         this={propInput[prop.edit]}
                              options={prop.options}
                         on:change={handleChange}
-                             displayValue={displayValue}
-                        value={value}
-                             bind:this={ref}
+                             value={value}
+                        bind:this={ref}
                     />
                 {/if}
             {:else}
                 {#if prop.array}
-                    {#each displayValue as v}
-                    <b>
-                        {@html v}
-                    </b>
+                    {#each value as v,n}
+                        <span class="arrayval">
+                            {#if propDisplay[prop.edit]}
+                                <svelte:component
+                                    this="{propDisplay[prop.edit]}"
+                                    value="{v}"
+                                />
+                            {:else}
+                                <!-- generic display -->
+                                {@html getDisplayVal(v)}
+                            {/if}
+                        </span>
                     {/each}
                 {:else}
-                <b>
-                    {@html displayValue}
-                </b>
+                        {#if propDisplay[prop.edit]}
+                            <svelte:component
+                                this="{propDisplay[prop.edit]}"
+                                value="{value}"
+                            />
+                        {:else}
+                            <!-- generic display -->
+                            {@html getDisplayVal(value)}
+                        {/if}
                 {/if}
             {/if}
             {#if !showLabel}
@@ -177,5 +209,9 @@
      justify-self: center;
  }
 
+ .arrayval {
+     display: inline-block;
+     padding-right: 1em;
+ }
 
 </style>
