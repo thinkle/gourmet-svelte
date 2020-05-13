@@ -17,7 +17,7 @@
   -> Ok, actually, faunadb + GraphQL is kind of a time-suck and then faunadb doesn't support
      custom interfaces anyway and ends up creating a whole bunch of collections for my schema
      which kind of feels like SQL anyway and defeats the whole purpose of using a NoSQL DB, right?
-     So I'm switching course to MongoDB.
+     So I'm switching course to MongoDB. (x)
 
      - MongoDB seems simple, open source, so far so good.
      - Not sure it's worth using "Mongoose" and schema with it. If I understand it, this puts a bunch
@@ -26,11 +26,21 @@
        computers can run the logic and keep my netlify function layer as thin as possible.
 * initial implementation of a remote recipe db implementation (x)
 * Update recipe model to handle syncing to remote DB
-  -> Grab from remote DB
-     - how to sync the ID's / version #'s... ? (let's just use modified time stamps for now...)
-  -> Compare to local DB
-  -> Maybe come up with some way to version / avoid grabbing remote data if we don't need to?
-* Update display to handle new layout
+  -> Grab from remote DB (x)
+     - how to sync the ID's / version #'s... ? (let's just use modified time stamps for now...) (x)
+  -> Compare to local DB (x)
+  -> Maybe come up with some way to version / avoid grabbing remote data if we don't need to? (x)
+* Update display to handle new layout (x)
+* Build handy little link conveniences (auto-timers, ingredient highlighter)
+  - part way: I have a way to insert custom widgets into code blocks
+* Build editor widget types for recipe editing (x)
 
 * Build out chrome extension / translation of react extension for importing recipes
-* Build editor widget types for recipe editing
+  -> Get svelte compiling into extension (x)
+  -> Set up sidebar to communicate with website so we can run ourselves in a sidebar (x)
+  -> Set up right-click actions to allow interacting with existing recipes
+  -> Set up magic links and stuff
+  -> Think through login business...
+
+
+  
