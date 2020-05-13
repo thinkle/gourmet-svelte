@@ -16,19 +16,21 @@
 
  function addValue () {
      console.log('Add value!',nextValue);
-     if (nextValue) {
+     if (nextValue && value.indexOf(nextValue)==-1) {
          value = [...value, nextValue];
+         value.sort()
+         value = value
          console.log('did it?');
+         nextValue = ''
      }
-     nextValue = ''
  }
 
 </script>
 <span>
     <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.indexOf(o)==-1)} bind:value={nextValue}/> <button class="icon" on:click={addValue}><i  class='material-icons'>add</i></button></span>
     <span>
-        {#each value as v}
-            <span class="tag">{v}
+        {#each value as v (v)}
+            <span animate:flip class="tag">{v}
                 <button class="icon" on:click={()=>remove(v)}><i class='material-icons'>close</i></button>
             </span>
         {/each}
