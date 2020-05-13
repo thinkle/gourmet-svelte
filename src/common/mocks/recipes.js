@@ -202,7 +202,7 @@ let testRecs = {
         categories : ['Dessert'],
         text : [
             {header:'Instructions',
-             text: "Your text goes here..."}
+             body: "Your text goes here..."}
         ],
         images : [
         ],
