@@ -1,5 +1,6 @@
 <script>
  /*  import { TextField } from "smelte"; */
+ import FancyInput from './PlainInput.svelte';
  import { createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
  // name and url
@@ -18,9 +19,9 @@
 </script>
 <div>
     <label on:click={()=>tref.focus()}>Text:</label>
-    <input bind:this="{tref}" on:change={change} class="name" type="text" bind:value={value.name}>
+    <FancyInput bind:this="{tref}" on:change={change} class="name" type="text" bind:value={value.name}/>
     <label on:click={()=>uref.focus()}>URL:</label>
-    <input bind:this={uref} on:change={change} class="url" type="text" bind:value={value.url}>
+    <FancyInput bind:this={uref} on:change={change} class="url" type="text" bind:value={value.url}/>
 </div>
 <style>
  div {
