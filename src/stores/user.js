@@ -46,14 +46,20 @@ function createUser() {
             set(currentUser)
             api.doFetch('getUser',currentUser).then(
                 (result)=>{
-                    console.log('Got user from db...');
+                    console.log('Got user confirmed from db...');
                     currentUser.dbuser = result
                     set(currentUser);
-                    netlifyIdentity.gotrue.currentUser().update({
-                        data: {
-                            dbuser : currentUser.dbuser
-                        }
-                    }).then(user => console.log('netlify user updated',user))
+                    if (netlifyIdentity.gotrue) {
+                        netlifyIdentity.gotrue.currentUser().update({
+                            data: {
+                                dbuser : currentUser.dbuser
+                            }
+                        }).then(user => console.log('netlify user updated',user))
+                    }
+                    else {
+                        console.log('Fake user? Not finding a netlify identity instance');
+                        console.log('User is',currentUser);
+                    }
                 }
             ).catch((err)=>{
                 console.log('ERROR FETCHING USER FROM API',err)
