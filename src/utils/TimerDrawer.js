@@ -3,19 +3,35 @@ import {rad,ccoord} from './TrigHelper.js';
 
 
 function Timer ({ctx,timerSize,
-                 timeColor='#33cc33',
+                 activeTimeColor='#33cc33',
+                 pauseTimeColor='#737373',
+                 overtimeColor = '#ff0000',
                  clockColor='#232323',
+                 secondHandColor = '#878787',
                  bgColor='#fff',
                  textColor='#222',
                  font='Futura',
                  outerCircle=0.8,
                  tickCircle=0.7,
-                 majorTick=0.5,
+                 majorTick=0.6,
+                 secondTick=0.75,
+                 secondHand=false
                 }={}) {
+
+    let timeColor = activeTimeColor;
     
     return {
         timerSize,
         ctx,
+
+        pause () {
+            timeColor = pauseTimeColor;
+        },
+
+        resume () {
+            timeColor = activeTimeColor;
+        },
+
         draw (s) {
             let ctx = this.ctx;
             ctx.clearRect(0,0,this.timerSize,this.timerSize);
@@ -25,15 +41,34 @@ function Timer ({ctx,timerSize,
             this.unit = this.scale.u
             this.drawTimer();
             this.drawTimeCircle(s);
+            if (secondHand) {this.drawSecondHand(s)}
             this.drawLabel(s)
+        },
+        drawSecondHand (s) {
+            let cx = this.timerSize/2;
+            let cy = this.timerSize/2;
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = secondHandColor;
+            this.ctx.beginPath();
+            this.ctx.moveTo(cx,cy);
+            const seconds = s % 60;
+            const angle = 360*(seconds/60) - 90;
+            this.ctx.lineTo(...ccoord(cx,cy)
+                            .getCoords(rad(angle),this.timerSize/3))
+            this.ctx.stroke();
         },
         drawLabel (s) {
             let cx = this.timerSize/2
             let cy = this.timerSize/2
             this.ctx.textAlign = 'center';
             this.ctx.fillStyle = textColor
-            this.ctx.font = `${this.timerSize/4}px ${font}`
-            this.ctx.fillText(Times.getTimeLabel(s),cx,cy);
+            var fontSize = this.timerSize/4
+            if (s < 0) {
+                this.ctx.fillStyle = overtimeColor;
+                fontSize = this.timerSize/4; // make room for "-"
+            }
+            this.ctx.font = `${fontSize}px ${font}`
+            this.ctx.fillText(Times.getTimeLabel(s),cx,cy+fontSize/3);
         },
 
         drawWedge (angle1, angle2, radius) {
@@ -101,6 +136,18 @@ function Timer ({ctx,timerSize,
                 ctx.stroke();
                 even = !even
             }
+            for (let second=0; second < 60; second++) {
+                let percentage = second / 60;
+                let angle = Math.PI/2 + Math.PI*2*percentage
+                let x1 = cx + Math.cos(angle) * (secondTick)*this.timerSize/2;
+                let x2 = cx + Math.cos(angle) * outerCircle*this.timerSize/2;
+                let y1 = cy + Math.sin(angle) * (secondTick)*this.timerSize/2;
+                let y2 = cy + Math.sin(angle) * outerCircle*this.timerSize/2;
+                ctx.beginPath();
+                ctx.moveTo(x1,y1);
+                ctx.lineTo(x2,y2);
+                ctx.stroke();
+            }
         },
 
         drawTimeCircle (s) {
@@ -111,6 +158,9 @@ function Timer ({ctx,timerSize,
             ctx.beginPath();
             ctx.lineWidth = 3
             ctx.strokeStyle = timeColor
+            if (s < 0) {
+                ctx.strokeStyle = overtimeColor
+            }
             let end = this.top+(Math.PI*2*arcPercentage)
             ctx.arc(cx,cy,0.8*(this.timerSize/2),
                     this.top,end);
