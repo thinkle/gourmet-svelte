@@ -6,7 +6,9 @@
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
  import RichText from '../../widgets/RichText.svelte';
-
+ import FancyInput from '../../widgets/PlainInput.svelte';
+ import {getContext} from 'svelte'
+ let recipeChanges = getContext('recipeChanges');
  var displayValue;
  $: displayValue = value.body //prop.toHtml && prop.toHtml(value) || value
  let initialValue;
@@ -50,39 +52,43 @@
      if (!editedThisTime) {console.log('Setting editedThisTime to true!')}
      editedThisTime = true;
      value.body = event.detail || event.target.value;
+     $recipeChanges += 1;
  }
  
 </script>
-<div>
+<div class="contain">
     <div class="top">
         {#if showLabel}
             {#if edit}
-                <input bind:value={value.header}>
+                <FancyInput bind:value={value.header}/>
             {:else}
                 <h3>{value.header}</h3>
             {/if}
         {/if}
         {#if editable && !edit}
-        <button class="icon" on:click={turnEditOn}>
-            <i class="material-icons">edit</i>
-        </button>
+            <button class="icon" on:click={turnEditOn}>
+                <i class="material-icons">edit</i>
+            </button>
         {/if}
         {#if edit && !forceEdit}
-        <button class="icon" on:click={turnEditOff}>
-            <i class="material-icons">done</i>
-        </button>
+            <button class="icon" on:click={turnEditOff}>
+                <i class="material-icons">done</i>
+            </button>
         {/if}
     </div>
     {#if edit}
-    <RichText initialValue={initialValue}
-              on:change="{handleChange}"
-    />
+        <RichText initialValue={initialValue}
+                               on:change="{handleChange}"
+        />
     {:else}
-    <div>{@html displayValue}</div>
+        <div>{@html displayValue}</div>
     {/if}
 
 </div>
 <style>
+ .contain {
+     max-width: 800px;
+ }
  div {
      display: block;
      max-width: 100%;
