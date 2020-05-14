@@ -8,14 +8,16 @@
  import LocalDataTester from './LocalDataTester.svelte';
  import RecipeDataTester from '../stores/RecipeDataTester.svelte';
  import RemoteApiTester from '../data/RemoteApiTester.svelte';
+ import HighlightTest from '../extension/parser/HighlightTest.svelte';
  export let demo
  
  let demos = {
+     widgets : WidgetTests,
      rec : RecDisplayTests,
      localData : LocalDataTester,
-     widgets : WidgetTests,
-     tester : Tester,
+     remote: RemoteApiTester,     
      rd : RecipeDataTester,
+     highlight : HighlightTest,
      ...widgetTestPaths,
  }
 
@@ -35,15 +37,11 @@
             <svelte:component this="{demos[demo]}" initialShow={true} />
         {/if}
     {:else}
-        <WidgetTests/>
-        <RecDisplayTests/>
-        <LocalDataTester/>
-        <RecipeDataTester/>
-        <RemoteApiTester/>
+        {#each Object.keys(demos) as name}
+            <h2>{name} <a href={`/demo/${name}`}>standalone</a></h2> 
+            <svelte:component this={demos[name]} initialShow={false} />
+        {/each}
     {/if}
-    {#each Object.keys(demos) as name}
-        <li><a href={`/demo/${name}`}>{name}</a></li>
-    {/each}
 </div>
 <style>
 </style>
