@@ -33,20 +33,36 @@ var EditTypes = [
 
 var Metadata = {
     importProps : [
+        {name:'title',
+         label:'Title'},
         {name:'ingredients',
          label:'Ingredients',
-         edit:RCH,
+        },
+        {name:'text',
+         label:'Text',
+         hasDetail:true,
         },
         {name:'recipe',
          label:'Recipe (whole thing)',
-         edit:RCH,
         },
         {name:'ingredient',
          label:'Ingredient',
-         edit:TXT,},
+        },
         {name:'inggroup',
          label:'Ingredient Group',
-         edit:TXT},
+        },
+        {name:'yields',
+         label:'Yields',
+         hasDetail:true,
+        },
+        {name:'source',
+         label:'Source'},
+        {name:'category',
+         label:'Category'},
+         {name:'amount',
+          label:'Ingredient Amount'},
+         {name:'unit',
+          label:'Ingredient Unit'},        
     ],
     ingProps : [
         {name:'ingkey',
@@ -162,6 +178,11 @@ Metadata.EditModes = {
     DUR,
     LNK,
     NUMUNIT,    
+}
+
+Metadata.importPropsByName = {}
+for (let p of Metadata.importProps) {
+    Metadata.importPropsByName[p.name] = p;
 }
 
 export default Metadata;
