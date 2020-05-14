@@ -10,10 +10,8 @@
  
  onMount( ()=>{
      ifr.onload = async function () {
-         console.log('Got doc?',ifr.contentDocument);
          body = ifr.contentDocument
                    .querySelector("div")
-         console.log('Got body!',body);
          if (componentContainer && body) {
              mountComponent();
          }
@@ -24,8 +22,6 @@
  });
 
  function mountComponent () {
-     /* console.log('Mounting component, here we go!');
-      * console.log('Render component',component,'to',body,props); */
      body.appendChild(componentContainer)
      let ro = new ResizeObserver( entries => {
          width = body.clientWidth + wiggleRoom
