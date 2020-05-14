@@ -27,7 +27,7 @@ export default [
 	        // a separate file  better for performance
 	        css: css => {
 		    css.write('public/build/bundle.css');
-	        }
+	        } 
 	    }),
 
 	    // If you have external dependencies installed from
@@ -68,6 +68,63 @@ export default [
         },
         plugins : [json()],
     },
+    {
+        input : 'src/extension/background.js',
+        output : {
+            sourcemap : true,
+            format : 'iife',
+            name : 'extension',
+            file : 'extension/background.js',
+        }
+    },
+    {
+        input : 'src/extension/content.js',
+        output : {
+            sourcemap : true,
+            format : 'iife',
+            name : 'extension',
+            file : 'extension/content.js',
+        },
+        plugins : [
+            svelte({
+	        // enable run-time checks when not in production
+	        dev: !production
+	        // we'll extract any component CSS out into
+	        // a separate file  better for performance
+	    }),
+            resolve({
+	        browser: true,
+	        dedupe: ['svelte']
+	    })
+
+        ],
+
+
+    },
+    {
+        input : 'src/extension/embed.js',
+        output : {
+            sourcemap : true,
+            format : 'iife',
+            name : 'extension',
+            file : 'extension/embed.js',
+        },
+        plugins : [
+            svelte({
+	        // enable run-time checks when not in production
+	        dev: !production
+	        // we'll extract any component CSS out into
+	        // a separate file  better for performance
+	    }),
+            resolve({
+	        browser: true,
+	        dedupe: ['svelte']
+	    })
+
+        ],
+    },
+
+
 ];
 
 function serve() {
@@ -77,7 +134,7 @@ function serve() {
 	writeBundle() {
 	    if (!started) {
 		started = true;
-
+                
 		require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
 		    stdio: ['ignore', 'inherit', 'inherit'],
 		    shell: true
