@@ -4,14 +4,15 @@ const parser = Parser(tagger.tagElement);
 
 chrome.extension.onMessage.addListener(
     (msg,sender,sendResponse) => {
-        tagger.listenForParseMessage(msg,sender,sendResponse);
-        console.log('Got message! %s',JSON.stringify(msg));
-        if (msg.action=='parsePage') {
-            console.log('autoparse!');
-            parser.auto_parse();
+        if (tagger.listenForParseMessage(msg,sender,sendResponse)) {
+            console.log('tagger handled message')
         }
-        else if (msg.action!='parseSelection') {
+        else if (parser.listenForParseMessage(msg,sender,sendResponse)) {
+            console.log('parser handled message');
+        }
+        else {
             console.log('Got some other message');
+            console.log('UNHANDLED MESSAGE',msg);
         }
 
     });
