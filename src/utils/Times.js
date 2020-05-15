@@ -14,7 +14,33 @@ function f (n) {
    return Math.floor(n).toString(10)
 }
 
+const timeWords = [
+    {matcher:/\b(sec(ond)?s?)\b/i,
+     value:1},
+    {matcher:/\b(min(ute)?s?)\b/i,
+     value:M},
+    {matcher:/\b(h(ou)?rs?)\b/i,
+     value:H},
+    {matcher:/\b(da?ys?)\b/i,
+     value:D},
+    {matcher:/\b(we+ks?)\b/i,
+     value:W},
+    {matcher:/\b(mo?n?ths)\b/i,
+     value:MNTH},
+    {matcher:/\b(y(ea)?rs?)\b/i,
+     value:YR}
+]
+
 export default {
+
+    getTimeUnit (s) {
+        for (let matcher of timeWords) {
+            if (s.match(matcher.matcher)) {
+                return matcher.value;
+            }
+        }
+    },
+    
     getTimeLabel (s) {
         if (s < 0) {
             return '-' + this.getTimeLabel(-1*s);
