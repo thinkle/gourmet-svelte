@@ -1,6 +1,7 @@
 // runs in background tab
 export const parsed = {
 }
+window.parsed = parsed; // lazy
 
 export function handleContentRequest (request, sender, sendResponse) {
     console.log('Got content request');
@@ -11,11 +12,23 @@ export function handleContentRequest (request, sender, sendResponse) {
     }
     if (request.action=='addTag') {
         console.log('Adding tag (request from content)');
-        console.log('Request: %s',JSON.stringify(request));
+        console.log('Request: ',request);
         if (!parsed[sender.tab.id]) {
             parsed[sender.tab.id] = {}
         }
         parsed[sender.tab.id][request.message.id]=request.message;
+        console.log('Done adding newest',request.message,'to',parsed);
+    }
+    if (request.action=='addTags') {
+        console.log('Adding tag (request from content)');
+        console.log('Request: ',request);
+        if (!parsed[sender.tab.id]) {
+            parsed[sender.tab.id] = {}
+        }
+        for (let message of request.message) {
+            parsed[sender.tab.id][message.id]=message;
+        }
+        console.log(`Done adding ${request.message.length} tags to parsed: `,parsed[sender.tab.id]);
     }
     if (request.action=='updateTag') {
         console.log('Got request to update content...');
@@ -38,12 +51,12 @@ export function handleContentRequest (request, sender, sendResponse) {
 
 export function handleSidebarRequest (request, sender, sendResponse) {
     console.log('Sidebar message incoming');
-    console.log('Got message from sidebar: %s',
-                JSON.stringify({
+    console.log('Got message from sidebar:',
+                {
                     request:request,
                     sender:sender,
-                    sendResponse,sendResponse}));
-    console.log('Message from tab: %s',sender.tab.url);
+                    sendResponse,sendResponse});
+    console.log('Message from tab:',sender.tab.url);
     sendResponse(
         {
             url : sender.tab.url,
