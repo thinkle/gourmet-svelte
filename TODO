@@ -38,7 +38,16 @@
 * Build out chrome extension / translation of react extension for importing recipes
   -> Get svelte compiling into extension (x)
   -> Set up sidebar to communicate with website so we can run ourselves in a sidebar (x)
-  -> Set up right-click actions to allow interacting with existing recipes
+  -> Set up right-click actions to allow interacting with existing recipes (x)
+  -> Set up test harness for moving from magic parser to parsed recipe to import UI
+         - Is import UI different from editing UI? How?
+         - Is Import UI different from mark-up on the page? How?
+
+         Option 1: mark-up items on the page, bring them in. Some smarts must be applied in converting marked up text to JSON.
+         Option 2: interpret the page directly, some smarts need be applied.
+
+         We generate JSON with a bunch of "pieces" that need to be parsed into items. I guess option three is figuring out how to "add" those pieces.
+
   -> Set up magic links and stuff
   -> Think through login business...
 
