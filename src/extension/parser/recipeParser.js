@@ -8,6 +8,19 @@ const defaultParsers = [
 
 const byDomain = {
     'cooking.nytimes.com':[
+        /* 
+           <li class="recipe-yield-container">
+                <span class="recipe-yield-time-label recipe-yield">Yield</span>
+                <span class="recipe-yield-value">4 to 6 servings</span>
+              </li>
+
+        */
+        {xpath:"//span[contains(@class, 'recipe-yield-time-label')]/text()[contains(.,'Yield')]/parent::span/following-sibling::span",
+         tag:'yields'},
+        /*<span class="recipe-yield-time-label recipe-time">Time</span>*/
+        {xpath:"//span[contains(@class, 'recipe-yield-time-label')]/text()[contains(.,'Time')]/parent::span/following-sibling::span",
+         tag:'time'},
+        //{selector:'.recipe-yield-value',tag:'yield'},
         {selector:'.recipe-title',tag:'title'},
         {selector:'.tag-block a',tag:'category'},
         {selector:'.byline',tag:'source'},
@@ -20,8 +33,8 @@ const byDomain = {
         {selector:'.topnote',tag:'text'},
         {selector:'.tag',tag:'category'},
         {selector:'',tag:''},
-        {selector:'.recipe-yield-value',tag:'yield'},
         {selector:'.recipe-steps',tag:'text'},
+        {selector:'.recipe-intro .media-container',tag:'image'},
         {selector:'[itemprop="image"]',tag:'image'}, // fix me
     ],
     'www.cooksillustrated.com':[
@@ -61,18 +74,6 @@ const byDomain = {
          tag:'text',detail:'Instructions'},
         {selector:'.asides',
          tag:'text',detail:'Footnote'},
-        /* 
-           <li class="recipe-yield-container">
-                <span class="recipe-yield-time-label recipe-yield">Yield</span>
-                <span class="recipe-yield-value">4 to 6 servings</span>
-              </li>
-
-        */
-        {xpath:'//span@recipe-yield-time-label[text()[contains(.,"Yield")]/following-sibling:span',
-         tag:'servings'},
-        /*<span class="recipe-yield-time-label recipe-time">Time</span>*/
-        {xpath:'//span@recipe-yield-time-label[text()[contains(.,"Time")]/following-sibling:span',
-         tag:'time'}
     ],
 }
 
@@ -81,28 +82,50 @@ function Parser (addTag) {
     var self = {
         
         auto_parse : function () {
+            self.results = [];
             var domain = document.domain;
             var parsers = byDomain[domain]||defaultParsers;
             parsers.forEach((parser)=>{
                 self.maybe_add(parser)
             });
+            return self.results
         },
         
         maybe_add : function ({selector, tag, ignoreSlug, xpath,detail}) {
+            // Make a list of elements, then move through them -- we can't iterate through xpath results
+            // and change the document as we go.
             if (xpath) {
-                let results = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null );
-                var result = results.iterateNext();
+                let iterator = document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null );
+                var result = iterator.iterateNext();
+                let results = []
                 while (result) {
+                    results.push(result)
+                    result = iterator.iterateNext();
+                }
+                for (let result of results) {
                     console.log('Tag',result,tag,detail)
-                    addTag(result,tag,detail);
-                    result = results.iterateNext();
+                    self.results.push(
+                        addTag(result,tag,detail)
+                    )
                 }
             }
             if (selector) {
                 document.querySelectorAll(selector).forEach(function (el) {
                     console.log('Tag',el,tag,detail)
-                    addTag(el,tag,detail);
+                    self.results.push(
+                        addTag(el,tag,detail)
+                    );
                 });
+            }
+        },
+
+        listenForParseMessage (msg, sender, sendResponse) {
+            if (msg.action=='parsePage') {
+                console.log('autoparse!');
+                debugger;
+                let results = self.auto_parse()
+                sendResponse(results);
+                return true
             }
         }
     }
