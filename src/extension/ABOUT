@@ -1,0 +1,24 @@
+Ok, chrome extensions can be a bear to keep track of, so here's a quick run-down...
+
+-> Browser action (clicking the tab) - injects the code in embed.js,
+   which embeds an iFrame with our web app running it's sidebar
+   page. This is our main UI. We could build the UI right in the
+   extension, but for all of our local storage and stuff to work
+   right, it has to pass through the web app anyway (because any kind
+   of browser storage is tied to the page and can't be shared).
+
+-> content script sits on every page in the browser. It listens for events:
+   -> context menu events let you mark-up the page
+   -> auto-parse events let you automatically parse the page
+
+-> background.js is the main glue behind things, it...
+
+
+   -> listens for sidebar requests and content requests and passes
+   messages between them
+
+   -> keeps track of recipe parsing data per page
+   
+
+
+
