@@ -26,11 +26,7 @@
      setTimeout(
          ()=>{
              if (!editor.contains(editor.ownerDocument.activeElement)) {
-                 console.log("Losing focus: ",editor.ownerDocument.activeElement,"not in ",editor);
                  active = false
-             }
-             else {
-                 console.log("Keeping focus!",editor.ownerDocument.activeElement);
              }
          },
          100);

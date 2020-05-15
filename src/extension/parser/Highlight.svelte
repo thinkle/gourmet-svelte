@@ -11,7 +11,7 @@
  let tagElement
  let makeWay = false;
 
- console.log('Creating zzgrmthighlight with ',targetContent,'at node',targetNode);
+
  onMount(
      ()=>{
          if (targetContent) {
