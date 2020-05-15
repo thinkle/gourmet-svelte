@@ -20,12 +20,10 @@ var Tagger = function () {
         if (!addressList) {addressList = []}
         var parent = node.parentElement
         if (!parent) {
-            console.log("Done iwth parents");
             return addressList
         }
         var idx = Array.prototype.indexOf.call(parent.childNodes,node)
         if (idx===undefined) {
-            console.log('weird - not in parent?');
             addressList.push(99999);
         }
         addressList.push(idx);
@@ -35,7 +33,6 @@ var Tagger = function () {
 
     function getNodeAddress (node) {
         var path = getNodePath(node);
-        console.log('Got path: %s',path);
         path.reverse();
         path = path.map(
             (i)=>{
@@ -61,7 +58,14 @@ var Tagger = function () {
             }
         })
         highlights[markupId] = h;
-        return salt+markupId
+        return {
+            id:salt+markupId,
+            html:content&&getHtmlFromDocumentFragment(content)||el.innerHTML,
+            tag:tagname,
+            text:el.textContent,
+            detail,
+            address : getNodeAddress(el)
+        }
     }
 
     function getHtmlFromDocumentFragment (fragment) {
@@ -78,17 +82,17 @@ var Tagger = function () {
         let range = window.getSelection().getRangeAt(0);
         let text = window.getSelection().toString();
         let fragment = range.extractContents();
-        let html = getHtmlFromDocumentFragment(fragment)
+        //let html = getHtmlFromDocumentFragment(fragment)
         // stick a span in that we can anchor our component to
         let placeholder = document.createElement('span');
         range.insertNode(placeholder)
         // create our tag
-        let id = tagElement(placeholder,name,fragment,detail)
+        let parsed = tagElement(placeholder,name,fragment,detail)
         // return info to pass on...
         return {
-            id,text,html,
-            tag : name,
-            address : getNodeAddress(placeholder)
+            ...parsed,
+            text
+            //address : getNodeAddress(placeholder)
         }
     }
 
@@ -109,6 +113,7 @@ var Tagger = function () {
                 }
                 console.log('Sending response: %s',JSON.stringify(resp));
                 sendResponse(resp);
+                return true
             }
         },
 
