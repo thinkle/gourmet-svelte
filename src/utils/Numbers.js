@@ -14,6 +14,72 @@
 // });
 import Amounts from './Amounts.js'; 
 
+var NUMBER_WORDS = [
+    {matcher:/(one|a)/i,
+     value:1},
+    {matcher:/(two|(a )?(couple|pair))/i,
+     value:2},
+    {matcher:/((one|a)\s*)?half(\s+(a|an))?\b/i,
+     value:0.5},
+    {matcher:/three/i,value:3},
+]
+
+
+var LESS_THAN_TWENTY = [
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'
+];
+
+var TENTHS_LESS_THAN_HUNDRED = [
+    'zero', 'ten', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'
+];
+
+for (let i=0; i<20; i++) {
+    let word = LESS_THAN_TWENTY[i]
+    NUMBER_WORDS.push({
+        matcher : new RegExp(word,'i'),
+        value : i
+    })
+}
+for (let t=2; t<10; t++) {
+    let tens = TENTHS_LESS_THAN_HUNDRED[t];
+    NUMBER_WORDS.push({
+        matcher : new RegExp(tens,'i'),
+        value : t*10
+    })
+    for (let i=1; i<10; i++) {
+        let ones = LESS_THAN_TWENTY[i]
+        NUMBER_WORDS.push({
+            matcher : new RegExp(tens+'(\\s*|-|–)'+ones,'i'),
+            value : t*10 + i
+        })
+    }
+}
+
+for (let word of NUMBER_WORDS) {
+    if (isNaN(word.value)) {
+        throw Error(`bad word ${word.matcher} ${word.value}`);
+    }
+}
+NUMBER_WORDS.reverse(); // longest to shortest - match greedy first
+
+
+function getValueFromNumberWord (s) {
+    let value = NaN;
+    for (let numberWord of NUMBER_WORDS) {
+        // We assume NUMBER_WORDS is in order from most to least
+        // specific, so if, for example twenty-two matches twenty and
+        // two and twenty-two, twenty-two will come first.
+        // I *think* but haven't rigorously confirmed that this works
+        // for all numbers with larger numbers being more specific than
+        // smaller numbers in terms of regexp matching
+        if (s.match(numberWord.matcher)) {
+            return numberWord.value
+        }
+    }
+}
+
+
 var NUMBER_FRACTIONS = [
     {numerator:1,
      denominator:2,
@@ -161,15 +227,28 @@ function frac_to_float (s) {
     if (s.match(/[0-9]([.][0-9][0-9][0-9])+([,][0-9]+)?$/)) {
         s = s.replace(/[.]/g,'');
     }
-    return Number(s)
+    let val = Number(s)
+    if (!isNaN(val)) {
+        return val
+    }
+    else {
+        let wordValue = getValueFromNumberWord(s)
+        if (wordValue) {
+            return wordValue
+        }
+    }
 }
 
+
 var numBase = `([0-9]|${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}`;
+numBase += '|' + NUMBER_WORDS.map((w)=>w.matcher.toString().replace(/(^\/|\/i$)/g,'')).join('|')
 var numNaked = numBase + ')';
 var numMid = numBase + '|[,./])' 
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
-var numMatchString = `${numMatchString}(\\s+${numMatchString})?`
-var numberMatcher = new RegExp(numMatchString);
+numMatchString = `${numMatchString}(\\s+${numMatchString})?`
+var numberMatcher = new RegExp(numMatchString,'i');
+var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})`
+var rangeMatcher = new RegExp(rangeMatcherString,'i')
 
 function incrementOld (value) {
      var nextOne = false;
@@ -278,5 +357,39 @@ function decrement (n) {
     }
 }
 
+let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/])')
 
-export {float_to_frac, frac_to_float, numberMatcher, numMatchString, increment, decrement}
+function parse_amount (s) {
+    let amount = {}
+    let match = s.match(rangeMatcher);
+    if (match) {
+        amount.rangeAmount = frac_to_float(match.groups.first);
+        amount.amount = frac_to_float(match.groups.second);
+    }
+    else {
+        match = s.match(numberBeforeUnitMatcher);
+        if (match) {
+            amount.amount = frac_to_float(match[0])
+        }
+        else {
+            match = s.match(numberMatcher);
+            if (match) {
+                amount.amount = frac_to_float(match[0])
+            }
+        }
+    }
+    if (match) {
+        amount.pretext = s.substr(0,match.index)
+        amount.posttext = s.substr(match.index+match[0].length)
+    }
+    else {
+        amount.posttext = s;
+    }
+    return amount
+}
+
+
+export {float_to_frac, frac_to_float, parse_amount,
+        numberMatcher, numMatchString,
+        rangeMatcherString, rangeMatcher,
+        increment, decrement}
