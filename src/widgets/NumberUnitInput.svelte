@@ -1,13 +1,19 @@
 <script>
  import { createEventDispatcher, setContext, getContext } from 'svelte';
- import AmountInput from './AmountInput.svelte';
- import {floatToFrac} from '../utils/numbers.js';
+ import RangeInput from './RangeInput.svelte';
+ import {formatAmount,floatToFrac} from '../utils/numbers.js';
  export let mode='inline'
  const dispatch = createEventDispatcher();
  // name and url
  export let value
  export let multipliable=true
- 
+ let amountValue;
+ $: if (value) {
+     amountValue = {
+         amount:value.amount,
+         rangeAmount:value.rangeAmount
+     }
+ }
  let nref
  let uref
  export function focus () {
@@ -26,17 +32,19 @@
 
  function onNumberChange (e) {
      console.log('Number changed',e);
-     value.amount = e.detail;
+     delete value.rangeAmount // don't put it back...
+     value = {...value,
+              ...e.detail}
      change();
  }
 
 </script>
 <div>
     <label on:click={()=>nref.focus()}>Number:</label> 
-    <AmountInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={value.amount}/>
+    <RangeInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={amountValue}/>
     <i>
         {#if multipliable && $multiplier!=1}
-            (&times;{floatToFrac($multiplier)}={floatToFrac(value.amount*$multiplier)})
+            (&times;{floatToFrac($multiplier)}={formatAmount(value,{multiplier:$multiplier})})
         {/if}
     </i>
 </div>
