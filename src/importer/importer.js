@@ -1,14 +1,23 @@
 import RecDef from '../common/RecDef.js'
-import {parse_amount} from '../utils/Numbers.js';
-import Times from '../utils/Times.js';
+import {parseAmount} from '../utils/numbers.js';
+import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
+import Times from '../utils/times.js';
+import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup} from './ingredientImporter.js';
 
-export function sortChunks (parsedChunks) {
+export function preprocessChunks (parsedChunks, context) {
+    // since we're already iterating through the list, we'll make a
+    // map while we're there
+    context.chunkMap = {}
     parsedChunks.sort(
-        (a,b)=>(a.address>b.address&&1
-                ||
-                a.address<b.address&&-1
-                ||
-                0)
+        (a,b)=>{
+            context.chunkMap[a.id] = a;
+            context.chunkMap[b.id] = b;
+            return (a.address>b.address&&1
+                    ||
+                    a.address<b.address&&-1
+                    ||
+                    0)
+        }
     );
 }
 
@@ -17,14 +26,17 @@ export function parseChunks (parsedChunks,context={}) {
     const recipe = {
         ingredients : []
     }
+
+
     // set up empty arrays
     for (let prop of RecDef.recProps) {
         if (prop.array) {
             recipe[prop.name] = [];
         }
     }
-    
-    sortChunks(parsedChunks)
+
+    preprocessChunks(parsedChunks, context); // get map
+
     for (let chunk of parsedChunks) {
         context.localContext = handleChunk(chunk,context,recipe);
     }
@@ -34,23 +46,47 @@ export function parseChunks (parsedChunks,context={}) {
 }
 
 
-export function handleChunk (chunk, context, recipe) {
+export function handleChunk (chunk, context, recipe, parent) {
+    if (chunk.handled) {
+        return;
+    }
+    else {
+        chunk.handled = true; // only run once per chunk
+    }
     if (chunk.tag=='title') {
         return handleTitle(chunk,context,recipe);
     }
     else if (chunk.tag=='source') {
-        return handleSource(chunk,context,recipe)
+        return handleSource(chunk,context,recipe,parent)
     }
-    else if (chunk.tag=='times') {
-        return handleTime(chunk,context,recipe)
+    else if (chunk.tag=='time') {
+        return handleTime(chunk,context,recipe,parent)
     }
     else if (chunk.tag=='yields') {
         return handleYields(chunk,context,recipe)
     }
+    else if (chunk.tag=='text') {
+        return handleText(chunk,context,recipe)
+    }
+    else if (chunk.tag=='amount') {
+        return handleIngredientAmount(chunk,context,recipe,parent)
+    }
+    else if (chunk.tag=='unit') {
+        return handleIngredientUnit(chunk,context,recipe,parent)
+    }
+    else if (chunk.tag=='ingredient') {
+        return handleIngredient(chunk,context,recipe,parent)
+    }
+    else if (chunk.tag=='ingredientText') {
+        return handleIngredientText(chunk,context,recipe,parent)
+    }
+    else if (chunk.tag=='inggroup') {
+        return handleIngredientGroup(chunk,context,recipe,parent);
+    }
 }
 
 function handleTime (chunk, context, recipe) {
-    let amount = parse_amount(chunk.text);
+    let amount = parseAmount(chunk.text);
     amount.unit = Times.getTimeUnit(chunk.text);
     amount.seconds = amount.amount * amount.unit;
     if (amount.pretext) {
@@ -64,7 +100,7 @@ function handleTime (chunk, context, recipe) {
 }
 
 function handleYields (chunk, context, recipe) {
-    let amount = parse_amount(chunk.text);
+    let amount = parseAmount(chunk.text);
     if (amount.pretext && amount.posttext) {
         cleanupWhitespace(amount.pretext +' '+amount.posttext)
     }
@@ -96,6 +132,13 @@ function handleSource (chunk, context, recipe) {
     }
 }
 
+function handleText (chunk, context, recipe) {
+    recipe.text.push({
+        body:chunk.html,
+        header:chunk.detail||getHeader(chunk,recipe),
+    });
+}
+
 function handleTitle (chunk, context, recipe) {
     let title = cleanupWhitespace(chunk.text)
     if (!recipe.title) {
@@ -103,6 +146,16 @@ function handleTitle (chunk, context, recipe) {
     }
     else {
         recipe.title += ' '+title;
+    }
+}
+
+function getHeader (chunk,recipe) {
+    // implement?
+    if (recipe.text.length) {
+        return ''
+    }
+    else {
+        return 'Instructions'
     }
 }
 
@@ -154,21 +207,3 @@ function extractUrlFromText (text) {
     }
 }
 
-function cleanupWhitespace (text, condenseMiddleSpaces=true) {
-    text = text
-        .replace(/^\s*/,'') // leading whitespace
-        .replace(/\s*$/,'') // trailing whitespace
-    if (condenseMiddleSpaces) {
-        return text
-            .replace(/\s+/g,' ') // extra whitespace -> single
-    }
-    else {
-        return text
-    }
-}
-
-function titleCase (words) {
-    return words.split(/\s/).map(
-        (word)=>word[0].toUpperCase()+word.substr(1).toLowerCase()
-    ).join(' ')
-}
