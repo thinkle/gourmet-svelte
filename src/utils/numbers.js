@@ -140,7 +140,8 @@ function getFraction (n, d, unicodeFractions=true) {
 }
 
 function floatToFrac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2,
-                            unicodeFractions=true}={}) {
+                          unicodeFractions=true,multiplier=1}={}) {
+    n *= multiplier
     if (n===0) {
         return '0'
     }
@@ -386,6 +387,15 @@ function parseAmount (s) {
         amount.posttext = s;
     }
     return amount
+}
+
+export function formatAmount (amount,options) {
+    if (amount.rangeAmount) {
+        return `${floatToFrac(amount.rangeAmount,options)}–${floatToFrac(amount.amount,options)}`
+    }
+    else {
+        return floatToFrac(amount.amount,options);
+    }
 }
 
 
