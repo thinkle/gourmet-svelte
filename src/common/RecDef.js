@@ -7,7 +7,7 @@ For each property type, we have:
   editType: , // the edit types...
 */
 
-import Units from '../utils/Units.js';
+import Units from '../utils/units.js';
 
 var TXT = 'text';
 var RCH = 'richText';
@@ -36,7 +36,7 @@ var Metadata = {
         {name:'title',
          label:'Title'},
         {name:'ingredients',
-         label:'Ingredients',
+         label:'Ingredient List',
         },
         {name:'time',
          label:'Time',
@@ -50,7 +50,10 @@ var Metadata = {
          label:'Recipe (whole thing)',
         },
         {name:'ingredient',
-         label:'Ingredient',
+         label:'Ingredient (Complete)',
+        },
+        {name:'ingredientText',
+         label:'Ingredient Item',
         },
         {name:'inggroup',
          label:'Ingredient Group',
