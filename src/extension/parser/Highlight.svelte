@@ -1,5 +1,6 @@
 <script>
  import Tag from './Tag.svelte';
+ import {updateTag,removeTag} from './actions.js';
  import ComponentSandbox from './ComponentSandbox.svelte';
  import {onMount} from 'svelte';
  export let name='?';
@@ -7,10 +8,10 @@
  export let targetNode;
  export let targetContent;
  export let id;
- let ref;
+ export let ref;
  let tagElement
  let makeWay = false;
-
+ import {tagClassname} from './metadata.js';
 
  onMount(
      ()=>{
@@ -26,15 +27,7 @@
  function remove () {
      zzgrmthighlight = false;
      try {
-         chrome.runtime.sendMessage(
-             //settings.chromeExtensionId,
-             {
-                 action:'removeTag',
-                 id:id,
-                 origin:'content',
-             },
-             (response)=>{console.log('I heard back from bg! %s',response)}
-         );
+         removeTag(id)
      }
      catch (err) {
          console.log("Are you testing? Can't send chrome message outside of extension")
@@ -45,56 +38,21 @@
  }
  let lastTag = name
  $: if (lastTag != name) {
-     updateTag()
+     updateTagname()
  }
- function updateTag () {
+ function updateTagname () {
      console.log('Update tag',name)
-     try {
-         chrome.runtime.sendMessage(
-             {
-                 action:'updateTag',
-                 message : {
-                     id:id,
-                     part:name,
-                 }
-             },
-             (response)=>{
-                 console.log('Heard back after update')
-                 lastTag = tag
-             }
-         );
-     }
-     catch (err) {
-         console.log("Are you testing? Can't send chrome message outside of extension")
-         console.log('Ignoring error',err)
-         console.log('new tag = ',id,name);
-     }
+     updateTag(id,name)
  }
 
  function updateContents (event) {
      console.log('Update',event.target.innerHTML);
-     try {
-         chrome.runtime.sendMessage(
-             {
-                 action:'updateTag',
-                 message : {
-                     id:id,
-                     part:name,
-                     parsed : {
-                         html:event.target.innerHTML,
-                         text:event.target.textContent
-                     }
-                 }
-             },
-             (response)=>console.log('Heard back after update')
-         );
-     }
-     catch (err) {
-         console.log("Are you testing? Can't send chrome message outside of extension")
-         console.log('Ignoring error',err)
-         console.log('new tag = ',id,name,event.target.innerHTML);
-     }
+     updateTag(id,part,{
+         html:event.target.innerHTML,
+         text:event.target.textContent
+     })
  }
+ 
 
  let tagWidth
  let tagHeight
@@ -110,7 +68,7 @@
 
 </script>
 
-<div class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
+<div class={tagClassname} class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
     <span contenteditable={zzgrmthighlight} on:input={updateContents}  bind:this={ref} on:blur={()=>makeWay=false}>
     </span>
     <div bind:this={tagElement} class="zzgrmttag">
@@ -148,3 +106,4 @@
  }
 
 </style>
+<svelte:options accessors/>

@@ -4,10 +4,10 @@
  import ipsum from '../../common/mocks/ipsum.js'
  import RecDef from '../../common/RecDef.js';
  import {onMount} from 'svelte'
-
+ let response;
  onMount(
      ()=>{
-         tagger.tagElement(ref,'text')
+         response = tagger.tagElement(ref,'text')
      }
  );
 
@@ -22,15 +22,16 @@
     </h3>
     {#each RecDef.importProps as prop}
         <button
-            on:click={()=>tagger.markupAndGetSelection(prop.name)}>
+            on:click={()=>response=tagger.markupAndGetSelection(prop.name)}>
             {prop.label}
         </button>
         {#if prop.hasDetail}
             <button
-                on:click={()=>tagger.markupAndGetSelection(prop.name,'foo boo')}>
+                on:click={()=>response=tagger.markupAndGetSelection(prop.name,'foo boo')}>
                 {prop.label} (w/ text)
             </button>
         {/if}
     {/each}
     {@html ipsum.generateParagraphs(5)}
+    <p>{JSON.stringify(response)}</p>
 </div>

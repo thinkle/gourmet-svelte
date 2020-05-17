@@ -30,6 +30,18 @@ export function handleContentRequest (request, sender, sendResponse) {
         }
         console.log(`Done adding ${request.message.length} tags to parsed: `,parsed[sender.tab.id]);
     }
+    if (request.action=='addChild') {
+        console.log('Request to update child');
+        let parent = parsed[sender.tab.id][request.message.parent]
+        if (!parent) {
+            console.log('WTF? Got request to add child to nonexistent parent: ',request.message);
+            throw Error('WTF? Got request to add child to nonexistent parent: ',request.message);
+        }
+        if (!parent.children) {
+            parent.children = [];
+        }
+        parent.children.push(request.message.child);
+    }
     if (request.action=='updateTag') {
         console.log('Got request to update content...');
         if (!parsed[sender.tab.id]) {

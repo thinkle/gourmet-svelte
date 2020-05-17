@@ -6,7 +6,8 @@
  * @license GPL
  */
 import Highlight from './Highlight.svelte';
-
+import {tagClassname} from './metadata.js';
+import {addChild} from './actions.js';
 let highlights = {}
 window.highlights = highlights
 
@@ -58,15 +59,52 @@ var Tagger = function () {
             }
         })
         highlights[markupId] = h;
+        let children = checkForChildren(h.ref)
+        lookForParent(el);
         return {
             id:salt+markupId,
             html:content&&getHtmlFromDocumentFragment(content)||el.innerHTML,
             tag:tagname,
             text:el.textContent,
+            children,
             detail,
             address : getNodeAddress(el)
         }
+
+        function checkForChildren (node, children=[]) {
+            debugger;
+            if (node.children) {
+                for (let child of node.children) {
+                    if (child && child.classList.contains(tagClassname)) {
+                        children.push(child.id)
+                    }
+                    else if (child) {
+                        checkForChildren(child,children)
+                    }
+                }
+            }
+            return children;
+        }
+        
+        function lookForParent (node) {
+            if (node.parentElement.classList.contains(tagClassname)) {
+                // Add!
+                console.log('Found a parent!',node.parentElement.id)
+                addChild(node.parentElement.id,salt+markupId);
+            }
+            else if (node.parentElement && node.parentElement.parentElement) {
+                lookForParent(node.parentElement);
+            }
+        }
+
+
+
+
+
     }
+
+    
+
 
     function getHtmlFromDocumentFragment (fragment) {
         // https://stackoverflow.com/questions/36653316/get-innerhtml-of-document-fragment-instead-of-textcontent
