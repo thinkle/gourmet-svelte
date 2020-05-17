@@ -1,5 +1,5 @@
 <script>
- import {float_to_frac} from '../utils/Numbers.js';
+ import {floatToFrac} from '../utils/numbers.js';
  export let value
  export let mode='inline'
  export let multipliable=true
@@ -19,7 +19,7 @@
 
 </script>
 
-<span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>{float_to_frac(displayAmount)}</span>
+<span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>{floatToFrac(displayAmount)}</span>
 &nbsp;
 <span class:table={mode=='table'} class="unit" >{value.unit||''}</span>
 

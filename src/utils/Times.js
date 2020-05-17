@@ -4,7 +4,7 @@ let D = H * 24;
 let W = D * 7;
 let MNTH = D * 31
 let YR = D * 365;
-import {float_to_frac} from './Numbers.js';
+import {floatToFrac} from './numbers.js';
 
 
 function f2 (n) {
@@ -123,24 +123,24 @@ export default {
                 return `${hms.seconds} seconds`
             }
             if (!hms.seconds) {
-                return `${float_to_frac(hms.minutes,{fallbackDigits:0})} minutes`
+                return `${floatToFrac(hms.minutes,{fallbackDigits:0})} minutes`
             }
-            return `${float_to_frac(hms.minutes)} minutes, ${float_to_frac(hms.seconds,{fallbackDigits:0})} seconds`
+            return `${floatToFrac(hms.minutes)} minutes, ${floatToFrac(hms.seconds,{fallbackDigits:0})} seconds`
         }
         if (hms.hours < 24) {
-            return `${float_to_frac(s/H,{fallbackDigits:0})} hours`
+            return `${floatToFrac(s/H,{fallbackDigits:0})} hours`
         }
         else if (hms.hours < 24*7) {
-            return `${float_to_frac(s/D,{fallbackDigits:0})} days`
+            return `${floatToFrac(s/D,{fallbackDigits:0})} days`
         }
         else if (hms.hours < 35*7) {
-            return `${float_to_frac(s/W,{fallbackDigits:0})} weeks`
+            return `${floatToFrac(s/W,{fallbackDigits:0})} weeks`
         }
         else if (hms.hours < 24*7*365) {
-            return `${float_to_frac(s/MNTH,{fallbackDigits:0})} months`
+            return `${floatToFrac(s/MNTH,{fallbackDigits:0})} months`
         }
         else {
-            return `${float_to_frac(s/YR,{fallbackDigits:0})} years`
+            return `${floatToFrac(s/YR,{fallbackDigits:0})} years`
         }
     }
 

@@ -1,5 +1,5 @@
-import {frac_to_float,float_to_frac,numMatchString} from './Numbers.js';
-import Amounts from './Amounts.js';
+import {fracToFloat,floatToFrac,numMatchString} from './numbers.js';
+import Amounts from './unitAmounts.js';
 var timeUnits = undefined
 var timeConversions = {} // gets populated in getTimeUnits()
 var timeEquivs = {
@@ -83,7 +83,7 @@ function checkForTimeWords (txt) {
         var re = timeEquivRegexps[unit];
         var match = txt.match(re);
         if (match) {
-            var num = frac_to_float(match[1]);
+            var num = fracToFloat(match[1]);
             var converter = timeConversions[unit];
             if (!converter) {
                 throw 'No converter found for unit '+unit;

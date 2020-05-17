@@ -1,4 +1,4 @@
-import {getAngle,deg} from './TrigHelper.js';
+import {getAngle,deg} from './trigHelper.js';
 
 it(
     'Trig helpers work right?',

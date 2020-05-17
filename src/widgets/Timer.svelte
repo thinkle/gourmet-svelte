@@ -1,8 +1,8 @@
 <script>
  import IB from './IconButton.svelte';
  import {onMount} from 'svelte';
- import Timer from '../utils/TimerDrawer.js';
- import Times from '../utils/Times.js';
+ import Timer from '../utils/timerDrawer.js';
+ import Times from '../utils/times.js';
  export let size = 100;
  export let duration = 60;
  let timeLeft;

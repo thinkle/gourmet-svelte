@@ -1,5 +1,5 @@
 <script>
- import {float_to_frac,frac_to_float,increment,decrement} from '../utils/Numbers.js';
+ import {floatToFrac,fracToFloat,increment,decrement} from '../utils/numbers.js';
  import IB from './IconButton.svelte';
  const DOWNCODES = [40,189]
  const UPCODES = [38,187]
@@ -8,14 +8,14 @@
  let useUnicode = true;
  
  let displayValue;
- $: displayValue = float_to_frac(value,{unicodeFractions:useUnicode});
+ $: displayValue = floatToFrac(value,{unicodeFractions:useUnicode});
  
  import { createEventDispatcher, setContext, getContext } from 'svelte';
  const dispatch = createEventDispatcher();
  import {tick} from 'svelte';
 
  function change () {
-     value = frac_to_float(displayValue);
+     value = fracToFloat(displayValue);
      dispatch('change',value);
  }
 
@@ -34,7 +34,7 @@
 
  function onchange (e) {
      console.log('onchange',e)
-     let val = frac_to_float(e.target.value);
+     let val = fracToFloat(e.target.value);
      if (val != value) {
          console.log('dispatching change event')
          dispatch('change',val);
@@ -54,10 +54,10 @@
  }
 
  function oninput (event) {
-     let val = frac_to_float(event.target.value);
+     let val = fracToFloat(event.target.value);
      console.log('input: val=',val);
      if (val && val != value) {
-         if (float_to_frac(val,{unicodeFractions:false}) == event.target.value) {
+         if (floatToFrac(val,{unicodeFractions:false}) == event.target.value) {
              console.log('dispatch a change event...');
              value = val;
              dispatch('change',val);

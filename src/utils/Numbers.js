@@ -6,22 +6,22 @@
 //         unformat: /\//
 //     },
 //     format: function(value, format, roundingFunction) {
-// 	return float_to_frac(value);
+// 	return floatToFrac(value);
 //     },
 //     unformat: function(string) {
-//         return frac_to_float(string);
+//         return fracToFloat(string);
 //     }
 // });
-import Amounts from './Amounts.js'; 
+import Amounts from './unitAmounts.js'; 
 
 var NUMBER_WORDS = [
-    {matcher:/(one|a)/i,
+    {matcher:/\b(one|a)\b/i,
      value:1},
-    {matcher:/(two|(a )?(couple|pair))/i,
+    {matcher:/(two|\ba\s*(couple|pair)\b)/i,
      value:2},
-    {matcher:/((one|a)\s*)?half(\s+(a|an))?\b/i,
+    {matcher:/(\b(one|a)\b\s*)?half(\s+(a|an))?\b/i,
      value:0.5},
-    {matcher:/three/i,value:3},
+    {matcher:/\bthree\b/i,value:3},
 ]
 
 
@@ -37,20 +37,20 @@ var TENTHS_LESS_THAN_HUNDRED = [
 for (let i=0; i<20; i++) {
     let word = LESS_THAN_TWENTY[i]
     NUMBER_WORDS.push({
-        matcher : new RegExp(word,'i'),
+        matcher : new RegExp('\\b'+word+'\\b','i'),
         value : i
     })
 }
 for (let t=2; t<10; t++) {
     let tens = TENTHS_LESS_THAN_HUNDRED[t];
     NUMBER_WORDS.push({
-        matcher : new RegExp(tens,'i'),
+        matcher : new RegExp('\\b'+tens+'\\b','i'),
         value : t*10
     })
     for (let i=1; i<10; i++) {
         let ones = LESS_THAN_TWENTY[i]
         NUMBER_WORDS.push({
-            matcher : new RegExp(tens+'(\\s*|-|–)'+ones,'i'),
+            matcher : new RegExp('\\b'+tens+'(\\s*|-|–)'+ones+'\\b','i'),
             value : t*10 + i
         })
     }
@@ -139,7 +139,7 @@ function getFraction (n, d, unicodeFractions=true) {
     return n+'/'+d
 }
 
-function float_to_frac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2,
+function floatToFrac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2,
                             unicodeFractions=true}={}) {
     if (n===0) {
         return '0'
@@ -193,7 +193,7 @@ function fractify (decimal, divisor, approx=0.01) {
 
 // translation to javascript
 /*We assume fractions look like this (I )?N/D */
-function frac_to_float (s) {
+function fracToFloat (s) {
     if (!s.split) {
         return Number(s); // if we are not a string, just use Number...
     }
@@ -359,22 +359,22 @@ function decrement (n) {
 
 let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/])')
 
-function parse_amount (s) {
+function parseAmount (s) {
     let amount = {}
     let match = s.match(rangeMatcher);
     if (match) {
-        amount.rangeAmount = frac_to_float(match.groups.first);
-        amount.amount = frac_to_float(match.groups.second);
+        amount.rangeAmount = fracToFloat(match.groups.first);
+        amount.amount = fracToFloat(match.groups.second);
     }
     else {
         match = s.match(numberBeforeUnitMatcher);
         if (match) {
-            amount.amount = frac_to_float(match[0])
+            amount.amount = fracToFloat(match[0])
         }
         else {
             match = s.match(numberMatcher);
             if (match) {
-                amount.amount = frac_to_float(match[0])
+                amount.amount = fracToFloat(match[0])
             }
         }
     }
@@ -389,7 +389,7 @@ function parse_amount (s) {
 }
 
 
-export {float_to_frac, frac_to_float, parse_amount,
+export {floatToFrac, fracToFloat, parseAmount,
         numberMatcher, numMatchString,
         rangeMatcherString, rangeMatcher,
         increment, decrement}

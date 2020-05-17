@@ -1,4 +1,4 @@
-import {float_to_frac, frac_to_float, rangeMatcher, rangeMatcherString, numberMatcher, numMatchString, increment, decrement, parse_amount} from './Numbers.js'
+import {floatToFrac, fracToFloat, rangeMatcher, rangeMatcherString, numberMatcher, numMatchString, increment, decrement, parseAmount} from './numbers.js'
 
 it(
     'Number Matchers',
@@ -54,32 +54,32 @@ it(
 it(
     'Words to numbers',
     ()=>{
-        expect(frac_to_float('two')).toEqual(2);
-        expect(frac_to_float('three')).toEqual(3);
-        expect(frac_to_float('a half')).toEqual(0.5);
-        expect(frac_to_float('nine')).toEqual(9);
-        expect(frac_to_float('ten')).toEqual(10);
-        expect(frac_to_float('seventeen')).toEqual(17);
-        expect(frac_to_float('thirtyseven')).toEqual(37);
-        expect(frac_to_float('twenty four')).toEqual(24);
-        expect(frac_to_float('forty-eight')).toEqual(48);
-        expect(frac_to_float('ninety-two')).toEqual(92);
+        expect(fracToFloat('two')).toEqual(2);
+        expect(fracToFloat('three')).toEqual(3);
+        expect(fracToFloat('a half')).toEqual(0.5);
+        expect(fracToFloat('nine')).toEqual(9);
+        expect(fracToFloat('ten')).toEqual(10);
+        expect(fracToFloat('seventeen')).toEqual(17);
+        expect(fracToFloat('thirtyseven')).toEqual(37);
+        expect(fracToFloat('twenty four')).toEqual(24);
+        expect(fracToFloat('forty-eight')).toEqual(48);
+        expect(fracToFloat('ninety-two')).toEqual(92);
     }
 );
 
 it(
     'Float to frac',
     ()=>{
-        expect(float_to_frac(0.5)).toEqual('\u00BD')
-        expect(float_to_frac(0.5,{unicodeFractions:false})).toEqual('1/2')
+        expect(floatToFrac(0.5)).toEqual('\u00BD')
+        expect(floatToFrac(0.5,{unicodeFractions:false})).toEqual('1/2')
     },
 );
 it(
     'Frac to float',
     ()=>{
-        expect(frac_to_float('2/3')).toBeCloseTo(0.666)
-        expect(frac_to_float('5 2/3')).toBeCloseTo(5.666)
-        expect(frac_to_float('2/')).toBeNaN()
+        expect(fracToFloat('2/3')).toBeCloseTo(0.666)
+        expect(fracToFloat('5 2/3')).toBeCloseTo(5.666)
+        expect(fracToFloat('2/')).toBeNaN()
     },
 );
 it(
@@ -104,31 +104,34 @@ it(
 );
 
 it(
-    'parse_amount',
+    'parseAmount',
     ()=>{
-        let a = parse_amount('1 1/2 cups');
+        let a = parseAmount('1 1/2 cups');
         expect(a.amount).toEqual(1.5);
         expect(a.posttext).toEqual(' cups');
-        a = parse_amount('2 cups');
+        a = parseAmount('2 cups');
         expect(a.amount).toEqual(2)
         expect(a.posttext).toEqual(' cups')
-        a = parse_amount('2 to 3 cups');
+        a = parseAmount('2 to 3 cups');
         expect(a.amount).toEqual(3)
         expect(a.rangeAmount).toEqual(2)
         expect(a.posttext).toEqual(' cups')
-        a = parse_amount('about 2 1/2 to four pints');
+        a = parseAmount('about 2 1/2 to four pints');
         expect(a.rangeAmount).toEqual(2.5)
         expect(a.amount).toEqual(4)
         expect(a.pretext).toEqual('about ')
         expect(a.posttext).toEqual(' pints')
-        a = parse_amount('maybe ten or twelve eggs');
+        a = parseAmount('maybe ten or twelve eggs');
         expect(a.rangeAmount).toEqual(10)
         expect(a.amount).toEqual(12)
         expect(a.pretext).toEqual('maybe ')
         expect(a.posttext).toEqual(' eggs')
-        a = parse_amount('three dozen chicken');
+        a = parseAmount('three dozen chicken');
         expect(a.amount).toEqual(3)
         expect(a.posttext).toEqual(' dozen chicken');
-
+        debugger;
+        a = parseAmount('something that really has no amount');
+        expect(a.amount).toEqual(undefined)
+        expect(a.posttext).toEqual('something that really has no amount');
     }
 );

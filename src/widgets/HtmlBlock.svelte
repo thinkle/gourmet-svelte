@@ -5,7 +5,7 @@
  let parsed
  let components = []
  
- function crawlNode (node) {
+ function crawlNode (node) {*
      if (markupToComponentMap[node.tagName]) {
 	 components.push({node,type:markupToComponentMap[node.tagName]
 			 })

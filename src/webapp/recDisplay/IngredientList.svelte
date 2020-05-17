@@ -8,7 +8,7 @@
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
- import {float_to_frac} from '../../utils/Numbers.js';
+ import {floatToFrac} from '../../utils/numbers.js';
  import {onMount} from 'svelte';
  let recipeChanges = getContext('recipeChanges');
 
@@ -81,7 +81,7 @@
                                 {:else}
                                     <NumberUnitDisplay  mode="table" value={ii.amount}/>
                                     
-	                            <!-- <span bind:clientWidth={ii.awidth} class='amount'>{ii.amount.amount&&float_to_frac(ii.amount.amount)||''}</span>
+	                            <!-- <span bind:clientWidth={ii.awidth} class='amount'>{ii.amount.amount&&floatToFrac(ii.amount.amount)||''}</span>
 	                                 <span bind:clientWidth={ii.uwidth} class='unit'>{ii.amount.unit||''}</span> -->
 
 	                            <span bind:clientWidth={ii.iwidth} class='item'>{ii.text}</span>
@@ -105,7 +105,7 @@
                         </button>
                     {:else}
                         <NumberUnitDisplay mode="table" value={i.amount}/>
-	                <!-- <span bind:clientWidth={i.awidth} class='amount'>{i.amount.amount&&float_to_frac(i.amount.amount)||''}</span>
+	                <!-- <span bind:clientWidth={i.awidth} class='amount'>{i.amount.amount&&floatToFrac(i.amount.amount)||''}</span>
 	                     <span bind:clientWidth={i.uwidth} class='unit'>{i.amount.unit||''}</span> -->                        
 	                <span bind:clientWidth={i.iwidth} class='item'>{i.text}</span>
                     {/if}

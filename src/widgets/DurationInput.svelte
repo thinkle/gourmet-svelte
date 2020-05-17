@@ -1,8 +1,8 @@
 <script>
  import {onMount} from 'svelte';
- import Timer from '../utils/TimerDrawer.js';
- import Times from '../utils/Times.js';
- import {getAngle,deg} from '../utils/TrigHelper.js'
+ import Timer from '../utils/timerDrawer.js';
+ import Times from '../utils/times.js';
+ import {getAngle,deg} from '../utils/trigHelper.js'
  export let value
  export let timerSize=50
  export let minimal=false;

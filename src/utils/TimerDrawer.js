@@ -1,5 +1,5 @@
-import Times from './Times.js';
-import {rad,ccoord} from './TrigHelper.js';
+import Times from './times.js';
+import {rad,ccoord} from './trigHelper.js';
 
 
 function Timer ({ctx,timerSize,

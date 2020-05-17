@@ -1,4 +1,4 @@
-import Times from './Times.js';
+import Times from './times.js';
 
 it(
     'Time matcher',

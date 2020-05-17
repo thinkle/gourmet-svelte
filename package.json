@@ -6,7 +6,9 @@
     "dev": "rollup -c -w",
     "start": "sirv public --single",
     "test-one": "jest",
-    "test": "jest --watch"
+      "test": "jest --watch",
+      "test:debug":"node --inspect node_modules/.bin/jest --runInBand ",
+      "test:debug-brk":"node --inspect-brk node_modules/.bin/jest --runInBand "
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",

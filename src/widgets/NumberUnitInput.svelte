@@ -1,7 +1,7 @@
 <script>
  import { createEventDispatcher, setContext, getContext } from 'svelte';
  import AmountInput from './AmountInput.svelte';
- import {float_to_frac} from '../utils/Numbers.js';
+ import {floatToFrac} from '../utils/numbers.js';
  export let mode='inline'
  const dispatch = createEventDispatcher();
  // name and url
@@ -36,7 +36,7 @@
     <AmountInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={value.amount}/>
     <i>
         {#if multipliable && $multiplier!=1}
-            (&times;{float_to_frac($multiplier)}={float_to_frac(value.amount*$multiplier)})
+            (&times;{floatToFrac($multiplier)}={floatToFrac(value.amount*$multiplier)})
         {/if}
     </i>
 </div>
