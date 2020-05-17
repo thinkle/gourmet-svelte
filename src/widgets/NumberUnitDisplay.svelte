@@ -1,25 +1,17 @@
 <script>
- import {floatToFrac} from '../utils/numbers.js';
+ import {formatAmount} from '../utils/numbers.js';
  export let value
  export let mode='inline'
  export let multipliable=true
 
  import {getContext} from 'svelte';
  let multiplier = getContext('multiplier')
-
- let displayAmount
- $: {
-     if (multipliable) {
-         displayAmount = value && value.amount && value.amount * $multiplier
-     }
-     else {
-         displayAmount = value && value.amount
-     }
- }
-
+ console.log('Formatting',value);
 </script>
 
-<span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>{floatToFrac(displayAmount)}</span>
+<span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>
+    {formatAmount(value,{multiplier:$multiplier})}
+</span>
 &nbsp;
 <span class:table={mode=='table'} class="unit" >{value.unit||''}</span>
 
