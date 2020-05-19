@@ -125,7 +125,7 @@ it(
 );
 
 
-xit(
+it(
     'Full Sample Recipe',
     ()=>{
         let result = parseChunks(sampleParse,{url:'https://cooking.nytimes.com/recipes/1020045-coconut-miso-salmon-curry'})
