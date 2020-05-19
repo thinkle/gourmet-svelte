@@ -22,7 +22,10 @@
      visible = false;
      getRoot().style.width = '100%'
  }
- export let url = 'http://localhost:51312/sidebar';// '//localhost:5000';
+ let url
+ let port = 59181
+$: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
+ 
 </script>
 <link
     href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons&display=swap"
@@ -35,7 +38,7 @@
             <h2>Gourmet</h2>
             <span style="margin-left: auto"><IB on:click={minimize}>chevron_right</IB>
         </div>
-        <input bind:value={url}>
+        <input bind:value={port}>
         <iframe title="Gourmet Sidebar" src={url} id="{id}">
             No frame loaded?
         </iframe>

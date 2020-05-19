@@ -1,6 +1,6 @@
 import Metadata from '../common/RecDef.js';
-import {handleContentRequest} from './parser/backgroundParser.js';
-
+import {addTags,addTag} from './parser/backgroundParser.js';
+import {contentParsePage,contentParseSelection} from './messaging/parsing.js';
 /* Create context menu for marking up data */
 function init () {
 
@@ -8,21 +8,10 @@ function init () {
         title:'Gourmet Parse Recipe',
         id:'gourmet-top-page',
         contexts:['page'],
-        onclick: (info,tabInfo)=>{
+        onclick: async (info,tabInfo)=>{
             console.log('Clicked "Parse"!')
-            chrome.tabs.sendMessage(
-                tabInfo.id,
-                {action:'parsePage'},
-                function (response) {
-                    console.log('Got response',response);
-                    handleContentRequest(
-                        {action:'addTags',
-                         message:response},
-                        {tab:tabInfo},
-                        ()=>{}
-                    );
-                }
-            );
+            let tags = await contentParsePage.send(undefined,tabInfo);
+            addTags(tabInfo.id,tags)
         }   
     });
         
@@ -52,25 +41,12 @@ function init () {
     }
 
 
-    function makeParseCallback (part) {
-        return (info,tabInfo)=>{
-            console.log('Gourmet %s: %s',part, JSON.stringify(info));
+    function makeParseCallback (tag) {
+        return async (info,tabInfo)=>{
+            console.log('Gourmet %s: %s',tag, JSON.stringify(info));
             console.log('tabInfo %s',JSON.stringify(tabInfo));
-            chrome.tabs.sendMessage(
-                tabInfo.id,
-                {action:'parseSelection',
-                 part:part},
-                function (response) {
-                    console.log('Got response back from content script!',response);
-                    // register this with parser...
-                    handleContentRequest(
-                        {'action':'addTag',
-                         message:response},
-                        {tab:tabInfo},
-                        ()=>{}
-                    );
-                }
-            );
+            const tagData = await contentParseSelection.send(tag,tabInfo)
+            addTag(tabInfo.id,tagData)
         }
     }
 

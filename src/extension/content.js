@@ -2,20 +2,24 @@ import Parser from './parser/recipeParser.js';
 import tagger from './parser/tagger.js';
 const parser = Parser(tagger.tagElement);
 
-chrome.extension.onMessage.addListener(
-    (msg,sender,sendResponse) => {
-        if (tagger.listenForParseMessage(msg,sender,sendResponse)) {
-            console.log('tagger handled message')
-        }
-        else if (parser.listenForParseMessage(msg,sender,sendResponse)) {
-            console.log('parser handled message');
-        }
-        else {
-            console.log('Got some other message');
-            console.log('UNHANDLED MESSAGE',msg);
-        }
+console.log('Extension last built at BUILD_TIME')
 
-    });
+// chrome.extension.onMessage.addListener(
+//     (msg,sender,sendResponse) => {
+//         if (tagger.listenForParseMessage(msg,sender,sendResponse)) {
+//             console.log('tagger handled message')
+//         }
+//         else if (parser.listenForParseMessage(msg,sender,sendResponse)) {
+//             console.log('parser handled message');
+//         }
+//         else {
+//             console.log('Got some other message');
+//             console.log('UNHANDLED MESSAGE',msg);
+//         }
+
+//     });
+tagger.listen();
+parser.listen();
 
 function testParser () {
     parser.maybe_add('.detail__header--text','title');
