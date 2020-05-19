@@ -4,6 +4,8 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import json from 'rollup-plugin-json';
+import replace from 'rollup-plugin-replace';
+
 import { terser } from 'rollup-plugin-terser';
 
 
@@ -20,6 +22,10 @@ export default [
         },
         plugins: [
             json(),
+            replace({
+                BUILD_TIME : new Date()+'',
+                BUILD_MS : new Date().getTime(),
+            }),
 	    svelte({
 	        // enable run-time checks when not in production
 	        dev: !production,
@@ -75,7 +81,13 @@ export default [
             format : 'iife',
             name : 'extension',
             file : 'extension/background.js',
-        }
+        },
+        plugins : [
+            replace({
+                BUILD_TIME : new Date()+'',
+                BUILD_MS : new Date().getTime(),
+            }),
+        ]
     },
     {
         input : 'src/extension/content.js',
@@ -92,6 +104,10 @@ export default [
 	        // we'll extract any component CSS out into
 	        // a separate file  better for performance
 	    }),
+            replace({
+                BUILD_TIME : new Date()+'',
+                BUILD_MS : new Date().getTime(),
+            }),
             resolve({
 	        browser: true,
 	        dedupe: ['svelte']
