@@ -6,7 +6,6 @@
  export let value;
  export let showPlusMinusButtons=false
  let useUnicode = true;
- 
  let displayValue;
  $: displayValue = floatToFrac(value,{unicodeFractions:useUnicode});
  
@@ -18,7 +17,6 @@
      value = fracToFloat(displayValue);
      dispatch('change',value);
  }
-
 
  function doIncrement () {
      value = increment(value);
