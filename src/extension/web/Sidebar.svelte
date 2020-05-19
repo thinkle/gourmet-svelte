@@ -1,41 +1,40 @@
 <script>
- let chromeExtensionId = 'aaaloblfbkmkhcpbandokicnfpifbmlj'
-                         //'aaaloblfbkmkhcpbandokicnfpifbmlj'
- let messagePromise;
+ import {onMount} from 'svelte';
+ import {extensionUrl} from './messages.js';
+ import {backgroundGetPageInfo} from '../messaging/parsing.js';
+ import SidebarImport from './SidebarImport.svelte';
+ 
+ let messagePromise
 
- const talkToChrome = () => {
-     messagePromise = new Promise((resolve,reject)=>{
-         chrome.runtime.sendMessage(
-             chromeExtensionId,
-             {message:'hello',
-             origin:'sidebar'},
-             (response)=>{
-                 if (response) {
-                     console.log('Got response',response);
-                     resolve(response);
-                 }
-                 else {
-                     console.log('Error talking to chrome',chrome.runtime.lastError);
-                     reject(chrome.runtime.lastError)
-                 }
-             }
-         );
-     });
+ function doGet () {
+     messagePromise = backgroundGetPageInfo.send(null);
  }
+
+ onMount(doGet)
+
+ let now = new Date().getTime()
+ let longAgo = (now - BUILD_MS)/(1000 * 60)
 </script>
 
-<h2>Hello World</h2>
+<h2>Hello World BUILD_TIME {longAgo} minutes ago</h2>
 <p>This is a sidebar</p>
-<button on:click="{talkToChrome}">Talk to the extension</button>
+
 {#if messagePromise}
     {#await messagePromise}
-        Talking to the google...
-    {:then json}
-        Cool: got data {json}
+        <p>One second...</p>
+        <p>Impatient? Give it <a on:click={doGet}>a kick</a></p>
+    {:then pageInfo}
+        <SidebarImport pageInfo={pageInfo} />
+        Cool: got data {pageInfo}
         Stringify?
-        {JSON.stringify(json)}
+        {JSON.stringify(pageInfo)}
     {:catch error}
-        Bummer: error: {error}
+        <p>Error connecting. Perhaps you haven't installed the
+        Chrome Extension? (in which case, I'm not sure how
+            you have arrived at this page).</p>
+        <p>Visit <a href={extensionUrl}>our extension page</a>
+            to download the latest extension</p>
+        {JSON.stringify(error)}
     {/await}
 {/if}
 
