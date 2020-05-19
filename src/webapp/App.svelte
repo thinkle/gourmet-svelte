@@ -4,7 +4,7 @@
  import Recipe from './recDisplay/Recipe.svelte';
  import RecipeList from './recDisplay/RecipeList.svelte';
  import Demo from './Demo.svelte';
- import Sidebar from './Sidebar.svelte';
+ import Sidebar from '../extension/web/Sidebar.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
 
