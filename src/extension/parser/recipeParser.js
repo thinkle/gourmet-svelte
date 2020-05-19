@@ -1,3 +1,5 @@
+import {contentParsePage} from '../messaging/parsing.js';
+
 const defaultParsers = [
     {selector:'h1',tag:'title'},
     {selector:'.tag',tag:'category'},
@@ -119,16 +121,10 @@ function Parser (addTag) {
             }
         },
 
-        listenForParseMessage (msg, sender, sendResponse) {
-            if (msg.action=='parsePage') {
-                console.log('autoparse!');
-                debugger;
-                let results = self.auto_parse()
-                sendResponse(results);
-                return true
-            }
-        }
     }
+
+    self.listen = ()=>{contentParsePage.receive(() => self.auto_parse());}
+    
     return self;
 }
 

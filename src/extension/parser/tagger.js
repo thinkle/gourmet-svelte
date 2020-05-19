@@ -7,7 +7,11 @@
  */
 import Highlight from './Highlight.svelte';
 import {tagClassname} from './metadata.js';
-import {addChild} from './actions.js';
+import {backgroundAddChild} from '../messaging/tags.js';
+import {contentParseSelection,
+        contentGetPageInfo,
+        contentClearAll,
+        contentClearOne} from '../messaging/parsing.js';
 let highlights = {}
 window.highlights = highlights
 
@@ -47,6 +51,7 @@ var Tagger = function () {
 
     function tagElement (el, tagname, content, detail) {
         markupId += 1;
+        let id = salt + markupId
         let h = new Highlight({
             target:el.parentElement,
             anchor:el,
@@ -55,14 +60,14 @@ var Tagger = function () {
                 targetContent:content,
                 name:tagname,
                 detail:detail,
-                id:salt+markupId
+                id:id
             }
         })
         highlights[markupId] = h;
         let children = checkForChildren(h.ref)
         lookForParent(el);
         return {
-            id:salt+markupId,
+            id:id,
             html:content&&getHtmlFromDocumentFragment(content)||el.innerHTML,
             tag:tagname,
             text:el.textContent,
@@ -72,10 +77,9 @@ var Tagger = function () {
         }
 
         function checkForChildren (node, children=[]) {
-            debugger;
             if (node.children) {
                 for (let child of node.children) {
-                    if (child && child.classList.contains(tagClassname)) {
+                    if (child && child.classList.contains(tagClassname) && child.id != id) {
                         children.push(child.id)
                     }
                     else if (child) {
@@ -87,24 +91,27 @@ var Tagger = function () {
         }
         
         function lookForParent (node) {
-            if (node.parentElement.classList.contains(tagClassname)) {
+            if (node.parentElement.classList.contains(tagClassname) && node.parentElement.id != id) {
                 // Add!
                 console.log('Found a parent!',node.parentElement.id)
-                addChild(node.parentElement.id,salt+markupId);
+                backgroundAddChild.send(node.parentElement.id,id);
             }
             else if (node.parentElement && node.parentElement.parentElement) {
                 lookForParent(node.parentElement);
             }
         }
 
-
-
-
-
     }
 
-    
+    function clearAll () {
+        for (let hcomponent of Object.values(highlights)) {
+            hcomponent.remove();
+        }
+    }
 
+    function clear (id) {
+        highlights[id].remove();
+    }
 
     function getHtmlFromDocumentFragment (fragment) {
         // https://stackoverflow.com/questions/36653316/get-innerhtml-of-document-fragment-instead-of-textcontent
@@ -134,28 +141,35 @@ var Tagger = function () {
         }
     }
 
+    function getPageInfo () {
+        return {
+                url : location.href,
+                host: location.hostname,
+                title : document.title
+        }
+    }
+    function listen () {
+        contentParseSelection.receive((tag)=>markupAndGetSelection(tag));
+        contentGetPageInfo.receive(()=>getPageInfo());
+        console.log('Establish clearAll listener');
+        contentClearAll.receive(
+            ()=>{
+                console.log('CLEAR ALL!');
+                clearAll()
+            }
+        );
+        contentClearOne.receive((id)=>clear(id));
+    }
     // Interface we expose...
     return {
         //tagClass,
+        getPageInfo,
         markupAndGetSelection,
         tagElement,
-        listenForParseMessage : (msg,sender,sendResponse) => {
-            console.log('Got message! %s',JSON.stringify(msg));
-            if (msg.action=='parseSelection') {
-                console.log('time to parse... %s',msg.part);
-                var parsed = markupAndGetSelection(msg.part)
-                var resp = {
-                    id:parsed.id,
-                    part:msg.part,
-                    parsed:parsed
-                }
-                console.log('Sending response: %s',JSON.stringify(resp));
-                sendResponse(resp);
-                return true
-            }
-        },
-
-
+        clearAll,
+        clear,
+        highlights,
+        listen,
     }
 }
 

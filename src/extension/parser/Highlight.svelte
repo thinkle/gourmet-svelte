@@ -1,6 +1,6 @@
 <script>
  import Tag from './Tag.svelte';
- import {updateTag,removeTag} from './actions.js';
+ import {backgroundUpdateTag,backgroundRemoveTag} from '../messaging/tags.js';
  import ComponentSandbox from './ComponentSandbox.svelte';
  import {onMount} from 'svelte';
  export let name='?';
@@ -13,6 +13,10 @@
  let makeWay = false;
  import {tagClassname} from './metadata.js';
 
+ export function remove () {
+     zzgrmthighlight = false;
+ }
+
  onMount(
      ()=>{
          if (targetContent) {
@@ -24,16 +28,16 @@
      }
  );
  let zzgrmthighlight = true;
- function remove () {
-     zzgrmthighlight = false;
+ function doRemove () {
+     remove();
      try {
-         removeTag(id)
+         backgroundRemoveTag.send(id)
      }
      catch (err) {
          console.log("Are you testing? Can't send chrome message outside of extension")
-         console.log('Ignoring error',err)
-         console.log('Removing tag...')
-     }
+ console.log('Ignoring error',err)
+ console.log('Removing tag...')
+ }
 
  }
  let lastTag = name
@@ -42,15 +46,16 @@
  }
  function updateTagname () {
      console.log('Update tag',name)
-     updateTag(id,name)
+     backgroundUpdateTag.send({id,tag:name})
  }
 
  function updateContents (event) {
      console.log('Update',event.target.innerHTML);
-     updateTag(id,part,{
+     backgroundupdateTag.send({
+         id,tag,
          html:event.target.innerHTML,
          text:event.target.textContent
-     })
+     });
  }
  
 
@@ -68,19 +73,19 @@
 
 </script>
 
-<div class={tagClassname} class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
+<div class:zzgrmthighlighterblock={true} class={tagClassname} class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
     <span contenteditable={zzgrmthighlight} on:input={updateContents}  bind:this={ref} on:blur={()=>makeWay=false}>
     </span>
     <div bind:this={tagElement} class="zzgrmttag">
         <ComponentSandbox onResize={onResize}
         >
-            <Tag  bind:name={name}  bind:detail={detail} onRemove={remove}/>
+            <Tag  bind:name={name}  bind:detail={detail} onRemove={doRemove}/>
         </ComponentSandbox>
     </div>
 </div>
 
 <style>
- .zzgrmthighlight {
+ .zzgrmthighlighterblock {
      display: inline-block;
      padding : 0;
      margin : 0;
