@@ -1,4 +1,5 @@
 import {contentParsePage} from '../messaging/parsing.js';
+import {recipeSchemaSelector,importer} from './recipeSchema.js'
 
 const defaultParsers = [
     {selector:'h1',tag:'title'},
@@ -7,6 +8,10 @@ const defaultParsers = [
     {selector:'.ingredient',tag:'ingredient'},
     {selector:'.ing',tag:'ingredient'},
 ];
+
+const bySelector = {
+    [recipeSchemaSelector] : importer,    
+}
 
 const byDomain = {
     'cooking.nytimes.com':[
@@ -28,8 +33,9 @@ const byDomain = {
         {selector:'.byline',tag:'source'},
         {selector:'[itemProp="recipeYield"]',tag:'yield'},
         {selector:'.recipe-ingredients-wrap .part-name',tag:'inggroup'},
+        {selector:'.recipe-ingredients li',tag:'ingredient'},
+        {selector:'.ingredient-name',tag:'ingredientText'},
         {selector:'.quantity',tag:'amount'},
-        {selector:'.ingredient-name',tag:'ingredient'},
         {selector:'[itemprop="recipeInstructions"]',tag:'text',detail:'Instructions'},
         {selector:'.recipe-notes',tag:'footnote'},
         {selector:'.topnote',tag:'text'},
@@ -83,10 +89,31 @@ const byDomain = {
 function Parser (addTag) {
     var self = {
         
+        getParserBySelector () {
+            for (let selector in bySelector) {
+                if (document.querySelector(selector)) {
+                    return bySelector[selector]
+                }
+            }
+        },
+
         auto_parse : function () {
             self.results = [];
             var domain = document.domain;
-            var parsers = byDomain[domain]||defaultParsers;
+            let parsers;
+            if (byDomain[domain]) {
+                parsers = byDomain[domain]
+                console.log('Got custom parser for domain');
+            }
+            else {
+                parsers = self.getParserBySelector();
+                if (parsers) {
+                    console.log("Got parser by selector!");
+                }
+            }
+            if (!parsers) {
+                parsers = defaultParsers
+            }
             parsers.forEach((parser)=>{
                 self.maybe_add(parser)
             });
@@ -107,15 +134,15 @@ function Parser (addTag) {
                 for (let result of results) {
                     console.log('Tag',result,tag,detail)
                     self.results.push(
-                        addTag(result,tag,detail)
-                    )
+                            addTag(result,tag,undefined,detail)
+                    );
                 }
             }
             if (selector) {
                 document.querySelectorAll(selector).forEach(function (el) {
                     console.log('Tag',el,tag,detail)
                     self.results.push(
-                        addTag(el,tag,detail)
+                        addTag(el,tag,undefined,detail)
                     );
                 });
             }
