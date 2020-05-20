@@ -18,7 +18,8 @@ window.highlights = highlights
 var Tagger = function () {
     var markupId = 0;
     var salt = 'oiweras0';
-
+    var delayed = []
+    
     function getNodePath (node, addressList) {
         // Given a node with parents, we crawl the whole document...
         // and return our position...
@@ -49,33 +50,43 @@ var Tagger = function () {
         return path.join('-');
     }
 
-    function tagElement (el, tagname, content, detail) {
+    function tagElement (el, tagname, content, detail, delayHighlight=false) {
         markupId += 1;
+        let nodeAddress = getNodeAddress(el)
         let id = salt + markupId
-        let h = new Highlight({
-            target:el.parentElement,
-            anchor:el,
-            props:{
-                targetNode:el,
-                targetContent:content,
-                name:tagname,
-                detail:detail,
-                id:id
-            }
-        })
-        highlights[markupId] = h;
-        let children = checkForChildren(h.ref)
-        lookForParent(el);
-        return {
+        const doHighlight = () => {
+            let h = new Highlight({
+                target:el.parentElement,
+                anchor:el,
+                props:{
+                    targetNode:el,
+                    targetContent:content,
+                    name:tagname,
+                    detail:detail,
+                    address:nodeAddress,
+                    id:id
+                }
+            })
+            highlights[markupId] = h;
+            let children = checkForChildren(h.ref)
+            lookForParent(el);
+        }
+        let tag = {
             id:id,
-            html:content&&getHtmlFromDocumentFragment(content)||el.innerHTML,
+            html:content&&getHtmlFromDocumentFragment(content)||el.outerHTML,
             tag:tagname,
             text:el.textContent,
-            children,
             detail,
-            address : getNodeAddress(el)
+            address : nodeAddress
         }
-
+        if (!delayHighlight) {
+            doHighlight();
+        }
+        else {
+            delayed.push(doHighlight)
+        }
+        return tag;
+        
         function checkForChildren (node, children=[]) {
             if (node.children) {
                 for (let child of node.children) {
@@ -86,6 +97,9 @@ var Tagger = function () {
                         checkForChildren(child,children)
                     }
                 }
+            }
+            for (let child of children) {
+                backgroundAddChild.send({parent:id,child:id});
             }
             return children;
         }
@@ -162,6 +176,15 @@ var Tagger = function () {
         );
         contentClearOne.receive((id)=>clear(id));
     }
+
+    function finishTagging () {
+        let next = delayed.pop();
+        next();
+        if (delayed.length > 0) {
+            setTimeout(finishTagging,0);
+        }
+    }
+
     // Interface we expose...
     return {
         //tagClass,
@@ -172,6 +195,7 @@ var Tagger = function () {
         clear,
         highlights,
         listen,
+        finishTagging
     }
 }
 
