@@ -99,18 +99,18 @@
 
 <div style={`width:${size*1.25}px`}>
     {#if state==INITIAL}
-        <span class="topright"><IB inverse={editMode} on:click="{edit}">edit</IB></span>
+        <span class="topright"><IB inverse={editMode} on:click="{edit}" bare={true} icon="edit"></IB></span>
     {/if}
     {#if editMode}
         <DurationInput minimal={true} timerSize={size} value={{seconds:duration}} on:change={updateDuration}/>
     {:else}
         {#if state==PAUSED||timeLeft<0}
-            <span class="topleft"> <IB on:click="{reset}">replay</IB></span>
+            <span class="topleft"> <IB on:click="{reset}" bare={true} icon="replay"></IB></span>
         {/if}
         {#if state==GOING}
-            <IB on:click="{pause}">pause_circle_filled</IB>
+            <IB on:click="{pause}" bare={true} icon="pause_circle_filled"></IB>
         {:else}
-            <IB on:click="{resume}">play_circle_filled</IB>
+            <IB on:click="{resume}" bare={true} icon="play_circle_filled"></IB>
         {/if}
     {/if}
     <canvas class:hidden={editMode}  on:click={toggleTimer} width="{size}"  height="{size}" bind:this={canv}/>
