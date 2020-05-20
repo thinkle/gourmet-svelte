@@ -94,7 +94,7 @@ var Tagger = function () {
             if (node.parentElement.classList.contains(tagClassname) && node.parentElement.id != id) {
                 // Add!
                 console.log('Found a parent!',node.parentElement.id)
-                backgroundAddChild.send(node.parentElement.id,id);
+                backgroundAddChild.send({parent:node.parentElement.id,child:id});
             }
             else if (node.parentElement && node.parentElement.parentElement) {
                 lookForParent(node.parentElement);
@@ -107,10 +107,12 @@ var Tagger = function () {
         for (let hcomponent of Object.values(highlights)) {
             hcomponent.remove();
         }
+        return true;
     }
 
     function clear (id) {
         highlights[id].remove();
+        return true;
     }
 
     function getHtmlFromDocumentFragment (fragment) {
@@ -155,7 +157,7 @@ var Tagger = function () {
         contentClearAll.receive(
             ()=>{
                 console.log('CLEAR ALL!');
-                clearAll()
+                return clearAll()
             }
         );
         contentClearOne.receive((id)=>clear(id));
