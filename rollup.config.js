@@ -24,7 +24,7 @@ export default [
             json(),
             replace({
                 BUILD_TIME : ()=>new Date()+'',
-                BUILD_MS : new Date().getTime(),
+                BUILD_MS : ()=>new Date().getTime(),
             }),
 	    svelte({
 	        // enable run-time checks when not in production
@@ -78,8 +78,8 @@ export default [
         },
         plugins : [
             replace({
-                BUILD_TIME : new Date()+'',
-                BUILD_MS : new Date().getTime(),
+                BUILD_TIME : ()=>new Date()+'',
+                BUILD_MS : ()=>new Date().getTime(),
             }),
         ]
     },
@@ -99,8 +99,8 @@ export default [
 	        // a separate file  better for performance
 	    }),
             replace({
-                BUILD_TIME : new Date()+'',
-                BUILD_MS : new Date().getTime(),
+                BUILD_TIME : ()=>new Date()+'',
+                BUILD_MS : ()=>new Date().getTime(),
             }),
             resolve({
 	        browser: true,
