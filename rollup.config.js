@@ -23,7 +23,7 @@ export default [
         plugins: [
             json(),
             replace({
-                BUILD_TIME : new Date()+'',
+                BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : new Date().getTime(),
             }),
 	    svelte({
@@ -48,14 +48,8 @@ export default [
 
 	    commonjs(),
             builtins(),
-	    // In dev mode, call `npm run start` once
-	    // the bundle has been generated
 	    !production && serve(),
-
-	    // Watch the `public` directory and refresh the
-	    // browser on changes when not in production
-	    !production && livereload('public'),
-
+            !production && livereload('public'),
 	    // If we're building for production (npm run build
 	    // instead of npm run dev), minify
 	    production && terser()
@@ -111,7 +105,21 @@ export default [
             resolve({
 	        browser: true,
 	        dedupe: ['svelte']
-	    })
+	    }),
+	    commonjs(),
+            builtins(),
+	    // In dev mode, call `npm run start` once
+	    // the bundle has been generated
+
+
+	    // Watch the `public` directory and refresh the
+	    // browser on changes when not in production
+	    //!production && livereload('extension'),
+
+	    // If we're building for production (npm run build
+	    // instead of npm run dev), minify
+	    production && terser()
+            
 
         ],
 
