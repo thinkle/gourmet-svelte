@@ -167,11 +167,11 @@ var Metadata = {
          edit:DUR,
         },
         {name:'text',
-         label:'text',
+         label:'',
          array:true,
          summaryView:false,
          testValue:[{header:'Instructions',body:'This is a bunch of <b>text</b'}],
-         toHtml:(s)=>s,
+         toHtml:(s)=>s.header&&`<h3>${s.header}</h3>\n${s.body}`||s.body,
          empty:[],
          edit:RCH}
     ],
