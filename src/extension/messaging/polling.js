@@ -16,7 +16,6 @@ export function listenForConnections () {
             console.log('GOT EXTERNAL CONNECTION!')
             if (port.name=='poll') {
                 console.log('SET UP POLL EXTERNAL CONNECTION!')
-                debugger;
                 port.onMessage.addListener(
                     (msg)=>{console.log('Weird, we got a message from the webpage via polling -- we have not implemented that')}
                 );
