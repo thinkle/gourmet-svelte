@@ -13,6 +13,8 @@
  let oneLiner = true;
  let justHadFocus;
  let selection;
+
+ $: if (!value) {value = ''}
  
  $: if (justHadFocus && selection && ref.tagName != selection.origin) {
      justHadFocus = false;
