@@ -31,11 +31,11 @@
 
 </script>
 <span>
-    <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue}>add</IB></span>
+    <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue} bare={true} icon="add"></IB></span>
     <span>
         {#each value as v}
             <span class="tag">{v.name}
-                <IB on:click={()=>remove(v)}>close</IB>
+                <IB on:click={()=>icon=move(v)} bare={true} icon="close"></IB>
             </span>
         {/each}
     </span>
