@@ -92,6 +92,7 @@ it(
                 unit:'servings'
             })
         );
+
         handleChunk({
             tag:'time',
             text:'30 minutes',
@@ -117,6 +118,25 @@ it(
                 text:'Total time 1 1/2 hours',
                 seconds:60*60*1.5,
                 label:'Total Time'
+            })
+        );
+
+        handleChunk({
+            address: "00001-00001-00005-00001-00000-00001-00001-00081-00003-00001-00002-00000-00000",
+            children: [],
+            detail: "Cook Time",
+            html: '<time class="cookbook-element-wrapper cookbook-element-wrapper-total-time" itemprop="totalTime" datetime="PT1H25M"><span class="cookbook-element-content cookbook-element-content-total-time"><span class="cookbook-time-value cookbook-time-value-hours">1</span> <span class="cookbook-time-label cookbook-time-label-hours">hour</span>, <span class="cookbook-time-value cookbook-time-value-minutes">25</span> <span class="cookbook-time-label cookbook-time-label-minutes">mins</span></span></time>',
+            id: "oiweras05",
+            tag: "time",
+            text: "1 hour, 25 mins",
+        },{},recipe);
+        console.log('Got recipe times:',recipe.times)
+        expect(recipe.times.length).toEqual(3);
+        expect(recipe.times[2]).toEqual(
+            expect.objectContaining({
+                text:'1 hour, 25 mins',
+                seconds:85*60,
+                label:'Cook Time'
             })
         );
 
