@@ -47,7 +47,15 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
         if (type=='content') {
             validate(tab,{id:1})
         }
-        validate(request,requestDef);
+        try {
+            validate(request,requestDef);
+        }
+        catch (err) {
+            err.context = this;
+            console.log(`send (${type},${name} called with invalid request`,request);
+            console.log('Expected request to match: ',requestDef);
+            throw err;
+        }
         console.log('Sending valid request',request);
         return sendMessage(type,request,name,tab,chatty);
     }
@@ -74,13 +82,20 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
             if (fullRequest.channelName == name) {
                 if (chatty) {console.log('receive got callback',name,type,fullRequest,sender)}
                 let response = receiveCallback(fullRequest.request,sender)
-                if (response.then) {
+                if (response && response.then) {
                     if (chatty) {console.log('async... awaiting response',response)}
                     response = await response
                     if (chatty) {console.log('async... got response',response)}
                 }
                 if (chatty) {console.log('validating response',response,responseDef)}
-                validate(response,responseDef);
+                try {
+                    validate(response,responseDef);
+                }
+                catch (err) {
+                    err.receiveCallback = receiveCallback;
+                    console.log('Callback ',receiveCallback,'produced invalid response',response);
+                    throw err;
+                }
                 if (chatty) {console.log('Sending valid response',response);}
                 sendResponse(response);
             }
