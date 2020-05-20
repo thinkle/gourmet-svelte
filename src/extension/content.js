@@ -1,6 +1,6 @@
 import Parser from './parser/recipeParser.js';
 import tagger from './parser/tagger.js';
-const parser = Parser(tagger.tagElement);
+const parser = Parser(tagger);
 
 console.log('Extension last built at BUILD_TIME')
 
