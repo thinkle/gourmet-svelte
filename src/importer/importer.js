@@ -2,7 +2,7 @@ import RecDef from '../common/RecDef.js'
 import {parseAmount} from '../utils/numbers.js';
 import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup} from './ingredientImporter.js';
-import handleTime from './timeImporter.js'
+import {handleTime} from './timeImporter.js'
 export function preprocessChunks (parsedChunks, context) {
     // since we're already iterating through the list, we'll make a
     // map while we're there
@@ -46,6 +46,8 @@ export function parseChunks (parsedChunks,context={}) {
     }
 
     preprocessChunks(parsedChunks, context); // get map
+
+    console.log('Importing chunks: ',parsedChunks);
 
     for (let chunk of parsedChunks) {
         context.localContext = handleChunk(chunk,context,recipe);
@@ -141,7 +143,7 @@ function handleSource (chunk, context, recipe) {
 }
 
 function handleText (chunk, context, recipe) {
-    if (chunk.children.length) {
+    if (chunk.children && chunk.children.length) {
         for (let childId of chunk.children) {
             let child = context.chunkMap[childId]
             if (child.tag=='text') {
