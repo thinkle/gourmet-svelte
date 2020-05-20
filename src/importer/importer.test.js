@@ -1,5 +1,6 @@
-import sampleParse from './parseData.js';
-import {parseChunks,handleChunk} from './importer.js';
+import sampleChunks from './parseData.js';
+import {sampleData} from './parseData.js';
+import {parseData,parseChunks,handleChunk} from './importer.js';
 import RecDef from '../common/RecDef.js';
 it(
     'Simple Chunks',
@@ -124,11 +125,22 @@ it(
     }
 );
 
-
 it(
+    'Full sample recipe with groups and nestedness and stuff',
+    ()=>{
+        console.log('full sample full full fullgroups and stuff!');
+        let result = parseData(sampleData);
+        console.log('Ingredients are:',
+                    result.ingredients.map((i)=>JSON.stringify(i))
+                   )
+    }
+    
+);
+
+xit(
     'Full Sample Recipe',
     ()=>{
-        let result = parseChunks(sampleParse,{url:'https://cooking.nytimes.com/recipes/1020045-coconut-miso-salmon-curry'})
+        let result = parseChunks(sampleChunks,{url:'https://cooking.nytimes.com/recipes/1020045-coconut-miso-salmon-curry'})
         console.log('Got result: ',result);
         expect(result).toEqual(
             expect.objectContaining({
