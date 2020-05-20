@@ -16,9 +16,7 @@
  let longAgo = (now - BUILD_MS)/(1000 * 60)
 </script>
 
-<h2>Hello World BUILD_TIME {longAgo} minutes ago</h2>
-<p>This is a sidebar</p>
-
+<pre>BUILD_TIME {longAgo} minutes ago</pre>
 {#if messagePromise}
     {#await messagePromise}
         <p>One second...</p>
@@ -34,15 +32,14 @@
             you have arrived at this page).</p>
         <p>Visit <a href={extensionUrl}>our extension page</a>
             to download the latest extension</p>
+        {#if error.message.indexOf('closed before')>-1}
+            {doGet()}
+        {/if}
         {JSON.stringify(error)}
     {/await}
 {/if}
 
 <style>
- .app {
-     margin: auto;
-     max-width: 1200px;
- }
  :root {
      --grey : #727272;
      --black : #efefef;
