@@ -12,7 +12,8 @@
  let tagElement
  let makeWay = false;
  import {tagClassname} from './metadata.js';
-
+ import _ from 'lodash';
+ 
  export function remove () {
      zzgrmthighlight = false;
  }
@@ -35,9 +36,9 @@
      }
      catch (err) {
          console.log("Are you testing? Can't send chrome message outside of extension")
- console.log('Ignoring error',err)
- console.log('Removing tag...')
- }
+         console.log('Ignoring error',err)
+         console.log('Removing tag...')
+     }
 
  }
  let lastTag = name
@@ -49,15 +50,26 @@
      backgroundUpdateTag.send({id,tag:name})
  }
 
- function updateContents (event) {
+ function updateText (event) {
      console.log('Update',event.target.innerHTML);
-     backgroundupdateTag.send({
-         id,tag,
+     backgroundUpdateTag.send({
+         id,
+         tag:name,
          html:event.target.innerHTML,
-         text:event.target.textContent
+         text:event.target.textContent,
      });
  }
+
+ function updateDetail () {
+     backgroundUpdateTag.send({
+         id,detail
+     })
+ }
+
+ const updateTextDebounced = _.debounce(e=>updateText(e),500);
+ const updateDetailDebounced = _.debounce(()=>updateDetail(),500);
  
+ $: { if (detail) {updateDetailDebounced()}}
 
  let tagWidth
  let tagHeight
@@ -74,7 +86,7 @@
 </script>
 
 <div class:zzgrmthighlighterblock={true} class={tagClassname} class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
-    <span contenteditable={zzgrmthighlight} on:input={updateContents}  bind:this={ref} on:blur={()=>makeWay=false}>
+    <span contenteditable={zzgrmthighlight} on:input={updateTextDebounced}  bind:this={ref} on:blur={()=>makeWay=false}>
     </span>
     <div bind:this={tagElement} class="zzgrmttag">
         <ComponentSandbox onResize={onResize}
