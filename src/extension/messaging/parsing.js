@@ -54,7 +54,7 @@ export const contentClearAll = new Channel({
     name:'clearAll',
     type:'content',
     requestDef:null,
-    responseDef:{},
+    responseDef:true,
     chatty:true,
 });
 
@@ -62,13 +62,13 @@ export const contentClearOne = new Channel({
     name:'clearOne',
     type:'content',
     requestDef:'id',
-    responseDef:{},
+    responseDef:true,
 });
 
 export const backgroundClearOne = new Channel({
     name:'clearOne',
     type:'background',
     requestDef:'id',
-    responseDef:{},
+    responseDef:true,
 });
 
