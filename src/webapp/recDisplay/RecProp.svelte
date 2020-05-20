@@ -6,6 +6,7 @@
  export let forceEdit=false;
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
+ import IconButton from '../../widgets/IconButton.svelte';
  import PlainInput from '../../widgets/PlainInput.svelte';
  import DurationInput from '../../widgets/DurationInput.svelte';
  import UrlInput from '../../widgets/UrlInput.svelte';
@@ -13,12 +14,15 @@
  import CategoryInput from '../../widgets/CategoryInput.svelte';
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte';
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
+ import TimeLink from '../../widgets/TimeLink.svelte';
+ import RecBlock from './RecBlock.svelte';
+
  let modes = RecDef.EditModes
  let recipeChanges = getContext('recipeChanges');
  let ref;
  const propInput = {
      [modes.TXT] : PlainInput,
-     [modes.RCH] : PlainInput,
+     [modes.RCH] : RecBlock,
      [modes.DUR] : DurationInput,
      [modes.CMB] : ComboInput,
      [modes.MCMB] : CategoryInput,
@@ -28,6 +32,7 @@
 
  const propDisplay = {
      [modes.NUMUNIT] : NumberUnitDisplay,
+     [modes.DUR] : TimeLink
  }
 
  var displayValue;
@@ -85,14 +90,10 @@
             <div class="top" >
                 <label on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !edit}
-                    <button class="edit icon" on:click={turnEditOn}>
-                        <i class="material-icons">edit</i>
-                    </button>
+                    <IconButton icon="edit" bare="true" on:click={turnEditOn}/>
                 {/if}
                 {#if edit && !forceEdit}
-                    <button class="icon" on:click={turnEditOff}>
-                        <i class="material-icons">done</i>
-                    </button>
+                    <IconButton icon="done" bare="true" on:click={turnEditOff}/>
                 {/if}
             </div>
         {/if}
@@ -101,24 +102,21 @@
                 {#if prop.array}
                     <div class="multiContainer">
                         {#each value as subval,n}
-                            <button class="icon"
+                            <IconButton bare="true" icon="remove"
                                     on:click={()=>{
                                         value.splice(n,1)
                                         value = value;
                                     }}
-                            >
-                                <i class="material-icons">remove
-                                </i>
-                            </button>
+                            />
                             <div>
                                 <svelte:component this="{propInput[prop.edit]}"
                                                   on:change="{makeArrayHandler(n)}"
                                                   value="{value[n]}"/>
                             </div>
                         {/each}
-                        <button class="icon"
+                        <IconButton bare="true" icon="add" class="icon"
                                 on:click={()=>value=[...value,...prop.empty]}
-                        ><i class="material-icons">add</i></button>
+                                    />
                     </div>
                 {:else}
                     <svelte:component
@@ -158,14 +156,10 @@
             {/if}
             {#if !showLabel}
               {#if editable && !edit}
-              <button class="icon" on:click={turnEditOn}>
-                  <i class="material-icons">edit</i>
-              </button>
+                  <IconButton bare="true" icon="edit" on:click={turnEditOn}/>
               {/if}
               {#if edit && !forceEdit}
-              <button class="icon" on:click={turnEditOff}>
-                  <i class="material-icons">done</i>
-              </button>
+              <IconButton icon="done" bare="true" on:click={turnEditOff}/>
               {/if}
            {/if}
         </div>
