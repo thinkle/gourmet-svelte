@@ -1,9 +1,8 @@
 import RecDef from '../common/RecDef.js'
 import {parseAmount} from '../utils/numbers.js';
 import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
-import Times from '../utils/times.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup} from './ingredientImporter.js';
-
+import handleTime from './timeImporter.js'
 export function preprocessChunks (parsedChunks, context) {
     // since we're already iterating through the list, we'll make a
     // map while we're there
@@ -19,12 +18,23 @@ export function preprocessChunks (parsedChunks, context) {
                     0)
         }
     );
+    parsedChunks = parsedChunks.map(
+        (o)=>({...o})
+    );
+}
+
+export function parseData (parseData) {
+    let context = {...parseData.pageInfo}
+    let chunks = Object.values(parseData);
+    console.log('Parsing ',chunks.length,'chunks');
+    return parseChunks(chunks,context);
 }
 
 export function parseChunks (parsedChunks,context={}) {
     // We get an array of "parsed" chunks...
     const recipe = {
-        ingredients : []
+        ingredients : [],
+        images : [],
     }
 
 
@@ -62,6 +72,9 @@ export function handleChunk (chunk, context, recipe, parent) {
     else if (chunk.tag=='time') {
         return handleTime(chunk,context,recipe,parent)
     }
+    else if (chunk.tag=='category') {
+        return handleCategory(chunk,context,recipe,parent)
+    }
     else if (chunk.tag=='yields') {
         return handleYields(chunk,context,recipe)
     }
@@ -85,18 +98,13 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
-function handleTime (chunk, context, recipe) {
-    let amount = parseAmount(chunk.text);
-    amount.unit = Times.getTimeUnit(chunk.text);
-    amount.seconds = amount.amount * amount.unit;
-    if (amount.pretext) {
-        amount.label = titleCase(cleanupWhitespace(amount.pretext))
+function handleCategory (chunk, context, recipe) {
+    if (!recipe.categories) {
+        recipe.categories = [];
     }
-    else {
-        amount.label = 'Time'
-    }
-    amount.text = cleanupWhitespace(chunk.text)
-    recipe.times.push(amount);
+    recipe.categories.push(
+        {name:cleanupWhitespace(chunk.text)}
+    );
 }
 
 function handleYields (chunk, context, recipe) {
@@ -133,6 +141,16 @@ function handleSource (chunk, context, recipe) {
 }
 
 function handleText (chunk, context, recipe) {
+    if (chunk.children.length) {
+        for (let childId of chunk.children) {
+            let child = context.chunkMap[childId]
+            if (child.tag=='text') {
+                // don't bother with nested text children -- we'll just let the parent handle it
+                child.handled = true;
+            }
+            // FIXME : Add header handling?
+        }
+    }
     recipe.text.push({
         body:chunk.html,
         header:chunk.detail||getHeader(chunk,recipe),
