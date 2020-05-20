@@ -1,5 +1,4 @@
 import {pollers,onConnectToPoll} from '../messaging/polling.js';
-import {sendTabMessage} from '../messageSender.js';
 import {backgroundParsePage,
         contentParsePage,
         backgroundGetPageInfo,
