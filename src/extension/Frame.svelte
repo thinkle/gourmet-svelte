@@ -27,7 +27,7 @@ $: visible && maximize(width)
      getRoot().style.width = '100%'
  }
  let url
- let port = 49174
+ let port = 58942
  $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
  
 </script>
@@ -40,7 +40,7 @@ $: visible && maximize(width)
         <div class='head'>
             <img style="margin-right: auto" width=50 src={cookie} alt="cookie">
             <h2>Gourmet</h2>
-            <span style="margin-left: auto"><IB on:click={minimize}>chevron_right</IB>
+            <span style="margin-left: auto"><IB on:click={minimize} icon="chevron_right"></IB>
                 <button on:click={()=>width+=50}>+</button>
                 <button on:click={()=>width-=50}>-</button>
         </div>
