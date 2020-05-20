@@ -9,6 +9,7 @@
  export let targetContent;
  export let id;
  export let ref;
+ export let address // DEBUG PURPOSES ONLY...
  let tagElement
  let makeWay = false;
  import {tagClassname} from './metadata.js';
@@ -91,12 +92,23 @@
     <div bind:this={tagElement} class="zzgrmttag">
         <ComponentSandbox onResize={onResize}
         >
-            <Tag  bind:name={name}  bind:detail={detail} onRemove={doRemove}/>
+            <Tag  bind:name={name}  detail={detail} onRemove={doRemove}/>
         </ComponentSandbox>
     </div>
+    <!-- <blockquote>{address}</blockquote> -->
 </div>
 
 <style>
+ blockquote {
+     visibility: hidden;
+     position: absolute;
+     z-index: 999999999;
+     background-color: pink;
+     color: navy;
+ }
+ div:hover blockquote {
+     visibility: visible;
+ }
  .zzgrmthighlighterblock {
      display: inline-block;
      padding : 0;
