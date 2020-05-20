@@ -52,9 +52,9 @@
             />
         </div>
         <span>Change Events: {$recipeChanges}. Update: {$updateCount[rec.id]}</span>
-        <button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
+        {#if editable}<button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
             Edit{#if editMode}ing{/if}
-            Recipe <i class="material-icons">edit</i></button>
+            Recipe <i class="material-icons">edit</i></button>{/if}
         {#if $recipeData && rec && rec.id && $recipeData[rec.id] && $recipeData[rec.id].changed}
             <button
                 class:busy={$recipeData[rec.id].localState=='updating'}
@@ -66,7 +66,7 @@
     <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
 	<h3 slot="leftHead">
 	    Ingredients
-            {#if !editMode}
+            {#if !editMode && editable}
                 {#if ingeditmode}
                     <button class="icon" on:click={()=>ingeditmode=false }><i class="material-icons">done</i></button>
                 {:else}
@@ -75,7 +75,7 @@
             {/if}
 	</h3>
 	<div slot="left">
-	    <IL  editMode="{editMode||ingeditmode}" bind:ingredients={rec.ingredients} maxWidth="350">
+	    <IL  editable={editable} editMode="{editMode||ingeditmode}" bind:ingredients={rec.ingredients} maxWidth="350">
 	    </IL>
 	</div>		
 	
