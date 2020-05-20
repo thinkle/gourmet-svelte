@@ -9,9 +9,11 @@
  import RecipeDataTester from '../stores/RecipeDataTester.svelte';
  import RemoteApiTester from '../data/RemoteApiTester.svelte';
  import HighlightTest from '../extension/parser/HighlightTest.svelte';
+ import RecipeTextTest from './recDisplay/RecipeTextTest.svelte';
  export let demo
  
  let demos = {
+     rectext : RecipeTextTest,
      widgets : WidgetTests,
      rec : RecDisplayTests,
      localData : LocalDataTester,
