@@ -3,15 +3,20 @@
  export let inverse=false;
  export let icon
  export let bare
+ export let iconSize;
+ export let fontSize;
  export function focus () {
      b.focus()
  }
 </script>
 
-<button class:bare class:inverse class="icon" on:click bind:this={b}>
+<button
+    style={`--fontSize:${fontSize};--iconSize:${iconSize}`}
+     class:customSize={fontSize}
+    class:bare class:inverse class="icon" on:click bind:this={b}>
     <slot>
     </slot>
-    <i  class="material-icons">
+    <i class:customSize={iconSize}  class="material-icons">
         {icon}
     </i>
 </button>
@@ -24,11 +29,18 @@
      display: inline-flex;
      justify-content: center;
      align-content: center;
- }
- button.icon {
      border-radius: 10px;
-     transition: all 0.8s;
+     transition: all 300ms;
  }
+ 
+ button.customSize {
+     font-size: var(--fontSize);
+ }
+ 
+ i.customSize {
+     font-size: var(--iconSize) 
+ }
+ 
  button.bare {
      border: none;
      background-color: transparent;
