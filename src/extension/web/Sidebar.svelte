@@ -1,6 +1,6 @@
 <script>
  import {onMount} from 'svelte';
- import {extensionUrl} from './messages.js';
+ import {extensionUrl} from '../id.js';
  import {backgroundGetPageInfo} from '../messaging/parsing.js';
  import SidebarImport from './SidebarImport.svelte';
  
