@@ -178,8 +178,13 @@ var Tagger = function () {
     }
 
     function finishTagging () {
-        let next = delayed.pop();
-        next();
+        const batchSize = 5;
+        const toDo = Math.min(batchSize,delayed.length);
+        for (let i=0; i<toDo; i++) {
+            // let's try five tags at a time...
+            let next = delayed.pop();
+            next();
+        }
         if (delayed.length > 0) {
             setTimeout(finishTagging,0);
         }
