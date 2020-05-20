@@ -16,6 +16,7 @@
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
  import TimeLink from '../../widgets/TimeLink.svelte';
  import RecBlock from './RecBlock.svelte';
+ import RecipeText from './RecipeText.svelte';
 
  let modes = RecDef.EditModes
  let recipeChanges = getContext('recipeChanges');
@@ -32,7 +33,8 @@
 
  const propDisplay = {
      [modes.NUMUNIT] : NumberUnitDisplay,
-     [modes.DUR] : TimeLink
+     [modes.DUR] : TimeLink,
+     [modes.RCH] : RecipeText,
  }
 
  var displayValue;
