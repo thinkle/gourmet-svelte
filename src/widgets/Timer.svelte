@@ -3,8 +3,10 @@
  import {onMount} from 'svelte';
  import Timer from '../utils/timerDrawer.js';
  import Times from '../utils/times.js';
+ export let onEditModeToggle;
  export let size = 100;
  export let duration = 60;
+ export let onComplete;
  let timeLeft;
  import DurationInput from './DurationInput.svelte';
  $: timeLeft = duration * 1000;
@@ -19,7 +21,11 @@
  const PAUSED = 2
  const GOING = 3
  let editMode = false;
-
+ let lastEditMode = false;
+ $: if (editMode != lastEditMode) {
+     lastEditMode = editMode;
+     if (onEditModeToggle) {onEditModeToggle(editMode);}
+ }
  let state = INITIAL
  
  function pause () {
@@ -114,9 +120,27 @@
         {/if}
     {/if}
     <canvas class:hidden={editMode}  on:click={toggleTimer} width="{size}"  height="{size}" bind:this={canv}/>
+    {#if state==GOING}
+        <blockquote>{timeLeft/1000} seconds left</blockquote>
+    {/if}
+    {#if timeLeft <=0 && state==GOING && !editMode }
+        <audio
+            autoplay="true"
+            controls
+            src="/phone.wav">
+            Your browser does not support the
+            <code>audio</code> element.
+        </audio>
+        {onComplete && onComplete() && ''}
+    {/if}
 </div>
 
 <style>
+ blockquote {
+     display: none;
+ }
+ audio {display: none}
+ 
  div {
      text-align: center;
      position: relative;
