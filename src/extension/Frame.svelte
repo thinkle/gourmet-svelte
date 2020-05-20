@@ -4,7 +4,8 @@
  export let id;
  import IB from '../widgets/IconButton.svelte'
  let cookie = chrome.extension.getURL("images/cookie.png");
- 
+ let width = 300;
+
  onMount(()=>{
      maximize();
  });
@@ -16,15 +17,18 @@
 
  function maximize () {
      visible = true;
-     getRoot().style.width = 'calc(100% - 300px)'
+     getRoot().style.width = `calc(100% - ${width}px)`
  }
+
+$: visible && maximize(width)
+ 
  function minimize () {
      visible = false;
      getRoot().style.width = '100%'
  }
  let url
- let port = 59181
-$: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
+ let port = 49174
+ $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
  
 </script>
 <link
@@ -32,11 +36,13 @@ $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
     rel="stylesheet"
 />
 {#if visible}
-    <div class="container" transition:fly={{x:300}}>
+    <div class="container" style={`--grmtSidebarWidth:${width}px`} transition:fly={{x:300}}>
         <div class='head'>
             <img style="margin-right: auto" width=50 src={cookie} alt="cookie">
             <h2>Gourmet</h2>
             <span style="margin-left: auto"><IB on:click={minimize}>chevron_right</IB>
+                <button on:click={()=>width+=50}>+</button>
+                <button on:click={()=>width-=50}>-</button>
         </div>
         <input bind:value={port}>
         <iframe title="Gourmet Sidebar" src={url} id="{id}">
@@ -71,6 +77,7 @@ $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
      display: block;
      position: fixed;
      width: 300px;
+     width: var(--grmtSidebarWidth);
      top: 0;
      right : 0;
      border-left: 5px solid purple;
@@ -84,5 +91,6 @@ $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
  }
  iframe {
      height: calc(100vh - 50px);
+     width: var(--grmtSidebarWidth);
  }
 </style>
