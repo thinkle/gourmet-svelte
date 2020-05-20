@@ -1,4 +1,5 @@
 <script>
+ import IconButton from '../../widgets/IconButton.svelte';
  import {getContext} from 'svelte';
  export let recursive=false;
  export let ingredients;
@@ -53,77 +54,98 @@
 </script>
 
 <div style="max-width:{maxWidth}px;">
-    <ul bind:this={ref}  class:edit-mode={editMode} class="inglist" style={getStyle(idealWidth)}>
+    <table bind:this={ref}  class:edit-mode={editMode} class="inglist" style={getStyle(idealWidth)}>
 	{#each ingredients as i,n}
-	    <li class:ing={!i.ingredients} class:grouphead={i.ingredients}>
-                {#if i.ingredients}
-                    {#if editMode}
-                        <FancyInput on:change={onChange} bind:value={i.text} placeholder="Ingredient Group"/>
-                        {#if (i.ingredients.length==0)}
-                            <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}">
-                                <i class="material-icons" >delete</i>
-                            </button>
-                        {/if}
-                    {:else}
-                        <h3>{i.text}</h3>
-                    {/if}
-                    <ul class="inglist">
-                        {#each i.ingredients as ii,nn}
-	                    <li class='ing'>
-                                {#if editMode}
-                                    <NumberUnitInput on:change={onChange} mode="table" label={false} bind:value={ii.amount}/>
-                                    <td>
-                                        <label>Item:</label> 
-                                        <FancyInput on:change={onChange} bind:value={ii.text} placeholder="Ingredient"/>
-                                    </td>
-                                    <button on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients }}"><i class="material-icons" >delete</i>
-                                    </button>
-                                {:else}
-                                    <NumberUnitDisplay  mode="table" value={ii.amount}/>
-                                    
-	                            <!-- <span bind:clientWidth={ii.awidth} class='amount'>{ii.amount.amount&&floatToFrac(ii.amount.amount)||''}</span>
-	                                 <span bind:clientWidth={ii.uwidth} class='unit'>{ii.amount.unit||''}</span> -->
-
-	                            <span bind:clientWidth={ii.iwidth} class='item'>{ii.text}</span>
-                                {/if}
-                            </li>
-                        {/each}
+            {#if i.ingredients}
+                <!-- nested ingredients...! -->
+                <tr class:ing={!i.ingredients} class:grouphead={i.ingredients}>
+                    <td colspan="4">
                         {#if editMode}
-                            <button
-                                on:click="{()=>{i.ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
-                                type="icon"><i class='material-icons'>add</button>
+                            <FancyInput on:change={onChange} bind:value={i.text} placeholder="Ingredient Group"/>
+                            {#if (i.ingredients.length==0)}
+                                <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}">
+                                    <i class="material-icons" >delete</i>
+                                </button>
+                            {/if}
+                        {:else}
+                            <h3>{i.text}</h3>
                         {/if}
-                    </ul>
-                {:else}
+                        <table class="inglist">
+                            {#each i.ingredients as ii,nn}
+	                        <tr class='ing'>
+                                    {#if editMode}
+                                        <NumberUnitInput on:change={onChange} mode="table" label={false} bind:value={ii.amount}/>
+                                        <td>
+                                            <label>Item:</label> 
+                                            <FancyInput on:change={onChange} bind:value={ii.text} placeholder="Ingredient"/>
+                                        </td>
+                                        <button on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients }}"><i class="material-icons" >delete</i>
+                                        </button>
+                                    {:else}
+                                        <NumberUnitDisplay  mode="table" value={ii.amount}/>
+	                                <td>
+                                            <span bind:clientWidth={ii.iwidth} class='item'>{ii.text}</span>
+                                        </td>
+                                    {/if}
+                                </tr>
+                            {/each}
+                            <!-- Button for adding more rows... -->
+                            {#if editMode}
+                                <tr>
+                                    <td>
+                                        <IconButton icon="add" bare="true"
+                                                    on:click="{()=>{i.ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
+                                                    type="icon"><i class='material-icons'/>
+                                        </IconButton>
+                                    </td>
+                                </tr>
+                            {/if}
+                        </table>
+                    </td>
+                    <!-- end of nested table -->
+                </tr>
+            {:else}
+                <tr> <!-- standard ingredient row -->
                     {#if editMode}
                         <NumberUnitInput on:change={onChange} mode="table" label={false} bind:value={i.amount}/>
                         <td>
                             <label>Item:</label> 
                             <FancyInput on:change={onChange} placeholder="Ingredient" bind:value={i.text}/>
                         </td>
-                        <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}"><i class="material-icons" >delete</i>
-                        </button>
+                        <td>
+                            <IconButton on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}" icon="delete" bare="true"/>
+                        </td>
                     {:else}
                         <NumberUnitDisplay mode="table" value={i.amount}/>
-	                <!-- <span bind:clientWidth={i.awidth} class='amount'>{i.amount.amount&&floatToFrac(i.amount.amount)||''}</span>
-	                     <span bind:clientWidth={i.uwidth} class='unit'>{i.amount.unit||''}</span> -->                        
-	                <span bind:clientWidth={i.iwidth} class='item'>{i.text}</span>
+	                <td>
+                            <span bind:clientWidth={i.iwidth} class='item'>{i.text}</span>
+                        </td>
                     {/if}
-                {/if}
-	    </li>
+                </tr>
+            {/if}
 	{/each}
         {#if editMode}
-            <button
-                on:click="{()=>{ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
-                type="icon"><i class='material-icons'>add</button>
-                <button
-                    on:click="{()=>{ingredients.push({item:'',ingredients:[
-                              ]});ingredients=ingredients}}"
-                    type="icon"><i class='material-icons'>collections</button>
-
-                
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <IconButton icon="add" bare="true"
+                                on:click="{()=>{ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
+                                type="icon">
+                    </IconButton>
+                </td>
+                <td>
+                    <IconButton
+                        icon='collections'
+                        bare='true'
+                        on:click="{()=>{ingredients.push({item:'',ingredients:[
+                                  ]});ingredients=ingredients}}"
+                    >New Group
+                    </IconButton>
+                </td>
+            </tr>
         {/if}
-    </ul>
+    </table>
 </div>
 {#if (!recursive)}
 <div class="invisible">
