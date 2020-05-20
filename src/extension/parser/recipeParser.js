@@ -86,7 +86,8 @@ const byDomain = {
 }
 
 
-function Parser (addTag) {
+function Parser (tagger) {
+
     var self = {
         
         getParserBySelector () {
@@ -117,6 +118,7 @@ function Parser (addTag) {
             parsers.forEach((parser)=>{
                 self.maybe_add(parser)
             });
+            tagger.finishTagging(); // async do all the dom manipulation...
             return self.results
         },
         
@@ -134,7 +136,7 @@ function Parser (addTag) {
                 for (let result of results) {
                     console.log('Tag',result,tag,detail)
                     self.results.push(
-                            addTag(result,tag,undefined,detail)
+                        tagger.tagElement(result,tag,undefined,detail,true) // true flag delays actually inserting tag
                     );
                 }
             }
@@ -142,7 +144,7 @@ function Parser (addTag) {
                 document.querySelectorAll(selector).forEach(function (el) {
                     console.log('Tag',el,tag,detail)
                     self.results.push(
-                        addTag(el,tag,undefined,detail)
+                        tagger.tagElement(el,tag,undefined,detail,true) // true flag delays actually inserting tag
                     );
                 });
             }
