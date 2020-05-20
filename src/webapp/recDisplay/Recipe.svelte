@@ -100,10 +100,6 @@
                     {/each}
                 </div>
             </div>
-            {#each rec.text as textBlock}
-                <RecBlock bind:value="{textBlock}" forceEdit="{editMode}"/>
-            {/each}
-            {#if editMode}<div class="small"><button on:click={()=>rec.text.push({header:'More Text',text:''})}>Add more text</button></div>{/if}
 	</div>
     </SideBySide>
 </div>
