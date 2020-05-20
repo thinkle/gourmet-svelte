@@ -20,9 +20,8 @@ import {
 // runs in background tab
 export const parsed = {
 }
-
-window.parsed = parsed; // lazy
-
+const waitingChildren = {
+}
 
 function respondToPoll (tabId,data) {
     console.log('poll',tabId,data,pollers);
@@ -37,10 +36,17 @@ function respondToPoll (tabId,data) {
 
 onConnectToPoll((port)=>{
     console.log('backgroundParser connecting to poll',port);
-    port.postMessage(parsed[port.sender.tab.id])
+    port.postMessage({parsed:parsed[port.sender.tab.id]})
     console.log('sent update',parsed,parsed[port.sender.tab.id]);
 })
 
+
+function addWaitingChildren (tabId, tag) {
+    if (waitingChildren[tabId] && waitingChildren[tabId][tag.id]) {
+        console.log('Adding waiting children!');
+        tag.children = [...tag.children,...waitingChildren[tabId][tag.id]]
+    }    
+}
 
 export function addTags (tabId, tags) {
     console.log('Adding tag (request from content)',tags);
@@ -49,7 +55,8 @@ export function addTags (tabId, tags) {
         }
     }
     for (let tag of tags) {
-        parsed[tabId][tag.id]=tag;
+        addWaitingChildren(tabId,tag);
+        parsed[tabId][tag.id]=tag;       
     }
     console.log(`Done adding ${tags.length} tags to parsed: `,parsed[tabId]);
     respondToPoll(tabId,
@@ -63,6 +70,7 @@ export function addTag (tabId, tag) {
     if (!parsed[tabId]) {
         parsed[tabId] = {}
     }
+    addWaitingChildren(tabId,tag);
     parsed[tabId][tag.id]=tag;
     respondToPoll(
         tabId,
@@ -74,63 +82,6 @@ export function addTag (tabId, tag) {
         }
     );
 }
-
-
-
-export function handleContentRequest (request, sender, sendResponse) {
-    console.log('Got content request');
-    if (request.action=='removeTag') {
-        console.log('Deleting...');
-        delete parsed[sender.tab.id][request.id]
-        console.log(parsed);
-    }
-    if (request.action=='addTag') {
-        addTag(sender.tab.id,request.message);
-        return
-    }
-    if (request.action=='addTags') {
-        addTags(sender.tab.id,request.message);
-        // addTags handles the end stuff for us
-        return
-    }
-    if (request.action=='addChild') {
-        console.log('Request to update child');
-        let parent = parsed[sender.tab.id][request.message.parent]
-        if (!parent) {
-            console.log('WTF? Got request to add child to nonexistent parent: ',request.message);
-            throw Error('WTF? Got request to add child to nonexistent parent: ',request.message);
-        }
-        if (!parent.children) {
-            parent.children = [];
-        }
-        parent.children.push(request.message.child);
-    }
-    if (request.action=='updateTag') {
-        console.log('Got request to update content...');
-        if (!parsed[sender.tab.id]) {
-            parsed[sender.tab.id] = {}
-        }
-        if (!parsed[sender.tab.id][request.message.id]) {
-            parsed[sender.tab.id][request.message.id] = {}
-        }
-        let oldData = parsed[sender.tab.id][request.message.id]
-        let newParsed = {...oldData.parsed,...request.message.parsed}
-        parsed[sender.tab.id][request.message.id] = {
-            ...oldData,
-            ...request.message,
-            parsed:newParsed
-        }
-        console.log('=>',parsed[sender.tab.id][request.message.id])
-    }
-    if (sendResponse) {
-        sendResponse(parsed[sender.tab.id]);
-    }
-    respondToPoll(sender.tab.id,
-                  {
-                      lastAction : request
-                  });
-}
-
 
 function listenForContent () {
     backgroundRemoveTag.receive(
@@ -165,18 +116,26 @@ function listenForContent () {
     );
     backgroundAddChild.receive(
         (request,sender)=>{
-            const {parentID,childID} = request
-            let parent = parsed[sender.tab.id][parentID];
-            if (!parent) {
-                console.log('WTF? Got request to add child to nonexistent parent: ',request.message);
-                throw Error('WTF? Got request to add child to nonexistent parent: ',request.message);
+            const {parent,child} = request
+            let parentTag = parsed[sender.tab.id] && parsed[sender.tab.id][parent];
+            if (!parentTag) {
+                if (!waitingChildren[sender.tab.id]) {
+                    waitingChildren[sender.tab.id] = {}
+                }
+                if (!waitingChildren[sender.tab.id][parent]) {
+                    waitingChildren[sender.tab.id][parent] = []
+                }
+                waitingChildren[sender.tab.id][parent].push(child)
+                // Wait...
             }
-            if (!parent.children) {
-                parent.children = [];
+            else {
+                if (!parentTag.children) {
+                    parentTag.children = [];
+                }
+                respondToPoll(sender.tab.id);
+                parentTag.children.push(child)
             }
-            respondToPoll(sender.tab.id);
-            parent.children.push(childID)
-            return parsed[sender.tab.id]
+            return parsed[sender.tab.id]||{}
         }
     );
 }
@@ -195,6 +154,7 @@ function listenForSidebar () {
             console.log('Got pageInfo',pageInfo);
             pageInfo.id = 'pageInfo';
             addTag(sender.tab.id,pageInfo);
+            respondToPoll(sender.tab.id)
             return pageInfo
         },
         true // external
@@ -203,7 +163,10 @@ function listenForSidebar () {
     backgroundParsePage.receive(
         async (msg, sender)=>{
             console.log('parse page...',sender.tab)
-            return await contentParsePage.send(null, sender.tab);
+            let response = await contentParsePage.send(null, sender.tab);
+            addTags(sender.tab.id,response);
+            respondToPoll(sender.tab.id)
+            return response
         },
         true // external
     );
@@ -213,6 +176,7 @@ function listenForSidebar () {
             console.log('Got clear all');
             parsed[sender.tab.id] = {}
             await contentClearAll.send(null, sender.tab);
+            respondToPoll(sender.tab.id)
             return parsed[sender.tab.id];
         },
         true
@@ -222,15 +186,9 @@ function listenForSidebar () {
         async (id, sender) => {
             delete parsed[sender.tab.id][id];
             contentClearOne.send(id,sender.tab);
+            respondToPoll(sender.tab.id)
             return parsed[sender.tab.id]
         },
         true
     )
-    // [contentParsePage,
-    //     backgroundGetPageInfo,
-    //     contentGetPageInfo,
-    //     backgroundClearOne,
-    //     contentClearOne,
-    //     backgroundClearAll,
-    //  contentClearAll]
 }
