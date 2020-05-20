@@ -113,8 +113,8 @@
     >
     {#if showPlusMinusButtons}
         <div class="minibuttons">
-            <IB on:click={doIncrement}>keyboard_arrow_up</IB>
-            <IB on:click={doDecrement}>keyboard_arrow_down</IB>
+            <IB on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IB>
+            <IB on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IB>
         </div>
     {/if}
 </span>
