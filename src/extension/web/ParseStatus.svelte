@@ -7,11 +7,21 @@
  let pollAgain = true;
  let parsed
  let updateCount = 0;
+ import {recipeActions,recipeData,connected} from '../../stores/recipeData.js';
+ import IconButton from '../../widgets/IconButton.svelte';
+ let creating;
+
+ function doCreateRecipe () {
+     creating = recipeActions.createRecipe(recipe);    
+ }
+
+
  
  import RecDef from '../../common/RecDef.js';
  let poller;
  onMount(
      ()=>{
+         console.log('Set up poller!');
          poller = listenToExtension(
              (msg)=>{
                  console.log('Got poller message!',msg);
@@ -21,7 +31,7 @@
              }
          );
          return function cleanUp () {
-             console.log('disconnecting');
+             console.log('disconnecting poller');
              poller.disconnect();
          }
      }
@@ -55,6 +65,21 @@
      let showRec = false;
 </script>
 <div>
+    {#if connected && recipe}
+        <IconButton icon="save" on:click={doCreateRecipe}>Save Recipe to Collection</IconButton>
+    {:else if recipe}
+        Not connected?
+    {/if}
+    {#if creating}
+        {#await creating}
+            Creating recipe in database...
+        {:then recid}
+            Created recipe! {recipe = $recipeData[recid]}
+            ID={recid};
+        {:catch error}
+            Unable to create recipe {error}
+        {/await}
+    {/if}
     <!-- fix me: import  -->
     {#if poller}Connected to extension...{/if}
     <p>{updateCount} responses</p>
@@ -84,3 +109,8 @@
         <button on:click={()=>show=true}>Show JSON</button>
     {/if}
 </div>
+<style>
+ div {
+     border : 2px solid blue;
+ }
+</style>
