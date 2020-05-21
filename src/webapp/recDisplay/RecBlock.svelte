@@ -2,7 +2,7 @@
  export let value
  export let prop
  export let editable=true;
- export let forceEdit=false;
+ export let forceEdit=true;
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
  import RichText from '../../widgets/RichText.svelte';
