@@ -1,5 +1,6 @@
 <script>
  import IL from './IngredientList.svelte';
+ import IconButton from '../../widgets/IconButton.svelte';
  import RecDef from '../../common/RecDef.js';
  import RecProp from './RecProp.svelte';
  import SideBySide from '../../widgets/SideBySide.svelte';
@@ -52,7 +53,8 @@
             />
         </div>
         <span>Change Events: {$recipeChanges}. Update: {$updateCount[rec.id]}</span>
-        {#if editable}<button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
+        {#if editable}
+            <button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
             Edit{#if editMode}ing{/if}
             Recipe <i class="material-icons">edit</i></button>{/if}
         {#if $recipeData && rec && rec.id && $recipeData[rec.id] && $recipeData[rec.id].changed}
@@ -68,9 +70,9 @@
 	    Ingredients
             {#if !editMode && editable}
                 {#if ingeditmode}
-                    <button class="icon" on:click={()=>ingeditmode=false }><i class="material-icons">done</i></button>
+                    <IconButton bare="true" on:click={()=>ingeditmode=false } icon="done"/>
                 {:else}
-                    <button class="icon" on:click={()=>ingeditmode=true }><i class="material-icons">edit</i></button>
+                    <IconButton bare="true" on:click={()=>ingeditmode=true } icon="edit" />
                 {/if}
             {/if}
 	</h3>
