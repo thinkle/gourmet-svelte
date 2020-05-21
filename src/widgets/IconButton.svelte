@@ -2,9 +2,9 @@
  let b;
  export let inverse=false;
  export let icon
- export let bare
- export let iconSize;
- export let fontSize;
+ export let bare=false
+ export let iconSize=undefined;
+ export let fontSize=undefined;
  export function focus () {
      b.focus()
  }
