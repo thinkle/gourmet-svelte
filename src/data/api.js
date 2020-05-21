@@ -1,14 +1,13 @@
-import localApi from './dexieApi.js';
-import {RecipeApi} from './remoteApi.js';
-import {user} from '../stores/user.js';
-import status from '../stores/status.js';
-import {prepRecLocal} from '../data/validate.js';
 // Our "glue" layer between local data and remote data.
 // This layer will handle syncing of data between remote and local storage
 
 // This thing should work like this in the browser , to a server, to a file system -- we don't care.
 
-
+import localApi from './dexieApi.js';
+import {RecipeApi} from './remoteApi.js';
+import {user} from '../stores/user.js';
+import status from '../stores/status.js';
+import {prepRecLocal} from '../data/validate.js';
 
 let remoteApi;
 
