@@ -15,9 +15,6 @@ it('connect to db',async () => {
 
 it('Store and retrieve a recipe',async () => {
     await api.connect();
-    expect(api.db).toBeDefined()
-    expect(api.db.recipes).toBeDefined()
-    //delete testRecs.standard.id
     const recid = await api.addRecipe(testRecs.standard);
     console.log('Created rec with ID',recid);
     const readRec = await api.getRecipe(recid);
