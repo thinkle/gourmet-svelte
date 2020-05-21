@@ -1,7 +1,12 @@
-import api from './localApi';
-import "fake-indexeddb/auto";
+import Dexie from 'dexie';
+import indexedDB from 'fake-indexeddb';
+import IDBKeyRange from"fake-indexeddb/lib/FDBKeyRange";
+import api from './dexieApi.js';
 import user from "../common/mocks/user.js"
 import {testRecs} from "../common/mocks/recipes.js"
+
+Dexie.dependencies.indexedDB = indexedDB;
+Dexie.dependencies.IDBKeyRange = IDBKeyRange
 
 it('connect to db',async () => {
     await api.connect()
@@ -10,9 +15,14 @@ it('connect to db',async () => {
 
 it('Store and retrieve a recipe',async () => {
     await api.connect();
-    const recid = await api.addRecipe(testRecs.standard,user.id);
-    const readRec = await api.getRecipe(recid,user.id);
-    expect(recid).toEqual(1)
+    expect(api.db).toBeDefined()
+    expect(api.db.recipes).toBeDefined()
+    //delete testRecs.standard.id
+    const recid = await api.addRecipe(testRecs.standard);
+    console.log('Created rec with ID',recid);
+    const readRec = await api.getRecipe(recid);
+    expect(recid).toBeDefined()
+    expect(readRec).toBeDefined();
     expect(readRec.title).toEqual(testRecs.standard.title)
     expect(readRec.ingredients.length).toEqual(testRecs.standard.ingredients.length)
     expect(readRec.ingredients[0].item).toEqual(testRecs.standard.ingredients[0].item)    
@@ -20,10 +30,12 @@ it('Store and retrieve a recipe',async () => {
 
 it('Store multiple recs',async () => {
     await api.connect();
-    await api.addRecipe(testRecs.standard,user.id);
-    await api.addRecipe(testRecs.standard,user.id);
-    await api.addRecipe(testRecs.standard,user.id);
-    let resp = await api.getRecipes(undefined,user.id);
+    delete testRecs.standard.localid
+    delete testRecs.standard.id
+    await api.addRecipe({...testRecs.standard});
+    await api.addRecipe({...testRecs.standard});
+    await api.addRecipe({...testRecs.standard});
+    let resp = await api.getRecipes(undefined);
     expect(resp.result.length).toBeGreaterThan(2);
 });
 
