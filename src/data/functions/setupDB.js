@@ -39,13 +39,14 @@ const functions = {
         let {client,db} = await loadDB();
         try {
             let result = await db.collection('recipes').drop();
-            console.log('dropped with result',result);
+            //console.log('dropped with result',result);
         }
         catch (err) {
             console.log('unable to drop recipes - maybe does not exist yet?');
         }
         prepRecs(recs,user);
-        return await insertMany('recipes',recs.recipes);
+        let recipes = await insertMany('recipes',recs.recipes);
+        return recipes;
     },
     create_recipe_index : async () => {
         const {client,db} = await loadDB();
@@ -72,13 +73,13 @@ const functions = {
 }
 
 export default async function (event, context, user, params) {
-    console.log('setup running...',params);
     if (user && user.email=='tmhinkle@gmail.com') {
         return functions[params.action](event,context,user,params)
         //return {message:'Congratulations, you are allowed via my hard-coded non-secure security magic!'}
     }
     else {
         return {message:'No way sir, no how no go: user not permitted!!,',
+                status:'ERROR',
                 user:user||'no user logged in'}
     }
 }
