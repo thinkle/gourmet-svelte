@@ -1,3 +1,8 @@
+/**
+dexieApi.js implements the interface for storing recipes in IndexDB
+
+**/
+
 import {prepRecLocal} from '../data/validate.js';
 import Dexie from 'dexie';
 
@@ -12,20 +17,20 @@ const dexieApi = {
         return true;
     },
 
-    async addRecipe (recipe) {
-        await dexieApi.db.recipes.add(
+    addRecipe (recipe) {
+        return dexieApi.db.recipes.add(
             prepRecLocal(recipe)
         );
     },
 
-    async getRecipe (recid, {mongoId}={}) {
+    getRecipe (recid, {mongoId}={}) {
         if (mongoId) {
-            return await dexieApi.db.recipes.get(
+            return dexieApi.db.recipes.get(
                 {_id:mongoId}
             );
         }
         else {
-            return await dexieApi.db.recipes.get({id:recid})
+            return dexieApi.db.recipes.get({id:recid})
         }
     },
 
