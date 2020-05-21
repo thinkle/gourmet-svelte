@@ -303,7 +303,6 @@ export function getInAConversion (unit1, unit2, density) {
             // v = (m / density)
             if (density && toGrams[unit2]) {
                 // cool, we got grams...
-                debugger;
                 unit2inML = toGrams[unit2] / density
             }
         }
@@ -318,7 +317,6 @@ export function getInAConversion (unit1, unit2, density) {
             unit2inG = toGrams[unit2]; // eg 15
         }
         else if (toMilliliters[unit2] && density) {
-            debugger;
             // d = m / v
             // m = d * v
             unit2inG = toMilliliters[unit2] * density
