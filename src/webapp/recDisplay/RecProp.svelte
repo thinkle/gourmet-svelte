@@ -88,11 +88,13 @@
 </script>
 <div>
     <div>
-        {#if showLabel}
+        {#if showLabel && (!prop.hideLabel && !edit)}
             <div class="top" >
                 <label on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !edit}
-                    <IconButton icon="edit" bare="true" on:click={turnEditOn}/>
+                    <span class="editbutton" >
+                        <IconButton icon="edit" bare="true" on:click={turnEditOn}/>
+                    </span>
                 {/if}
                 {#if edit && !forceEdit}
                     <IconButton icon="done" bare="true" on:click={turnEditOff}/>
@@ -158,7 +160,7 @@
             {/if}
             {#if !showLabel}
               {#if editable && !edit}
-                  <IconButton bare="true" icon="edit" on:click={turnEditOn}/>
+                  <span class="editbutton" ><IconButton bare="true" icon="edit" on:click={turnEditOn}/></span>
               {/if}
               {#if edit && !forceEdit}
               <IconButton icon="done" bare="true" on:click={turnEditOff}/>
@@ -208,6 +210,13 @@
  .arrayval {
      display: inline-block;
      padding-right: 1em;
+ }
+
+ .editbutton {
+     visibility: hidden;
+ }
+ div:hover .editbutton {
+     visibility: visible;
  }
 
 </style>
