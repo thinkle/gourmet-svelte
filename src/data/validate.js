@@ -65,6 +65,7 @@ export function prepRecs (recs,user) {
                 email : user.email,
                 full_name : user.metadata && user.metadata.full_name
             };
+            r.user = user.email
             r._id = makeId(r.localid);
             crawlIngsForIds(r.ingredients);
             validateRec(r)
