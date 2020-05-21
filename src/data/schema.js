@@ -1,3 +1,8 @@
+/*
+* schema.js isn't a real schema, just an example of what we think our
+* recipe collection might look like when we're done.
+*/
+
 const collection =
       {
           metadata : {
