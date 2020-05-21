@@ -1,3 +1,8 @@
+/**
+*  remoteApi.js implements remote storage/fetching of recipes through
+*  calls to our lambda functions served from the backend.
+**/
+
 import querystring from 'querystring'
 
 const baseURL = "/.netlify/functions/api?"
