@@ -1,9 +1,18 @@
+/********
+// validate.js has convenience functions for parsing recipes in
+// preparation for inserting them into DBs and for indexing. The indexing
+// needs of front-end and back-end are different, so validate also does
+// some pruning of the JSON to only keep the stuff we care about.
+**************/
 // Validate and prepare our recipe for insertion...
 // This may do DB-specific things to the recipe to make life easier...
 import stopword from 'stopword';
 
 function validateRec (rec) {
     rec.flatIngredients = []
+    if (!rec.ingredients) {
+        rec.ingredients = []
+    }
     rec.ingredients.map((i)=>crawlIngredient(i,rec.flatIngredients))
     rec.fullText = getFullText(rec)
 }
