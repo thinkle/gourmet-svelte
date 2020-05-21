@@ -317,7 +317,16 @@ let testRecs = {
             "ingredient_hash": "484e4ca800d47c9cd7ff173faff162c2",
             "id": 20,
         "categories": [{name:'Quiche'},{name:'Vegetarian'}],
-        },
+    },
+    testIngredient : {
+        "text": "diced and peeled squash",
+        "amount": {
+            "amount": 3,
+            "rangeamount" : 7,
+            "unit": "cups"
+        }
+    },
+
 }
 
 export {testRecs}

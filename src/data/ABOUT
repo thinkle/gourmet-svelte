@@ -1,3 +1,4 @@
+-----
 Ok -- this is a place for some notes about recipe data.
 
 We're going to assume recipe data looks like a JSON store of some kind.
@@ -17,14 +18,24 @@ Hard tasks are:
 
 Here's what I've got so far...
 
-Local Memory -> Recipes exist in the "store" as a mutable object/list of objects that could disappear on any page refresh.
-IndexedDB -> Stores locally in browser. Good for caching/offline work/responsiveness. Automatically generates unique IDs when you insert.
-MongoDB -> Stores remotely. Seems like a good home for our data long-term. *Also* generates a unique ID when you insert. 
-Import/Export -> Will need IDs for internal references. This will make for a *third* ID of course...
-Autosave -> If we want to support auto-saving, we will either need to add a versioning database or support a diff system...
+Local Memory -> Recipes exist in the "store" as a mutable object/list
+of objects that could disappear on any page refresh.
 
+IndexedDB -> Stores locally in browser. Good for caching/offline
+work/responsiveness. Automatically generates unique IDs when you
+insert.
 
-We'll use a last_modified timestamp field in IndexedDB and MongoDB to keep track of when we need to fetch data...
+MongoDB -> Stores remotely. Seems like a good home for our data
+long-term. *Also* generates a unique ID when you insert.
+
+Import/Export -> Will need IDs for internal references. This will make
+for a *third* ID of course...
+
+Autosave -> If we want to support auto-saving, we will either need to
+add a versioning database or support a diff system...
+
+We'll use a last_modified timestamp field in IndexedDB and MongoDB to
+keep track of when we need to fetch data...
 
 OK -- SIMPLIFYING THIS BABY...
 
@@ -32,10 +43,30 @@ MONGODB <--> INDEXEDDB <--> LOCAL STATE <-- USER INTERFACE
 
 So the local state will only ever display what's IN the IndexedDB.
 
-The IndexedDB layer will fetch remote data directly as needed.
-The user interface will need to know what's been saved locally and/or offline and allow the user to manage accordingly.
--> One downside here is that IndexedDB is substantially less full-featured than MongoDB, so we may be a little unhappy there...
+The IndexedDB layer will fetch remote data directly as needed.  The
+user interface will need to know what's been saved locally and/or
+offline and allow the user to manage accordingly.  -> One downside
+here is that IndexedDB is substantially less full-featured than
+MongoDB, so we may be a little unhappy there...
 
+The "glue" code will be centralized in api.js here, which will make
+all calls to the remoteApi and to the dexie API for us and will decide
+when to do what.
+
+TESTING
+
+There is significant complexity and many possible failure states in
+this layer of the app. Also, this is the shittiest to test. So it's
+worth thinking through a good testing suite or even a validation
+system in line with what I did with chrome messaging.
+
+Here are the layers of communication that need to be defined/validated/tested:
+-> What does the APP ask IndexedDB to do?
+-> How does the APP handle failure from IndexedDB
+-> What does the APP ask the remote API to do?
+-> How does the APP handle failure from the remote API?
+-> What does the remote API ask MongoDB to do
+-> What does failure from MongoDB look like.
 
 Here are our use-cases and what needs to happen to the data in each case:
 
