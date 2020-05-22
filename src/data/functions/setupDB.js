@@ -2,7 +2,7 @@
 //import {runQuery,runImport} from './gql.js';
 import {loadDB,runTest,insertOne,insertMany,queryCollection} from './mongoConnect.js';
 import recs from '../recs.json'
-import {validateRec,prepRecs} from '../validate.js'
+import {validateRec,prepRecsRemote} from '../validate.js'
 
 const functions = {
     mongoConnect : runTest,
@@ -35,16 +35,18 @@ const functions = {
             {});
     },
     create_recipes : async (event,context,user,params)=>{
+        if (params.user) {
+            user = params.user // set up for user
+        }
         //fquery(q.Collection('users'))
         let {client,db} = await loadDB();
         try {
             let result = await db.collection('recipes').drop();
-            //console.log('dropped with result',result);
         }
         catch (err) {
             console.log('unable to drop recipes - maybe does not exist yet?');
         }
-        prepRecs(recs,user);
+        prepRecsRemote(recs,user);
         let recipes = await insertMany('recipes',recs.recipes);
         return recipes;
     },
@@ -54,6 +56,7 @@ const functions = {
         const results = []
         for (let [index,options] of [
             [{'title':1},{}],
+            [{'owner.email':1}],
             [{'fullText.item':'text'},{name:'fulltext'}],
             [{'categories.name':1},{name:'category'}],
             [{'flatIngredients.item':1},{name:'ingredients'}],
