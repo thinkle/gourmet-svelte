@@ -17,7 +17,7 @@ function requestURI (mode,params) {
 const u = requestURI // shorthand
 
 async function doFetch (mode, user, params) {
-    console.log('fetch URL',u(mode,params))
+    //console.log('fetch URL',u(mode))
     
     let result = await fetch(u(mode),{
         method : 'post',
@@ -31,22 +31,16 @@ async function doFetch (mode, user, params) {
                             );
     if (result.status==200) {
         return result.json(); // return the promise from text...
+    } else if (result.status==400) {
+        let e = await result.json()
+         throw e;
     }
     else {
         let e = Error('Error fetching');
         e.status = result.status;
-        e.result=result;
         e.url = u(mode,params)
         e.error = await result.json();
-        console.log('Throwing an error everyone',e);
-        try {
-            console.log(JSON.stringify(e))
-            console.log(e.toString());
-        }
-        catch (ee) {
-            console.log('Cannot toString that baby?');
-        }
-        throw e;
+        throw e.error;
     }
 }
 
@@ -68,22 +62,15 @@ function RecipeApi (user) {
                 {recipe}
             );
         },
-        async updateRecipe (recipe) {
-            if (!recipe._id) {
-                const result = await api.addRecipe(recipe);
-                console.log('RemoteAPI Update Got result!',result)
-                return result
-            }
-            else {
-                console.log('Ok, remove actually needs to update...');
-                const result = await doFetch(
-                    'updateRecipe',
-                    user,
-                    {recipe}
-                );
-                console.log('Update got result',result);
-                return result;
-            }
+        updateRecipe (recipe) {
+            // Note: remote will insert if it's not already there (upsert: true)
+            return doFetch(
+                'updateRecipe',
+                user,
+                {recipe}
+            );
+            //console.log('Update got result',result);
+            //return result;
         },
         updateRecipes (recipes) {
             return doFetch(
@@ -91,23 +78,14 @@ function RecipeApi (user) {
                 'fixme'
             );
         },
-        getRecipe (recid) {
+        getRecipe (_id) {
             return doFetch(
                 'getRecipe',
                 user,
-                {id:recid}
+                {_id:_id}
             );
         },
         getRecipes ({query,fields,limit,page}={}) {
-            if (!query) {
-                query = {}
-            }
-            if (query['owner.email']) {
-                console.log('Warning: we had another email query???');
-                console.log('Quashing it: it was',query);
-            }
-            query['owner.email'] = user.email;
-            console.log('doFetch with query',query);
             let args = {query,fields,limit,page};
             return doFetch(
                 'getRecipes',
@@ -115,7 +93,8 @@ function RecipeApi (user) {
                 args
             );
         },
-        deleteRecipe (id) {
+
+        deleteRecipe (_id) {
         }
     }
 
