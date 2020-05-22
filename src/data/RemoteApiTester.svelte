@@ -1,5 +1,6 @@
 <script>
  import Tester from '../widgets/Tester.svelte'
+ import RemoteRecipeTester from './RemoteRecipeTester.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
  import remoteApi from '../data/remoteApi.js'
@@ -105,6 +106,7 @@
             <button on:click={()=>fakeLogin()}>Fake Log In</button>
         </div>
     {/if}
+    <RemoteRecipeTester/>
     <button on:click={testApi}>Test API</button> 
     <button on:click="{setup}">Setup DB</button>
     <button on:click="{throwError}">Throw Error</button>
