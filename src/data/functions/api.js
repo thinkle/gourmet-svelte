@@ -33,7 +33,6 @@ const handler = async (event, context) => {
             email:'tmhinkle@gmail.com',
         }
     }
-    console.log('API GET USER: ',user);
     let f = functions[params.mode]
     if (!f) {
         return {
@@ -46,10 +45,13 @@ const handler = async (event, context) => {
         body = await f(event,context,user,params)
     }
     catch (err) {
-        console.log('ERROR!',err);
         return {
             statusCode:400,
-            body:JSON.stringify({error:err.toString()})
+            body:JSON.stringify({error:err.toString(),
+                                 params : params,
+                                 jsonRequst : jsonBody,
+                                 user : user,
+                                })
         }
     }
     return {
