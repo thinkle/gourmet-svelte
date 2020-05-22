@@ -20,3 +20,20 @@ export function titleCase (words) {
         (word)=>word[0].toUpperCase()+word.substr(1).toLowerCase()
     ).join(' ')
 }
+
+export function jsonConcisify (o) {
+    return JSON.stringify(
+        o,
+        (k,v) => {
+            if (typeof v==='string' && v.length > 50) {
+                return v.substr(0,47)+'...'
+            }
+            if (Array.isArray(v)) {
+                return [v[0],'...']
+            }
+            else {
+                return v;
+            }
+        }
+    );
+}
