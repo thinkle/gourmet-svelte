@@ -1,6 +1,5 @@
 let testRecs = {
     standard :                 {
-            "localid": 25,
             "title": "Baked Potato and Cauliflower \"Samosas\" with Tamarind Mint Chutney",
             "text": [
                 {
@@ -210,7 +209,6 @@ let testRecs = {
         ],
     },
     oldstandard :         {
-            "localid": 20,
             "title": "Asparagus Custard Tart",
             "text": [
                 {
