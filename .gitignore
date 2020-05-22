@@ -6,3 +6,5 @@
 .\#*
 /extension/*.js
 background.js
+/extension/*.map
+*graveyard*
