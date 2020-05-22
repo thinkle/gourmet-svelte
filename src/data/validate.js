@@ -8,6 +8,24 @@
 // This may do DB-specific things to the recipe to make life easier...
 import stopword from 'stopword';
 
+const salt = new Date().getTime().toString(36)
+
+function quickHash (s) {
+     var hash = 0;
+    for (var i = 0; i < s.length; i++) {
+        var character = s.charCodeAt(i);
+        hash = ((hash<<5)-hash)+character;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+function makeId (id,user) {
+    let userSalt = quickHash(JSON.stringify(user)).toString(36)
+    return `${id}-${salt}-${userSalt}`
+}
+let count = 1;
+
 function validateRec (rec) {
     rec.flatIngredients = []
     if (!rec.ingredients) {
@@ -51,36 +69,60 @@ function crawlIngredient (ingredient, array) {
 /**
 For preparing a recipe collection that's been exported for import...
 **/
-export function prepRecs (recs,user) {
+export function prepRecRemote (r,user) {
+       /**
+          WTF: For reasons I don't understand, MongoDB fetch/retrieve
+          was simply failing to fetch back a new recipe when passed
+          through the API. To fix it, I had to provide an _id from the
+          outset, and then all was well.
+          
+          So now prepRec always puts an ID on a recipe that doesn't
+          have one. We bypass MongoDB's own unique ID system, which is
+          maybe not so good -- and makeId above creates a unique ID
+          based on the time of update, the user name, and a local ID.
 
-    const salt = new Date().getTime().toString(36)
+          My hope is that the *same* user is NOT simultaneously creating
+          two recipes without localids at the same time (since all new recipes
+          should pass through a local db and get a local ID first anyway, this
+          shouldn't be a problem, but of course it could change in the future).
+        **/
 
-    function makeId (id) {
-        return `${recs.metadata.name}-${id}-${salt}`
-    }
-
-    recs.recipes.forEach(
-        (r)=>{
-            r.owner = {
-                email : user.email,
-                full_name : user.metadata && user.metadata.full_name
-            };
-            r.user = user.email
-            r._id = makeId(r.localid);
-            crawlIngsForIds(r.ingredients);
-            validateRec(r)
+    validateRec(r);
+    r.owner = {
+        email : user.email,
+        full_name : user.metadata && user.metadata.full_name
+    };
+    //r.user = user.email
+    if (!r._id) {
+        if (r.localid) {
+            r._id = makeId(r.localid,user);
         }
-    );
+        else {
+            r._id = makeId(count,user);
+            count += 1;
+        }
+    }
+    crawlIngsForIds(r.ingredients);
+    validateRec(r)
 
     function crawlIngsForIds (ii) {
         ii.forEach(
             (i) => {
                 if (i.reference) {
-                    i.reference = makeId(i.reference);
+                    i.reference = makeId(i.reference,user);
                 }
             }
         );
     }
+
+}
+
+export function prepRecsRemote (recs,user) {    
+
+    recs.recipes.forEach(
+        (r)=>prepRecRemote(r,user)
+    )
+
 }
 let commonWords = ['the','and','but','for']
 
