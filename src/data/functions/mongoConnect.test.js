@@ -1,6 +1,6 @@
 import {loadDB} from './mongoConnect.js';
 import setupHandler from './setupDB.js';
-import {user,event,context,setupDBwithRecs,setupEmptyDB} from './testUtils.js';
+import {user,event,context,setupDBwithRecs,setupEmptyDB} from './setupMockDB.js';
 
 it(
     'Connect to MongoDB',
