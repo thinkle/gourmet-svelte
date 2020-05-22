@@ -1,0 +1,3 @@
+These files are actually served via the "web app" but from a user's
+perspective they are part of the extension, served up in iFrames as
+sidebars etc.
