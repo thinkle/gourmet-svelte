@@ -129,7 +129,6 @@ it(
         a = parseAmount('three dozen chicken');
         expect(a.amount).toEqual(3)
         expect(a.posttext).toEqual(' dozen chicken');
-        debugger;
         a = parseAmount('something that really has no amount');
         expect(a.amount).toEqual(undefined)
         expect(a.posttext).toEqual('something that really has no amount');
