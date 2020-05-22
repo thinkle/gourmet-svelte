@@ -5,6 +5,12 @@ import {MongoClient,Server} from 'mongodb';
 import {testRecs} from '../../common/mocks/recipes.js'
 const DB = 'devtest'
 
+var lastResult = undefined
+
+export function getLastResult () {
+    return lastResult;
+}
+
 export function loadDB (name=DB) {
     return new Promise ((resolve,reject)=>{
         const client = new MongoClient(url, { useNewUrlParser: true });
@@ -23,45 +29,45 @@ export function loadDB (name=DB) {
 
 export async function insertMany (collection, docs) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
+    lastResult = await db.collection(collection)
         .insertMany(docs)
-    return result.ops;
+    return lastResult.ops;
 }
 
 export async function insertOne (collection, doc) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
+    lastResult = await db.collection(collection)
         .insertOne(doc)
-    return result.ops[0];
+    return lastResult.ops[0];
 }
 
 export async function getOne (collection, query) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
+    lastResult = await db.collection(collection)
         .findOne(query);
-    return result;
+    return lastResult;
 }
 
 export async function replaceOne (collection, query, document) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
-        .replaceOne(query,document);
-    return result.ops[0];
+    lastResult = await db.collection(collection)
+        .replaceOne(query,document,{upsert:true});
+    return lastResult.ops[0];
 }
 
 
 export async function updateOne (collection, query, values) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
+    lastResult = await db.collection(collection)
         .updateOne(query,values);
-    return result.ops[0];
+    return lastResult.ops[0];
 }
 
 export async function deleteOne (collection, query) {
     const {db,client} = await loadDB(DB)
-    let result = await db.collection(collection)
+    lastResult = await db.collection(collection)
         .deleteOne(query);
-    return result.deletedCount
+    return lastResult.deletedCount
 }
 
 export async function queryCollection (collection, query, {fields, limit=100,page=0}={}) {
@@ -85,12 +91,12 @@ export async function queryCollection (collection, query, {fields, limit=100,pag
         //console.log('projecting to ',fields);
         cursor = cursor.project(fields)
     }
-    let result = await cursor.toArray()
-    //console.log('Page:',result.length + page);
+    lastResult = await cursor.toArray()
+    //console.log('Page:',lastResult.length + page);
     return { // FIXME: handle pagination
         count:count,
-        result:result,
-        page:result.length+page,
+        result:lastResult,
+        page:lastResult.length+page,
     }
 }
 
