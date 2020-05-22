@@ -2,6 +2,8 @@ import deepcopy from 'deepcopy';
 import recipeFunctions from './recipeFunctions.js';
 import {testRecs} from '../../common/mocks/recipes.js';
 import user,{otherUser} from '../../common/mocks/user.js';
+import {setupDBwithRecs} from './setupMockDB.js'
+
 let event = {};
 let context = {}
 
@@ -15,9 +17,8 @@ it(
         });
         expect(recipe).toBeDefined();
         expect(recipe._id).toBeDefined();
-        expect(recipe.user).toBeDefined();
-        expect(recipe.user).toEqual(user.email)
-        console.log('Created ID',recipe._id)
+        expect(recipe.owner.email).toBeDefined();
+        expect(recipe.owner.email).toEqual(user.email)
         expect(recipe.title).toEqual(testRecs.standard.title);
         expect(recipe.ingredients.length).toEqual(testRecs.standard.ingredients.length);
         let fetchedRec = await recipeFunctions.getRecipe(
@@ -61,7 +62,6 @@ it(
             .toThrowError();
         let threwError = false;
         try {
-            console.log('this should fail...');
             let stolenRec = await recipeFunctions.getRecipe(event,context,otherUser,
                                                             {_id:rec._id});
             console.log('I stole the cookie jar: ',stolenRec);
@@ -71,48 +71,113 @@ it(
             expect(err.message).toMatch(/no recipe/i)
         }
         expect(threwError).toBeTruthy()
+        let origRecId = rec._id
         threwError = false;
         try {
             let muckedUpRec = await recipeFunctions.updateRecipe(
                 event,context,otherUser,
                 {recipe:rec}
             );
-        }
-        catch (err) {
+        } catch (err) {
+            // Update of one we don't find should just push a new recipe in
             threwError = true;
         }
-        expect(threwError).toBeTruthy();
-        let deletedOtherPersonsRecipes = await recipeFunctions.deleteRecipe(
+        if (!threwError) {
+            expect(muckedUpRec._id).not.toEqual(origRecId)
+        } 
+        try {
+            let deletedOtherPersonsRecipes = await recipeFunctions.deleteRecipe(
             event,context,otherUser,
-            {recipe:rec}
-        );
-        expect(deletedOtherPersonsRecipes).toEqual(0)
+                {_id:rec._id}
+            );
+            expect(deletedOtherPersonsRecipes).toEqual(0)
+        }
+        catch (err) {
+            expect(err.message).toMatch(/no\s*recipe/i);
+        }
+
     }
 );
+
+async function expectError (f) {
+    try {
+        await f()
+    }
+    catch (e) {
+        return e
+    }
+    expect('Error').toEqual('have been thrown');
+}
+
+it('nice errors',
+   async () => {
+       let e = await expectError(
+           async ()=>await recipeFunctions.getRecipe(...bp,{recipe:{title:'foo'}})
+       );
+       expect(e.message).toMatch(/foo/) // should report what parameters we passed with
+       expect(e.message).toMatch(/_id/) // should report what parameters were needed
+       let e2 = await expectError(
+           async ()=>await recipeFunctions.updateRecipe(...bp,{recipe:{title:'foo'}})
+       );
+       expect(e2.message).toMatch(/foo/) // should report what parameters we passed with
+       expect(e2.message).toMatch(/_id/) // should report what parameters were needed
+   }
+  );
+
 
 it(
     'delete recipe',
     async () => {
-        let rec = await recipeFunctions.addRecipe(...bp,{recipe:{title:'Private Recipe'}});
+        let rec = await recipeFunctions.addRecipe(...bp,{recipe:{title:'Bad Recipe'}});
         let id = rec._id;
         let gotItBack = await recipeFunctions.getRecipe(...bp,{_id:id});
         expect(gotItBack._id).toEqual(id);
-        console.log('Got back recipe!',gotItBack);
-        let deleteCount = await recipeFunctions.deleteRecipe(...bp,{recipe:{_id:id}});
+        let deleteCount = await recipeFunctions.deleteRecipe(...bp,{_id:id});
         expect(deleteCount).toEqual(1)
-        let threwError = false;
-        try {
-            let backFromTheDead = await recipeFunctions.getRecipe(...bp,{_id:id});
-        } catch (err) {
-            threwError = true;
-            expect(err.message).toMatch(/no recipe/i)
-        }
-        expect(threwError).toBeTruthy();
+        let err = await expectError(
+            async ()=>{
+                let backFromTheDead = await recipeFunctions.getRecipe(...bp,{_id:id});
+                console.log('VERY BAD: GOT REC BACK FROM THE DEAD',backFromTheDead)
+            }
+        );
+        expect(err.message).toMatch(/no\s*recipe/i)
     }
 );
 
-it(
-    'pagination and search',
-    async () => {
-        expect('me').toEqual('have implemented this');
-);
+describe('pagination', ()=>{
+
+    beforeAll(async ()=>{
+        await setupDBwithRecs(user);
+    }
+             );
+    
+    it(
+        'pagination',
+        async () => {
+            let result = await recipeFunctions.getRecipes(
+                ...bp,
+                {limit:10})
+            expect(result).toBeDefined();
+            expect(result.count).toBeDefined()
+            expect(result.page).toBeDefined()
+            expect(result.result).toBeDefined()
+            expect(result.result.length).toEqual(10);
+            let nextResult = await recipeFunctions.getRecipes(
+                ...bp,
+                {limit:10,page:result.page}
+            );
+            expect(result.result.indexOf(nextResult.result[0])).toEqual(
+                -1
+            );
+            let lastPage = result.count - 1;
+            let lastResults = await recipeFunctions.getRecipes(
+                ...bp,
+                {limit:10,page:lastPage}
+            );
+            expect(lastResults.result.length).toBeLessThan(10);
+        }
+    );
+})
+// TODO:
+// confirm getRecipes only gets you your own recipes
+// test some queries? 
