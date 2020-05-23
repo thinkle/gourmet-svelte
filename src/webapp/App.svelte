@@ -8,7 +8,7 @@
  import {testRecs} from '../common/mocks/recipes.js'
 
 
- let name = 'Gourmet';
+ let name = 'Gourmet BUILD_TIME';
  let page;
  let params = {};
  router('/',()=>{page = Landing; params={}});
@@ -35,6 +35,7 @@
 </script>
 
 <div>
+    <h2>{name}</h2>
     <svelte:component this={page} {...params}/>
 </div>
 <style>
