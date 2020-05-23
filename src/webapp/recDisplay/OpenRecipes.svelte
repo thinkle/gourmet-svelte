@@ -1,41 +1,35 @@
 <script>
  import Recipe from './Recipe.svelte'
- export let recipes=[];
+ import {openLocalRecipes,localRecipes,recipeState} from '../../stores/recipeStores.js';
 
- function getTabTitle (recipe) {
-     return recipe.title && recipe.title.substr(0,30) || 'wtf?'; // fixme
+ function getTabTitle (id) {
+     return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || '???'; // fixme
  }
 
- let activeRecipe
+ let activeRecipeId
  let hide = false;
 
- $: if (!activeRecipe && recipes.length) {activeRecipe = recipes[0].current}
+ $: if (!activeRecipeId && $openLocalRecipes.length) {activeRecipeId = $openLocalRecipes[0]}
 
- function removeRec (r) {
-     let i = recipes.indexOf(r)
-     recipes.splice(i,1)
-     recipes = recipes;
-     if (activeRecipe==r.current) {
-         activeRecipe = undefined;
-         if (i > 0) {
-             activeRecipe = recipes[i-1].current
-         }
-         else {
-             if (recipes.length>0) {
-                 activeRecipe = recipes[0].current
-             }
-         }
+ let showCloseModalFor
+ function closeRec (id,confirmed=false) {
+     showCloseModalFor = undefined;
+     if (!$recipeState[id].edited||confirmed) {
+         localRecipes.close(id);
+     } else {
+         console.log('Set closed modal!');
+         showCloseModalFor = id;
      }
  }
 
 </script>
 <div>
-    {#if recipes.length > 0}
+    {#if $openLocalRecipes.length > 0}
     <div class="tabbox" class:hidden={hide}>
         <div class="tabs">
-            {#each recipes as recipe}
-                <span class:active={activeRecipe==recipe.current} on:click={()=>activeRecipe=recipe.current}>{getTabTitle(recipe.current)}
-                    <button class="icon" on:click={()=>removeRec(recipe)}><i class="material-icons" >close</i></button>
+            {#each $openLocalRecipes as id}
+                <span class:active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>{getTabTitle(id)}
+                    <button class="icon" on:click={()=>closeRec(id)}><i class="material-icons" >close</i></button>
                 </span>
             {/each}
             <button on:click="{()=>hide=!hide}">
@@ -48,13 +42,37 @@
 
         </div>
         <div class="content">
-            <Recipe rec={activeRecipe}/>
-            {JSON.stringify(activeRecipe)}
+            <Recipe onChange={(rec)=>$localRecipes[activeRecipeId]=rec} rec={$localRecipes[activeRecipeId]}/>
+            {#if showCloseModalFor!==undefined}
+                <div class="modal" >
+                {$localRecipes[showCloseModalFor] && $localRecipes[showCloseModalFor].title} has changed, close and lose changes?
+                <button on:click={()=>closeRec(showCloseModalFor,true)}>
+                    Close anyway, I don't care about my changes
+                </button>
+                <button on:click={()=>showCloseModalFor=undefined}>
+                    Oh wait, nevermind, I'm so sorry!
+                </button>
+                </div>
+            {/if}
         </div>
     </div>
     {/if}
 </div>
 <style>
+
+ .modal {
+     /* fix me later... */
+     position: fixed;
+     width: 400px;
+     height: 400px;
+     background-color: white;
+     top: calc(50vh - 200px);
+     left: calc(50vw - 200px);
+     box-shadow: 3px 3px #5555;
+     border: 1px solid white;
+     border-radius: 10px;
+ }
+ 
  div {
      transition: all 500ms;
  }
