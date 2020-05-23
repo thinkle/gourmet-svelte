@@ -1,5 +1,6 @@
 <script>
- import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
+ //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
+ import {localRecipes,storedRecipes,connected,recipeActions,recipePage,recipeState} from '../../stores/recipeStores.js';
  import {testRecs} from '../../common/mocks/recipes.js'
  import Status from '../../widgets/Status.svelte';
  import Recipe from './Recipe.svelte'
@@ -9,8 +10,9 @@
  import _ from 'lodash';
  let items = []
 
- $: {
+ function getAll () {
      if ($connected) {
+
          console.log('Fetch those recipes...');
          recipeActions.getRecipes({fields:['title','categories','sources','images'],initial:true});
      }
@@ -18,19 +20,20 @@
          console.log('No connection yet... holding off');
      }
  }
+ 
  export let open = [];
  let recipes = []
- $: {
-     if ($recipeData) {
-         console.log('Got new data!',$recipeData);
-         if ($recipeData.searchResults) {
-             recipes = $recipeData.searchResults.map((v)=>$recipeData[v.id])
-         }
-         else {
-             recipes = []
-         }
-     }
- }
+ /* $: {
+  *     if ($recipeData) {
+  *         console.log('Got new data!',$recipeData);
+  *         if ($recipeData.searchResults) {
+  *             recipes = $recipeData.searchResults.map((v)=>$recipeData[v.id])
+  *         }
+  *         else {
+  *             recipes = []
+  *         }
+  *     }
+  * } */
 
  let syncingPromise
 
@@ -45,8 +48,18 @@
                             
 </script>
 <div>
-    <h2>Recipes</h2>    
-    <FancyInput type="text" bind:value={searchInput}/>
+    <h2>New Store Recipes BUILD_TIME</h2>
+    
+    {#if $connected}
+        Search: <FancyInput type="text" bind:value={searchInput}/>
+        <br>
+        <button on:click={()=>recipeActions.createRecipe(testRecs.empty)}>New Recipe</button>
+    {/if}
+    {#if $recipePage.length==0}
+        <button on:click={getAll}>
+            Get those recipes!
+        </button>
+    {/if}
     <Status/>
     <div>
         <OpenRecipes recipes={open}/>
@@ -62,9 +75,12 @@
             Failed :(
         {/await}
     {/if}
+    Page: ${recipePage}
     <table>
-        {#each recipes as recipe}
-            <RecipeSummary onClick={()=>open=[...open,recipe]} recipe={recipe.current}/>
+        {#each $recipePage as id}
+            {id} <RecipeSummary
+                     onClick={()=>localRecipes.open(id)}
+                     recipe={$storedRecipes[id]}/>
         {:else}
             <div>
                 No recipes yet? Maybe import some or create them!
@@ -76,6 +92,11 @@
             </div>
         {/each}
     </table>
+</div>
+<div>
+    DEBUG!
+    LOCAL: {JSON.stringify($localRecipes)}
+    StoredState: {JSON.stringify($recipeState)}
 </div>
 <style>
  .changed {font-style: italic; color: purple;}
