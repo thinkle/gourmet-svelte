@@ -19,7 +19,6 @@
  $: if (justHadFocus && selection && ref.tagName != selection.origin) {
      justHadFocus = false;
      ref.focus()
-     console.log('Grabbed focus!');
      if (ref.tagName=='INPUT') {
          ref.setSelectionRange(
              selection.start,
@@ -44,15 +43,11 @@ $: if (value && ref) {adjustSize()}
 
 function adjustSize () {     
      // adjust value...
-     console.log('Check value? current length:',value.length,
-                 'we last shrunk for ',shrunkForText.length);
      if (shrunkForText.length > value.length) {
-         console.log('Undo shrinkage...')
          fontSize = undefined;
          oneLiner = true;
          justHadFocus = document.activeElement==ref
          if (ref.tagName!='input') {
-             console.log('Going from div to input now...');
              let range = window.getSelection().getRangeAt(0);
              selection = {
                  start:range.startOffset,
@@ -61,24 +56,19 @@ function adjustSize () {
                  origin:'DIV'
              }
          }
-         console.log('just had focus?',justHadFocus)
      }
      if (ref.scrollWidth > ref.clientWidth) {
          if (oneLiner && !fontSize || fontSize > minFontSize) {
-             console.log('Try shrinking...');
              fontSize = window.getComputedStyle(ref).getPropertyValue('font-size');
-             console.log('Got font size: ',fontSize);
              let percentageTarget = ref.clientWidth/ref.scrollWidth
              fontSize = Number(fontSize.split('px')[0])
              fontSize = Math.max(fontSize * percentageTarget,minFontSize);
              shrunkForText = value;
          }
          else {
-             console.log('changing to contenteditable');
              shrunkForText = value;
              oneLiner = false;
              justHadFocus = document.activeElement==ref
-             console.log('just had focus?',justHadFocus)
              selection = {
                  start:ref.selectionStart,
                  end:ref.selectionEnd,
