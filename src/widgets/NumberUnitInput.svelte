@@ -31,7 +31,6 @@
  let multiplier = getContext('multiplier');
 
  function onNumberChange (e) {
-     console.log('Number changed',e);
      delete value.rangeAmount // don't put it back...
      value = {...value,
               ...e.detail}
