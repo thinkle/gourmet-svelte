@@ -35,7 +35,7 @@
     <span>
         {#each value as v}
             <span class="tag">{v.name}
-                <IB on:click={()=>icon=move(v)} bare={true} icon="close"></IB>
+                <IB on:click={()=>remove(v)} bare={true} icon="close"></IB>
             </span>
         {/each}
     </span>
