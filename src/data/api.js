@@ -1,13 +1,12 @@
 // Our "glue" layer between local data and remote data.
 // This layer will handle syncing of data between remote and local storage
 
-// This thing should work like this in the browser , to a server, to a file system -- we don't care.
-
 import localApi from './dexieApi.js';
 import {RecipeApi} from './remoteApi.js';
 import {user} from '../stores/user.js';
 import status from '../stores/status.js';
 import {prepRecLocal} from '../data/validate.js';
+import {jsonConcisify} from '../utils/textUtils.js';
 
 let remoteApi;
 
@@ -22,15 +21,11 @@ const api = {
     async addRecipe (recipe) {
         recipe.last_modified = new Date().getTime();
         let recid = await localApi.addRecipe(recipe)
-        console.log('Saved local',recipe);
         recipe.id = recid;
         try {
             let remoteRec = await remoteApi.addRecipe(recipe);
-            console.log('Saved remote',remoteRec);
-            console.log('Update remote');
             remoteRec.savedRemote = true;
             recipe.savedRemote = true; // update the object we were handed in case it sticks around...
-            console.log('Save local copy of remote...');
             await localApi.updateRecipe(remoteRec);
             return remoteRec;
         }
@@ -45,11 +40,9 @@ const api = {
         try {
             let remoteRec = await remoteApi.updateRecipe(recipe);
             recipe.savedRemote = true;
-            console.log('Saved remote',remoteRec);
             recipe._id = remoteRec._id;
         }
         catch (err) {
-            console.log("Failed to save remote",err);            
             recipe.savedRemote = false;
         }
         await localApi.updateRecipe(recipe);
@@ -58,9 +51,8 @@ const api = {
     async updateRecipes (recipes) {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
-    async sync (test=false) {
+    async sync (test=false,{onPartialSync}) {
         if (!localApi.db) {
-            console.log('Connect to local DB');
             await localApi.connect();
         }
         let statusId = status.createStatus('Syncing Recipes from database...',{type:'recipe'});
@@ -70,7 +62,6 @@ const api = {
         let result = []
         
         while (keepFetchingIDs) {
-            console.log('Fetch IDs of recs from remote server... PAGE#',idPage);
             status.start(statusId);
             let remoteResponse = await remoteApi.getRecipes({fields:['_ID','id','last_modified','owner'],page:idPage});
             let remoteRecs = remoteResponse.result;
@@ -108,6 +99,9 @@ const api = {
                 })
                 console.log('updating with local recipes...');
                 await localApi.updateRecipes(fullRecResponse.result);
+                if (onPartialSync) {
+                    onPartialSync(fullRecResponse.result);
+                }
                 console.log('Done...');
                 if (test) {
                     console.log('SYNC EXITING EARLY - THIS IS JUST A TEST BABY');
