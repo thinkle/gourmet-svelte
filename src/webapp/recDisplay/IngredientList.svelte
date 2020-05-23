@@ -6,6 +6,7 @@
  export let maxWidth=250;
  export let editable = true;
  export let editMode = false;
+ export let onChange
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
@@ -13,8 +14,8 @@
  import {onMount} from 'svelte';
  let recipeChanges = getContext('recipeChanges');
 
- function onChange () {
-     $recipeChanges += 1
+ function triggerChange () {
+     onChange && onChange(ingredients)
  }
 
  export function getWidth () {
@@ -61,9 +62,9 @@
                 <tr class:ing={!i.ingredients} class:grouphead={i.ingredients}>
                     <td colspan="4">
                         {#if editMode}
-                            <FancyInput on:change={onChange} bind:value={i.text} placeholder="Ingredient Group"/>
+                            <FancyInput on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
                             {#if (i.ingredients.length==0)}
-                                <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}">
+                                <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange() }}">
                                     <i class="material-icons" >delete</i>
                                 </button>
                             {/if}
@@ -74,17 +75,17 @@
                             {#each i.ingredients as ii,nn}
 	                        <tr class='ing'>
                                     {#if editMode}
-                                        <NumberUnitInput on:change={onChange} mode="table" label={false} bind:value={ii.amount}/>
+                                        <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
                                         <td>
                                             <label>Item:</label> 
-                                            <FancyInput on:change={onChange} bind:value={ii.text} placeholder="Ingredient"/>
+                                            <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
                                         </td>
-                                        <button on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients }}"><i class="material-icons" >delete</i>
+                                        <button on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients;triggerChange()}}"><i class="material-icons" >delete</i>
                                         </button>
                                     {:else}
                                         <NumberUnitDisplay  mode="table" value={ii.amount}/>
 	                                <td>
-                                            <span bind:clientWidth={ii.iwidth} class='item'>{ii.text}</span>
+                                            <span class='item'>{ii.text}</span>
                                         </td>
                                     {/if}
                                 </tr>
@@ -94,7 +95,7 @@
                                 <tr>
                                     <td>
                                         <IconButton icon="add" bare="true"
-                                                    on:click="{()=>{i.ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
+                                                    on:click="{()=>{i.ingredients.push({text:'',amount:{}});ingredients=ingredients}}"
                                                     type="icon"><i class='material-icons'/>
                                         </IconButton>
                                     </td>
@@ -107,18 +108,18 @@
             {:else}
                 <tr> <!-- standard ingredient row -->
                     {#if editMode}
-                        <NumberUnitInput on:change={onChange} mode="table" label={false} bind:value={i.amount}/>
+                        <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={i.amount}/>
                         <td>
                             <label>Item:</label> 
-                            <FancyInput on:change={onChange} placeholder="Ingredient" bind:value={i.text}/>
+                            <FancyInput on:change={triggerChange} placeholder="Ingredient" bind:value={i.text}/>
                         </td>
                         <td>
-                            <IconButton on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients }}" icon="delete" bare="true"/>
+                            <IconButton on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete" bare="true"/>
                         </td>
                     {:else}
                         <NumberUnitDisplay mode="table" value={i.amount}/>
 	                <td>
-                            <span bind:clientWidth={i.iwidth} class='item'>{i.text}</span>
+                            <span class='item'>{i.text}</span>
                         </td>
                     {/if}
                 </tr>
@@ -130,7 +131,7 @@
                 </td>
                 <td>
                     <IconButton icon="add" bare="true"
-                                on:click="{()=>{ingredients.push({item:'',amount:{}});ingredients=ingredients}}"
+                                on:click="{()=>{ingredients.push({text:'',amount:{}});ingredients=ingredients;triggerChange()}}"
                                 type="icon">
                     </IconButton>
                 </td>
