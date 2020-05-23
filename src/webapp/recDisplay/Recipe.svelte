@@ -6,34 +6,38 @@
  import SideBySide from '../../widgets/SideBySide.svelte';
  import RecBlock from './RecBlock.svelte';
  import AmountInput from '../../widgets/AmountInput.svelte';
- import {recipeData,recipeActions,connected,updateCount} from '../../stores/recipeData.js';
+
+ import {recipeState,recipeActions} from '../../stores/recipeStores.js';
  import {onMount,setContext} from 'svelte'
  import {writable} from 'svelte/store'
- let changed;
+
 
  export let rec={ingredients : [],
                 text : [],
                 images : [],
                 };
 
- export var editMode = false;
+ export let editMode = false;
  export let editable = true;
+
+ export let onChange;
+
+ function triggerChange () {
+     onChange(rec);
+ }
+ 
  var ingeditmode = false;
  
  
  // Store business...
  let multiplier = writable(1);
  setContext('multiplier',multiplier);
+ 
+ // Delete me
  let recipeChanges = writable(0);
  setContext('recipeChanges',recipeChanges);
- let lastUpdateCheck = 0;
- $: if ($recipeChanges > lastUpdateCheck) {
-     console.log('Recipe calls updateCurrent');
-     recipeActions.updateCurrent(rec.id,rec)
-     lastUpdateCheck = $recipeChanges;
- }
+ // end delete me
  
-
 
 </script>
 
@@ -42,7 +46,7 @@
         <h2>
 	    {#each RecDef.titleProps as prop}
                 <span>
-                    <RecProp showLabel={false} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}></RecProp>
+                    <RecProp onChange={triggerChange} showLabel={false} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}></RecProp>
                 </span>
             {/each}        
         </h2>
@@ -52,18 +56,21 @@
                          showPlusMinusButtons={true}
             />
         </div>
-        <span>Change Events: {$recipeChanges}. Update: {$updateCount[rec.id]}</span>
         {#if editable}
             <button class="toggle" class:active-toggle={editMode} on:click={()=>editMode=!editMode}>
-            Edit{#if editMode}ing{/if}
-            Recipe <i class="material-icons">edit</i></button>{/if}
-        {#if $recipeData && rec && rec.id && $recipeData[rec.id] && $recipeData[rec.id].changed}
-            <button
-                class:busy={$recipeData[rec.id].localState=='updating'}
-                           on:click="{()=>recipeActions.updateRecipe(rec)}">
-                Save Recipe
-            </button>
-        {/if}
+                Edit{#if editMode}ing{/if}
+                Recipe <i class="material-icons">edit</i></button>{/if}
+
+            {#if $recipeState[rec.id] && $recipeState[rec.id].edited}
+                <button on:click="{()=>recipeActions.revertRecipe(rec.id)}">
+                    Revert
+                </button>
+                <button
+                    class:busy={$recipeState[rec.id].updating}
+                               on:click="{()=>recipeActions.updateRecipe(rec)}">
+                    Save Recipe!
+                </button>
+            {/if} 
     </div>
     <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
 	<h3 slot="leftHead">
@@ -77,7 +84,7 @@
             {/if}
 	</h3>
 	<div slot="left">
-	    <IL  editable={editable} editMode="{editMode||ingeditmode}" bind:ingredients={rec.ingredients} maxWidth="350">
+	    <IL  editable={editable} editMode="{editMode||ingeditmode}" bind:ingredients={rec.ingredients} maxWidth="350" onChange={triggerChange}>
 	    </IL>
 	</div>		
 	
@@ -92,7 +99,7 @@
                 <div class="props" >
                     {#each RecDef.recProps as prop}
                         {#if rec.hasOwnProperty(prop.name)}
-                            <RecProp editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/>
+                            <RecProp onChange={triggerChange} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/>
                         {/if}
                         {#if editMode}
                             {#if !rec.hasOwnProperty(prop.name)}
