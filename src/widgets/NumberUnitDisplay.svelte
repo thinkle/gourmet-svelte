@@ -6,7 +6,6 @@
 
  import {getContext} from 'svelte';
  let multiplier = getContext('multiplier')
- console.log('Formatting',value);
 </script>
 
 <span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>
