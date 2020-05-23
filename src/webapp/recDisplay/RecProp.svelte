@@ -5,6 +5,7 @@
  export let editable=false;
  export let forceEdit=false;
  export let showLabel=true;
+ export let onChange;
  import RecDef from '../../common/RecDef.js';
  import IconButton from '../../widgets/IconButton.svelte';
  import PlainInput from '../../widgets/PlainInput.svelte';
@@ -18,8 +19,10 @@
  import RecBlock from './RecBlock.svelte';
  import RecipeText from './RecipeText.svelte';
 
+
+
  let modes = RecDef.EditModes
- let recipeChanges = getContext('recipeChanges');
+ 
  let ref;
  const propInput = {
      [modes.TXT] : PlainInput,
@@ -74,21 +77,21 @@
 
  function handleChange (event) {
      value = event.detail || event.target.value;
-     $recipeChanges += 1;
+     onChange && onChange(value)
  }
 
  function makeArrayHandler (n) {
      return function (event) {
          value[n] = event.detail || event.target.value;
          value = value;
-         $recipeChanges += 1;
+         onChange && onChange(value)
      }
  }
  
 </script>
 <div>
     <div>
-        {#if showLabel && (!prop.hideLabel && !edit)}
+        {#if showLabel && (!prop.hideLabel)}
             <div class="top" >
                 <label on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !edit}
@@ -115,7 +118,7 @@
                             <div>
                                 <svelte:component this="{propInput[prop.edit]}"
                                                   on:change="{makeArrayHandler(n)}"
-                                                  value="{value[n]}"/>
+                                                  bind:value="{value[n]}"/>
                             </div>
                         {/each}
                         <IconButton bare="true" icon="add" class="icon"
@@ -127,7 +130,7 @@
                         this={propInput[prop.edit]}
                              options={prop.options}
                         on:change={handleChange}
-                             value={value}
+                             bind:value={value}
                         bind:this={ref}
                     />
                 {/if}
@@ -138,7 +141,7 @@
                             {#if propDisplay[prop.edit]}
                                 <svelte:component
                                     this="{propDisplay[prop.edit]}"
-                                    value="{v}"
+                                    bind:value="{v}"
                                 />
                             {:else}
                                 <!-- generic display -->
@@ -150,7 +153,7 @@
                         {#if propDisplay[prop.edit]}
                             <svelte:component
                                 this="{propDisplay[prop.edit]}"
-                                value="{value}"
+                                bind:value="{value}"
                             />
                         {:else}
                             <!-- generic display -->
