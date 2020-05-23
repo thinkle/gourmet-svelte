@@ -6,9 +6,7 @@
  let thumb;
  $: thumb = recipe.images && recipe.images.length > 0 && recipe.images[0];
  function wowAClick (event) {
-     console.log('A click!');
      if (onClick) {
-         console.log('Calling callback...');
          onClick(event);
      }
  }
