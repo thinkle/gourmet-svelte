@@ -88,7 +88,8 @@ function buildAtLeastOneTimeMatcher () {
     return new RegExp(regexParts.join('|'),'ig')
 }
 
-const timeMatcher = buildAtLeastOneTimeMatcher();
+//const timeMatcher = buildAtLeastOneTimeMatcher(); // led to catatrophic backtracking in at least one case :(
+const timeMatcher = /((\band|\W+\b)?\s*\d+\s[acdehikmnorstuw]+\s*)+/ig // Much simplified -- less precise, but maybe won't leaad to catastrophic failure?
 const fancyTimeMatcher = new RegExp(reToString(timeMatcher).replace('\\d+',numMatchString),'ig');
 //const fancyTimeValueMatcher = new RegExp(reToString(timeValueMatcher).replace('\\d',numMatchString),'gi');
 
@@ -131,15 +132,17 @@ export function getSecondsFromString (s) {
     return total
 }
 
+
+
 export function parseTimes (s) {
     return s.replace(
         timeMatcher,
         (matchString)=>{
             let seconds = getSecondsFromString(matchString)
             // fix whitespace!
-            let {leading,content,trailing} = matchString.match(
-                    /^(?<leading>\s*)(?<content>.+?)(?<trailing>\s*)$/
-            ).groups;
+            let [s,leading,content,trailing]  = matchString.match(
+                    /^(\s*)(.+?)(\s*)$/
+            );
             return `${leading}<duration seconds=${seconds}>${content}</duration>${trailing}`
         }
     );
