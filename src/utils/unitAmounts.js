@@ -228,7 +228,8 @@ for (var key in UNIT_SYNONYMS) {
     });
 }
 
-export const UNIT_REGEXP_STRING = '\\b(?<unit>'+UNIT_NAMES.join('|')+')\\b'
+//export const UNIT_REGEXP_STRING = '\\b(?<unit>'+UNIT_NAMES.join('|')+')\\b'
+export const UNIT_REGEXP_STRING = '\\b('+UNIT_NAMES.join('|')+')\\b' // FF doesn't support named regexps :(
 export const UNIT_REGEXP = new RegExp(
     UNIT_REGEXP_STRING,'i'
 );
@@ -341,7 +342,7 @@ export function analyzeUnit (unit) {
 export function parseUnit (text) {
     let m = text.match(UNIT_REGEXP);
     if (m) {
-        let unit = m.groups.unit
+        let unit = m[1]
         let pretext = text.substr(0,m.index);
         let posttext = text.substr(m.index+unit.length)
         if (posttext) {
