@@ -248,9 +248,17 @@ var numMid = numBase + '|[,./])'
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
 numMatchString = `${numMatchString}(\\s+${numMatchString})?`
 var numberMatcher = new RegExp(numMatchString,'i');
-var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})`
-var rangeMatcher = new RegExp(rangeMatcherString,'i')
+var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})` // FF doesn't support named groups :(
+//var rangeMatcherString = `(${numMatchString})(\\s*(to|or|-|:|–|—|―)\\s*)(${numMatchString})`
 
+var rangeMatcher = new RegExp(rangeMatcherString,'i')
+var groupsInNumMatcher = ' '.match(new RegExp(numMatchString+'|\\s')).length
+console.log('numMatcher has ? groups',groupsInNumMatcher);
+var groupsInRangeMatcher = ' '.match(new RegExp(rangeMatcherString+'|\\s')).length
+console.log('rangeMatcher has ? groups',groupsInRangeMatcher)
+//var firstRangeGroup = 1
+//var secondRangeGroup = 1 + groupsInNumMatcher + 1 + 1 + 1  // container group for first number + all the number groups for that number + range group + 1 + 1
+//console.log('!!!Range matcher second range group is #',secondRangeGroup)
 function incrementOld (value) {
      var nextOne = false;
      if (value < 1) {
@@ -366,6 +374,8 @@ function parseAmount (s) {
     if (match) {
         amount.rangeAmount = fracToFloat(match.groups.first);
         amount.amount = fracToFloat(match.groups.second);
+        //amount.rangeAmount = fracToFloat(match[1]);
+        //amount.amount = fracToFloat(match[secondRangeGroup]);
     }
     else {
         match = s.match(numberBeforeUnitMatcher);
@@ -402,4 +412,6 @@ export function formatAmount (amount,options) {
 export {floatToFrac, fracToFloat, parseAmount,
         numberMatcher, numMatchString,
         rangeMatcherString, rangeMatcher,
-        increment, decrement}
+        increment, decrement,
+        //firstRangeGroup, secondRangeGroup,
+       }
