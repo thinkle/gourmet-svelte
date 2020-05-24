@@ -10,10 +10,7 @@ it(
         ).toBeTruthy()
         console.log('Got match',m)
         expect(
-            m.groups
-        ).toBeDefined()
-        expect(
-            m.groups.unit
+            m.groups[1]
         ).toEqual('cups')
     }
 );
