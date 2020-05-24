@@ -1,4 +1,6 @@
-import {floatToFrac, fracToFloat, rangeMatcher, rangeMatcherString, numberMatcher, numMatchString, increment, decrement, parseAmount} from './numbers.js'
+import {floatToFrac, fracToFloat, rangeMatcher, rangeMatcherString, numberMatcher, numMatchString,
+        increment, decrement, parseAmount,
+       } from './numbers.js'
 
 it(
     'Number Matchers',
@@ -24,7 +26,7 @@ it(
 it(
     'Range matchers',
     ()=>{
-        console.log('Testing range matcher:',rangeMatcher.toString().substr(0,500),'...')
+        //console.log('Testing range matcher:',rangeMatcher.toString().substr(0,500),'...')
         console.log('That was big!')
         //console.log(rangeMatcher)
         let m = '4 - 6'.match(rangeMatcher);
@@ -132,5 +134,8 @@ it(
         a = parseAmount('something that really has no amount');
         expect(a.amount).toEqual(undefined)
         expect(a.posttext).toEqual('something that really has no amount');
+        a = parseAmount('20 to 30 minutes');
+        expect(a.amount).toEqual(30);
+        expect(a.rangeAmount).toEqual(20);
     }
 );
