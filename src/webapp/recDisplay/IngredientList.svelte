@@ -6,7 +6,7 @@
  export let maxWidth=250;
  export let editable = true;
  export let editMode = false;
- export let onChange
+ export let onChange = undefined;
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
@@ -14,6 +14,7 @@
  import {onMount} from 'svelte';
  let recipeChanges = getContext('recipeChanges');
 
+ console.log("IngredientList created: onChange=",onChange)
  function triggerChange () {
      onChange && onChange(ingredients)
  }
