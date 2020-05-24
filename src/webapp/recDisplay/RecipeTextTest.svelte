@@ -19,6 +19,8 @@
 
 <Tester name="Recipe Text" initialShow={initialShow} >
     <RecipeText value={value} />
+    <textarea bind:value={value.body}></textarea>
+
     <button
         on:click={()=>hidden=!hidden}
     >Toggle</button>
