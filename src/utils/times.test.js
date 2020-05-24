@@ -59,3 +59,24 @@ it(
         );
     }
 );
+
+it(
+    'Expect browser not to crash',
+    ()=>{
+        let devilText =  ` <div class="topnote">
+                <p>Harissa paste, the Tunisian hot chile condiment, is a super versatile pantry item. Keep it on hand for creating quick weeknight sauces that pack a punch. Here, store-bought harissa is reinforced with sautéed onion and garlic, then brightened with lemony coriander and fresh parsley. Mashed chickpeas add texture and balance out the spicy, tangy sauce. Couscous and orzo are simple sides to serve with this meal; if you have extra time, roasted squash or steamed cauliflower are also great accompaniments. Leftover harissa sauce makes a great topping for roasted cod or salmon, or use it as a warm vinaigrette to dress up a simple green salad. If you'd like, you can use boneless breasts or thighs, but keep on eye on them. They'll be cooked through in 20 to 30 minutes.</p>
+                
+
+
+              </div>`
+        console.log('Crashing browser?');
+        //let array = [...devilText.matchAll(times.timeMatcher)];
+        //let one = devilText.match(times.timeMatcher)
+        console.log('The regexp: ',times.timeMatcher);
+        //console.log('Got matches for devil: ',one);
+        let result = times.parseTimes(
+        devilText
+        );
+        console.log('Got result!',result);
+
+    })
