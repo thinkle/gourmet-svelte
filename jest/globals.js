@@ -1,4 +1,3 @@
-console.log('Loading globals')
 import Dexie from 'dexie';
 import indexedDB from 'fake-indexeddb';
 import IDBKeyRange from"fake-indexeddb/lib/FDBKeyRange";
