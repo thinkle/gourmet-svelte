@@ -7,7 +7,7 @@
  let pollAgain = true;
  let parsed
  let updateCount = 0;
- import {recipeActions,recipeData,connected} from '../../stores/recipeData.js';
+ import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
  import IconButton from '../../widgets/IconButton.svelte';
  let creating;
 
@@ -59,10 +59,10 @@
             }
             recipe = parseData(parsed)
             
-            }
+ }
          
-         let show=true;
-     let showRec = false;
+ let show=false;
+ let showRec = false;
 </script>
 <div>
     {#if connected && recipe}
@@ -73,9 +73,9 @@
     {#if creating}
         {#await creating}
             Creating recipe in database...
-        {:then recid}
-            Created recipe! {recipe = $recipeData[recid]}
-            ID={recid};
+        {:then recipe}
+            Created recipe!
+            ID={recipe.id};
         {:catch error}
             Unable to create recipe {error}
         {/await}
@@ -87,7 +87,7 @@
     {#if recipe}
         {#if showRec}
             <button on:click={()=>showRec=false}>Hide Rec</button>
-            <Recipe editable={false} bind:rec={recipe}/>
+            <Recipe editable={false} rec={recipe}/>
             Recipe: {JSON.stringify(recipe)}
         {:else}
             <button on:click={()=>showRec=true}>Show Rec</button>
