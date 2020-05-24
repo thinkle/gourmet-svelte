@@ -87,7 +87,7 @@ export const localRecipes = {
 }
 
 export const openLocalRecipes = derived(local,($local)=>{
-    console.log('regenerate open...');
+    console.log('regenerate open...',Object.keys($local));
     return Object.keys($local)
 }
 );
@@ -99,6 +99,14 @@ export const recipePage = {
     subscribe : activePage.subscribe,
     
 }
+
+// Debug
+// stored.subscribe(
+//     (v)=>console.log('Stored updated:',Object.keys(v))
+// )
+// local.subscribe(
+//     (v)=>console.log('Local updated:',Object.keys(v))
+// )
 
 export const recipeActions = {
 
@@ -117,6 +125,7 @@ export const recipeActions = {
         localRecipes.open(recipe.id);
         ssp(actionState,'creating',false)
         ssp(actionState,'created',recipe.id)
+        return recipe;
     },
     async getRecipes ({query,fields,limit,page}) {
         ssp(actionState,'querying',{query,fields,limit,page});
