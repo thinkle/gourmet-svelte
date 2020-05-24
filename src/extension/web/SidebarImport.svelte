@@ -8,7 +8,6 @@
  let clearing;
  let imported = false;
 
-
  function doParseRecipe () {
      console.log('parse!');
      parsing = backgroundParsePage.send();     
@@ -28,11 +27,10 @@
     <ParseStatus/>
     {#if parsing}
         {#await parsing}
+            Parsing...
         {:then json}
             Done parsing!
             <p>You'll see the items highlighted on the recipe itself (hopefully: styling may vary depending on the page -- we do our best!</p>
-            <p>If it looks good, you can <button>Finish the import</button> now.</p>
-            <p>Or, you can tag more items by hand using the buttons below or the right-click menu.</p>
             {JSON.stringify(json)}
             <IconButton on:click={()=>parsing=undefined} bare={true} icon="close"></IconButton>
             {imported = true}
