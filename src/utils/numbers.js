@@ -339,7 +339,7 @@ function decrement (n) {
     }
     else {
         let fraction = getNearestFraction(n);
-        if (!fraction) {
+        if (!fraction || fraction[0]==0) {
             return n / 2
         }
         else {
