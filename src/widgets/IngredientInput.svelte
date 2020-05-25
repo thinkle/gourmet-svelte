@@ -24,35 +24,35 @@
  let doMarkup;
  $: { parse(text) }
 
-function parse () {                  
-     if (text) {
-         let amt = parseAmount(text);
-         let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
-         delete amt.pretext;
-         delete amt.posttext;
-         parsed = {
-             amount : {
-                 ...amt,
-                 unit : unitAndText.unit,
-                 standardUnit : unitAndText.standardUnit,
-             },
-             text : unitAndText.text,
-             originalText : text,
-         }
-     }
-     else {
-         parsed = {
-         }
-     }
-     if (fireInputOnNextParse) {
-         onInput && onInput(parsed);
-         fireInputOnNextParse = false
-     }
-     if (doMarkup) {
-         //markup();
-         //doMarkup = false; // do it once
-     }
- }
+                  function parse () {                  
+                                    if (text) {
+                                        let amt = parseAmount(text);
+                                        let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
+                                        delete amt.pretext;
+                                        delete amt.posttext;
+                                        parsed = {
+                                            amount : {
+                                                ...amt,
+                                                unit : unitAndText.unit,
+                                                standardUnit : unitAndText.standardUnit,
+                                            },
+                                            text : unitAndText.text,
+                                            originalText : text,
+                                        }
+                                    }
+                                    else {
+                                        parsed = {
+                                        }
+                                    }
+                                    if (fireInputOnNextParse) {
+                                        onInput && onInput(parsed);
+                                        fireInputOnNextParse = false
+                                    }
+                                    if (doMarkup) {
+                                        //markup();
+                                        //doMarkup = false; // do it once
+                                    }
+                                    }
 
  $: {
      if (ing) {
@@ -73,8 +73,14 @@ function parse () {
      // Check for "enter" key
      if (event.keyCode==13) {
          if (onEnter) {
-             onEnter(parsed);
-             markupAndChange();
+             console.log('Fire on enter!');
+             let result = onEnter(parsed);
+             if (result) {
+                 clear()
+             }
+             else {
+                 markupAndChange();
+             }
              event.preventDefault();
          }
      }
@@ -148,9 +154,9 @@ function parse () {
      // mark up text based on parsed...
      if (parsed.amount) {
          let t = text
+             .replace(parsed.amount.unit,`<span class="unit">${parsed.amount.unit}</span>`)
              .replace(parsed.amount.textAmount,`<span class="amount">${parsed.amount.textAmount}</span>`)
-             .replace(parsed.amount.textRangeAmount,`<span class="amount rangeamount">${parsed.amount.textRangeAmount}</span>`)
-             .replace(parsed.amount.unit,`<span class="unit">${parsed.amount.unit}</span>`);
+             .replace(parsed.amount.textRangeAmount,`<span class="amount rangeamount">${parsed.amount.textRangeAmount}</span>`);
          html = t;
      }     
  }
@@ -162,14 +168,17 @@ function parse () {
 <div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
 </div>
 <style>
+
  .input {
      margin-top: var(--small);
+     padding-left: calc(2.4 * var(--small));
+     text-indent: calc(-2.4 * var(--small));
  }
  .input :global(span.amount,span.unit) {
      border-top: 1px solid black;
      padding-top: 3px;
      position: relative;
-     text-align: center;
+     text-indent: 0;
  }
 
  .input :global(.amount) {
