@@ -140,10 +140,15 @@ export function parseTimes (s) {
         (matchString)=>{
             let seconds = getSecondsFromString(matchString)
             // fix whitespace!
-            let [s,leading,content,trailing]  = matchString.match(
-                    /^(\s*)(.+?)(\s*)$/
-            );
-            return `${leading}<duration seconds=${seconds}>${content}</duration>${trailing}`
+            if (seconds) {
+                let [s,leading,content,trailing]  = matchString.match(
+                        /^(\s*)(.+?)(\s*)$/
+                );
+                return `${leading}<duration seconds=${seconds}>${content}</duration>${trailing}`
+            }
+            else {
+                return matchString;
+            }
         }
     );
 }
