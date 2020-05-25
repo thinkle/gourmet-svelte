@@ -1,70 +1,54 @@
 <script>
+
  import {getContext} from 'svelte'
+ export let floatWidth
  export let value
  export let prop
  export let editable=false;
  export let forceEdit=false;
  export let showLabel=true;
  export let onChange;
+ export let smallLabel=true;
  import RecDef from '../../common/RecDef.js';
  import IconButton from '../../widgets/IconButton.svelte';
- import PlainInput from '../../widgets/PlainInput.svelte';
- import DurationInput from '../../widgets/DurationInput.svelte';
- import UrlInput from '../../widgets/UrlInput.svelte';
- import ComboInput from '../../widgets/ComboInput.svelte';
- import CategoryInput from '../../widgets/CategoryInput.svelte';
- import NumberUnitInput from '../../widgets/NumberUnitInput.svelte';
- import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
- import TimeLink from '../../widgets/TimeLink.svelte';
- import RecBlock from './RecBlock.svelte';
- import RecipeText from './RecipeText.svelte';
+ export let recursive=false;
 
-
+ import RecPropEditor from './RecPropEditor.svelte'
+ import RecPropDisplay from './RecPropDisplay.svelte'
 
  let modes = RecDef.EditModes
  
  let ref;
- const propInput = {
-     [modes.TXT] : PlainInput,
-     [modes.RCH] : RecBlock,
-     [modes.DUR] : DurationInput,
-     [modes.CMB] : ComboInput,
-     [modes.MCMB] : CategoryInput,
-     [modes.LNK] : UrlInput,
-     [modes.NUMUNIT] : NumberUnitInput,
- }
 
- const propDisplay = {
-     [modes.NUMUNIT] : NumberUnitDisplay,
-     [modes.DUR] : TimeLink,
-     [modes.RCH] : RecipeText,
- }
-
- var displayValue;
- function getDisplayVal (v) {
-     return v && prop.toHtml && prop.toHtml(v) || v
- }
- 
  $: if (prop.array) {
      if (!value) {
          value = []
      }
  }
 
- /* $: {
-  *     if (prop.array) {
-  *         displayValue = value && prop.array && value.map(getDisplayVal) || []
-  *     }
-  *     else {
-  *         displayValue = getDisplayVal(value,$multiplier);
-  *     }
-  * } */
+ import { quintOut } from 'svelte/easing';
+ import { crossfade,scale,fade,slide,fly } from 'svelte/transition';
+
+ const [send, receive] = crossfade({
+     duration: d => Math.sqrt(d * 200),
+     fallback : scale /* (node, params) {
+	                 const style = getComputedStyle(node);
+	                 const transform = style.transform === 'none' ? '' : style.transform;
+	                 return {
+	                 duration: 2000,
+	                 easing: quintOut,
+	                 css: t => `opacity: ${t}`
+	                 };
+                         } */
+ });
+ 
 
 
  var edit;
  var editOn = false;
- $: edit = editOn || forceEdit;
 
+ $: edit = editOn || forceEdit;
+ 
  
  function turnEditOn () {
      console.log('Edit on - was ',editOn)
@@ -74,108 +58,84 @@
      console.log('Edit OFf - was ',editOn)
      editOn = false;
  }
-
- function handleChange (event) {
-     value = event.detail || event.target.value;
-     onChange && onChange(value)
+ function handleChange (v) {
+     onChange && onChange(value);
  }
 
- function makeArrayHandler (n) {
-     return function (event) {
-         value[n] = event.detail || event.target.value;
-         value = value;
-         onChange && onChange(value)
-     }
- }
- 
+ $: fullWidth = edit && prop.minEditWidth >= floatWidth
+
 </script>
-<div>
+<div class="block" class:title={prop.isTitle} class:fullWidth={fullWidth}>
     <div>
         {#if showLabel && (!prop.hideLabel)}
             <div class="top" >
-                <label on:click={()=>ref.focus()}>{prop.label}</label>
+                <label class:small={smallLabel} on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !edit}
                     <span class="editbutton" >
-                        <IconButton icon="edit" bare="true" on:click={turnEditOn}/>
+                        <IconButton small={smallLabel} icon="edit" bare="true" on:click={turnEditOn}/>
                     </span>
+                {/if}
+                {#if edit && !forceEdit}
+                    <IconButton small={smallLabel} icon="done" bare="true" on:click={turnEditOff}/>
+                {/if}
+            </div>
+        {/if}
+        {#if prop.hideLabel && editable && !forceEdit}
+            <div class='floatingEditButton'>
+                {#if editable && !edit}
+                    <span class="editbutton" ><IconButton bare="true" icon="edit" on:click={turnEditOn}/></span>
                 {/if}
                 {#if edit && !forceEdit}
                     <IconButton icon="done" bare="true" on:click={turnEditOff}/>
                 {/if}
             </div>
         {/if}
+
+
         <div>
             {#if edit}
-                {#if prop.array}
-                    <div class="multiContainer">
-                        {#each value as subval,n}
-                            <IconButton bare="true" icon="remove"
-                                    on:click={()=>{
-                                        value.splice(n,1)
-                                        value = value;
-                                    }}
-                            />
-                            <div>
-                                <svelte:component this="{propInput[prop.edit]}"
-                                                  on:change="{makeArrayHandler(n)}"
-                                                  bind:value="{value[n]}"/>
-                            </div>
-                        {/each}
-                        <IconButton bare="true" icon="add" class="icon"
-                                on:click={()=>value=[...value,...prop.empty]}
-                                    />
-                    </div>
-                {:else}
-                    <svelte:component
-                        this={propInput[prop.edit]}
-                             options={prop.options}
-                        on:change={handleChange}
-                             bind:value={value}
+                <div out:fly={{x:150}} in:fly={{y:-50}}>
+                    <RecPropEditor
                         bind:this={ref}
+                                  bind:value={value}
+                        prop={prop}
+                                  onChange={handleChange}
                     />
-                {/if}
+                </div>
             {:else}
-                {#if prop.array}
-                    {#each value as v,n}
-                        <span class="arrayval">
-                            {#if propDisplay[prop.edit]}
-                                <svelte:component
-                                    this="{propDisplay[prop.edit]}"
-                                    bind:value="{v}"
-                                />
-                            {:else}
-                                <!-- generic display -->
-                                {@html getDisplayVal(v)}
-                            {/if}
-                        </span>
-                    {/each}
-                {:else}
-                        {#if propDisplay[prop.edit]}
-                            <svelte:component
-                                this="{propDisplay[prop.edit]}"
-                                bind:value="{value}"
-                            />
-                        {:else}
-                            <!-- generic display -->
-                            {@html getDisplayVal(value)}
-                        {/if}
-                {/if}
-            {/if}
-            {#if !showLabel}
-              {#if editable && !edit}
-                  <span class="editbutton" ><IconButton bare="true" icon="edit" on:click={turnEditOn}/></span>
-              {/if}
-              {#if edit && !forceEdit}
-              <IconButton icon="done" bare="true" on:click={turnEditOff}/>
-              {/if}
-           {/if}
+                <div out:fly={{x:150}} in:fly={{y:-50}}>
+                <RecPropDisplay
+                    value={value}
+                    prop={prop}
+                />
+                </div>
+            {/if}            
         </div>
     </div>
 
 </div>
+
+<!-- {#if edit && !recursive!}<div class="invisible" bind:clientWidth={editWidth} forceEdit={true}><svelte:self {...$$props} recursive={true}/></div>{/if} -->
+
 <style>
- div {
+ .invisible {
+     /*      visibility: hidden; */
+     opacity: 0.2;
+     position: fixed;
+     right: 300px;
+     top: 350px;
+    
+ }
+ label {
+     font-family: var(--recipeHeadFont);
+ }
+ 
+ .block {
      display: block;
+     font-family: var(--recipeFont);
+ }
+ .block.title {
+     font-family: var(--recipeHeadFont);
  }
  .top {
      display: flex;
@@ -211,7 +171,7 @@
  }
 
  .arrayval {
-     display: inline-block;
+     /*      display: inline-block; */
      padding-right: 1em;
  }
 
@@ -221,5 +181,17 @@
  div:hover .editbutton {
      visibility: visible;
  }
-
+ .block {
+     /*      display: inline-block; */
+ }
+ .small {
+     font-size: var(--small);
+ }
+ .floatingEditButton {
+     width: 40px;
+     float: right;
+ }
+ .fullWidth {
+     clear: right;
+ }
 </style>
