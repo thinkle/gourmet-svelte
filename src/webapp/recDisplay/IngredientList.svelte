@@ -9,6 +9,7 @@
  export let onChange = undefined;
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
+ import IngredientInput from '../../widgets/IngredientInput.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {floatToFrac} from '../../utils/numbers.js';
  import {onMount} from 'svelte';
@@ -53,6 +54,20 @@
      }
  }
 
+ function changeIngredient (original, updated) {
+     console.log('Replacing',original,'with',updated)
+     // swap out enumerable properties of ingredient object
+     for (let prop in original) {
+         delete original[prop]
+     }
+     for (let prop in updated) {
+         original[prop] = updated[prop]
+     }
+     ingredients = ingredients; // tell svelte it's changed
+     triggerChange(); // tell parent we've changed
+ }
+
+
 </script>
 
 <div style="max-width:{maxWidth}px;">
@@ -76,13 +91,18 @@
                             {#each i.ingredients as ii,nn}
 	                        <tr class='ing'>
                                     {#if editMode}
-                                        <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
-                                        <td>
-                                            <label>Item:</label> 
-                                            <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
+                                        <td colspan="4">
+                                            <IngredientInput ing={ii} onChange={(v)=>changeIngredient(ii,v)}/>
                                         </td>
-                                        <button on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients;triggerChange()}}"><i class="material-icons" >delete</i>
-                                        </button>
+                                        <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
+                                             <td>
+                                             <label>Item:</label> 
+                                             <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
+                                             </td> -->
+                                        <IconButton 
+                                            bare={true} 
+                                            icon="delete"
+                                            on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients;triggerChange()}}"/>
                                     {:else}
                                         <NumberUnitDisplay  mode="table" value={ii.amount}/>
 	                                <td>
@@ -107,18 +127,25 @@
                     <!-- end of nested table -->
                 </tr>
             {:else}
-                <tr> <!-- standard ingredient row -->
+                <tr class='ing'>
+                    <!-- standard ingredient row -->
                     {#if editMode}
-                        <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={i.amount}/>
-                        <td>
-                            <label>Item:</label> 
-                            <FancyInput on:change={triggerChange} placeholder="Ingredient" bind:value={i.text}/>
+                        <td colspan="4">
+                            <IngredientInput ing={i} onChange={(v)=>changeIngredient(i,v)}/>                            
                         </td>
                         <td>
-                            <IconButton on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete" bare="true"/>
+                            <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
                         </td>
+                        <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={i.amount}/>
+                             <td>
+                             <label>Item:</label> 
+                             <FancyInput on:change={triggerChange} placeholder="Ingredient" bind:value={i.text}/>
+                             </td>
+                             <td>
+                             <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
+                             </td> -->
                     {:else}
-                        <NumberUnitDisplay mode="table" value={i.amount}/>
+                    <NumberUnitDisplay mode="table" value={i.amount}/>
 	                <td>
                             <span class='item'>{i.text}</span>
                         </td>
@@ -128,7 +155,16 @@
 	{/each}
         {#if editMode}
             <tr>
+                <td colspan=3>
+                    <IngredientInput onEnter={(ing)=>{ingredients = [...ingredients,ing]; return true}}/>
+                </td>
                 <td>
+                    <IconButton bare={true} icon="add"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    
                 </td>
                 <td>
                     <IconButton icon="add" bare="true"
@@ -150,14 +186,14 @@
     </table>
 </div>
 {#if (!recursive)}
-<div class="invisible">
-    <svelte:self
-        bind:this={invisibleCopy}
-        maxWidth="none"          
-        recursive="true"
-        {...{ingredients,editable,editMode}}
+    <div class="invisible">
+        <svelte:self
+            bind:this={invisibleCopy}
+                      maxWidth="none"          
+            recursive="true"
+            {...{ingredients,editable,editMode}}
         />
-</div>
+    </div>
 {/if}
 <style>
  .invisible {
@@ -165,9 +201,9 @@
      visibility: hidden;
  }
  
-.edit-mode {
-  font-size : 0.8em
-}
+ .edit-mode {
+     font-size : 0.8em
+ }
  .inglist {
      padding: 0;
      display: table;
@@ -188,7 +224,12 @@
      display : table-cell;
      border-bottom: 1px solid grey;
  }
- .ing:last-child span {border-bottom: none;}
+ .ing:last-child span {
+     border-bottom: none;
+ }
+ .ing :global(.amount,.unit,.item) {
+     font-family: var(--recipeFont);     
+ }
  .amount {
      /*      min-width: var(--awidth); */
  }
@@ -204,8 +245,16 @@
  .grouphead .ing {
      font-weight: normal;
  }
+ .grouphead .text {
+     font-family: var(--recipeHeadFont);
+ }
+ .grouphead .ing .text {
+     font-family : var(--recipeFont);
+ }
 
  .grouphead > input {
      font-weight: bold;
  }
+
+ 
 </style>
