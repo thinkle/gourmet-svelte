@@ -9,30 +9,44 @@
  export let stackSidesAt = 500;
  let stackMode = false;
  let ref
+ import {watchResize} from 'svelte-watch-resize';
+
  onMount(
      ()=>{
-         let ro = new ResizeObserver( entries => {
-             for (let entry of entries) {
-                 const cr = entry.contentRect;
-                 console.log('Element:', entry.target);
-                 console.log(`Element size: ${cr.width}px x ${cr.height}px`);
-                 console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
-                 if (cr.width < Number(stackSidesAt)) {
-                     stackMode = true;
-                 }
-                 else {
-                     stackMode = false;
-                 }
-             }
-         });
+         /* let ro = new ResizeObserver( entries => {
+          *     for (let entry of entries) {
+          *         const cr = entry.contentRect;
+          *         console.log('Element:', entry.target);
+          *         console.log(`Element size: ${cr.width}px x ${cr.height}px`);
+          *         console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
+          *         if (cr.width < Number(stackSidesAt)) {
+          *             stackMode = true;
+          *         }
+          *         else {
+          *             stackMode = false;
+          *         }
+          *     }
+          * });
 
-         // Observe one or multiple elements
-         ro.observe(ref);
+          * // Observe one or multiple elements
+          * ro.observe(ref); */
  });
+
+
+ function handleResize () {
+     console.log('SBS HANDLE RESIZE');
+     if (ref.clientWidth < Number(stackSidesAt)) {
+         stackMode = true;
+     }
+     else {
+         stackMode = false;
+     }
+ }
+
 
 </script>
 
-<div bind:this={ref} class="top"
+<div use:watchResize={handleResize} bind:this={ref} class="top"
      style={`--height:${height};--leftBasis:${leftBasis};--rightBasis:${rightBasis}`}
      class:growRight
      class:growLeft
@@ -112,4 +126,8 @@
 
      height: var(--height);
  }
+ .stackMode .l,.stackMode .r {
+     height: auto;
+ }
+ 
 </style>
