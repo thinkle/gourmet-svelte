@@ -78,7 +78,7 @@
     Page: ${recipePage}
     <table>
         {#each $recipePage as id}
-            {id} <RecipeSummary
+            <RecipeSummary
                      onClick={()=>localRecipes.open(id)}
                      recipe={$storedRecipes[id]}/>
         {:else}
