@@ -68,10 +68,26 @@
      }
  }
  
+
+ let changedFromText
  function change () {
-     value.text = Times.getDescription(value.seconds)
+     if (!changedFromText) {
+         value.text = Times.getDescription(value.seconds)
+     }
      dispatch('change',
               value)
+     changedFromText = false;
+ }
+
+ function changeText (event) {
+     let text = event.target.value;
+     let time = Times.getSecondsFromString(text);
+     if (time) {
+         value.seconds = time
+     }
+     value.text = text;
+     changedFromText = true;
+     change();
  }
 
  function changeSeconds (event) {
@@ -160,7 +176,7 @@
             >
         </div>
         <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
-        {#if !minimal}<input class="text" on:change={change} type="text" bind:value={value.text}>{/if}
+        {#if !minimal}<input class="text" on:change={changeText} type="text" bind:value={value.text}>{/if}
     </span>
 </span>
 
