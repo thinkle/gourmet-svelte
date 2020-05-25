@@ -339,7 +339,7 @@ export function analyzeUnit (unit) {
 }
 
 
-export function parseUnit (text) {
+export function parseUnit (text, requireIngredient=false) {
     let m = text.match(UNIT_REGEXP);
     if (m) {
         let unit = m[1]
@@ -350,6 +350,12 @@ export function parseUnit (text) {
         }
         else {
             text = cleanupWhitespace(pretext);
+        }
+        if (requireIngredient) {
+            if (unit && !text) {
+                text = unit;
+                unit = undefined;
+            }
         }
         let unitDetails = analyzeUnit(unit);
         return {
