@@ -3,13 +3,13 @@
  import {testRecs} from '../common/mocks/recipes.js'
  import Recipe from './recDisplay/Recipe.svelte';
  import RecDisplayTests from './recDisplay/DemoRecDisplay.svelte';
- import WidgetTests from '../widgets/WidgetTests.svelte';
- import widgetTestPaths from '../widgets/widgetTests.js';
- import LocalDataTester from './LocalDataTester.svelte';
- import RecipeDataTester from '../stores/RecipeDataTester.svelte';
- import RemoteApiTester from '../data/RemoteApiTester.svelte';
- import HighlightTest from '../extension/parser/HighlightTest.svelte';
- import RecipeTextTest from './recDisplay/RecipeTextTest.svelte';
+ import WidgetTests from '../widgets/Widgets.demo.svelte';
+ import widgetTestPaths from '../widgets/widgetDemos.js';
+ import LocalDataTester from '../data/LocalData.demo.svelte';
+ import RecipeDataTester from '../stores/RecipeStores.demo.svelte';
+ import RemoteApiTester from '../data/RemoteApi.demo.svelte';
+ import HighlightTest from '../extension/parser/Highlight.demo.svelte';
+ import RecipeTextTest from './recDisplay/RecipeText.demo.svelte';
  export let demo
  
  let demos = {

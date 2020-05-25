@@ -30,9 +30,6 @@
 </div>
 <style>
  
- .test {
-     border: 2px dotted red;
- }
  div.hidden {display: none}
  div.show {display:block}
  .selected  {text-decoration: underline}

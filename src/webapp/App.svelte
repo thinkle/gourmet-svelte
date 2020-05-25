@@ -35,10 +35,14 @@
 </script>
 
 <div>
-    <h2>{name}</h2>
+    <p>{name}</p>
     <svelte:component this={page} {...params}/>
 </div>
 <style>
+ p {
+     font-size : var(--small);
+     font-family: var(--brandFont);
+ }
  .app {
      margin: auto;
      max-width: 1200px;
