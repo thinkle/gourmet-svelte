@@ -374,6 +374,8 @@ function parseAmount (s) {
     if (match) {
         amount.rangeAmount = fracToFloat(match.groups.first);
         amount.amount = fracToFloat(match.groups.second);
+        amount.textAmount = match.groups.second
+        amount.textRangeAmount = match.groups.first
         //amount.rangeAmount = fracToFloat(match[1]);
         //amount.amount = fracToFloat(match[secondRangeGroup]);
     }
@@ -381,11 +383,13 @@ function parseAmount (s) {
         match = s.match(numberBeforeUnitMatcher);
         if (match) {
             amount.amount = fracToFloat(match[0])
+            amount.textAmount = match[0]
         }
         else {
             match = s.match(numberMatcher);
             if (match) {
                 amount.amount = fracToFloat(match[0])
+                amount.textAmount = match[0]
             }
         }
     }
