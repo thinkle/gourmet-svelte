@@ -2,7 +2,8 @@
  import { tick } from 'svelte';
  import { fly } from 'svelte/transition';
  import { flip } from 'svelte/animate';
- 
+ import { quintOut } from 'svelte/easing';
+ import IconButton from './IconButton.svelte';
  export let value;
  export let onSelect
  
@@ -24,26 +25,28 @@
  const MENU = 2
 
  let mode = TYPING
- $: {if (!showMenu) {
-                                   currentMatch = -1
-                                   }
-    }
-            function toggleMenu () {
-                if (showMenu && showAll) {
-                    showMenu = false;
-                    showAll = false;
-                }
-                else if (showMenu && !showAll) {
-                    showAll = true;
-                }
-                else {
-                    showMenu = true;
-                    showAll = true;
-                }
-                inputRef.focus();
-                mode = MENU
-            }
-
+ $: {
+     if (!showMenu) {
+         currentMatch = -1
+     }
+ }
+ 
+ function toggleMenu () {
+     if (showMenu && showAll) {
+         showMenu = false;
+         showAll = false;
+     }
+     else if (showMenu && !showAll) {
+         showAll = true;
+     }
+     else {
+         showMenu = true;
+         showAll = true;
+     }
+     inputRef.focus();
+     mode = MENU
+ }
+ 
  function doSelect (v) {
      console.log('do select!',v);
      value = v;
@@ -110,14 +113,14 @@
          if (showMenu && currentMatch > -1 && matches.length > currentMatch) {
              value = matches[currentMatch]
          }
-          setTimeout(
-              ()=>{ 
+         setTimeout(
+             ()=>{
                  doSelect(value)
                  console.log('set show menu to false!');
                  showMenu = false;
                  currentMatch = -1;
                  updateMatches(); setTimeout(updateMatches,50)
-                     },10); // one tick...
+             },10); // one tick...
          return 
      }
      console.log('update matches...');
@@ -289,21 +292,19 @@
  
 </script>
 <span class='cmb'>
-    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value}/> <button class="icon" on:click={toggleMenu}>
-        {#if showMenu && showAll}
-            <i class="material-icons">arrow_drop_up</i>
-        {:else}
-            <i class="material-icons">arrow_drop_down</i>
-        {/if}
-    </button>
+    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value}/>
+    <IconButton class="icon" on:click={toggleMenu}
+                       icon={showMenu&&"arrow_drop_up"||"arrow_drop_down"}
+                small={true}
+                bare={true}
+    />
     {#if showMenu && focused}
-        <ul transition:fly>
-            <li>Selected = {currentMatch}</li>
+        <ul transition:fly>            
             {#each matches as match,i (match)}
                 <li key={match} class:current={currentMatch==i}
                     on:click={()=>doSelect(match)}
-                        transition:fly
-		    animate:flip>{@html highlight(match,value)}</li>
+                    transition:fly
+		    animate:flip={{delay: 250, duration: 250, easing: quintOut}}>{@html highlight(match,value)}</li>
             {/each}
             {#if showAll}
                 {#each options as option}
