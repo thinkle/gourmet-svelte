@@ -1,6 +1,6 @@
 <script>
  import Tester from '../widgets/Tester.svelte'
- import RemoteRecipeTester from './RemoteRecipeTester.svelte';
+ import RemoteRecipeTester from './RemoteRecipe.demo.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
  import remoteApi from '../data/remoteApi.js'
