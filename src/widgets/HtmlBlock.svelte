@@ -59,7 +59,7 @@
 
 
 </script>
-<div bind:this={root}>	
+<div bind:this={root}>
 </div>
 <!-- Components mounted below will be removed from their position and added to the DOM
      by JavaScript. They must each support an addToDOM method which takes a DOM parent
