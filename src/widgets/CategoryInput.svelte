@@ -1,10 +1,8 @@
 <script>
  import ComboInput from './ComboInput.svelte';
  import IB from './IconButton.svelte';
- import { tick } from 'svelte';
- import { fly } from 'svelte/transition';
  import { flip } from 'svelte/animate';
-
+ import { quintOut } from 'svelte/easing';
  import { createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
 
@@ -33,8 +31,9 @@
 <span>
     <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue} bare={true} icon="add"></IB></span>
     <span>
-        {#each value as v}
-            <span class="tag">{v.name}
+        {#each value as v (v.name)}
+            <span class="tag"
+                  animate:flip={{delay: 100, duration: 250, easing: quintOut}}>{v.name}
                 <IB on:click={()=>remove(v)} bare={true} icon="close"></IB>
             </span>
         {/each}
