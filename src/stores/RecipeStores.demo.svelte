@@ -1,5 +1,11 @@
 <script>
- import {recipeData,recipeActions} from './recipeData.js';
+ import {
+     recipeState,
+     storedRecipes,
+     localRecipes,
+     openLocalRecipes,
+     recipePage,
+     recipeActions} from './recipeStores.js';
  import Tester from '../widgets/Tester.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
  export let initialShow

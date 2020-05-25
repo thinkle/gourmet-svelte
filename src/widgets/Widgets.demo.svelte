@@ -1,12 +1,12 @@
 <script>
  export let initialShow
- import InputTests from './InputTests.svelte';
+ import InputTests from './Inputs.demo.svelte';
  import Tester from './Tester.svelte';
  import ipsum from '../common/mocks/ipsum.js';
  import SideBySide from './SideBySide.svelte';
  import Status from './Status.svelte';
  import status from '../stores/status.js';
- import paths from './widgetTests.js';
+ import paths from './widgetDemos.js';
  let sideBySideOptions = {
      left : {
          growLeft:true,
