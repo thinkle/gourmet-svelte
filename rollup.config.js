@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import json from 'rollup-plugin-json';
 import replace from 'rollup-plugin-replace';
-
+//import babel from 'rollup-plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
 
@@ -45,7 +45,10 @@ export default [
 	        browser: true,
 	        dedupe: ['svelte']
 	    }),
-
+            // babel({
+            //     exclude: 'node_modules/**', // only transpile our source code
+            //     plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
+            // }),
 	    commonjs(),
             builtins(),
 	    !production && serve(),
@@ -106,6 +109,10 @@ export default [
 	        browser: true,
 	        dedupe: ['svelte']
 	    }),
+            // babel({
+            //     exclude: 'node_modules/**', // only transpile our source code
+            //     plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
+            // }),
 	    commonjs(),
             builtins(),
 	    // In dev mode, call `npm run start` once
