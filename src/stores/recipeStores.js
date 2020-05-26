@@ -110,10 +110,10 @@ export const recipePage = {
 
 export const recipeActions = {
 
-    async doSync () {
-        await api.sync(true,{onPartialSync:(recipes)=>{
+    async doSync (testing) {
+        await api.sync(testing,{onPartialSync:(recipes)=>{
             recipeActions.getRecipes({limit:recipes.length});
-        }}); // test mode
+        }}); 
         await recipeActions.getRecipes({limit:50});
     },
 
@@ -172,13 +172,16 @@ export const recipeState = derived(
                 if (!recState[key].edited) {
                     let o1 = $local[key];
                     let o2 = $stored[key];
-                    
                 }
                 recState[key].edited = true;
             }
             else {
                 recState[key].edited = false;
             }
+            if ($stored[key].savedRemote) {
+                recState[key].savedRemote = true
+            }
+            recState[key].last_modified = $stored[key].last_modified
         }
         console.log('RECIPE STATE STORE: update state');
         return recState;
