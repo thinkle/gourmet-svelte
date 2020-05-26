@@ -52,7 +52,8 @@
      position: absolute;
      z-index: 99;
      width: 350px;
-     background-color: #ff9c;
+     background-color: var(--note-bg);
+     color : var(--note-fg);
      padding: 24px;
  }
 
@@ -75,9 +76,8 @@
      top: 24px;
  }
  .clickable:hover {
-     background-color: black;
-     color: white;
-     border : 3px solid #ff99;
+     background-color: var(--medium-bg);
+     color: var(--medium-fg);
      border-radius: 50%;
  }
 </style>
