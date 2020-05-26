@@ -122,7 +122,7 @@ function handleYields (chunk, context, recipe) {
 
 function handleSource (chunk, context, recipe) {
     let name = cleanupWhitespace(chunk.text)
-    let url = getUrl(chunk)
+    let url = getUrl(chunk,{baseUrl:context.url})
     if (!url) {
         [name,url] = extractUrlFromText(name)
     }
@@ -179,12 +179,18 @@ function getHeader (chunk,recipe) {
     }
 }
 
-function getUrl (chunk, selector='a[href]', attr='href') {
-    let doc = new DOMParser().parseFromString(chunk.html,'text/html');
+function getUrl (chunk, {selector='a[href]', attr='href', baseUrl=''}={}) {
+    // adding base url to parser fails... we'll just remove our URL I guess
+    let doc = new DOMParser().parseFromString(addBaseUrl(chunk.html,baseUrl),'text/html');
     let candidates = doc.querySelectorAll(selector);
     if (candidates.length == 1) {
         return candidates[0][attr]
     }
+
+    function addBaseUrl (text,url) {
+        return `<head><base href=${url}></head>${text}`
+    }
+    
 }
 
 function addSourceIfMissing (recipe, context) {
