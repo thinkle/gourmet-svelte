@@ -12,7 +12,7 @@
  import IngredientInput from '../../widgets/IngredientInput.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {floatToFrac} from '../../utils/numbers.js';
- import {onMount} from 'svelte';
+ import {onMount,tick} from 'svelte';
  let recipeChanges = getContext('recipeChanges');
 
  console.log("IngredientList created: onChange=",onChange)
@@ -67,6 +67,17 @@
      triggerChange(); // tell parent we've changed
  }
 
+ async function insertIngredient (value, list, index) {
+     list[index] = value;
+     let newIng = {
+     }
+     list.splice(index+1,0,newIng)
+     // Come up with some way to focus it :(
+     ingredients = ingredients; // tell svelte
+     triggerChange(); // tell parent
+     return true;
+ }
+ 
 
 </script>
 
@@ -92,7 +103,7 @@
 	                        <tr class='ing'>
                                     {#if editMode}
                                         <td colspan="4">
-                                            <IngredientInput ing={ii} onChange={(v)=>changeIngredient(ii,v)}/>
+                                            <IngredientInput ing={ii} onChange={(v)=>changeIngredient(ii,v)} onEnter={(v)=>insertIngredient(v,i.ingredients,nn)}/>
                                         </td>
                                         <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
                                              <td>
@@ -101,7 +112,7 @@
                                              </td> -->
                                         <IconButton 
                                             bare={true} 
-                                            icon="delete"
+                                                 icon="delete"
                                             on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients;triggerChange()}}"/>
                                     {:else}
                                         <NumberUnitDisplay  mode="table" value={ii.amount}/>
@@ -131,7 +142,10 @@
                     <!-- standard ingredient row -->
                     {#if editMode}
                         <td colspan="4">
-                            <IngredientInput ing={i} onChange={(v)=>changeIngredient(i,v)}/>                            
+                            <IngredientInput
+                                onEnter={(v)=>insertIngredient(v,ingredients,n)}
+                                ing={i}
+                                onChange={(v)=>changeIngredient(i,v)}/>
                         </td>
                         <td>
                             <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
@@ -206,38 +220,18 @@
  }
  .inglist {
      padding: 0;
-     display: table;
      border-spacing: 3px;
      max-width: var(--idealWidth);
      min-width: calc(var(--idealWidth)/2)
  }
- .ing {
-     /*      display: flex; */
-     display: table-row;
+ .ing > :global(td) {
+     border-bottom: 1px solid var(--light-underline);
  }
- 
- .ing span {
-     padding: var(--padding); 
-     display: inline-block;
- }
- .ing span {
-     display : table-cell;
-     border-bottom: 1px solid grey;
- }
- .ing:last-child span {
+ .ing:last-child > :global(td) {
      border-bottom: none;
  }
  .ing :global(.amount,.unit,.item) {
      font-family: var(--recipeFont);     
- }
- .amount {
-     /*      min-width: var(--awidth); */
- }
- .unit {
-     /*      min-width: var(--uwidth); */
- }
- .item {
-     /*      min-width: var(--iwidth); */
  }
  .grouphead {
      font-weight: bold;
