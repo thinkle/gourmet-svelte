@@ -89,8 +89,8 @@ const api = {
                 status.progress(
                     statusId,
                     {name:'Fetching more recent data from server...',
-                     amount:page,
-                     total:recsToFetch.length
+                     amount:remoteResponse.page+page,
+                     total:remoteResponse.count+recsToFetch.length
                     }
                 );
                 let fullRecResponse = await remoteApi.getRecipes({
@@ -98,6 +98,7 @@ const api = {
                     limit:10, page, 
                 })
                 console.log('updating with local recipes...');
+                fullRecResponse.result.forEach((r)=>r.savedRemote=true); // mark all as saved :)
                 await localApi.updateRecipes(fullRecResponse.result);
                 if (onPartialSync) {
                     onPartialSync(fullRecResponse.result);
