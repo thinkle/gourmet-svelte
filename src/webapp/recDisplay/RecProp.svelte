@@ -94,7 +94,7 @@
 
         <div>
             {#if edit}
-                <div out:fly={{x:150}} in:fly={{y:-50}}>
+                <div out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}>
                     <RecPropEditor
                         bind:this={ref}
                                   bind:value={value}
@@ -103,7 +103,7 @@
                     />
                 </div>
             {:else}
-                <div out:fly={{x:150}} in:fly={{y:-50}}>
+                <div out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}>
                 <RecPropDisplay
                     value={value}
                     prop={prop}
