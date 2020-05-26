@@ -161,8 +161,8 @@
 
  .tabs span:hover {
      border-bottom: 3px solid var(--medium-underline);
-     background-color: var(--tabhover-bg);
-     color: var(--tabhover-fg);
+     background-color: var(--light-bg);
+     color: var(--light-fg);
      font-weight: 500;
  }
  .toggle {
