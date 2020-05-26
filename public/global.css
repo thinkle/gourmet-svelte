@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300,400,500,600,700,900;0,300,400,500,700,900
+;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
 @font-face {
@@ -135,7 +136,7 @@ html, body {
  h1,h2,h3,h4,h5,h6 { 
      margin: 0;
  } 
-
+ /* Typography  */
 :root {
     --recipeFont : Lora, Ubuntu, Cantarell, serif;
     --recipeHeadFont : Lora,'Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;
@@ -144,6 +145,19 @@ html, body {
     --small : 0.8rem;
     --xsmall : 0.6rem;
 }
+/* Colors */
+:root {
+    --light-bg : #eedeff;
+    --light-fg : #111122;
+    --medium-bg: #7979ac;
+    --medium-fg: #eedeff;
+    --focus-border: #2222df;
+    --light-underline : #aaa;
+    --medium-underline : #666;
+    --heavy-underline : #aaa;
+}
+
+
 
 body {
 	color: #333;
