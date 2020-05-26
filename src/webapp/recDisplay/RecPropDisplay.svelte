@@ -1,8 +1,10 @@
 <script>
  export let prop;
  export let value;
-
-
+ 
+ $: {if (prop.array && !value) {
+     value = []
+ }}
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
  import TimeLink from '../../widgets/TimeLink.svelte';
  import RecDef from '../../common/RecDef.js';
