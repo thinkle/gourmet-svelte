@@ -6,7 +6,10 @@
  export let onInput
  console.log('ing:',ing)
  export function getValue () {return parsed}
- export function clear () {text=''}
+ export function clear () {
+     text=''
+     ing=undefined;
+ }
  export function focus () {
      console.log('Called focus!');
      ref.focus()
@@ -22,37 +25,39 @@
  // rangy.init();
  let fireInputOnNextParse
  let doMarkup;
- $: { parse(text) }
+ $: {
+     parse(text)
+ }
 
-                  function parse () {                  
-                                    if (text) {
-                                        let amt = parseAmount(text);
-                                        let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
-                                        delete amt.pretext;
-                                        delete amt.posttext;
-                                        parsed = {
-                                            amount : {
-                                                ...amt,
-                                                unit : unitAndText.unit,
-                                                standardUnit : unitAndText.standardUnit,
-                                            },
-                                            text : unitAndText.text,
-                                            originalText : text,
-                                        }
-                                    }
-                                    else {
-                                        parsed = {
-                                        }
-                                    }
-                                    if (fireInputOnNextParse) {
-                                        onInput && onInput(parsed);
-                                        fireInputOnNextParse = false
-                                    }
-                                    if (doMarkup) {
-                                        //markup();
-                                        //doMarkup = false; // do it once
-                                    }
-                                    }
+ function parse () {                  
+     if (text) {
+         let amt = parseAmount(text);
+         let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
+         delete amt.pretext;
+         delete amt.posttext;
+         parsed = {
+             amount : {
+                 ...amt,
+                 unit : unitAndText.unit,
+                 standardUnit : unitAndText.standardUnit,
+             },
+             text : unitAndText.text,
+             originalText : text,
+         }
+     }
+     else {
+         parsed = {
+         }
+     }
+     if (fireInputOnNextParse) {
+         onInput && onInput(parsed);
+         fireInputOnNextParse = false
+     }
+     if (doMarkup) {
+         //markup();
+         //doMarkup = false; // do it once
+     }
+ }
 
  $: {
      if (ing) {
@@ -69,6 +74,11 @@
      }
  }
 
+ function onKeyup (event) {
+     if (event.keyCode!=13) {
+         fireInputOnNextParse = true;
+     }
+ }
  function onKeypress (event) {
      // Check for "enter" key
      if (event.keyCode==13) {
@@ -84,43 +94,41 @@
              event.preventDefault();
          }
      }
-     else {
-         fireInputOnNextParse = true;
-     }
-     /* else {
-        // Handle the "easy" case 4 automated parsing...
-        let actualRange = window.getSelection().getRangeAt(0);
-        let endRange = document.createRange();//Create a range (a range is a like the selection but invisible)
-        endRange.selectNodeContents(ref);//Select the entire contents of the element with the range
-        endRange.collapse(false);// collapse to end
-        let lastChild = ref.childNodes[ref.childNodes.length-1]
-        let lastChildEndRange = document.createRange();
-        lastChildEndRange.selectNodeContents(lastChild);
-        lastChildEndRange.collapse(false); // collapse to end
-        if (actualRange.startContainer == endRange.startContainer &&
-        actualRange.endContainer == endRange.endContainer && 
-        actualRange.startOffset == endRange.startOffset && actualRange.endOffset==endRange.endOffset) {
-        console.log('At end!')
-        console.log('Restore selection to last child node')
-        markup()
-        tick().then(()=>setEndOfContenteditable(ref))
-        } else if (
-        actualRange.startContainer == lastChildEndRange.startContainer &&
-        actualRange.endContainer == lastChildEndRange.endContainer &&
-        actualRange.startOffset == lastChildEndRange.startOffset &&
-        actualRange.endOffset==lastChildEndRange.endOffset) {
-        console.log('At end of last child');
-        console.log('Restore selection to last child node')
-        markup()
-        tick().then(()=>setEndOfContenteditable(ref))
-        }
-        else {
-        console.log('Not at end');
-        console.log('End is:',endRange,'or',lastChildEndRange,'but we are at',actualRange);
-        }
-        }
-      */
  }
+ /* else {
+ // Handle the "easy" case 4 automated parsing...
+ let actualRange = window.getSelection().getRangeAt(0);
+ let endRange = document.createRange();//Create a range (a range is a like the selection but invisible)
+ endRange.selectNodeContents(ref);//Select the entire contents of the element with the range
+ endRange.collapse(false);// collapse to end
+ let lastChild = ref.childNodes[ref.childNodes.length-1]
+ let lastChildEndRange = document.createRange();
+ lastChildEndRange.selectNodeContents(lastChild);
+ lastChildEndRange.collapse(false); // collapse to end
+ if (actualRange.startContainer == endRange.startContainer &&
+ actualRange.endContainer == endRange.endContainer && 
+ actualRange.startOffset == endRange.startOffset && actualRange.endOffset==endRange.endOffset) {
+ console.log('At end!')
+ console.log('Restore selection to last child node')
+ markup()
+ tick().then(()=>setEndOfContenteditable(ref))
+ } else if (
+ actualRange.startContainer == lastChildEndRange.startContainer &&
+ actualRange.endContainer == lastChildEndRange.endContainer &&
+ actualRange.startOffset == lastChildEndRange.startOffset &&
+ actualRange.endOffset==lastChildEndRange.endOffset) {
+ console.log('At end of last child');
+ console.log('Restore selection to last child node')
+ markup()
+ tick().then(()=>setEndOfContenteditable(ref))
+ }
+ else {
+ console.log('Not at end');
+ console.log('End is:',endRange,'or',lastChildEndRange,'but we are at',actualRange);
+ }
+ }
+ }     */
+
 
  /* function setEndOfContenteditable(contentEditableElement)
     {
@@ -165,16 +173,16 @@
  onMount (()=>markup())
 </script>
 
-<div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
+<div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
 </div>
 <style>
 
  .input {
-     margin-top: var(--small);
-     padding-left: calc(2.4 * var(--small));
-     text-indent: calc(-2.4 * var(--small));
+     margin-top: var(--xsmall);
+     padding-left: calc(2.4 * var(--xsmall));
+     text-indent: calc(-2.4 * var(--xsmall));
  }
- .input :global(span.amount,span.unit) {
+ .input :global(span.amount),.input :global(span.unit) {
      border-top: 1px solid black;
      padding-top: 3px;
      position: relative;
@@ -183,25 +191,25 @@
 
  .input :global(.amount) {
      display: inline-block;
-     min-width: calc(var(--small)*4);
+     min-width: calc(var(--xsmall)*4);
  }
  .input :global(.unit) {
      display: inline-block;
-     min-width: calc(var(--small)*4);
+     min-width: calc(var(--xsmall)*4);
  }
 
  .input :global(.amount::before) {
      content : 'amount';
      position: absolute;
-     top : calc(-1.2 * var(--small));
+     top : calc(-1.2 * var(--xsmall));
      left : 0;
-     font-size: var(--small);
+     font-size: var(--xsmall);
  }
  .input :global(.unit::before) {
      content : 'unit';
      position: absolute;
-     top : calc(-1.2 * var(--small));
+     top : calc(-1.2 * var(--xsmall));
      left : 0;
-     font-size: var(--small);
+     font-size: var(--xsmall);
  }
 </style>
