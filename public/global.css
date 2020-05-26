@@ -155,6 +155,8 @@ html, body {
     --light-underline : #aaa;
     --medium-underline : #666;
     --heavy-underline : #aaa;
+    --note-bg : #ffffbd;
+    --note-fg : #333333;
 }
 
 
