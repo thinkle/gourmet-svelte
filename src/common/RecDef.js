@@ -111,6 +111,7 @@ var Metadata = {
          label:'Title',
          edit:TXT,
          testValue:'A Very Fine Recipe Indeed',
+         isTitle:true,
          toHtml:(s)=>s.trim(),
         },
     ],
@@ -160,7 +161,6 @@ var Metadata = {
 	{name:'times',
 	 label:'Time',
          array:true,
-         summaryView:true,
          testValue:{seconds:4250},
 	 toHtml:(s)=>`${s.name}: ${s.text||Units.secondsToTimeString(s.seconds)||''}`,
          empty:[{name:'',seconds:0}],
@@ -168,13 +168,16 @@ var Metadata = {
         },
         {name:'text',
          label:'Text',
+         bottom:true,
          hideLabel:true,
          array:true,
          summaryView:false,
          testValue:[{header:'Instructions',body:'This is a bunch of <b>text</b'}],
          toHtml:(s)=>s.header&&`<h3>${s.header}</h3>\n${s.body}`||s.body,
          empty:[{body:'',header:''}],
-         edit:RCH}
+         edit:RCH,
+         minEditWidth : 600,
+        }
     ],
 };
 
