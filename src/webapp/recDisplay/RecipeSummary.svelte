@@ -1,6 +1,6 @@
 <script>
  import RecDef from '../../common/RecDef.js';
- import RecProp from './RecProp.svelte';
+ import RecPropDisplay from './RecPropDisplay.svelte';
  export let recipe
  export let onClick
  let thumb;
@@ -11,20 +11,24 @@
      }
  }
 </script>
-<tr class='summary' on:click={wowAClick}>
+<tr class='summary'>
+    <slot/>
     <td>
         {#if thumb}
             <img src={thumb.thumbnailUrl||thumb.url} alt={thumb.alt||recipe.title}/>
         {/if}
     </td>
-    <td>
+    <td class="clickable" on:click={wowAClick}>
         <h3>{recipe.title}</h3>
     </td>
     {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
         <td>
-            <RecProp showLabel={false} editable={false} prop={prop} value={recipe[prop.name]}></RecProp>
+            <RecPropDisplay prop={prop} value={recipe[prop.name]}></RecPropDisplay>
         </td>
     {/each}        
 </tr>
 <style>
+ .clickable:hover {
+     text-decoration: underilne;
+ }
 </style>
