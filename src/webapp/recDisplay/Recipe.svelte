@@ -1,6 +1,7 @@
 <script>
  import IL from './IngredientList.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
+ import StatusIcon from '../../widgets/StatusIcon.svelte';
  import RecDef from '../../common/RecDef.js';
  import RecProp from './RecProp.svelte';
  import SideBySide from '../../widgets/SideBySide.svelte';
@@ -48,7 +49,6 @@
  }
  );
  
- 
 let  rightBlockWidth
  function handleResize () {
      if (!imageCentered) {
@@ -67,6 +67,7 @@ let  rightBlockWidth
  
 
 </script>
+
 {#if rec}
     <div class="recipe"> <!-- top-level container...  -->
         <!-- Above the side-by-side view... -->
@@ -78,7 +79,7 @@ let  rightBlockWidth
                     </span>
                 {/each}        
             </h2>
-            <div style="width:6em">
+            <div class='multiplier' style="width:6em">
                 &times;
                 <AmountInput value={$multiplier} on:change={(e)=>$multiplier=e.detail}
                              showPlusMinusButtons={true}
@@ -90,17 +91,47 @@ let  rightBlockWidth
                     Recipe
                 </IconButton>
 
-                {#if $recipeState[rec.id] && $recipeState[rec.id].edited}
-                    <button on:click="{()=>recipeActions.revertRecipe(rec.id)}">
-                        Revert
-                    </button>
-                    <button
-                        class:busy={$recipeState[rec.id].updating}
-                                   on:click="{()=>recipeActions.updateRecipe(rec)}">
-                        Save Recipe!
-                    </button>
+                {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
+                    <IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
+                                busy={$recipeState[rec.id].updating}
+                    >
+                        Revert Changes
+                    </IconButton>
+                    <IconButton
+                        icon="save"
+                        tooltip="Attempt to save?"
+                        busy={$recipeState[rec.id].updating}
+                              on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        Save
+                    </IconButton>
+                {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
+                    <IconButton
+                        busy={$recipeState[rec.id].updating}
+                             icon="cloud_upload"
+                        on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        Save to Cloud
+                    </IconButton>
                 {/if}
             {/if}
+            <div class="status">
+                <i class='material-icons'>
+                    offline_pin
+                </i>
+                {#if rec}
+                    {#if rec.savedRemote}
+                        <StatusIcon icon="cloud_done" tooltip="true">
+                            Saved to browser and in the cloud.
+                            Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                        </StatusIcon>
+                    {:else}
+                        <StatusIcon icon="cloud_off" tooltip="true">
+                            Saving to the cloud failed - perhaps you're offline?
+                            Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
+                            Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                        </StatusIcon>
+                    {/if}
+                {/if}
+            </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
         <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
@@ -175,39 +206,44 @@ let  rightBlockWidth
 	    </div> <!-- close right slot -->
         </SideBySide>
     </div>  <!-- close container  -->
-            {/if}
-            <style>
-             .small {
-                 font-size: var(--small);
-             }
-             .top {
-                 display: flex;
-                 align-items: center;
-             }
-             .top button:nth-of-type(1) {
-                 margin-left: auto;
-             }
-             .top button {
-                 margin-right: 1em;
-             }
-             .images {
-                 float : right;
-             }
-             /* .props {
-                display: inline-block;
-                } */
-             h2,h3,h4,h5,h5 {
-                 font-family: var(--recipeHeadFont);
-             }
-             .flowingProps {
-                 width : 200px;
-                 width: var(--widthLeftOfImage);
-             }
-             .centered {
-                 width: 100%;
-                 margin: auto;
-                 display: flex;
-                 justify-content: center;
-                 align-items: center;
-             }
-            </style>
+{/if}
+
+<style>
+ .small {
+     font-size: var(--small);
+ }
+ .top {
+     display: flex;
+     align-items: center;
+ }
+ .top button:nth-of-type(1) {
+     margin-left: auto;
+ }
+ .top button {
+     margin-right: 1em;
+ }
+ .images {
+     float : right;
+ }
+ /* .props {
+    display: inline-block;
+    } */
+ h2,h3,h4,h5,h5 {
+     font-family: var(--recipeHeadFont);
+ }
+ .flowingProps {
+     width : 200px;
+     width: var(--widthLeftOfImage);
+ }
+ .centered {
+     width: 100%;
+     margin: auto;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+ }
+ .multiplier {
+     margin-left: 1em;
+     margin-right: auto;
+ }
+</style>
