@@ -7,13 +7,20 @@
  import {getContext} from 'svelte';
  let multiplier = getContext('multiplier')
 </script>
+{#if mode=='table'}
+    <td class="amount" class:multiplied={$multiplier!=1}>
+        {formatAmount(value,{multiplier:$multiplier})}
+    </td>
+    &nbsp;
+    <td class="unit" >{value.unit||''}</td>
 
-<span class:table={mode=='table'} class="amount" class:multiplied={$multiplier!=1}>
+{:else}
+<span class="amount" class:multiplied={$multiplier!=1}>
     {formatAmount(value,{multiplier:$multiplier})}
 </span>
 &nbsp;
-<span class:table={mode=='table'} class="unit" >{value.unit||''}</span>
-
+<span class="unit" >{value.unit||''}</span>
+{/if}
 
 <style>
  .multiplied {
