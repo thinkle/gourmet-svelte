@@ -2,6 +2,7 @@
  //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
  import {localRecipes,storedRecipes,connected,recipeActions,recipePage,recipeState} from '../../stores/recipeStores.js';
  import {testRecs} from '../../common/mocks/recipes.js'
+ import IconButton from '../../widgets/IconButton.svelte';
  import Status from '../../widgets/Status.svelte';
  import Recipe from './Recipe.svelte'
  import RecipeSummary from './RecipeSummary.svelte';
@@ -44,8 +45,8 @@
  let setInputValue = val => {searchInput = val};
  $: setInputValue(search); // In case the search is updated other than through the input.
 
- $: {if ($connected) {recipeActions.getRecipes({fields:['title','categories','sources','images'],limit:50,query:{fulltext:search}});}}
-                            
+ $: {if ($connected) {recipeActions.getRecipes({fields:['title','categories','sources','images'],limit:10,query:{fulltext:search}});}}
+                            let opener;
 </script>
 <div>
     <h2>New Store Recipes BUILD_TIME</h2>
@@ -62,7 +63,7 @@
     {/if}
     <Status/>
     <div>
-        <OpenRecipes recipes={open}/>
+        <OpenRecipes bind:this={opener} recipes={open}/>
     </div>    
     <button on:click="{()=>syncingPromise=recipeActions.doSync()}">Sync with Server?</button>
     <button on:click="{()=>syncingPromise=recipeActions.doSync(true)}">Small Sync</button>
@@ -72,15 +73,22 @@
         {:then json}
             Cool, done syncing! {JSON.stringify(json)}
         {:catch error}
-            Failed :(
+            Failed :( {console.log(error)} {error}
         {/await}
     {/if}
     Page: ${recipePage}
     <table>
-        {#each $recipePage as id}
+        {#each $recipePage.slice(0,10) as id}
             <RecipeSummary
-                     onClick={()=>localRecipes.open(id)}
-                     recipe={$storedRecipes[id]}/>
+                onClick={()=>localRecipes.open(id)}
+                recipe={$storedRecipes[id]}
+            >
+                <td>
+                    {#if $localRecipes[id]}
+                        <IconButton icon="fullscreen" on:click={opener.open(id)}/>
+                    {/if}
+                </td>
+            </RecipeSummary>
         {:else}
             <div>
                 No recipes yet? Maybe import some or create them!
