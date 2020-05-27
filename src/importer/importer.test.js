@@ -1,7 +1,34 @@
-import sampleChunks from './parseData.js';
-import {sampleData} from './parseData.js';
-import {parseData,parseChunks,handleChunk} from './importer.js';
+//import sampleChunks from './parseData.js';
+//import {sampleData} from './parseData.js';
+import {parseData,parseChunks,handleChunk,findChildren} from './importer.js';
 import RecDef from '../common/RecDef.js';
+
+it(
+    'Find Children',
+    ()=>{
+        expect(()=>findChildren([])).not.toThrow();
+        let nodes = ['01-02','01-02-1','01-02-03'].map((n,i)=>({id:i,address:n,children:[]}));
+        findChildren(nodes);
+        expect(nodes[0].children.length).toEqual(2)
+        expect(nodes[1].children.length).toEqual(0)
+        expect(nodes[2].children.length).toEqual(0)
+        console.log('Paresed first nodes:',nodes);
+        console.log('Pass?');
+        nodes = ['02-03-01','02-03-01-01','02-03-01-02',
+                 '02-03-02',
+                 '02-03-03','02-03-03-07'
+                ].map((n,i)=>({id:i,address:n,children:[]}));
+        findChildren(nodes);
+        console.log('Parsed second nodes:',nodes);
+        expect(nodes[0].children.length).toEqual(2);
+        expect(nodes[0].children[0]).toEqual(1);
+        expect(nodes[3].children.length).toEqual(0)
+        expect(nodes[4].children.length).toEqual(1);
+        nodes = [{address:'foo',id:1},{id:2}]
+        expect(()=>findChildren(nodes)).not.toThrow()
+    }
+);
+
 it(
     'Simple Chunks',
     ()=>{
@@ -145,7 +172,21 @@ it(
     }
 );
 
-it(
+fit(
+    'Images',
+    ()=>{
+        let recipe = {images:[]}
+        handleChunk(
+            {"id":"oiweras0232","html":"<div class=\"media-container \">\n <img src=\"https://static01.nyt.com/images/2019/10/09/dining/lh-roasted-fish-with-cherry-tomatoes/merlin_159811149_9e520eb6-31c2-44fa-aba8-bcc56a2eb34c-articleLarge.jpg\" data-pin-media=\"https://static01.nyt.com/images/2019/10/09/dining/lh-roasted-fish-with-cherry-tomatoes/merlin_159811149_9e520eb6-31c2-44fa-aba8-bcc56a2eb34c-verticalTwoByThree735.jpg\" alt=\"One-Pan Roasted Fish With Cherry Tomatoes\">\n\n <p class=\"image-credit\">\n Andrew Purcell for The New York Times. Food Sylist: Barrett Washburne.\n </p>\n </div>","tag":"image","text":"\n \n\n \n Andrew Purcell for The New York Times. Food Sylist: Barrett Washburne.\n \n ","address":"00002-00013-00005-00001-00001-00001-00003-00001"},{url:'https://cooking.nytimes.com/recipes/1020454-one-pan-roasted-fish-with-cherry-tomatoes?algo=cooking_vanilla&fellback=false&imp_id=688303451&action=click&module=RecirculationRibbon&pgType=recipedetails&rank=2'},
+            recipe
+        );
+        expect(recipe.images.length).toEqual(1);
+        expect(recipe.images[0].url).toEqual('https://static01.nyt.com/images/2019/10/09/dining/lh-roasted-fish-with-cherry-tomatoes/merlin_159811149_9e520eb6-31c2-44fa-aba8-bcc56a2eb34c-articleLarge.jpg');        
+        expect(recipe.images[0].alt).toEqual('One-Pan Roasted Fish With Cherry Tomatoes');        
+    }
+);
+
+xit(
     'Full sample recipe with groups and nestedness and stuff',
     ()=>{
         console.log('full sample full full fullgroups and stuff!');
