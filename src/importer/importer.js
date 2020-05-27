@@ -121,6 +121,9 @@ export function handleChunk (chunk, context, recipe, parent) {
     else if (chunk.tag=='inggroup') {
         return handleIngredientGroup(chunk,context,recipe,parent);
     }
+    else if (chunk.tag=='image') {
+        return handleImage(chunk,context,recipe);
+    }
 }
 
 function handleCategory (chunk, context, recipe) {
@@ -141,6 +144,15 @@ function handleYields (chunk, context, recipe) {
         amount.unit = cleanupWhitespace(amount.pretext || amount.posttext)
     }
     recipe.yields.push(amount);
+}
+
+function handleImage (chunk, context, recipe) {
+    let img = getElement(chunk,{selector:'img',baseUrl:context.url});
+    if (img) {
+        recipe.images.push({url:img.src,
+                            alt:img.alt,
+                           })
+    }
 }
 
 function handleSource (chunk, context, recipe) {
@@ -200,18 +212,27 @@ function getHeader (chunk,recipe) {
     }
 }
 
-function getUrl (chunk, {selector='a[href]', attr='href', baseUrl=''}={}) {
-    // adding base url to parser fails... we'll just remove our URL I guess
+function getElement (chunk, {selector, baseUrl}={}) {
     let doc = new DOMParser().parseFromString(addBaseUrl(chunk.html,baseUrl),'text/html');
     let candidates = doc.querySelectorAll(selector);
-    if (candidates.length == 1) {
-        return candidates[0][attr]
+    if (candidates.length > 1) {
+        console.log('Warning: found more than one match for ',selector,'in',chunk);
+    }
+    if (candidates.length>0) {
+        return candidates[0]
     }
 
     function addBaseUrl (text,url) {
         return `<head><base href=${url}></head>${text}`
     }
-    
+}
+
+function getUrl (chunk, {selector='a[href]', attr='href', baseUrl=''}={}) {
+    // adding base url to parser fails... we'll just remove our URL I guess
+    let link = getElement(chunk,{selector,baseUrl})
+    if (link) {
+        return link[attr]
+    }
 }
 
 function addSourceIfMissing (recipe, context) {
@@ -225,7 +246,7 @@ function addSourceIfMissing (recipe, context) {
         }
         if (!alreadyHaveUrl) {
             recipe.sources.push(
-                {name:recipe.title,
+                {name:context.host,
                  url:context.url}
             )
         }
