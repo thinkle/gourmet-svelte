@@ -1,4 +1,5 @@
 module.exports = {
+    "testEnvironment":"jest-environment-jsdom-fourteen",
     "setupFiles": [
     "./jest/globals.js"
     ],
