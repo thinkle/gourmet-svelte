@@ -15,6 +15,9 @@
      creating = recipeActions.createRecipe(recipe);    
  }
 
+ function redoImport () {
+     recipe = parseData(parsed);
+ }
 
  
  import RecDef from '../../common/RecDef.js';
@@ -59,12 +62,13 @@
             }
             recipe = parseData(parsed)
             
- }
+            }
          
- let show=false;
- let showRec = false;
+         let show=false;
+     let showRec = false;
 </script>
 <div>
+    <IconButton icon="redo" on:click={redoImport}>Re-Import Parsed Data?</IconButton> <!-- For testing... -->
     {#if connected && recipe}
         <IconButton icon="save" on:click={doCreateRecipe}>Save Recipe to Collection</IconButton>
     {:else if recipe}
