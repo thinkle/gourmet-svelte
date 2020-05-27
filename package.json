@@ -18,6 +18,7 @@
     "@testing-library/svelte": "^3.0.0",
     "fake-indexeddb": "^3.0.0",
     "jest": "^25.5.2",
+    "jest-environment-jsdom-fourteen": "^1.0.1",
     "mock-local-storage": "^1.1.12",
     "rollup": "^1.20.0",
     "rollup-plugin-json": "^4.0.0",
