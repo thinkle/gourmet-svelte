@@ -162,7 +162,7 @@ function listenForSidebar () {
     backgroundParsePage.receive(
         async (msg, sender)=>{
             console.log('parse page...',sender.tab)
-            let response = await contentParsePage.send(null, sender.tab);
+            let response = await contentParsePage.send(msg, sender.tab);
             addTags(sender.tab.id,response);
             respondToPoll(sender.tab.id)
             return response
