@@ -68,8 +68,6 @@ var Tagger = function () {
                 }
             })
             highlights[markupId] = h;
-            let children = checkForChildren(h.ref)
-            lookForParent(el);
         }
         let tag = {
             id:id,
@@ -87,34 +85,6 @@ var Tagger = function () {
         }
         return tag;
         
-        function checkForChildren (node, children=[]) {
-            if (node.children) {
-                for (let child of node.children) {
-                    if (child && child.classList.contains(tagClassname) && child.id != id) {
-                        children.push(child.id)
-                    }
-                    else if (child) {
-                        checkForChildren(child,children)
-                    }
-                }
-            }
-            for (let child of children) {
-                backgroundAddChild.send({parent:id,child:id});
-            }
-            return children;
-        }
-        
-        function lookForParent (node) {
-            if (node.parentElement.classList.contains(tagClassname) && node.parentElement.id != id) {
-                // Add!
-                console.log('Found a parent!',node.parentElement.id)
-                backgroundAddChild.send({parent:node.parentElement.id,child:id});
-            }
-            else if (node.parentElement && node.parentElement.parentElement) {
-                lookForParent(node.parentElement);
-            }
-        }
-
     }
 
     function clearAll () {
