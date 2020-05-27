@@ -1,4 +1,4 @@
-import sampleParse from './parseData.js';
+//import sampleParse from './parseData.js';
 import {parseChunks,handleChunk} from './importer.js';
 import RecDef from '../common/RecDef.js';
 
@@ -6,13 +6,13 @@ it('Ingredient container',
    ()=>{
        let result = parseChunks(
            [
-               {tag:'ingredient',address:1,'children':['a','b','c'],
+               {tag:'ingredient',address:'1-1',
 text:'2     lb   spaghetti'},
-               {tag:'ingredient',address:2,'children':['d'],text:'3     eggs'},
-               {tag:'amount',address:4,id:'a',text:'2'},
-               {tag:'unit',address:5,id:'b',text:'lb'},
-               {tag:'ingredientText',address:3,id:'c',text:'spaghetti'},
-               {tag:'amount',address:7,id:'d',text:'3'}
+               {tag:'ingredient',address:'1-2',text:'3     eggs'},
+               {tag:'amount',address:'1-1-1',id:'a',text:'2'},
+               {tag:'unit',address:'1-1-2',id:'b',text:'lb'},
+               {tag:'ingredientText',address:'1-1-3',id:'c',text:'spaghetti'},
+               {tag:'amount',address:'1-2-1',id:'d',text:'3'}
            ],{}
        );
        expect(result.ingredients[0].amount.amount).toEqual(2)
@@ -115,7 +115,7 @@ it('Ingredient in pieces',
          
    })
 
-it('Ingredient Groups vanilla',
+xit('Ingredient Groups vanilla',
    ()=>{
        let result = parseChunks(
            [
@@ -166,17 +166,32 @@ it('Ingredient groups with children',
        debugger;
              let result = parseChunks(
            [
-               {tag:'ingredient',text:'1 cup lettuce',id:'01'},
-               {tag:'inggroup',text:'Dressing',id:'02',
-                children:['03','04']},
-               {tag:'ingredient',text:'1/2 cup oil',id:'03'},
-               {tag:'ingredient',text:'2 Tbs vinegar',id:'04'},
-               {tag:'inggroup',text:'Crunchy bits',id:'05',
-                children:['06','07']
+               {tag:'ingredient',text:'1 cup lettuce',id:'01',
+                address:'01'
                },
-               {tag:'ingredient',text:'Croutons',id:'06'},
-               {tag:'ingredient',text:'Bacon',id:'07'},
-               {tag:'ingredient',text:'Trailing',id:'08'},
+               {tag:'inggroup',text:'Dressing',id:'02',
+                address:'02',
+                //children:['03','04']},
+               },
+               {tag:'ingredient',text:'1/2 cup oil',id:'03',
+                address:'02-01'
+               },
+               {tag:'ingredient',text:'2 Tbs vinegar',id:'04',
+                address:'02-02',
+               },
+               {tag:'inggroup',text:'Crunchy bits',id:'05',
+                address:'03',
+                //children:['06','07']
+               },
+               {tag:'ingredient',text:'Croutons',id:'06',
+                address:'03-01'
+               },
+               {tag:'ingredient',text:'Bacon',id:'07',
+                address:'03-02'
+               },
+               {tag:'ingredient',text:'Trailing',id:'08',
+                address:'04'
+               },
            ]
        );
        let ings = result.ingredients;
