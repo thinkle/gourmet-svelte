@@ -3,6 +3,7 @@
  import RecPropDisplay from './RecPropDisplay.svelte';
  export let recipe
  export let onClick
+ export let maxImageWidth=150
  let thumb;
  $: thumb = recipe.images && recipe.images.length > 0 && recipe.images[0];
  function wowAClick (event) {
@@ -11,7 +12,7 @@
      }
  }
 </script>
-<tr class='summary'>
+<tr class='summary' style={`--maxImageWidth:${maxImageWidth}px`}>
     <slot/>
     <td>
         {#if thumb}
@@ -30,5 +31,8 @@
 <style>
  .clickable:hover {
      text-decoration: underilne;
+ }
+ img {
+     width: var(--maxImageWidth)
  }
 </style>
