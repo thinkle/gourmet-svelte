@@ -8,21 +8,30 @@
  let clearing;
  let imported = false;
 
+ function doSilentParseRecipe () {
+     console.log('parse!');
+     parsing = backgroundParsePage.send(true); // silent mode
+ }
+
  function doParseRecipe () {
      console.log('parse!');
-     parsing = backgroundParsePage.send();     
+     parsing = backgroundParsePage.send(false); // regular mark-up mode
  }
 
  function doClearParsed () {
      console.log('Clearing parsed...');
-     clearing = backgroundClearAll.send();
+     clearing = backgroundClearAll.send(); // silent mode
      imported = false;
  }
 
 </script>
 <div>
-    {#if !imported}<p>Import <span class="link">{pageInfo.title}<a target="_BLANK" href={pageInfo.url}>{pageInfo.url}</a> </span>?</p>
-    <IconButton icon="import_export" on:click={doParseRecipe}>Mark Up Recipe</IconButton>{/if}
+    <div style="font-size:5pt">BUILD_TIME</div> FOOF!
+    {#if !imported}
+        <p>Import {pageInfo.title}?</p>
+    {/if}
+    <IconButton icon="spy" on:click={doSilentParseRecipe}>Silently Fetch Recipe</IconButton>
+    <IconButton icon="import_export" on:click={doParseRecipe}>Loudly Mark Up Recipe</IconButton>
     <IconButton icon="delete" on:click={doClearParsed}>Clear All Tags</IconButton>
     <ParseStatus/>
     {#if parsing}
