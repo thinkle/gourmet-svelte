@@ -6,8 +6,7 @@ export const contentGetPageInfo = new Channel({
     name:'pageInfo',
     type:'content',
     requestDef:null,
-    responseDef:{url:'',title:''},
-    chatty:true,
+    responseDef:{url:'',title:''},    
 });
 
 export const backgroundGetPageInfo = new Channel({
@@ -15,20 +14,19 @@ export const backgroundGetPageInfo = new Channel({
     type:'background',
     requestDef:null,
     responseDef:{url:'',title:''},
-    chatty:true
 })
 
 export const contentParsePage = new Channel({
     name:'parseRecipes',
     type:'content',
-    requestDef:null,
+    requestDef:true, // boolean for silent mode
     responseDef:[{id:''}],
 });
 
 export const backgroundParsePage = new Channel({
     name:'parseRecipes',
     type:'background',
-    requestDef:null,
+    requestDef:true, // boolean...
     responseDef:[{id:''}],
 });
 
@@ -47,7 +45,7 @@ export const backgroundClearAll = new Channel({
     type:'background',
     requestDef:null,
     responseDef:true,
-    chatty:true,
+    
 });
 
 export const contentClearAll = new Channel({
@@ -55,7 +53,7 @@ export const contentClearAll = new Channel({
     type:'content',
     requestDef:null,
     responseDef:true,
-    chatty:true,
+     
 });
 
 export const contentClearOne = new Channel({
