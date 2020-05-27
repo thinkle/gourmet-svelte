@@ -34,7 +34,7 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
         throw Error(`Unknown Channel type: ${type}`)
     }
     if (channels[type][name]) {
-        console.log(`Channel ${name} defined with null response, but null response is how google communicates errors`);
+        console.log(`Channel ${type} ${name} already defined`);
         throw Error(`Channel ${type} ${name} already defined`);
     }
     if (!responseDef) {
@@ -56,7 +56,7 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
             console.log('Expected request to match: ',requestDef);
             throw err;
         }
-        console.log('Sending valid request',request);
+        if (chatty) {console.log('Sending valid request',request);}
         return sendMessage(type,request,name,tab,chatty);
     }
 
