@@ -152,7 +152,7 @@ function Parser (tagger) {
 
     }
 
-    self.listen = ()=>{contentParsePage.receive(() => self.auto_parse());}
+    self.listen = ()=>{contentParsePage.receive((silent) => self.auto_parse(silent));}
     
     return self;
 }
