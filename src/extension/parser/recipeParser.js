@@ -98,7 +98,7 @@ function Parser (tagger) {
             }
         },
 
-        auto_parse : function () {
+        auto_parse : function (silent) {
             self.results = [];
             var domain = document.domain;
             let parsers;
@@ -118,7 +118,7 @@ function Parser (tagger) {
             parsers.forEach((parser)=>{
                 self.maybe_add(parser)
             });
-            tagger.finishTagging(); // async do all the dom manipulation...
+            if (!silent) {tagger.finishTagging()}; // async do all the dom manipulation...
             return self.results
         },
         
