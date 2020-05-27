@@ -4,13 +4,8 @@ import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup} from './ingredientImporter.js';
 import {handleTime} from './timeImporter.js'
 export function preprocessChunks (parsedChunks, context) {
-    // since we're already iterating through the list, we'll make a
-    // map while we're there
-    context.chunkMap = {}
     parsedChunks.sort(
         (a,b)=>{
-            context.chunkMap[a.id] = a;
-            context.chunkMap[b.id] = b;
             return (a.address>b.address&&1
                     ||
                     a.address<b.address&&-1
@@ -21,12 +16,43 @@ export function preprocessChunks (parsedChunks, context) {
     parsedChunks = parsedChunks.map(
         (o)=>({...o})
     );
+    findChildren(parsedChunks)
+    context.chunkMap = {}
+    parsedChunks.forEach(
+        (chunk)=>context.chunkMap[chunk.id] = chunk
+    );
+    return parsedChunks
+}
+
+export function findChildren (parsedChunks) {
+    // Given a sorted list of node addresses, find children...
+    // Since we are sorted, children *must* come after the parents, so we will search backward
+    // from the child until we find a parent
+    //
+    // 001
+    // 001-002 (search back 1 node to find 001)
+    // 001-002-003 (search back 1 node to find 001-002)
+    // 001-004-006 (search back 2 nodes and fail, finally find 001 as a parent)
+    // 002-003-004-006 (search back to failure -- no parent).
+    if (parsedChunks.length==0) {return}
+    parsedChunks[0].children = []
+    for (let childIndex=1; childIndex < parsedChunks.length; childIndex++) {
+        for (let parentIndex=childIndex-1; parentIndex > -1; parentIndex--) {
+            parsedChunks[childIndex].children = []; // empty list
+            // now we just check if the parent matches the start of the child...
+            let childAddress = parsedChunks[childIndex].address
+            let parentAddress = parsedChunks[parentIndex].address
+            if (childAddress && parentAddress && childAddress.indexOf(parentAddress)==0) { // i.e. 001-002-003 matches 001-002
+                parsedChunks[parentIndex].children.push(parsedChunks[childIndex].id)
+                parentIndex = -1; // stop looping - we found our parent :)
+            }
+        }
+    }
 }
 
 export function parseData (parseData) {
     let context = {...parseData.pageInfo}
     let chunks = Object.values(parseData);
-    console.log('Parsing ',chunks.length,'chunks');
     return parseChunks(chunks,context);
 }
 
@@ -44,10 +70,7 @@ export function parseChunks (parsedChunks,context={}) {
             recipe[prop.name] = [];
         }
     }
-
-    preprocessChunks(parsedChunks, context); // get map
-
-    console.log('Importing chunks: ',parsedChunks);
+    parsedChunks = preprocessChunks(parsedChunks, context); // get map
 
     for (let chunk of parsedChunks) {
         context.localContext = handleChunk(chunk,context,recipe);
@@ -128,10 +151,8 @@ function handleSource (chunk, context, recipe) {
     }
     if (context &&
         context.url) {
-        console.log('Update with ',context.url)
         let urlObject = new URL(url,context.url)
         url = urlObject.href
-        console.log('Got',url)
     }
     let source = {name,url}
     recipe.sources.push(source)
@@ -221,9 +242,7 @@ function extractUrlFromText (text) {
         text = text.replace(liberalUrlMatcher,'')
         text = text.replace(/^\s*(\W+\s*)+/,'')
         text = text.replace(/\s*(\W+\s*)+$/,'')
-        console.log('Have text and url',text,url)
         if (!url.match(/\/\//)) {
-            console.log('Add slashes...')
             url = '//' + url
         }
         return [text,url]
