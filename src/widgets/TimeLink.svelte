@@ -40,7 +40,9 @@
 <div bind:this={ref}>
     <label>{label}{#if label}:{/if}
         <span class:active href="#showTimer" on:click={toggleTimer}>
-            {timestring||times.getDescription(seconds)}
+            <slot>
+                {timestring||times.getDescription(seconds)}
+            </slot>
         </span>
     </label>
     {#if show}
