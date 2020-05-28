@@ -134,6 +134,13 @@ export const recipeActions = {
         setStoredRec(response);
         ssp(actionState,'loading',false)
     },
+
+    async openRecipe (id) {
+        await recipeActions.getRecipe(id);
+        await localRecipes.open(id);
+        let rec = get(localRecipes)[id]
+        return rec;
+    },
     
     async getRecipes ({query,fields,limit,page}) {
         ssp(actionState,'querying',{query,fields,limit,page});
@@ -142,6 +149,7 @@ export const recipeActions = {
         activePage.set(response.result.map((r)=>r.id));
         ssp(actionState,'querying',false);
     },
+    
     async updateRecipe (recipe) {
         let updatedRecipe = await api.updateRecipe(recipe);
         setStoredRec(updatedRecipe);
