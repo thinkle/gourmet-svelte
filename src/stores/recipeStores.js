@@ -60,7 +60,8 @@ function setStoredRecs (recs) {
 export const localRecipes = {
     open (id) {
         return new Promise((resolve,reject)=>{
-            const storedRec = get(storedRecipes)[id]
+            let $storedRecipes = get(storedRecipes)
+            const storedRec = $storedRecipes[id]
             if (!storedRec) {
                 throw 'No stored recipe exists!'
             }
@@ -127,6 +128,13 @@ export const recipeActions = {
         ssp(actionState,'created',recipe.id)
         return recipe;
     },
+    async getRecipe (id) {
+        ssp(actionState,'loading',true);
+        let response = await api.getRecipe(id);
+        setStoredRec(response);
+        ssp(actionState,'loading',false)
+    },
+    
     async getRecipes ({query,fields,limit,page}) {
         ssp(actionState,'querying',{query,fields,limit,page});
         let response = await api.getRecipes({query,fields,limit,page});
