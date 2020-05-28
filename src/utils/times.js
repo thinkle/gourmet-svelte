@@ -1,5 +1,7 @@
+import { get } from 'svelte/store'
 import {floatToFrac,numMatchString,parseAmount} from './numbers.js';
 import {reToString} from './regExpUtil.js';
+import {getSurroundingSentence} from './textUtils.js';
 
 let M = 60;
 let H = 60*60;
@@ -132,19 +134,24 @@ export function getSecondsFromString (s) {
     return total
 }
 
-
-
-export function parseTimes (s) {
+export function parseTimes (s, includeSentence) {
+    let lastMatchOffset = -1
     return s.replace(
-        timeMatcher,
-        (matchString)=>{
+        fancyTimeMatcher,
+        function (matchString) {
+            let offset = arguments[arguments.length-2]
             let seconds = getSecondsFromString(matchString)
             // fix whitespace!
             if (seconds) {
-                let [s,leading,content,trailing]  = matchString.match(
+                let [ts,leading,content,trailing]  = matchString.match(
                         /^(\s*)(.+?)(\s*)$/
                 );
-                return `${leading}<duration seconds=${seconds}>${content}</duration>${trailing}`
+                if (lastMatchOffset > offset) {
+                    lastMatchOffset = s.length // scratch it if we're nested
+                }
+                let context = getSurroundingSentence(s,offset,lastMatchOffset).replace("'","\\'");
+                lastMatchOffset = offset + matchString.length - 1;
+                return `${leading}<duration context='${context}' seconds=${seconds}>${content}</duration>${trailing}`
             }
             else {
                 return matchString;
@@ -244,15 +251,21 @@ export default {
         const hms = this.getHMS(s);
         if (!hms.hours) {
             if (!hms.minutes) {
-                return `${hms.seconds} seconds`
+                return `${hms.seconds} seconds` // fix me
             }
-            if (!hms.seconds) {
+            if ([0,15,30,45].indexOf(hms.seconds)>-1) {
                 return `${floatToFrac(hms.minutes,{fallbackDigits:0})} minutes`
+            } else {
+                return `${floatToFrac(hms.minutes)} minutes, ${floatToFrac(hms.seconds,{fallbackDigits:0})} seconds`
             }
-            return `${floatToFrac(hms.minutes)} minutes, ${floatToFrac(hms.seconds,{fallbackDigits:0})} seconds`
         }
         if (hms.hours < 24) {
-            return `${floatToFrac(s/H,{fallbackDigits:0})} hours`
+            if ([0,15,30,45].indexOf(hms.minutes)>-1) {
+                return `${floatToFrac(s/H,{fallbackDigits:0})} hours`
+            }
+            else {
+                return `${floatToFrac(hms.hours)} hour ${floatToFrac(hms.minutes)} minutes`
+            }
         }
         else if (hms.hours < 24*7) {
             return `${floatToFrac(s/D,{fallbackDigits:0})} days`
