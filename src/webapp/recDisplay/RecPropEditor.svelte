@@ -44,7 +44,7 @@
  let ref;
 
 </script>
-{#if prop.array}
+{#if prop.array && prop.edit!==modes.MCMB}
     <div   class="multiContainer">
         {#each value as subval,n}
             <IconButton bare="true" icon="remove"
@@ -70,7 +70,7 @@
             </div>
         {/each}
         <IconButton bare="true" icon="add" class="icon"
-                    on:click={()=>value=[...value,...prop.empty]}
+                    on:click={()=>value=[...value,{...prop.empty}]}
         />
     </div>
 {:else}
@@ -82,3 +82,17 @@
         bind:this={ref}
     />
 {/if}
+
+<style>
+ .multiContainer {
+     display: grid;
+     grid-template-columns: 2em auto;
+     row-gap: 5px;
+ }
+
+ .multiContainer > button {
+     align-self: center;
+     justify-self: center;
+ }
+
+</style>
