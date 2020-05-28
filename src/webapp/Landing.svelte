@@ -1,6 +1,4 @@
 <script>
- import RecipeList from './recDisplay/RecipeList.svelte';
- import Admin from './Admin.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
  import remoteApi from '../data/remoteApi.js'
@@ -59,15 +57,7 @@
         <div>
             <button on:click={() => doLogout()}>Log Out</button>
         </div>
-        <button on:click={()=>adminMode=!adminMode}>
-            {#if adminMode}
-                Regular Mode
-                {:else}
-                Admin Mode
-            {/if}
-        </button>
-        
-        
+        <slot/>
     {:else}
         Not Logged in...
         <div>
@@ -75,9 +65,5 @@
             <button on:click={() => doSignup() }>Sign Up</button>
         </div>
     {/if}
-    {#if adminMode}
-        <Admin/>
-        {:else}
-        <RecipeList/>
-    {/if}
+
 </div>
