@@ -99,4 +99,7 @@ function adjustSize () {
  input {
      width : 100%
  }
+ .input {
+     margin: 0;
+ }
 </style>
