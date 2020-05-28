@@ -26,9 +26,8 @@
 <style>
  div {
      display: inline-grid;
-     grid-template-columns: 6em auto;
+     grid-template-columns: 3em auto;
      grid-column-gap: 3px;
-     width: 100%;
  }
  label {
      text-align: right;
