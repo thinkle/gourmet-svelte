@@ -11,7 +11,6 @@
  export let smallLabel=true;
  import RecDef from '../../common/RecDef.js';
  import IconButton from '../../widgets/IconButton.svelte';
- export let recursive=false;
 
  import RecPropEditor from './RecPropEditor.svelte'
  import RecPropDisplay from './RecPropDisplay.svelte'
@@ -27,21 +26,7 @@
  }
 
  import { quintOut } from 'svelte/easing';
- import { crossfade,scale,fade,slide,fly } from 'svelte/transition';
-
- const [send, receive] = crossfade({
-     duration: d => Math.sqrt(d * 200),
-     fallback : scale /* (node, params) {
-	                 const style = getComputedStyle(node);
-	                 const transform = style.transform === 'none' ? '' : style.transform;
-	                 return {
-	                 duration: 2000,
-	                 easing: quintOut,
-	                 css: t => `opacity: ${t}`
-	                 };
-                         } */
- });
- 
+ import { fly } from 'svelte/transition';
 
 
  var edit;
@@ -64,7 +49,19 @@
 
  $: fullWidth = edit && prop.minEditWidth >= floatWidth
 
+ function hasValue () {
+     if (prop.array && value.length > 0) {
+         return true;
+     } else if (!prop.array && value) {
+         return true;
+     } else {
+         return false;
+     }
+ }
+
 </script>
+
+{#if (edit || hasValue(value))}
 <div class="block" class:title={prop.isTitle} class:fullWidth={fullWidth}>
     <div>
         {#if showLabel && (!prop.hideLabel)}
@@ -114,8 +111,7 @@
     </div>
 
 </div>
-
-<!-- {#if edit && !recursive!}<div class="invisible" bind:clientWidth={editWidth} forceEdit={true}><svelte:self {...$$props} recursive={true}/></div>{/if} -->
+{/if}
 
 <style>
  .invisible {
@@ -138,9 +134,7 @@
      font-family: var(--recipeHeadFont);
  }
  .top {
-     display: flex;
-     width: 100%;
-     align-items: center;
+     display: block;
  }
  .top button {
      margin-left: 1em;
@@ -159,19 +153,8 @@
      color: var(--black);
      background-color: var(--white);}
 
- .multiContainer {
-     display: grid;
-     grid-template-columns: 4em auto;
-     row-gap: 20px;
- }
-
- .multiContainer > button {
-     align-self: center;
-     justify-self: center;
- }
 
  .arrayval {
-     /*      display: inline-block; */
      padding-right: 1em;
  }
 
