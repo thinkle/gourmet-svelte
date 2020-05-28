@@ -2,6 +2,16 @@ import times from './times.js';
 
 
 it(
+    'getDescription (Time to string)',
+    ()=>{
+        expect(times.getDescription(30)).toMatch('30 seconds')
+        expect(times.getDescription(30*60)).toMatch('30 minutes')
+        expect(times.getDescription(90*60)).toMatch('1 ½ hours')
+        expect(times.getDescription(95*60)).toMatch('1 hour 35 minutes')
+    }
+);
+
+it(
     'Time matcher',
     ()=>{
         expect(times.getTimeUnit('20 seconds')).toEqual(1)
@@ -45,17 +55,17 @@ it(
         expect(
             times.parseTimes('3 hours 2 minutes AND THEN 1 minute')
         ).toEqual(
-            `<duration seconds=${3*60*60+2*60}>3 hours 2 minutes</duration> AND THEN <duration seconds=60>1 minute</duration>`
+            `<duration context='3 hours 2 minutes AND THEN 1 minute' seconds=${3*60*60+2*60}>3 hours 2 minutes</duration> AND THEN <duration context='AND THEN 1 minute' seconds=60>1 minute</duration>`
         );
         expect(
             times.parseTimes('3 hours, 2 minutes AND THEN 1 minute and 1 second')
-        ).toEqual(
-            `<duration seconds=${3*60*60+2*60}>3 hours, 2 minutes</duration> AND THEN <duration seconds=61>1 minute and 1 second</duration>`
+        ).toMatch(
+            `seconds=${3*60*60+2*60}>3 hours, 2 minutes</duration>`
         );
         expect(
             times.parseTimes('1 hour\ncat\n1 minute')
         ).toEqual(
-            `<duration seconds=${60*60}>1 hour</duration>\ncat\n<duration seconds=60>1 minute</duration>`
+            `<duration context='1 hour\ncat\n1 minute' seconds=${60*60}>1 hour</duration>\ncat\n<duration context='cat\n1 minute' seconds=60>1 minute</duration>`
         );
     }
 );
