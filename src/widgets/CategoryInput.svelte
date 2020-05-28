@@ -30,18 +30,25 @@
 </script>
 <span>
     <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue} bare={true} icon="add"></IB></span>
-    <span>
+    <span class="tag-container">
         {#each value as v (v.name)}
             <span class="tag"
                   animate:flip={{delay: 100, duration: 250, easing: quintOut}}>{v.name}
-                <IB on:click={()=>remove(v)} bare={true} icon="close"></IB>
+                <span class="close"> <IB small="true " on:click={()=>remove(v)} bare={true} icon="close"></IB></span>
             </span>
         {/each}
     </span>
 </span>
 <style>
- span {display: flex; flex-direction: column;}
- span > span {display: flex; flex-direction: row}
+ .tag-container {
+     display: flex;
+     flex-direction: row;
+     flex-wrap: wrap;
+ }
+ span > span {
+     display: flex;
+     flex-direction: row
+ }
 
  .tag .material-icons {
      font-size: 1rem;
@@ -49,6 +56,7 @@
  .tag {
      display: inline-flex;
      padding: 4px;
+     margin: 2px;
      border-radius: 5px;
      background-color: #c7c7d7;
      color: #333;
@@ -61,5 +69,9 @@
  .current {
      background-color: yellow;
      font-weight: bold;
+ }
+ .close {
+     align-self: flex-start; /* top */
+     margin-left: auto; /* right */
  }
 </style>
