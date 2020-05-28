@@ -321,6 +321,7 @@
 <style>
  .cmb {
      position: relative;
+     display: inline-flex;
  }
  .current,li:active {
      background-color: yellow;
