@@ -13,8 +13,12 @@
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
 
-
  export let rec=undefined;
+ let valid = false;
+ $: {
+     valid = isValid(rec);
+     console.log('Recipe is valid?',valid,rec);
+ }
 
  export let editMode = false;
  export let editable = true;
@@ -22,7 +26,9 @@
  export let onChange;
 
  function triggerChange () {
-     if (onChange) {onChange(rec);}
+     if (onChange) {
+         onChange(rec);
+     }
  }
 
  $: if (rec && rightBlock && imageBlock) {handleResize()}
@@ -33,7 +39,17 @@
  // Store business...
  let multiplier = writable(1);
  setContext('multiplier',multiplier);
- 
+ let ingredientList = writable([]);
+ setContext('ingredientList',ingredientList);
+ let highlightedIngredient = writable({});
+ setContext('highlightedIngredient',highlightedIngredient);
+
+
+ $: if (rec && rec.ingredients) {
+     $ingredientList = rec.ingredients;
+ }
+
+
  // Delete me
  let recipeChanges = writable(0);
  setContext('recipeChanges',recipeChanges);
@@ -44,13 +60,17 @@
  let widthLeftOfImage = ''
  let imageCentered = false;
  export let minPropWidth = 150;
- onMount(()=>{
-     handleResize()
- }
- );
+ /* onMount(()=>{
+  *     handleResize()
+  * }
+  * ); */
  
-let  rightBlockWidth
+ let  rightBlockWidth
  function handleResize () {
+     if (!imageBlock || !rightBlock) {
+         console.log('Weird: blocks not ready yet? img',imageBlock,'rght',rightBlock);
+         return;
+     }
      if (!imageCentered) {
          imageBlockWidth = imageBlock.clientWidth;
      }
@@ -64,18 +84,45 @@ let  rightBlockWidth
          imageCentered = false
      }
  }
- 
+
+ function resizeOnUpdate (node) {
+     handleResize(); // initial handle resie...
+     return {
+         update () {
+             console.log('Content update!');
+             handleResize();
+         },
+     }
+ }
+
+ /* Check if our recipe is valid - helps us display a message rather
+    than crashing outright... */
+ function isValid (rec) {
+     if (!rec) {return false}
+     if (!rec.images || !Array.isArray(rec.images)) { return false }
+     if (!rec.ingredients || !Array.isArray(rec.ingredients)) { return false }
+     return true;
+ }
+
 
 </script>
 
-{#if rec}
+{#if valid}
+    <h1>Recipe valid: {valid}</h1>
     <div class="recipe"> <!-- top-level container...  -->
         <!-- Above the side-by-side view... -->
         <div class="top" use:watchResize={handleResize}>
             <h2>
 	        {#each RecDef.titleProps as prop}
                     <span>
-                        <RecProp onChange={triggerChange} showLabel={false} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}></RecProp>
+                        <RecProp
+                            onChange={triggerChange}
+                            showLabel={false}
+                            editable={editable}
+                            forceEdit={editMode}
+                            prop={prop}
+                            bind:value={rec[prop.name]}
+                        />
                     </span>
                 {/each}        
             </h2>
@@ -123,18 +170,22 @@ let  rightBlockWidth
                             Saved to browser and in the cloud.
                             Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
                         </StatusIcon>
-                    {:else}
+                    {:else if $recipeState[rec.id]}
                         <StatusIcon icon="cloud_off" tooltip="true">
                             Saving to the cloud failed - perhaps you're offline?
                             Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
                             Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                        </StatusIcon>
+                    {:else}
+                        <StatusIcon icon="info" tooltip="true" >
+                            Huh, no state information found for this recipe at all. Are you testing or is this a bug?
                         </StatusIcon>
                     {/if}
                 {/if}
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
+        <SideBySide height="60vh" growRight="true" leftBasis="300px" rightBasis="600px">
 	    <h3 slot="leftHead"> 
 	        Ingredients
                 {#if !editMode && editable}
@@ -155,11 +206,11 @@ let  rightBlockWidth
 	        </IL>
 	    </div>		
 	    
-	    <div slot="right" bind:this={rightBlock} style={`--widthRightBlock:${rightBlockWidth}px`}>
+	    <div slot="right" bind:this={rightBlock} use:resizeOnUpdate style={`--widthRightBlock:${rightBlockWidth}px`}>
                 <div class="topblock" style={`--widthLeftOfImage:${widthLeftOfImage}px`}>
                     <div class="props" >
                         
-                        <div class="images" class:centered={imageCentered} bind:this={imageBlock}>
+                        <div class="images" class:centered={imageCentered} use:resizeOnUpdate bind:this={imageBlock}>
                             {#each rec.images as image}
                                 <!-- Small: <img alt={image.alt||rec.title} src={image.thumbnailUrl}/> -->
                                 <img alt={image.alt||rec.title} src={image.url}/>
@@ -167,37 +218,21 @@ let  rightBlockWidth
                         </div> <!-- close images -->
 
                         {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
-                            <div class="flowingProps">
-                                {#if rec.hasOwnProperty(prop.name)}
-                                    <RecProp
-                                        floatWidth={widthLeftOfImage}
-                                                   onChange={triggerChange} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/><br>
-                                {/if}
-                                {#if editMode}
-                                    {#if !rec.hasOwnProperty(prop.name)}
-                                        <div style="inline-block" class="small"><button on:click={()=>rec[prop.name]=prop.empty}>Add {prop.label}?</button></div><br>
-                                    {/if}
-                                {/if}
+                            <div class="prop">                                
+                                <RecProp onChange={triggerChange} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/>                                
                             </div>
                             <!-- Close flowing props  -->
                         {/each}
                         <!-- block props  -->
                         {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
-                            {#if rec.hasOwnProperty(prop.name)}
+                            <div class="prop bottomProp">
                                 <RecProp
                                     floatWidth={widthLeftOfImage}
-                                    onChange={triggerChange}
+                                               onChange={triggerChange}
                                     editable={editable}
-                                    forceEdit={editMode}
+                                               forceEdit={editMode}
                                     prop={prop} bind:value={rec[prop.name]}/>
-                            {/if}
-                            {#if editMode}
-                                {#if !rec.hasOwnProperty(prop.name)}
-                                    <div style="inline-block" class="small">
-                                        <button on:click={()=>rec[prop.name]=prop.empty}>Add {prop.label}?</button> <!-- add text button -->
-                                    </div>
-                                {/if}
-                            {/if}
+                            </div>
                         {/each}
                         <!-- end block props -->
 
@@ -206,6 +241,12 @@ let  rightBlockWidth
 	    </div> <!-- close right slot -->
         </SideBySide>
     </div>  <!-- close container  -->
+{:else}
+    {#if !rec}
+        Loading recipe...
+    {:else}
+        Invalid Recipe: {JSON.stringify(rec)}.
+    {/if}
 {/if}
 
 <style>
@@ -231,9 +272,11 @@ let  rightBlockWidth
  h2,h3,h4,h5,h5 {
      font-family: var(--recipeHeadFont);
  }
- .flowingProps {
-     width : 200px;
-     width: var(--widthLeftOfImage);
+ .prop:first-child {
+     margin-top: 0;
+ }
+ .prop {
+     margin-top: 5px;
  }
  .centered {
      width: 100%;
@@ -245,5 +288,6 @@ let  rightBlockWidth
  .multiplier {
      margin-left: 1em;
      margin-right: auto;
+     display: flex;
  }
 </style>
