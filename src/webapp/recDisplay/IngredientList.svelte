@@ -13,7 +13,8 @@
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {floatToFrac} from '../../utils/numbers.js';
  import {onMount,tick} from 'svelte';
- let recipeChanges = getContext('recipeChanges');
+ import {highlightItem} from '../../utils/ingredientUtils.js';
+ let highlightedIngredient = getContext('highlightedIngredient');
 
  console.log("IngredientList created: onChange=",onChange)
  function triggerChange () {
@@ -67,7 +68,9 @@
      triggerChange(); // tell parent we've changed
  }
 
- async function insertIngredient (value, list, index) {
+ let focusNext
+
+ function insertIngredient (value, list, index) {
      list[index] = value;
      let newIng = {
      }
@@ -75,18 +78,41 @@
      // Come up with some way to focus it :(
      ingredients = ingredients; // tell svelte
      triggerChange(); // tell parent
+     focusNext = newIng;
      return true;
  }
  
+ function removeIngredient (list, index) {
+     list.splice(index,1);
+     ingredients = ingredients;
+     triggerChange();
+     focusNext = list[index-1]
+ }
+
+ function toggleHighlight (ingredient) {
+     if ($highlightedIngredient.highlighted != ingredient.text) {
+         $highlightedIngredient.highlighted = ingredient.text
+     } else {
+         $highlightedIngredient.highlighted = undefined
+     } 
+ }
+ function hoverOn (ingredient) {
+     $highlightedIngredient.hover = ingredient.text
+ }
+ function hoverOff (ingredient) {
+     $highlightedIngredient.hover = undefined
+ }
 
 </script>
 
 <div style="max-width:{maxWidth}px;">
     <table bind:this={ref}  class:edit-mode={editMode} class="inglist" style={getStyle(idealWidth)}>
-	{#each ingredients as i,n}
+	{#each ingredients as i,n (i)}
             {#if i.ingredients}
                 <!-- nested ingredients...! -->
-                <tr class:ing={!i.ingredients} class:grouphead={i.ingredients}>
+                <tr class:highlighted={i.text==$highlightedIngredient.highlighted}
+                                      class:hover={i.text==$highlightedIngredient.hover}
+                    class:ing={!i.ingredients} class:grouphead={i.ingredients}>
                     <td colspan="4">
                         {#if editMode}
                             <FancyInput on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
@@ -99,25 +125,38 @@
                             <h3>{i.text}</h3>
                         {/if}
                         <table class="inglist">
-                            {#each i.ingredients as ii,nn}
-	                        <tr class='ing'>
-                                    {#if editMode}
-                                        <td colspan="4">
-                                            <IngredientInput ing={ii} onChange={(v)=>changeIngredient(ii,v)} onEnter={(v)=>insertIngredient(v,i.ingredients,nn)}/>
-                                        </td>
-                                        <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
-                                             <td>
-                                             <label>Item:</label> 
-                                             <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
-                                             </td> -->
-                                        <IconButton 
-                                            bare={true} 
-                                                 icon="delete"
-                                            on:click="{()=>{i.ingredients.splice(nn,1);ingredients=ingredients;triggerChange()}}"/>
-                                    {:else}
-                                        <NumberUnitDisplay  mode="table" value={ii.amount}/>
-	                                <td>
-                                            <span class='item'>{ii.text}</span>
+                            {#each i.ingredients as ii,nn (ii)}
+	                        <tr class='ing'
+                                           class:highlighted={ii.text==$highlightedIngredient.highlighted}
+                                           class:hover={ii.text==$highlightedIngredient.hover}
+                                >
+                                           {#if editMode}
+                                           <td colspan="4">
+                                           <IngredientInput
+                                           onChange={(v)=>changeIngredient(ii,v)}
+                                           onEnter={(v)=>insertIngredient(v,i.ingredients,nn)}
+                                           onDelete={()=>{removeIngredient(i.ingredients,nn)}}
+                                           shouldFocus={focusNext===ii}
+                                           ing={ii}
+                                />
+                                           </td>
+                                           <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
+                                           <td>
+                                           <label>Item:</label> 
+                                           <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
+                                           </td> -->
+                                           <IconButton 
+                                           bare={true} 
+                                           icon="delete"
+                                           on:click="{()=>{removeIngredient(i.ingredients,nn)}}"/>
+                                           {:else}
+                                           <NumberUnitDisplay  mode="table" value={ii.amount}/>
+	                                   <td
+                                             on:click={()=>toggleHighlight(ii)}
+                                             on:mouseover={()=>hoverOn(ii)}
+                                             on:mouseleave={()=>hoverOff(ii)}
+                                           >
+                                           <span class='item'>{@html highlightItem(ii)}</span>
                                         </td>
                                     {/if}
                                 </tr>
@@ -138,14 +177,20 @@
                     <!-- end of nested table -->
                 </tr>
             {:else}
-                <tr class='ing'>
+        <tr class='ing'
+            class:highlighted={i.text==$highlightedIngredient.highlighted}
+            class:hover={i.text==$highlightedIngredient.hover}
+            >
                     <!-- standard ingredient row -->
                     {#if editMode}
                         <td colspan="4">
                             <IngredientInput
                                 onEnter={(v)=>insertIngredient(v,ingredients,n)}
+                                        onChange={(v)=>changeIngredient(i,v)}
+                                onDelete={()=>{removeIngredient(ingredients,n)}}
+                                        shouldFocus={focusNext===i}
                                 ing={i}
-                                onChange={(v)=>changeIngredient(i,v)}/>
+                            />
                         </td>
                         <td>
                             <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
@@ -159,9 +204,13 @@
                              <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
                              </td> -->
                     {:else}
-                    <NumberUnitDisplay mode="table" value={i.amount}/>
-	                <td>
-                            <span class='item'>{i.text}</span>
+                        <NumberUnitDisplay mode="table" value={i.amount}/>
+	                <td
+                          on:click={()=>toggleHighlight(i)}
+                          on:mouseover={()=>hoverOn(i)}
+                          on:mouseleave={()=>hoverOff(i)}
+                          >
+                            <span class='item'>{@html highlightItem(i)}</span>
                         </td>
                     {/if}
                 </tr>
@@ -248,6 +297,15 @@
 
  .grouphead > input {
      font-weight: bold;
+ }
+ .highlighted {
+     background-color: var(--note-bg);
+     color: var(--note-fg);
+     font-weight: bold;
+ }
+ .hover {
+     background-color: var(--note-light-bg);
+     color: var(--note-light-fg);
  }
 
  
