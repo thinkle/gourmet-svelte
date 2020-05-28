@@ -1,5 +1,5 @@
 <script>
- import {onMount} from 'svelte';
+ import {onMount,tick} from 'svelte';
  export let content=''
  export let markupToComponentMap = {
  }
@@ -14,32 +14,58 @@
      for (let child of node.children) {
 	 crawlNode(child);
      }
- }
- 
- $: {
-     parsed =  new DOMParser().parseFromString(content, 'text/html');
-     crawlNode(parsed.body);	
+     components = components;
  }
  
  /* $: {
-  *     if (root) {
-  *         addToRoot()
-  *     }
+  *     parsed =  new DOMParser().parseFromString(content, 'text/html');
+  *     crawlNode(parsed.body);	
   * } */
-
- onMount(addToRoot)
  
- function addToRoot () {
-     components.forEach(
-	 (c)=>c.component.addToDOM(c.node)
-     );
-     console.log("ADD TO ROOT",parsed,parsed.body.innerHTML)
+
+ async function makeComponentsAndMountThem (root) {
+     parsed =  new DOMParser().parseFromString(content, 'text/html');
+     crawlNode(parsed.body);
+     await tick();
+     addToRoot(root)
+ }
+
+
+ function magic (node) {
+     console.log('magic got node',node);
+     makeComponentsAndMountThem(node);
+     return {
+         update () {
+             console.log('magic updated!',node)
+             makeComponentsAndMountThem(node)
+         },
+         destroy () {
+             console.log('magic destroyed',node);
+             node.innerHTML = ''
+         }
+     }
+ }
+
+ //onMount(addToRoot)
+ function addSelfToDom (node,i) {
+     let target = components[i].node;
+     console.log('Adding node to our dom',node,target)
+     target.parentElement.insertBefore(node,target);
+     target.remove();
+ }
+
+
+ function addToRoot (root) {
+     /* components.forEach(
+	(c)=>c.component.addToDOM(c.node)
+      * ); */
+     //console.log("ADD TO ROOT",parsed,parsed.body.innerHTML)
      let toAppend = []
      for (let i=0; i<parsed.body.childNodes.length; i++) {
-         console.log('append child node #',i)
+         //console.log('append child node #',i)
          toAppend.push(parsed.body.childNodes[i]);
      }
-     console.log('Must append',toAppend)
+     //console.log('Must append',toAppend)
      for (let node of toAppend) {
          root.appendChild(node)
      }
@@ -54,21 +80,21 @@
      return map
  }
  
- let root;
+ /*  let root; */
 
 
 
 </script>
-<div bind:this={root}>
+<div use:magic={content}>
 </div>
 <!-- Components mounted below will be removed from their position and added to the DOM
      by JavaScript. They must each support an addToDOM method which takes a DOM parent
      and adds them to it.
 -->
 {#each components as component,i}
-    <svelte:component this={components[i].type} bind:this={components[i].component} {...mapAttrs(components[i].node.attributes)} >
+    <span use:addSelfToDom={i}><svelte:component  this={components[i].type} bind:this={components[i].component} {...mapAttrs(components[i].node.attributes)} >
         {@html components[i].node.innerHTML}
-    </svelte:component>
+    </svelte:component></span>
 {/each}
 <style>
  div {
