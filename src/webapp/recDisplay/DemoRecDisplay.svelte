@@ -3,8 +3,6 @@
  import {testRecs} from '../../common/mocks/recipes.js'
  import Recipe from './Recipe.svelte';
  export let initialShow
- import {recipeData} from '../../stores/recipeData.js';
- $recipeData = testRecs;
 </script>
 
 <div> 
