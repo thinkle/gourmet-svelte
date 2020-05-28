@@ -2,8 +2,13 @@
  export let text=''
  export let ing = undefined;
  export let onEnter
+ export let onDelete
  export let onChange
  export let onInput
+ export let shouldFocus
+
+ $: shouldFocus && ref && focus();
+
  console.log('ing:',ing)
  export function getValue () {return parsed}
  export function clear () {
@@ -19,7 +24,7 @@
  import {parseUnit} from '../utils/unitAmounts.js';
  let parsed;
  let ref
-
+ 
  import {onMount, tick} from 'svelte';
  //import rangy from 'rangy'
  // rangy.init();
@@ -30,34 +35,34 @@
  }
 
  function parse () {                  
-     if (text) {
-         let amt = parseAmount(text);
-         let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
-         delete amt.pretext;
-         delete amt.posttext;
-         parsed = {
-             amount : {
-                 ...amt,
-                 unit : unitAndText.unit,
-                 standardUnit : unitAndText.standardUnit,
-             },
-             text : unitAndText.text,
-             originalText : text,
-         }
-     }
-     else {
-         parsed = {
-         }
-     }
-     if (fireInputOnNextParse) {
-         onInput && onInput(parsed);
-         fireInputOnNextParse = false
-     }
-     if (doMarkup) {
-         //markup();
-         //doMarkup = false; // do it once
-     }
- }
+                   if (text) {
+                       let amt = parseAmount(text);
+                       let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
+                       delete amt.pretext;
+                       delete amt.posttext;
+                       parsed = {
+                           amount : {
+                               ...amt,
+                               unit : unitAndText.unit,
+                               standardUnit : unitAndText.standardUnit,
+                           },
+                           text : unitAndText.text,
+                           originalText : text,
+                       }
+                   }
+                   else {
+                       parsed = {
+                       }
+                   }
+                   if (fireInputOnNextParse) {
+                       onInput && onInput(parsed);
+                       fireInputOnNextParse = false
+                   }
+                   if (doMarkup) {
+                       //markup();
+                       //doMarkup = false; // do it once
+                   }
+                   }
 
  $: {
      if (ing) {
@@ -78,6 +83,11 @@
      if (event.keyCode!=13) {
          fireInputOnNextParse = true;
      }
+     if (event.keyCode==8 && text=='') {
+         if (onDelete) {
+             onDelete()
+         }
+     }
  }
  function onKeypress (event) {
      // Check for "enter" key
@@ -96,38 +106,38 @@
      }
  }
  /* else {
- // Handle the "easy" case 4 automated parsing...
- let actualRange = window.getSelection().getRangeAt(0);
- let endRange = document.createRange();//Create a range (a range is a like the selection but invisible)
- endRange.selectNodeContents(ref);//Select the entire contents of the element with the range
- endRange.collapse(false);// collapse to end
- let lastChild = ref.childNodes[ref.childNodes.length-1]
- let lastChildEndRange = document.createRange();
- lastChildEndRange.selectNodeContents(lastChild);
- lastChildEndRange.collapse(false); // collapse to end
- if (actualRange.startContainer == endRange.startContainer &&
- actualRange.endContainer == endRange.endContainer && 
- actualRange.startOffset == endRange.startOffset && actualRange.endOffset==endRange.endOffset) {
- console.log('At end!')
- console.log('Restore selection to last child node')
- markup()
- tick().then(()=>setEndOfContenteditable(ref))
- } else if (
- actualRange.startContainer == lastChildEndRange.startContainer &&
- actualRange.endContainer == lastChildEndRange.endContainer &&
- actualRange.startOffset == lastChildEndRange.startOffset &&
- actualRange.endOffset==lastChildEndRange.endOffset) {
- console.log('At end of last child');
- console.log('Restore selection to last child node')
- markup()
- tick().then(()=>setEndOfContenteditable(ref))
- }
- else {
- console.log('Not at end');
- console.log('End is:',endRange,'or',lastChildEndRange,'but we are at',actualRange);
- }
- }
- }     */
+    // Handle the "easy" case 4 automated parsing...
+    let actualRange = window.getSelection().getRangeAt(0);
+    let endRange = document.createRange();//Create a range (a range is a like the selection but invisible)
+    endRange.selectNodeContents(ref);//Select the entire contents of the element with the range
+    endRange.collapse(false);// collapse to end
+    let lastChild = ref.childNodes[ref.childNodes.length-1]
+    let lastChildEndRange = document.createRange();
+    lastChildEndRange.selectNodeContents(lastChild);
+    lastChildEndRange.collapse(false); // collapse to end
+    if (actualRange.startContainer == endRange.startContainer &&
+    actualRange.endContainer == endRange.endContainer && 
+    actualRange.startOffset == endRange.startOffset && actualRange.endOffset==endRange.endOffset) {
+    console.log('At end!')
+    console.log('Restore selection to last child node')
+    markup()
+    tick().then(()=>setEndOfContenteditable(ref))
+    } else if (
+    actualRange.startContainer == lastChildEndRange.startContainer &&
+    actualRange.endContainer == lastChildEndRange.endContainer &&
+    actualRange.startOffset == lastChildEndRange.startOffset &&
+    actualRange.endOffset==lastChildEndRange.endOffset) {
+    console.log('At end of last child');
+    console.log('Restore selection to last child node')
+    markup()
+    tick().then(()=>setEndOfContenteditable(ref))
+    }
+    else {
+    console.log('Not at end');
+    console.log('End is:',endRange,'or',lastChildEndRange,'but we are at',actualRange);
+    }
+    }
+    }     */
 
 
  /* function setEndOfContenteditable(contentEditableElement)
