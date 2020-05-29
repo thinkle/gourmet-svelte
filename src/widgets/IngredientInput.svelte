@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
  export let text=''
  export let ing = undefined;
  export let onEnter
@@ -6,8 +7,7 @@
  export let onChange
  export let onInput
  export let shouldFocus
-
- $: shouldFocus && ref && focus();
+ let originalValue;
 
  console.log('ing:',ing)
  export function getValue () {return parsed}
@@ -30,52 +30,49 @@
  // rangy.init();
  let fireInputOnNextParse
  let doMarkup;
- $: {
-     parse(text)
+ 
+ function parse () {
+     if (text) {
+         let amt = parseAmount(text);
+         let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
+         delete amt.pretext;
+         delete amt.posttext;
+         parsed = {
+             amount : {
+                 ...amt,
+                 unit : unitAndText.unit,
+                 standardUnit : unitAndText.standardUnit,
+             },
+             text : unitAndText.text,
+             originalText : text,
+         }
+     }
+     else {
+         parsed = {
+             text : ''
+         }
+     }
+     if (fireInputOnNextParse) {
+         onInput && onInput(parsed);
+         fireInputOnNextParse = false
+     }
  }
-
- function parse () {                  
-                   if (text) {
-                       let amt = parseAmount(text);
-                       let unitAndText = parseUnit(amt.posttext||amt.pretext, true); // true means we require a unit
-                       delete amt.pretext;
-                       delete amt.posttext;
-                       parsed = {
-                           amount : {
-                               ...amt,
-                               unit : unitAndText.unit,
-                               standardUnit : unitAndText.standardUnit,
-                           },
-                           text : unitAndText.text,
-                           originalText : text,
-                       }
-                   }
-                   else {
-                       parsed = {
-                       }
-                   }
-                   if (fireInputOnNextParse) {
-                       onInput && onInput(parsed);
-                       fireInputOnNextParse = false
-                   }
-                   if (doMarkup) {
-                       //markup();
-                       //doMarkup = false; // do it once
-                   }
-                   }
-
- $: {
-     if (ing) {
-         console.log('Cool got an ingredient, parse it!')
+ 
+ let lastIng; // don't keep re-parsing our ingredient if it hasn't changed
+ function handleIncomingIng (ing) {
+     if (ing && JSON.stringify(ing)!==lastIng) {
          if (ing.amount) {
              text = `${formatAmount(ing.amount,{unicodeFractions:false})} ${ing.amount.unit||''} ${ing.text}`
          }
          else {
              text = ing.text;
          }
+         lastIng = JSON.stringify(ing);
          ing = undefined; // kill our ingredient reference now
          parse();
          markup();
+     } else if (lastIng) {
+         //console.log('skip unnecessary parse');
      }
  }
 
@@ -164,7 +161,7 @@
  function markupAndChange () {
      markup()
      if (onChange) {
-         console.log('Fire change!');
+         console.log('Ingredient Input: Fire change!');
          onChange(parsed);}
  }
 
@@ -180,7 +177,11 @@
  }
 
  let html
+ 
  onMount (()=>markup())
+ $: shouldFocus && ref && focus();
+ $: parse(text)
+ $: handleIncomingIng(ing)
 </script>
 
 <div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
