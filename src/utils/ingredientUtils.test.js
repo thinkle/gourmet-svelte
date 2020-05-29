@@ -1,6 +1,7 @@
 import {extractItems,
         getItemMatchers,
-       highlightItemText} from './ingredientUtils.js';
+        markupTextForIngredient,
+        highlightItemText} from './ingredientUtils.js';
 
 it(
     'extract items to remove basic stopwords',
@@ -25,11 +26,11 @@ it(
         console.log('Get matchers: "head of true Italian romaine lettuce, finely chopped"')
         let matchers = getItemMatchers("head of true Italian romaine lettuce, finely chopped");
         expect(matchers[0].length).toEqual(4);
-        expect(matchers[0].matcher+'').toEqual(/true\W+Italian\W+romain\W+lettuce/gi+'')
+        expect(matchers[0].matcher+'').toMatch(/Italian.*romain.*lettuce/)
     }
 );
 
-fit(
+it(
     'highlight item text',
     ()=>{
         expect(
@@ -53,8 +54,44 @@ fit(
         highlightItemText(text);
         let end = new Date().getTime();
         expect(end-start).toBeLessThan(200)
+    }
+);
 
-        
-        
+
+it(
+    'No blank replacers',
+    ()=>{
+        expect(markupTextForIngredient('Eat garlic!',{text:'garlic'})).
+            toMatch('>garlic<')
+        expect(()=>markupTextForIngredient('Foo',{text:''})).not.toThrow();
+        expect(markupTextForIngredient('Foo',{text:''})).toEqual('Foo');
+    }
+);
+
+it(
+    'Case insensitive replacing and plurals and stuff',
+    ()=>{
+        // Handle plurals
+        expect(
+            markupTextForIngredient('some delicious potatoes',{text:'potato'})
+        ).toMatch(/>potatoes</)
+        // Case insensitive
+        expect(
+            markupTextForIngredient('some delicious POTATOES',{text:'potato'})
+        ).toMatch(/>POTATOES</)
+        // Filter out prep words
+        expect(
+            markupTextForIngredient('eat that boiled, minced shrimp',{text:'boiled, minced shrimp'})
+        ).toMatch(/>shrimp</)
+    }
+);
+
+it(
+    'No accidental regexps',
+    ()=>{
+        expect(markupTextForIngredient('Eat garlic!',{text:'\\w\\s+'})).
+            toEqual('Eat garlic!');
+        expect(markupTextForIngredient('Eat garlic garlicc garlicccccc !',{text:'garlic+'})).toMatch(/>garlic<.*\s+garlicc\s+garliccccc/)
+        expect(markupTextForIngredient('Chives',{text:'Ch[i]ves'})).toEqual('Chives');
     }
 );
