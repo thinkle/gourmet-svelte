@@ -142,7 +142,7 @@
 
  .content {
      height: 90vh;
-     padding: 2em;
+     padding: 5px;
  }
 
  .modal {
