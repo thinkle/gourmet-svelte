@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS,'Ing',);
  let b;
  export let inverse=false;
  export let icon
@@ -55,19 +56,20 @@
  }
 
  button.icon:hover {
-     background-color: #7474f4;
-     color: white;
+     background-color: var(--light-bg);
+     color: var(--light-fg);
  }
  button.icon:focus {
      border: 1px solid #7474f4;
  }
  button.toggle {
-     border: 1px solid grey;
      transition: all 0.8s;
  }
 
- button.toggle:hover {
-     background-color: #a9a9a9;
+ button.toggled {
+     background-color: var(--medium-bg);
+     color: var(--medium-fg);
+     font-weight: 500;
  }
  button.active-toggle {
      background-color: #747474;
