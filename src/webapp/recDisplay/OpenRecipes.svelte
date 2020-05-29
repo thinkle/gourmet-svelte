@@ -1,9 +1,10 @@
 <script>
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  import {flip} from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
  import Recipe from './Recipe.svelte'
  import IconButton from '../../widgets/IconButton.svelte';
- import {openLocalRecipes,localRecipes,recipeState} from '../../stores/recipeStores.js';
+ import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../../stores/recipeStores.js';
  export function open (id) {
      hide = false;
      if (id!==undefined) {
@@ -45,8 +46,18 @@
      }
  }
 
+ function onOpenSubRec (id) {
+     console.log('Request to open recipe!',id);
+     recipeActions.openRecipe(id);
+ }
+
 </script>
-<div>
+{#if !hide && $openLocalRecipes.length > 0}
+    <div class="screen" on:click="{()=>{hide=true}}">
+        
+    </div>
+{/if}
+<div class="fixedContainer">
     {#if ($openLocalRecipes.length > 0)}
         <div class="tabbox" class:hidden={hide}>
             <div class="tabs">
@@ -54,7 +65,10 @@
                     <span
                         animate:flip={{delay:100,duration:250,easing:quintOut}}
                         class:active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>
-                        <div class='close'><IconButton bare={true} small={true} on:click={()=>{console.log('close fired',id);closeRec(id)}} icon='close'/></div>
+                        <div class='close'>
+                            <IconButton bare={true} small={true} on:click={()=>window.open(`/rec/${id}`,'_blank')} icon='open_in_new'/>
+                            <IconButton bare={true} small={true} on:click={()=>{console.log('close fired',id);closeRec(id)}} icon='close'/>
+                        </div>
                         {getTabTitle(id)}
                         
                     </span>
@@ -75,10 +89,14 @@
             <div class="content">
                 <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
                 {#if $localRecipes[activeRecipeId]}
-                    <Recipe onChange={(rec)=>{
-                                     console.log('onChange fired!');
-                                     $localRecipes[rec.id]=rec
-                                     }}} rec={$localRecipes[activeRecipeId]}/>
+                    <Recipe
+                        rec="{$localRecipes[activeRecipeId]}"
+                        {onOpenSubRec}
+                        onChange="{(rec)=>{
+                                  console.log('OpenRecipes got onChange from recipe!');
+                                  $localRecipes[rec.id]=rec;
+                                  }}"
+                    />
                 {:else}
                     {$openLocalRecipes.length>0 && openOne()}                    
                 {/if}
@@ -101,6 +119,31 @@
     {/if}
 </div>
 <style>
+
+ .screen {
+     background-color: #9995;
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100vh;
+ }
+
+ .tabbox {
+     width : 70%;
+     max-width: 1400px;
+     min-width: 800px;
+     margin: auto;
+ }
+
+ .tabbox.hidden {
+     width : 95%;
+ }
+
+ .content {
+     height: 90vh;
+     padding: 2em;
+ }
 
  .modal {
      /* fix me later... */
@@ -130,16 +173,14 @@
  }
 
  .tabbox .content {
-     height: 90vh;
-     opacity: 1;
-     width: calc(100vw - 20px);
      background-color: white;
  }
 
- .tabbox {
+ .fixedContainer {
      position: fixed;
-     top: 5vh;
-     left: 10px;
+     top: 0;
+     left: 0;
+     width: 100%;
  }
 
  .tabs {
