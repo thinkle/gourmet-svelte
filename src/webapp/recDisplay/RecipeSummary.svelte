@@ -33,6 +33,6 @@
      text-decoration: underilne;
  }
  img {
-     width: var(--maxImageWidth)
+     max-width: var(--maxImageWidth)
  }
 </style>
