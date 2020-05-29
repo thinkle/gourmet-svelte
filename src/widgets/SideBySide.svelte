@@ -1,35 +1,19 @@
 <script>
  import {onMount} from 'svelte';
- export let height = '200px';
+ export let height;
  export let growRight = false;
  export let growLeft  = false;
  export let growEven = false;
  export let leftBasis = '';
  export let rightBasis = '';
  export let stackSidesAt = 500;
+ export let fillHeight = true;
  let stackMode = false;
  let ref
  import {watchResize} from 'svelte-watch-resize';
 
  onMount(
      ()=>{
-         /* let ro = new ResizeObserver( entries => {
-          *     for (let entry of entries) {
-          *         const cr = entry.contentRect;
-          *         console.log('Element:', entry.target);
-          *         console.log(`Element size: ${cr.width}px x ${cr.height}px`);
-          *         console.log(`Element padding: ${cr.top}px ; ${cr.left}px`);
-          *         if (cr.width < Number(stackSidesAt)) {
-          *             stackMode = true;
-          *         }
-          *         else {
-          *             stackMode = false;
-          *         }
-          *     }
-          * });
-
-          * // Observe one or multiple elements
-          * ro.observe(ref); */
  });
 
 
