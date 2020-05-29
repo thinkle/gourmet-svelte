@@ -118,26 +118,15 @@ export function prepRecRemote (r,user) {
 }
 
 export function prepRecsRemote (recs,user) {    
-
     recs.recipes.forEach(
         (r)=>prepRecRemote(r,user)
     )
 
 }
-let commonWords = ['the','and','but','for']
 
 export function prepRecLocal (rec) {
     validateRec(rec); // step 1...
-    rec.words = [];
-    rec.fullText.split(/\W+/).forEach(
-        (w)=>{
-            w = w.toLowerCase();
-            if (!commonWords.indexOf(w)>-1 &&
-                rec.words.indexOf(w)==-1) {
-                rec.words.push(w)
-            }
-        }
-    );
+    rec.words = rec.fullText.split(/\W+/);
     delete rec.fullText; // we don't need to keep this.
     rec.words = stopword.removeStopwords(rec.words);
     rec.ings = []
