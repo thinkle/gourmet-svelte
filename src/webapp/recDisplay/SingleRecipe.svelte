@@ -4,14 +4,17 @@
  import Recipe from './Recipe.svelte';
  let rec
 
- async function openRecipe (id) {
-     await recipeActions.getRecipe(id);
-     localRecipes.open(id);
-     rec = $localRecipes[id]
+ async function open () {
+     if (!isNaN(Number(id))) {
+         rec = await recipeActions.openRecipe(Number(id))
+     }
+     else {
+         rec = await recipeActions.openRecipe(id)
+     }
  }
 
- $: if (id) {
-     openRecipe(id)
+ $: if ($connected && id) {
+     open(id)
  }
  
 
@@ -26,7 +29,7 @@
         />
     {:else}
         Loading recipe... just one second
-        <button on:click={()=>openRecipe(id)}>Kick it</button>
+        <button on:click={()=>open(id)}>Kick it</button>
     {/if}
 </div>
 
@@ -36,8 +39,7 @@
      max-width: 1400px;
      margin: auto;
  }
- :global(body) {
-     overflow: hidden; /* prevent scrolling outside our recipe container */
+ :global(body) {     
      margin: 0;
      width: 100%;
      height: 100%;
