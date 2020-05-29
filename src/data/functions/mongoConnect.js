@@ -3,7 +3,7 @@ const mongopw = process.env.MONGO_PASSWORD;
 const mongouser = process.env.MONGO_USER;
 import {MongoClient,Server} from 'mongodb';
 import {testRecs} from '../../common/mocks/recipes.js'
-const DB = 'devtest'
+const DB = 'MONGO_DB_NAME'
 
 var lastResult = undefined
 
