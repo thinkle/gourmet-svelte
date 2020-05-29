@@ -23,6 +23,14 @@ let testRecs = {
                             }
                         },
                         {
+                            amount : {
+                                amount : 1,
+                                unit : 'recipe',
+                            },
+                            'text' : 'asparagus custard, which definitely goes with this meal',
+                            reference : 20,
+                        },
+                        {
                             "text": "cauliflower, cut into smaller florets",
                             "amount": {
                                 "amount": 2,
@@ -192,27 +200,18 @@ let testRecs = {
         },
 
     empty : {
-        title : "My First Recipe",
-        times : [
-            {
-                name : 'preptime',
-                seconds:60*30
-            }],
-        categories : ['Dessert'],
-        text : [
-            {header:'Instructions',
-             body: "Your text goes here..."}
-        ],
-        images : [
-        ],
-        ingredients : [
-        ],
+        title : "My Recipe",
+        times : [],
+        categories : [],
+        text : [{'header':'Instructions',body:''}],
+        images : [],
+        ingredients : [],
     },
     oldstandard :         {
             "title": "Asparagus Custard Tart",
             "text": [
                 {
-                    "body": "Preheat oven to 450F. Bring crust to room temperature. Open onto a floured work surface, turn to lightly coat with flour, then turn again. With a rolling pin, working from the center out, gently and evenly thin the crust. Transfer to a lightly greased quiche pan. Double over the edge to form the sides, then pinch the top edge to form an attractive crust. Bake for 15 minutes. Cool.<br><br>Reduce oven to 350\u00b0F.<br><br>Steam asparagus til cooked. Drain on paper towels to absorb moisture. Trim the spears to fit (see TIPS), spoke fashion with tips pointing out, atop the pastry.<br><br>Whisk custard ingredients and gently pour over asparagus. Bake for 20 minutes or until center jiggles slightly but is fully cooked. Serve warm or at room temperature. Also good cold!",
+                    "body": "Preheat oven to 450F. This will take about a 1/2 hour. Or maybe it takes \u00BE hours. Bring crust to room temperature. Open onto a floured work surface, turn to lightly coat with flour, then turn again. With a rolling pin, working from the center out, gently and evenly thin the crust. Transfer to a lightly greased quiche pan. Double over the edge to form the sides, then pinch the top edge to form an attractive crust. Bake for 15 minutes. Cool.<br><br>Reduce oven to 350\u00b0F.<br><br>Steam asparagus til cooked. Drain on paper towels to absorb moisture. Trim the spears to fit (see TIPS), spoke fashion with tips pointing out, atop the pastry.<br><br>Whisk custard ingredients and gently pour over asparagus. Bake for 20 minutes or until center jiggles slightly but is fully cooked. Serve warm or at room temperature. Also good cold!",
                     "header": "Instructions"
                 },
                 {
@@ -312,7 +311,7 @@ let testRecs = {
                 }
             ],
             "recipe_hash": "297078d1d41dc5951e14c0fbdccc50d5",
-            "ingredient_hash": "484e4ca800d47c9cd7ff173faff162c2",
+            "ingredient_hash": "484e4ca800d4c9cd7ff173faff162c2",
             "id": 20,
         "categories": [{name:'Quiche'},{name:'Vegetarian'}],
     },
