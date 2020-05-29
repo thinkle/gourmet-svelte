@@ -1,4 +1,6 @@
 <script>
+ import {stamp} from '../stores/debug.js'
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS,'App',);
  import router from 'page';
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';
@@ -10,7 +12,7 @@
  import {testRecs} from '../common/mocks/recipes.js'
 
 
- let name = 'Gourmet BUILD_TIME';
+ let name = 'Gourmet';
  let page;
  let params = {};
  router('/',()=>{page = RecipeList; params={}});
@@ -18,7 +20,7 @@
  router('/rec/:id',(ctx)=>{
      page = SingleRecipe
      params = {
-         id:Number(ctx.params.id)
+         id:ctx.params.id
      };
  });
  router('/sidebar',()=>{page = Sidebar; params={}});
@@ -48,6 +50,7 @@
     <Landing>
         <svelte:component this={page} {...params}/>
     </Landing>
+    <div style="position: fixed; z-index: 99; bottom: 0; right: 0; font-size: 8pt;">{$stamp}</div>
 </div>
 <style>
  p {
@@ -61,6 +64,7 @@
 
  :root {
      /* Colors */
+     --link : #0033a0;
      --grey : #727272;
      --black : #efefef;
      --white : #121212;
@@ -71,7 +75,7 @@
      --focus-border: #2222df;
      --light-underline : #aaa;
      --medium-underline : #666;
-     --heavy-underline : #aaa;
+     --heavy-underline : #222;
      --note-bg : #ffffad;
      --note-fg : #333333;
      --note-light-bg : #ffffdd;
@@ -83,6 +87,7 @@
      --uiFont : 'Noto Sans', Ubuntu, Cantarell, -apple-system, sans-serif;
      --small : 0.8rem;
      --xsmall : 0.6rem;
+
  }
 
  
