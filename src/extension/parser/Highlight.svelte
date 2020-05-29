@@ -9,7 +9,6 @@
  export let targetContent;
  export let id;
  export let ref;
- export let address // DEBUG PURPOSES ONLY...
  let tagElement
  let makeWay = false;
  import {tagClassname} from './metadata.js';
@@ -95,7 +94,6 @@
             <Tag  bind:name={name}  detail={detail} onRemove={doRemove}/>
         </ComponentSandbox>
     </div>
-    <!-- <blockquote>{address}</blockquote> -->
 </div>
 
 <style>
