@@ -47,8 +47,10 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
+    "scrollparent": "^2.0.1",
     "sirv-cli": "^0.4.4",
     "stopword": "^1.0.1",
+    "svelte-i18n": "^3.0.3",
     "svelte-moveable": "^0.8.7",
     "svelte-quill": "^1.2.0",
     "svelte-watch-resize": "^1.0.3"
