@@ -5,8 +5,44 @@ let words = [...UNIT_NAMES,
              'seeded', // but not seeds/seed
             ]
 
-let adjs = ['thin','thick','medium','fine','light','heavy','large','flavorful','fresh','small'];
-let verbs = ['slice','dice','mince','chop','peel','discard','retain','keep','hold','boil','bake','saute','sauté','fry','sprinkle','shake','shook','throw','thrown','toss','mix','process','cut','devein'];
+let adjs = [
+    'fine',
+    'flavorful',
+    'fresh',
+    'heavy',
+    'large',
+    'light',
+    'medium',
+    'small',
+    'thick',
+    'thin',
+];
+let verbs = [
+    'bake',
+    'boil',
+    'chop',
+    'cut',
+    'devein',
+    'dice',
+    'discard',
+    'fry',
+    'hold',
+    'keep',
+    'mince',
+    'mix',
+    'peel',
+    'process',
+    'retain',
+    'saute',
+    'sauté',
+    'shake',
+    'shook',
+    'slice',
+    'sprinkle',
+    'throw',
+    'thrown',
+    'toss',
+];
 // we'll be grammatical profligates...
 for (let v of verbs) {
     words.push(v);
