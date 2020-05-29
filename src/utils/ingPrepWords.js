@@ -1,7 +1,12 @@
 import {UNIT_NAMES} from './unitAmounts.js';
-let words = [...UNIT_NAMES]
+let words = [...UNIT_NAMES,
+             // words added directly here won't have any attempts to handle
+             // suffixes, which may be what we want
+             'seeded', // but not seeds/seed
+            ]
+
 let adjs = ['thin','thick','medium','fine','light','heavy','large','flavorful','fresh','small'];
-let verbs = ['slice','dice','mince','chop','peel','discard','retain','keep','hold','boil','bake','saute','sauté','fry','sprinkle','shake','shook','throw','thrown','toss','mix','process','cut'];
+let verbs = ['slice','dice','mince','chop','peel','discard','retain','keep','hold','boil','bake','saute','sauté','fry','sprinkle','shake','shook','throw','thrown','toss','mix','process','cut','devein'];
 // we'll be grammatical profligates...
 for (let v of verbs) {
     words.push(v);
