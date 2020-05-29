@@ -44,6 +44,7 @@
      editOn = false;
  }
  function handleChange (v) {
+     console.log('Rec Prop has a change!');
      onChange && onChange(value);
  }
 
