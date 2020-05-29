@@ -1,4 +1,6 @@
 <script>
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS,'IL');
+ import Ingredient from './Ingredient.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import {getContext} from 'svelte';
  export let recursive=false;
@@ -7,6 +9,7 @@
  export let editable = true;
  export let editMode = false;
  export let onChange = undefined;
+ export let onOpenSubRec = undefined;
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import IngredientInput from '../../widgets/IngredientInput.svelte'
@@ -18,6 +21,7 @@
 
  console.log("IngredientList created: onChange=",onChange)
  function triggerChange () {
+     console.log('Ingredients trigger change!')
      onChange && onChange(ingredients)
  }
 
@@ -89,6 +93,7 @@
      focusNext = list[index-1]
  }
 
+
  function toggleHighlight (ingredient) {
      if ($highlightedIngredient.highlighted != ingredient.text) {
          $highlightedIngredient.highlighted = ingredient.text
@@ -101,6 +106,12 @@
  }
  function hoverOff (ingredient) {
      $highlightedIngredient.hover = undefined
+ }
+ function addIngredient (list=ingredients,ingredient={text:'',amount:{}}) {
+     ingredients.push(ingredient);
+     ingredients = ingredients;
+     triggerChange();
+     return true; // when used as a direct handler, tells us to clear entry after adding.
  }
 
 </script>
@@ -126,47 +137,22 @@
                         {/if}
                         <table class="inglist">
                             {#each i.ingredients as ii,nn (ii)}
-	                        <tr class='ing'
-                                           class:highlighted={ii.text==$highlightedIngredient.highlighted}
-                                           class:hover={ii.text==$highlightedIngredient.hover}
-                                >
-                                           {#if editMode}
-                                           <td colspan="4">
-                                           <IngredientInput
-                                           onChange={(v)=>changeIngredient(ii,v)}
-                                           onEnter={(v)=>insertIngredient(v,i.ingredients,nn)}
-                                           onDelete={()=>{removeIngredient(i.ingredients,nn)}}
-                                           shouldFocus={focusNext===ii}
-                                           ing={ii}
+                                <Ingredient
+                                    ing="{ii}"
+                                    {onOpenSubRec}
+                                    onChange="{(v)=>changeIngredient(ii,v)}"
+                                    onEnter="{(v)=>insertIngredient(v,i.ingredients,nn)}"
+                                    onDelete="{()=>removeIngredient(i.ingredients,nn)}"
+                                    shouldFocus="{focusNext===ii}"
+                                    edit="{editMode}"
                                 />
-                                           </td>
-                                           <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={ii.amount}/>
-                                           <td>
-                                           <label>Item:</label> 
-                                           <FancyInput on:change={triggerChange} bind:value={ii.text} placeholder="Ingredient"/>
-                                           </td> -->
-                                           <IconButton 
-                                           bare={true} 
-                                           icon="delete"
-                                           on:click="{()=>{removeIngredient(i.ingredients,nn)}}"/>
-                                           {:else}
-                                           <NumberUnitDisplay  mode="table" value={ii.amount}/>
-	                                   <td
-                                             on:click={()=>toggleHighlight(ii)}
-                                             on:mouseover={()=>hoverOn(ii)}
-                                             on:mouseleave={()=>hoverOff(ii)}
-                                           >
-                                           <span class='item'>{@html highlightItem(ii)}</span>
-                                        </td>
-                                    {/if}
-                                </tr>
                             {/each}
                             <!-- Button for adding more rows... -->
                             {#if editMode}
                                 <tr>
                                     <td>
                                         <IconButton icon="add" bare="true"
-                                                    on:click="{()=>{i.ingredients.push({text:'',amount:{}});ingredients=ingredients}}"
+                                                    on:click="{()=>{addIngredient(i.ingredients)}}"
                                                     type="icon"><i class='material-icons'/>
                                         </IconButton>
                                     </td>
@@ -177,49 +163,22 @@
                     <!-- end of nested table -->
                 </tr>
             {:else}
-        <tr class='ing'
-            class:highlighted={i.text==$highlightedIngredient.highlighted}
-            class:hover={i.text==$highlightedIngredient.hover}
-            >
-                    <!-- standard ingredient row -->
-                    {#if editMode}
-                        <td colspan="4">
-                            <IngredientInput
-                                onEnter={(v)=>insertIngredient(v,ingredients,n)}
-                                        onChange={(v)=>changeIngredient(i,v)}
-                                onDelete={()=>{removeIngredient(ingredients,n)}}
-                                        shouldFocus={focusNext===i}
-                                ing={i}
-                            />
-                        </td>
-                        <td>
-                            <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
-                        </td>
-                        <!-- <NumberUnitInput on:change={triggerChange} mode="table" label={false} bind:value={i.amount}/>
-                             <td>
-                             <label>Item:</label> 
-                             <FancyInput on:change={triggerChange} placeholder="Ingredient" bind:value={i.text}/>
-                             </td>
-                             <td>
-                             <IconButton bare={true} on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange()}}" icon="delete"/>
-                             </td> -->
-                    {:else}
-                        <NumberUnitDisplay mode="table" value={i.amount}/>
-	                <td
-                          on:click={()=>toggleHighlight(i)}
-                          on:mouseover={()=>hoverOn(i)}
-                          on:mouseleave={()=>hoverOff(i)}
-                          >
-                            <span class='item'>{@html highlightItem(i)}</span>
-                        </td>
-                    {/if}
-                </tr>
-            {/if}
-	{/each}
+                <!-- Non nested ingredient -->
+                <Ingredient
+                    {onOpenSubRec}
+                    onEnter="{(v)=>insertIngredient(v,ingredients,n)}"
+                    onChange="{(v)=>changeIngredient(i,v)}"
+                    onDelete="{()=>{removeIngredient(ingredients,n)}}"
+                    shouldFocus="{focusNext===i}"
+                    ing="{i}"
+                    edit="{editMode}"
+                />
+            {/if} <!-- End if nested ingredient block -->
+	{/each} <!-- End each i in ingredients -->
         {#if editMode}
             <tr>
                 <td colspan=3>
-                    <IngredientInput onEnter={(ing)=>{ingredients = [...ingredients,ing]; return true}}/>
+                    <IngredientInput onEnter={(i)=>addIngredient(ingredients,i)}/>
                 </td>
                 <td>
                     <IconButton bare={true} icon="add"/>
@@ -231,7 +190,7 @@
                 </td>
                 <td>
                     <IconButton icon="add" bare="true"
-                                on:click="{()=>{ingredients.push({text:'',amount:{}});ingredients=ingredients;triggerChange()}}"
+                                on:click="{addIngredient}"
                                 type="icon">
                     </IconButton>
                 </td>
@@ -239,9 +198,13 @@
                     <IconButton
                         icon='collections'
                         bare='true'
-                        on:click="{()=>{ingredients.push({item:'',ingredients:[
-                                  ]});ingredients=ingredients}}"
-                    >New Group
+                        on:click="{()=>{
+                                  addIngredient(
+                                      {text:'',ingredients:[] }
+                                  )
+                                  }}"
+                    >
+                        New Group
                     </IconButton>
                 </td>
             </tr>
@@ -285,13 +248,13 @@
  .grouphead {
      font-weight: bold;
  }
- .grouphead .ing {
+ .grouphead :global(.ing) {
      font-weight: normal;
  }
- .grouphead .text {
+ .grouphead :global(.text) {
      font-family: var(--recipeHeadFont);
  }
- .grouphead .ing .text {
+ .grouphead :global(.ing .text) {
      font-family : var(--recipeFont);
  }
 
