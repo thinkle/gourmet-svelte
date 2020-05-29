@@ -1,4 +1,14 @@
 <script>
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ export let rec=undefined;
+
+ export let onChange=undefined;;
+ export let onOpenSubRec=undefined;
+
+ export let editMode = false;
+ export let editable = true;
+ export let minPropWidth = 150;
+
  import IL from './IngredientList.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import StatusIcon from '../../widgets/StatusIcon.svelte';
@@ -12,18 +22,13 @@
  import {onMount,setContext} from 'svelte'
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
+ import deepcopy from 'deepcopy';
 
- export let rec=undefined;
+
  let valid = false;
  $: {
      valid = isValid(rec);
-     console.log('Recipe is valid?',valid,rec);
  }
-
- export let editMode = false;
- export let editable = true;
-
- export let onChange;
 
  function triggerChange () {
      if (onChange) {
@@ -41,14 +46,42 @@
  setContext('multiplier',multiplier);
  let ingredientList = writable([]);
  setContext('ingredientList',ingredientList);
- let highlightedIngredient = writable({});
+ let highlightedIngredient = writable({active:[]});
  setContext('highlightedIngredient',highlightedIngredient);
 
 
  $: if (rec && rec.ingredients) {
-     $ingredientList = rec.ingredients;
+     // Let's check for a change before assigning...
+     updateIngredientList()
  }
 
+ function updateIngredientList () {
+     let items = crawl($ingredientList);
+     for (let ing of rec.ingredients) {
+         if (items.indexOf(ing.text)==-1) {
+             $ingredientList = deepcopy(rec.ingredients);
+             return
+         }
+         if (ing.ingredients) {
+             for (let ii of ing.ingredients) {
+                 if (items.indexOf(ii.text)==-1) {
+                     $ingredientList = deepcopy(rec.ingredients);
+                     return
+                 }
+             }
+         }
+     }
+     
+     function crawl (ii,items=[]) {
+         for (let i of ii) {
+             items.push(i.text);
+             if (i.ingredients) {
+                 crawl(i.ingredients,items)
+             }
+         }
+         return items;
+     }
+ }
 
  // Delete me
  let recipeChanges = writable(0);
@@ -59,7 +92,7 @@
  let rightBlock;
  let widthLeftOfImage = ''
  let imageCentered = false;
- export let minPropWidth = 150;
+
  /* onMount(()=>{
   *     handleResize()
   * }
@@ -89,7 +122,6 @@
      handleResize(); // initial handle resie...
      return {
          update () {
-             console.log('Content update!');
              handleResize();
          },
      }
@@ -108,7 +140,6 @@
 </script>
 
 {#if valid}
-    <h1>Recipe valid: {valid}</h1>
     <div class="recipe"> <!-- top-level container...  -->
         <!-- Above the side-by-side view... -->
         <div class="top" use:watchResize={handleResize}>
@@ -169,23 +200,32 @@
                         <StatusIcon icon="cloud_done" tooltip="true">
                             Saved to browser and in the cloud.
                             Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                            <IconButton icon="refresh" bare="true" small="true"
+                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                            />
                         </StatusIcon>
                     {:else if $recipeState[rec.id]}
                         <StatusIcon icon="cloud_off" tooltip="true">
                             Saving to the cloud failed - perhaps you're offline?
                             Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
                             Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                            <IconButton icon="refresh" bare="true" small="true"
+                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                            />
                         </StatusIcon>
                     {:else}
                         <StatusIcon icon="info" tooltip="true" >
                             Huh, no state information found for this recipe at all. Are you testing or is this a bug?
+                            <IconButton icon="refresh" bare="true" small="true"
+                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                            />
                         </StatusIcon>
                     {/if}
                 {/if}
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide height="60vh" growRight="true" leftBasis="300px" rightBasis="600px">
+        <SideBySide growRight="true" leftBasis="300px" rightBasis="600px">
 	    <h3 slot="leftHead"> 
 	        Ingredients
                 {#if !editMode && editable}
@@ -198,10 +238,12 @@
 	    </h3>
 	    <div slot="left">
 	        <IL
-                    onChange={triggerChange}
-                             editable={editable}
+                    {editable}
+                    {onOpenSubRec}
+                    onChange="{triggerChange}"
                     editMode="{editMode||ingeditmode}"
-                    bind:ingredients={rec.ingredients} maxWidth="350"
+                    bind:ingredients="{rec.ingredients}"
+                    maxWidth="350"
                 >
 	        </IL>
 	    </div>		
