@@ -5,39 +5,40 @@ import {inTag} from './textUtils.js';
 
 export function parseIngredients (text, ingredients) {
     for (let i of ingredients) {
-        text = markupTextForIngredient(i);
+        text = markupTextForIngredient(text,i);
         if (i.ingredients) {
             for (let ii of i.ingredients) {
-                text = markupTextForIngredient(ii);
+                text = markupTextForIngredient(text,ii);
             }
         }
     }
     return text;
-
-    function markupTextForIngredient (ing) {
-        let highlighters = getIngredientHighlighters(ing);
-        for (let i=0; i<=3; i++) { // up to three highlights per ingredient only
-            let highlighter = highlighters[i]
-            if (highlighter) {
-                text = text.replace(
-                    highlighter.matcher,
-                    function (v) {
-                        let text = arguments[arguments.length - 1] // work around grouping
-                        let idx = arguments[arguments.length - 2]
-                        if (!inTag(idx,text)) {
-                            return `<ing target="${ing.text}">${v}</ing>`
-                        }
-                        else {
-                            return v;
-                        }
-                    }
-                )
-            }
-        }
-        return text
-    }
-    
 }
+export function markupTextForIngredient (text,ing) {
+    if (!ing || !ing.text) {return text}
+    let highlighters = getIngredientHighlighters(ing);
+    for (let i=0; i<=3; i++) { // up to three highlights per ingredient only
+        let highlighter = highlighters[i]
+        if (highlighter) {
+            text = text.replace(
+                highlighter.matcher,
+                function (v) {
+                    let text = arguments[arguments.length - 1] // work around grouping
+                    let idx = arguments[arguments.length - 2]
+                    if (!inTag(idx,text)) {
+                        return `<ing target="${ing.text}">${v}</ing>`
+                    }
+                    else {
+                        return v;
+                    }
+                }
+            )
+        }
+    }    
+    return text
+}
+    
+
 
 function getIngredientHighlighters (item) {
     return getItemMatchers(item.text)
@@ -79,6 +80,7 @@ export function getItemMatchers (text) {
     let words = extractItems(text).filter((w)=>w);
     // Since we're going through n^2 words, it's probably worth putting a limit on how many words we allow...
     words = words.slice(0,50); // 50*50 iterations should cut it...
+    words = words.filter((w)=>w.length>1).map((w)=>w+'?e?s?')
     // Now let's find contiguous meaningful words and keep them together...
     let matchers = [];
     for (let si=0; si<words.length; si++) { // start index
