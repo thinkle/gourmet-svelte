@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS,'Ing',);
  export let value
  export let prop
  export let editable=true;
@@ -8,7 +9,8 @@
  import RichText from '../../widgets/RichText.svelte';
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {getContext} from 'svelte'
- let recipeChanges = getContext('recipeChanges');
+ import { createEventDispatcher } from 'svelte';
+ const dispatch = createEventDispatcher();
  var displayValue;
  $: displayValue = value.body //prop.toHtml && prop.toHtml(value) || value
  let initialValue;
@@ -52,7 +54,7 @@
      if (!editedThisTime) {console.log('Setting editedThisTime to true!')}
      editedThisTime = true;
      value.body = event.detail || event.target.value;
-     $recipeChanges += 1;
+     dispatch('change',value);
  }
  
 </script>
@@ -60,7 +62,7 @@
     <div class="top">
         {#if showLabel}
             {#if edit}
-                <FancyInput bind:value={value.header}/>
+                <FancyInput on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
             {:else}
                 <h3>{value.header}</h3>
             {/if}
