@@ -5,7 +5,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import json from 'rollup-plugin-json';
 import replace from 'rollup-plugin-replace';
-//import babel from 'rollup-plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 
 
@@ -46,8 +45,8 @@ export default [
 	        dedupe: ['svelte']
 	    }),
             // babel({
-            //     exclude: 'node_modules/**', // only transpile our source code
-            //     plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
+            //     // exclude: 'node_modules/**', // only transpile our source code
+            //     // plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
             // }),
 	    commonjs(),
             builtins(),
@@ -69,7 +68,15 @@ export default [
             name : 'functions',
             file : 'functions/api.js'
         },
-        plugins : [json()],
+        plugins : [
+            json(),
+            production && replace(
+                'MONGO_DB_NAME','Gourmet'
+            ),
+            !production && replace(
+                'MONGO_DB_NAME','devtest',
+            ),
+        ]
     },
     {
         input : 'src/extension/background.js',
@@ -110,8 +117,8 @@ export default [
 	        dedupe: ['svelte']
 	    }),
             // babel({
-            //     exclude: 'node_modules/**', // only transpile our source code
-            //     plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
+            //     // exclude: 'node_modules/**', // only transpile our source code
+            //     // plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
             // }),
 	    commonjs(),
             builtins(),
