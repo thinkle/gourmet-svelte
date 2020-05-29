@@ -63,16 +63,17 @@ export const localRecipes = {
             let $storedRecipes = get(storedRecipes)
             const storedRec = $storedRecipes[id]
             if (!storedRec) {
-                throw 'No stored recipe exists!'
+                reject('No stored recipe exists!');
             }
             else {
+                let localCopy = deepcopy(storedRec);
                 local.update(
-                    (lr)=>{
-                        lr[id] = deepcopy(storedRec);
-                        return lr;
+                    ($localRecipes)=>{
+                        $localRecipes[id] = localCopy
+                        return $localRecipes;
                     }
                 );
-                tick().then(resolve);
+                resolve(localCopy);
             }
         });
     },
@@ -128,18 +129,23 @@ export const recipeActions = {
         ssp(actionState,'created',recipe.id)
         return recipe;
     },
-    async getRecipe (id) {
+    async getRecipe (id,mongoId) {
         ssp(actionState,'loading',true);
-        let response = await api.getRecipe(id);
-        setStoredRec(response);
-        ssp(actionState,'loading',false)
+        let response = await api.getRecipe(id,{mongoId});
+        if (response) {
+            setStoredRec(response);
+            ssp(actionState,'loading',false)
+        }
+        return response
     },
 
     async openRecipe (id) {
-        await recipeActions.getRecipe(id);
-        await localRecipes.open(id);
-        let rec = get(localRecipes)[id]
-        return rec;
+        let rec = await recipeActions.getRecipe(id);
+        if (!rec) {
+            rec = await recipeActions.getRecipe(undefined,id); // mongoID?
+        }
+        let localCopy = await localRecipes.open(rec.id);
+        return localCopy;
     },
     
     async getRecipes ({query,fields,limit,page}) {
@@ -157,7 +163,7 @@ export const recipeActions = {
     },
 
     async revertRecipe (id) {
-        let storedRecipe = get(stored)[id]
+        let storedRecipe = await this.getRecipe(id); //get(stored)[id]
         console.log('Revert to: ',storedRecipe)
         ssp(local,id,deepcopy(storedRecipe));
         console.log('Reverted!')
