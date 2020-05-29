@@ -19,7 +19,3 @@ export function scrollIntoView (node) {
         );
 }
 
-export function fillWithoutScrolling (node) {
-    let parent = scrollparent(node);
-    
-}
