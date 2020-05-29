@@ -2,7 +2,7 @@
  import Tester from '../widgets/Tester.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
  import Recipe from './recDisplay/Recipe.svelte';
- import RecDisplayTests from './recDisplay/DemoRecDisplay.svelte';
+ import RecDisplayTests from './recDisplay/Recipe.demo.svelte';
  import WidgetTests from '../widgets/Widgets.demo.svelte';
  import widgetTestPaths from '../widgets/widgetDemos.js';
  import LocalDataTester from '../data/LocalData.demo.svelte';
