@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
  import {localRecipes,storedRecipes,connected,recipeActions,recipePage,recipeState} from '../../stores/recipeStores.js';
  import {testRecs} from '../../common/mocks/recipes.js'
@@ -49,8 +50,6 @@
                             let opener;
 </script>
 <div>
-    <h2>New Store Recipes BUILD_TIME</h2>
-    
     {#if $connected}
         Search: <FancyInput type="text" bind:value={searchInput}/>
         <br>
