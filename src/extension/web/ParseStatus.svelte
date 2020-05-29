@@ -78,8 +78,9 @@
         {#await creating}
             Creating recipe in database...
         {:then recipe}
-            Created recipe!
-            ID={recipe.id};
+            <a href={`${location.origin}/`} target="_BLANK">Open collection...</a>
+            <a href={`${location.origin}/rec/${recipe.id}`} target="_BLANK">Open recipe</a>
+            
         {:catch error}
             Unable to create recipe {error}
         {/await}
