@@ -25,7 +25,7 @@
 </script>
 {#if prop.array}
     {#each value as v,n}
-        <span class="arrayval">
+        <span class="arrayval" class:tag="{prop.displayAsTag}">
             {#if propDisplay[prop.edit]}
                 <svelte:component
                     this="{propDisplay[prop.edit]}"
@@ -48,3 +48,18 @@
         {@html getDisplayVal(value)}
     {/if}
 {/if}
+
+<style>
+ .tag {
+     background-color: var(--light-bg);
+     color: var(--light-fg);
+     border-radius: 5px;
+     border-width: 1px;
+     border-style: solid;
+     border-color: var(--medium-underline);
+     padding: 3px;
+     display: inline-block;
+     margin-right: 5px;
+
+ }
+</style>
