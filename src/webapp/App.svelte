@@ -5,7 +5,7 @@
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';
  import Recipe from './recDisplay/Recipe.svelte';
- import RecipeList from './recDisplay/RecipeList.svelte';
+ import MainView from './MainView.svelte';
  import SingleRecipe from './recDisplay/SingleRecipe.svelte';
  import Demo from './Demo.svelte';
  import Sidebar from '../extension/web/Sidebar.svelte';
@@ -15,7 +15,7 @@
  let name = 'Gourmet';
  let page;
  let params = {};
- router('/',()=>{page = RecipeList; params={}});
+ router('/',()=>{page = MainView; params={}});
  router('/admin',()=>{page = Admin; params={}});
  router('/rec/:id',(ctx)=>{
      page = SingleRecipe
@@ -47,9 +47,9 @@
 
 <div>
     <Landing>
-        <span slot="rightnav">
-            {#if page!==RecipeList}<a href="/">Recipe List</a>{/if}
-        </span>
+        <!-- <span slot="rightnav">
+             {#if page!==MainView}<a href="/">Recipe List</a>{/if}
+             </span> -->
         <svelte:component this={page} {...params}/>
     </Landing>
     <div style="position: fixed; z-index: 99; bottom: 0; right: 0; font-size: 8pt;">{$stamp}</div>
