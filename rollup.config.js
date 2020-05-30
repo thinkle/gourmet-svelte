@@ -22,6 +22,7 @@ export default [
         plugins: [
             json(),
             replace({
+                DEV : !production,
                 BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : ()=>new Date().getTime(),
             }),
