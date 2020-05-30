@@ -62,6 +62,8 @@ function setStoredRecs (recs) {
 export const localRecipes = {
     open (id) {
         return new Promise((resolve,reject)=>{
+            let alreadyOpenCopy = get(localRecipes)[id]
+            if (alreadyOpenCopy) {resolve(alreadyOpenCopy)}
             let $storedRecipes = get(storedRecipes)
             const storedRec = $storedRecipes[id]
             if (!storedRec) {
@@ -121,6 +123,7 @@ export const recipeActions = {
     },
 
     async createRecipe (r) {
+        if (!r) {r = {}}
         ssp(actionState,'creating',true)
         let recipe = await api.addRecipe(r);
         setStoredRec(recipe);
