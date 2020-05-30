@@ -1,5 +1,6 @@
 <script>
  import {flip} from 'svelte/animate'
+ import {fade} from 'svelte/transition'
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
  import {connected,
@@ -13,6 +14,7 @@
         recipeState} from '../../stores/recipeStores.js';
  import {testRecs} from '../../common/mocks/recipes.js'
  import SearchProgress from '../../widgets/SearchProgress.svelte';
+ import Whisk from '../../widgets/WhiskLogo.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import Status from '../../widgets/Status.svelte';
  import Recipe from './Recipe.svelte'
@@ -86,30 +88,40 @@
         <span width="30px">
             {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
         </span>
-        {#if $pageInfo.count}
-            <span class="count">
-            Showing recipes
-            {$pageInfo.currentPage}&ndash;{$pageInfo.currentPage+limit} of 
-                {$pageInfo.count}
-            </span>
-        {/if}
+        <span class="count">
+            {#if $pageInfo.count}
+                Showing recipes
+                {$pageInfo.currentPage}&ndash;{
+                Math.max($pageInfo.currentPage+$recipePage.length)}
+                {#if !$pageInfo.last}
+                    of 
+                    {$pageInfo.count}
+                {/if}
+            {:else}
+                {#if $recipeActionGeneralState.querying}
+                    Looking
+                {:else if search}
+                    No recipes
+                {/if}
+            {/if}
+        </span>
         <IconButton
             invisible="{!$pageInfo.currentPage}"
             icon="navigate_before"
             on:click="{
-                             getRecipes($pageInfo.prevPage)
-                             }"
-            />
+                       getRecipes($pageInfo.prevPage)
+                       }"
+        />
         <IconButton
             invisible="{$pageInfo.last}"
             icon="navigate_next" on:click="{()=>{
-                                              getRecipes($pageInfo.nextPage)
+                                           getRecipes($pageInfo.nextPage)
                                            }}"
         />
     </div>
     <table>
         {#each $recipePage as id,n (n)}
-            <tr animate:flip class='summary'>
+            <tr animate:flip class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
                     onClick={()=>localRecipes.open(id)}
                    recipe={$storedRecipes[id]}
@@ -121,27 +133,66 @@
                 </td>
             </tr>
         {:else}
-            <div>
-                No recipes yet? Maybe import some or create them!
-                {#if $connected}<button on:click={()=>recipeActions.createRecipe(testRecs.empty)}>Create Your First Recipe</button>
-                {:else}(Connecting...)
-                {/if}
-
-                <a href="broken">Install the Chrome Plugin to make it easy to import from webpages</a>
-            </div>
+            <tr in:fade="{{delay:200,duration:800}}" out:fade="{{duration:300}}">
+                <td>
+                <div class="center">
+                    <h2>
+                        {#if search}
+                            No results for "{search}"...
+                        {:else}
+                            No recipes yet? Maybe import some or create them!
+                        {/if}
+                    </h2>
+                    <div class="center"><Whisk size="250" /></div>
+                    {#if $connected}
+                        <IconButton
+                            icon="add"
+                            on:click={()=>recipeActions.createRecipe(testRecs.empty)}>
+                            Create a Recipe?
+                        </IconButton>
+                    {:else}
+                        (We're still connecting...)
+                    {/if}
+                    <div>
+                        <a href="broken">
+                            Install the Chrome Plugin
+                            to import recipes from
+                            your favorite sites
+                        </a>
+                    </div>
+                </div></td>
+            </tr>
         {/each}
     </table>
 </div>
 <div>
 </div>
 <style>
- .changed {font-style: italic; color: purple;}
+ table {
+     margin: auto; /* center  */
+ }
+ .center {
+     display: flex;
+     height: 100%;
+     width: 100%;
+     align-items: center;
+     justify-content: center;
+     text-align: center;
+     margin: auto;
+     flex-direction: column;
+ }
+ .changed {
+     font-style: italic;
+     color: purple;
+ }
  .searchBar {
      display: flex;
+     align-items: center;
  }
  .count {
      font-size: var(--small);
      width: 12rem;
+     margin-left: 1em;
  }
  .searchBar.searching {
      cursor: busy;
