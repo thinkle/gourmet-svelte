@@ -3,6 +3,7 @@
  import {extensionUrl} from '../id.js';
  import {backgroundGetPageInfo} from '../messaging/parsing.js';
  import SidebarImport from './SidebarImport.svelte';
+ import JsonDebug from '../../widgets/JsonDebug.svelte';
  
  let messagePromise
 
@@ -23,19 +24,18 @@
         <p>Impatient? Give it <a on:click={doGet}>a kick</a></p>
     {:then pageInfo}
         <SidebarImport pageInfo={pageInfo} />
-        Cool: got data {pageInfo}
-        Stringify?
-        {JSON.stringify(pageInfo)}
+        Got pageInfo
+        <JsonDebug data="{pageInfo}"/>
     {:catch error}
         <p>Error connecting. Perhaps you haven't installed the
-        Chrome Extension? (in which case, I'm not sure how
+            Chrome Extension? (in which case, I'm not sure how
             you have arrived at this page).</p>
         <p>Visit <a href={extensionUrl}>our extension page</a>
             to download the latest extension</p>
         {#if error.message.indexOf('closed before')>-1}
             {doGet()}
         {/if}
-        {JSON.stringify(error)}
+        <JsonDebug data="{error}"/>
     {/await}
 {/if}
 
