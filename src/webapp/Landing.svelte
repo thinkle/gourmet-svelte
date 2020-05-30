@@ -1,4 +1,6 @@
 <script>
+ import IconButton from '../widgets/IconButton.svelte';
+ import {setContext} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
  import remoteApi from '../data/remoteApi.js'
@@ -50,6 +52,33 @@
      });
  }
 
+
+ let extraItems = []
+ setContext('toolbar',
+            {
+                addItem (item) {
+                    debugger;
+                    extraItems = [...extraItems,item];
+                    return {
+                        unmount () {
+                            extraItems.splice(extraItems.indexOf(item),1);
+                            extraItems = extraItems;
+                        },
+                        hide () {
+                            item.hide = true;
+                            extraItems = extraItems;
+                        },
+                        show () {
+                            item.hide = false;
+                            extraItems = extraItems;
+                        }
+                    }
+                },
+            }
+ );
+ console.log('set toolbar context');
+
+
 </script>
 
 {#if isLoggedIn}    
@@ -59,8 +88,24 @@
         </div>
         <div class='brand'>Gourmet</div>
         <div>
-            <slot name="rightnav"/>
-            <button on:click={() => doLogout()}>Log Out</button>
+            {#each extraItems.filter((i)=>!i.hide) as item (item)}
+                {#if item.component}
+                    <svelte:component this="{item.component}"
+                                      {...item.props}
+                    >
+                        {item.content}  {JSON.stringify(item.props)}
+                    </svelte:component>
+                {:else if item.props.icon}
+                    <IconButton {...item.props} on:click={item.onClick}>
+                        {item.content}
+                    </IconButton>
+                {:else}
+                    <span {...item.props} on:click="{item.onClick}">
+                        {item.content}
+                    </span>
+                {/if}
+            {/each}
+            <IconButton on:click={() => doLogout()} icon="close">Log Out</IconButton>
         </div>
     </nav>
     <slot/>
@@ -71,8 +116,8 @@
         <div></div>
     </nav>
     <article>
-        <button on:click={() => doLogin() }>Log In</button>
-        <button on:click={() => doSignup() }>Sign Up</button>
+        <IconButton on:click={() => doLogin()} icon="login">Log In</IconButton>
+        <IconButton on:click={() => doSignup()} icon="account_box">Sign Up</IconButton>
     </article>
 {/if}
 
@@ -93,6 +138,7 @@
  nav {
      height : var(--navHeight);
      display: flex;
+     align-items: center;
      font-size: var(--small);
  }
  nav div:first-child {
