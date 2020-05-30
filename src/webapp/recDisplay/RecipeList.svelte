@@ -33,10 +33,6 @@
      }
  }
  
- export let open = [];
- let recipes = []
-
-
  let search = '';
  let searchInput = '';
  let updateSearchDebounced = _.debounce(val => {search = val}, 250)
@@ -95,7 +91,7 @@
     </div>
     <table>
         {#each $recipePage as id,n (n)}
-            <tr animate:flip class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
+            <tr class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
                     onClick={()=>onRecipeClick(id)}
                    recipe={$storedRecipes[id]}
