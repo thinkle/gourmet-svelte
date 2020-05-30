@@ -1,6 +1,7 @@
 <script>
  import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS,'Ing',);
  let b;
+ export let invisible=false; // useful if we want to take up the normal space in our layout whether active or not
  export let inverse=false;
  export let icon
  export let bare=false
@@ -15,10 +16,17 @@
 </script>
 
 <button
+    class:bare
+    class:inverse
+    class:invisible
+    class:toggle
+    class:toggled
+    class:small
+    class="icon" 
     style={`--fontSize:${fontSize};--iconSize:${iconSize}`}
-          class:customSize={fontSize}
-    class:toggle class:toggled class:small
-    class:bare class:inverse class="icon" on:click bind:this={b}>
+           class:customSize={fontSize}
+    
+    on:click bind:this={b}>
     <slot>
     </slot>
     <i class:customSize={iconSize}  class="material-icons">
@@ -75,6 +83,8 @@
      background-color: #747474;
      color: white;
  }
-
+ .invisible {
+     visibility: hidden;
+ }
 
 </style>
