@@ -106,12 +106,14 @@ const dexieApi = {
         if (page && result.length) {
             previousPage = page - result.length
         }
+        let last = (result.length + (page||0) >= count)
         return {
             result,
             count,
             prevPage : previousPage,
             nextPage : result.length + (page||0),
-            currentPage : page||0,            
+            currentPage : page||0,
+            last
         }
         
     },
