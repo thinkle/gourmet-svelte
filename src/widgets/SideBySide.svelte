@@ -7,7 +7,6 @@
  export let leftBasis = '';
  export let rightBasis = '';
  export let stackSidesAt = 500;
- export let fillHeight = true;
  let stackMode = false;
  let ref
  import {watchResize} from 'svelte-watch-resize';
