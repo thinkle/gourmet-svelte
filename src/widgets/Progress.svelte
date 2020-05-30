@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
  export let amount
  export let total
  let percentage
@@ -14,7 +15,7 @@
 <div class="total" style={`--pwidth:${width};`}>
     <div class="complete" style={getStyle(percentage)}>
     </div>
-    <div class="label">{amount||0} {#if total}of {total}{/if}
+    <div class="label">{amount&&amount.toFixed(0)||0} {#if total}of {total}{/if}
     </div>
 </div>
 <style>
