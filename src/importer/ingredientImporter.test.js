@@ -2,6 +2,22 @@
 import {parseChunks,handleChunk} from './importer.js';
 import RecDef from '../common/RecDef.js';
 
+it('Parsing ingredients',
+   ()=>{
+       let chunk = {
+           tag:'ingredient',
+           text:'½   cucumber, peeled, halved lengthwise, seeded, and diced fine (1/2 cup)'};
+       let rec = {ingredients:[]}
+       handleChunk(chunk,{},rec);
+       console.log('Got recs:',rec.ingredients)
+       let result = rec.ingredients[0]
+       expect(result.text).toMatch(
+               /cucumber, peeled, halved lengthwise, seeded.*/
+       );
+       expect(result.amount.amount).toEqual(0.5);
+   }
+  );
+
 it('Ingredient container',
    ()=>{
        let result = parseChunks(
