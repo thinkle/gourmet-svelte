@@ -12,6 +12,7 @@
  let creating;
 
  function doCreateRecipe () {
+     debugger;
      creating = recipeActions.createRecipe(recipe);    
  }
 
@@ -69,7 +70,7 @@
 </script>
 <div>
     <IconButton icon="redo" on:click={redoImport}>Re-Import Parsed Data?</IconButton> <!-- For testing... -->
-    {#if connected && recipe}
+    {#if $connected && recipe}
         <IconButton icon="save" on:click={doCreateRecipe}>Save Recipe to Collection</IconButton>
     {:else if recipe}
         Not connected?
