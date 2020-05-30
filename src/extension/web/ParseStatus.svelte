@@ -1,4 +1,5 @@
 <script>
+ import JsonDebug from '../../widgets/JsonDebug.svelte';
  import {onMount} from 'svelte';
  import {parseData} from '../../importer/importer.js';
  import Recipe from '../../webapp/recDisplay/Recipe.svelte'
@@ -94,7 +95,7 @@
         {#if showRec}
             <button on:click={()=>showRec=false}>Hide Rec</button>
             <Recipe editable={false} rec={recipe}/>
-            Recipe: {JSON.stringify(recipe)}
+            Recipe: <JsonDebug data="{recipe}"/>
         {:else}
             <button on:click={()=>showRec=true}>Show Rec</button>
         {/if}
@@ -108,12 +109,7 @@
             {/each}
         </ul>
     {/if}
-    {#if show}
-        <button on:click={()=>show=false}>Hide</button>
-        {JSON.stringify(parsed)}
-    {:else}
-        <button on:click={()=>show=true}>Show JSON</button>
-    {/if}
+    Parsed: <JsonDebug data="{parsed}"/>
 </div>
 <style>
  div {
