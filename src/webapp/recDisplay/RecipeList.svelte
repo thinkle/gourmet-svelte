@@ -1,8 +1,18 @@
 <script>
+ import {flip} from 'svelte/animate'
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
- import {localRecipes,storedRecipes,connected,recipeActions,recipePage,recipeState} from '../../stores/recipeStores.js';
+ import {connected,
+        localRecipes,
+        storedRecipes,
+        recipeActions,
+        recipeActionState,
+        recipeActionGeneralState,
+        pageInfo,
+        recipePage,
+        recipeState} from '../../stores/recipeStores.js';
  import {testRecs} from '../../common/mocks/recipes.js'
+ import SearchProgress from '../../widgets/SearchProgress.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import Status from '../../widgets/Status.svelte';
  import Recipe from './Recipe.svelte'
@@ -14,7 +24,6 @@
 
  function getAll () {
      if ($connected) {
-
          console.log('Fetch those recipes...');
          recipeActions.getRecipes({fields:['title','categories','sources','images'],initial:true});
      }
@@ -25,33 +34,30 @@
  
  export let open = [];
  let recipes = []
- /* $: {
-  *     if ($recipeData) {
-  *         console.log('Got new data!',$recipeData);
-  *         if ($recipeData.searchResults) {
-  *             recipes = $recipeData.searchResults.map((v)=>$recipeData[v.id])
-  *         }
-  *         else {
-  *             recipes = []
-  *         }
-  *     }
-  * } */
 
  let syncingPromise
-
  let search = '';
  let searchInput = '';
  let updateSearchDebounced = _.debounce(val => {search = val}, 250)
  $: updateSearchDebounced(searchInput);
  let setInputValue = val => {searchInput = val};
  $: setInputValue(search); // In case the search is updated other than through the input.
+ let limit = 15
+ function getRecipes (page=0) {
+     recipeActions.getRecipes({
+         fields:['title','categories','sources','images'],
+         limit,
+         query:{fulltext:search},
+         page,
+     });
+ }
 
- $: {if ($connected) {recipeActions.getRecipes({fields:['title','categories','sources','images'],limit:10,query:{fulltext:search}});}}
-                            let opener;
+ $: $connected && getRecipes(0,search,limit)
+ let opener;
 </script>
 <div>
     {#if $connected}
-        Search: <FancyInput type="text" bind:value={searchInput}/>
+        
         <br>
         <button on:click={()=>recipeActions.createRecipe(testRecs.empty)}>New Recipe</button>
     {/if}
@@ -74,20 +80,46 @@
         {:catch error}
             Failed :( {console.log(error)} {error}
         {/await}
-    {/if}
-    Page: ${recipePage}
+    {/if}   
+    <div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
+        Search: <FancyInput type="text" bind:value={searchInput}/>
+        <span width="30px">
+            {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
+        </span>
+        {#if $pageInfo.count}
+            <span class="count">
+            Showing recipes
+            {$pageInfo.currentPage}&ndash;{$pageInfo.currentPage+limit} of 
+                {$pageInfo.count}
+            </span>
+        {/if}
+        <IconButton
+            invisible="{!$pageInfo.currentPage}"
+            icon="navigate_before"
+            on:click="{
+                             getRecipes($pageInfo.prevPage)
+                             }"
+            />
+        <IconButton
+            invisible="{$pageInfo.last}"
+            icon="navigate_next" on:click="{()=>{
+                                              getRecipes($pageInfo.nextPage)
+                                           }}"
+        />
+    </div>
     <table>
-        {#each $recipePage.slice(0,10) as id}
-            <RecipeSummary
-                onClick={()=>localRecipes.open(id)}
-                recipe={$storedRecipes[id]}
-            >
+        {#each $recipePage as id,n (n)}
+            <tr animate:flip class='summary'>
+                <RecipeSummary
+                    onClick={()=>localRecipes.open(id)}
+                   recipe={$storedRecipes[id]}
+                />
                 <td>
                     {#if $localRecipes[id]}
                         <IconButton icon="fullscreen" on:click={opener.open(id)}/>
                     {/if}
                 </td>
-            </RecipeSummary>
+            </tr>
         {:else}
             <div>
                 No recipes yet? Maybe import some or create them!
@@ -101,10 +133,17 @@
     </table>
 </div>
 <div>
-    DEBUG!
-    LOCAL: {JSON.stringify($localRecipes)}
-    StoredState: {JSON.stringify($recipeState)}
 </div>
 <style>
  .changed {font-style: italic; color: purple;}
+ .searchBar {
+     display: flex;
+ }
+ .count {
+     font-size: var(--small);
+     width: 12rem;
+ }
+ .searchBar.searching {
+     cursor: busy;
+ }
 </style>
