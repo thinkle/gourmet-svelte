@@ -30,12 +30,43 @@
 
 </script>
 <span>
-    <span><ComboInput onSelect="{addValue}" options={options.filter((o)=>value.map((v)=>v.name).indexOf(o)==-1)} bind:value={nextValue}/> <IB on:click={addValue} bare={true} icon="add"></IB></span>
+    <span>
+        <ComboInput
+            onSelect="{addValue}"
+            options="{
+                      options
+                      .filter(
+                         (o)=> value.map( 
+                                 (v)=>v.name
+                                 ).indexOf(o.name)==-1
+                      )
+                      .map(o=>o.name)
+                      }"
+            bind:value={nextValue}
+        />
+        <IB
+            icon="add"
+            bare="{true}"
+            on:click="{addValue}"
+        />
+    </span>
     <span class="tag-container">
         {#each value as v (v.name)}
-            <span class="tag"
-                  animate:flip={{delay: 100, duration: 250, easing: quintOut}}>{v.name}
-                <span class="close"> <IB small="true " on:click={()=>remove(v)} bare={true} icon="close"></IB></span>
+            <span
+                class="tag"
+                animate:flip="{{delay: 100, duration: 250, easing: quintOut}}"
+            >
+                {v.name}
+                {#if !v.name}
+                    {@debug v}
+                {/if}
+                <span class="close">
+                    <IB icon="close"
+                        small="{true}"
+                        bare="{true}"
+                        on:click="{()=>remove(v)}"
+                    />
+                </span>
             </span>
         {/each}
     </span>
