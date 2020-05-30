@@ -21,6 +21,7 @@ let verbs = [
     'bake',
     'boil',
     'chop',
+    'core',
     'cut',
     'devein',
     'dice',
@@ -37,11 +38,13 @@ let verbs = [
     'saute',
     'sauté',
     'scrape',
+    'serve',
     'shake',
     'shook',
     'sift',
     'slice',
     'sprinkle',
+    'stem',
     'throw',
     'thrown',
     'toss',
@@ -49,7 +52,7 @@ let verbs = [
 // we'll be grammatical profligates...
 for (let v of verbs) {
     words.push(v);
-    if ('pts'.indexOf(v.substr(v.length-1))>-1) {
+    if ('ptsm'.indexOf(v.substr(v.length-1))>-1) {
         words.push(v+v.substr(v.length-1)+'ed');
         words.push(v+v.substr(v.length-1)+'ing');
     }
