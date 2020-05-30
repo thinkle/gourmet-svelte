@@ -1,4 +1,6 @@
 <script>
+ export let onRecipeClick
+
  import {flip} from 'svelte/animate'
  import {fade} from 'svelte/transition'
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
@@ -12,14 +14,11 @@
         pageInfo,
         recipePage,
         recipeState} from '../../stores/recipeStores.js';
- import {testRecs} from '../../common/mocks/recipes.js'
  import SearchProgress from '../../widgets/SearchProgress.svelte';
  import Whisk from '../../widgets/WhiskLogo.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
- import Status from '../../widgets/Status.svelte';
  import Recipe from './Recipe.svelte'
  import RecipeSummary from './RecipeSummary.svelte';
- import OpenRecipes from './OpenRecipes.svelte';
  import FancyInput from '../../widgets/PlainInput.svelte';
  import _ from 'lodash';
  let items = []
@@ -37,7 +36,7 @@
  export let open = [];
  let recipes = []
 
- let syncingPromise
+
  let search = '';
  let searchInput = '';
  let updateSearchDebounced = _.debounce(val => {search = val}, 250)
@@ -55,34 +54,9 @@
  }
 
  $: $connected && getRecipes(0,search,limit)
- let opener;
+
 </script>
 <div>
-    {#if $connected}
-        
-        <br>
-        <button on:click={()=>recipeActions.createRecipe(testRecs.empty)}>New Recipe</button>
-    {/if}
-    {#if $recipePage.length==0}
-        <button on:click={getAll}>
-            Get those recipes!
-        </button>
-    {/if}
-    <Status/>
-    <div>
-        <OpenRecipes bind:this={opener} recipes={open}/>
-    </div>    
-    <button on:click="{()=>syncingPromise=recipeActions.doSync()}">Sync with Server?</button>
-    <button on:click="{()=>syncingPromise=recipeActions.doSync(true)}">Small Sync</button>
-    {#if syncingPromise}
-        {#await syncingPromise}
-            Syncing...
-        {:then json}
-            Cool, done syncing! {JSON.stringify(json)}
-        {:catch error}
-            Failed :( {console.log(error)} {error}
-        {/await}
-    {/if}   
     <div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
         Search: <FancyInput type="text" bind:value={searchInput}/>
         <span width="30px">
@@ -123,12 +97,12 @@
         {#each $recipePage as id,n (n)}
             <tr animate:flip class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
-                    onClick={()=>localRecipes.open(id)}
+                    onClick={()=>onRecipeClick(id)}
                    recipe={$storedRecipes[id]}
                 />
                 <td>
                     {#if $localRecipes[id]}
-                        <IconButton icon="fullscreen" on:click={opener.open(id)}/>
+                        <IconButton icon="fullscreen" on:click={onRecipeClick(id)}/>
                     {/if}
                 </td>
             </tr>
@@ -147,7 +121,7 @@
                     {#if $connected}
                         <IconButton
                             icon="add"
-                            on:click={()=>recipeActions.createRecipe(testRecs.empty)}>
+                            on:click={()=>recipeActions.createRecipe()}>
                             Create a Recipe?
                         </IconButton>
                     {:else}
