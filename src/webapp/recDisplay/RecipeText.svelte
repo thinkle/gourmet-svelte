@@ -16,10 +16,13 @@
  $: {
      console.log('Parsing text: ',text);
      if (text) {
-         parsed = parseIngredients(text,$ingredientList);
+         if (ingredientList && $ingredientList && $ingredientList.length > 1) {
+             parsed = parseIngredients(text,$ingredientList);
+         } else {
+             parsed = text;
+         }
          parsed = parseTimes(parsed);
-         console.log('Success:',parsed)
- }
+     }
  }
  
  let markupToComponentMap = {
