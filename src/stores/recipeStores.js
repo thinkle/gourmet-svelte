@@ -8,6 +8,8 @@ import deepcopy from 'deepcopy'
 const stored = writable({});
 const local = writable({});
 const activePage = writable([]);
+export const pageInfo = writable({
+});
 const actionState = writable({}) // for e.g. "searching recipes..."
 const individualActionState = writable({}) // for e.g. updating recipe #123124
 export const connected = readable(false,(set)=>{
@@ -153,6 +155,13 @@ export const recipeActions = {
         let response = await api.getRecipes({query,fields,limit,page});
         setStoredRecs(response.result);
         activePage.set(response.result.map((r)=>r.id));
+        pageInfo.set({
+            currentPage:response.currentPage,
+            nextPage:response.nextPage,
+            prevPage:response.prevPage,
+            count:response.count,
+        
+        })
         ssp(actionState,'querying',false);
     },
     
