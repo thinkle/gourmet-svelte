@@ -1,7 +1,7 @@
 import RecDef from '../common/RecDef.js'
 import {parseAmount} from '../utils/numbers.js';
 import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
-import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup} from './ingredientImporter.js';
+import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup,handleIngredients} from './ingredientImporter.js';
 import {handleTime} from './timeImporter.js'
 export function preprocessChunks (parsedChunks, context) {
     parsedChunks.sort(
@@ -120,6 +120,9 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
     else if (chunk.tag=='inggroup') {
         return handleIngredientGroup(chunk,context,recipe,parent);
+    }
+    else if (chunk.tag=='ingredients') {
+        return handleIngredients(chunk,context,recipe,parent);
     }
     else if (chunk.tag=='image') {
         return handleImage(chunk,context,recipe);
