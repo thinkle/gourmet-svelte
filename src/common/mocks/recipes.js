@@ -200,7 +200,7 @@ let testRecs = {
         },
 
     empty : {
-        title : "My Recipe",
+        title : "",
         times : [],
         categories : [],
         text : [{'header':'Instructions',body:''}],
