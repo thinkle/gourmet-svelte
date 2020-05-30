@@ -51,19 +51,58 @@
  }
 
 </script>
-<div>
-    {#if isLoggedIn}
-        Howdy {username} 
+
+{#if isLoggedIn}    
+    <nav>
+        <div>Hello, {username}
+            <slot name="leftnav"/>
+        </div>
+        <div class='brand'>Gourmet</div>
         <div>
+            <slot name="rightnav"/>
             <button on:click={() => doLogout()}>Log Out</button>
         </div>
-        <slot/>
-    {:else}
-        Not Logged in...
-        <div>
-            <button on:click={() => doLogin() }>Log In</button>
-            <button on:click={() => doSignup() }>Sign Up</button>
-        </div>
-    {/if}
+    </nav>
+    <slot/>
+{:else}
+    <nav>
+        <div>Not Logged in...</div>
+        <div class='brand'>Gourmet</div>
+        <div></div>
+    </nav>
+    <article>
+        <button on:click={() => doLogin() }>Log In</button>
+        <button on:click={() => doSignup() }>Sign Up</button>
+    </article>
+{/if}
 
-</div>
+
+<style>
+ article {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     height: calc(100vh - var(--navHeight));
+ }
+
+ article button {
+     font-size : var(--large);
+     margin: var(--large);
+ }
+ 
+ nav {
+     height : var(--navHeight);
+     display: flex;
+     font-size: var(--small);
+ }
+ nav div:first-child {
+     margin-right: auto;
+ }
+ nav div:last-child {
+     margin-left: auto;
+ }
+ .brand {
+     font-family: var(--brandFont);
+ }
+ 
+</style>
