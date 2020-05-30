@@ -1,7 +1,9 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
  import status,{states} from '../stores/status.js';
  import Progress from './Progress.svelte';
  import { fly } from 'svelte/transition';
+ import IconButton from './IconButton.svelte';
  export let type;
 
  let items = []
@@ -39,9 +41,12 @@
             <div>{item.name}: {@html item.formatter && item.formatter(item) || format(item)}</div>
             <div><Progress width="90%" amount={item.amount} total={item.total}/></div>
             {#if item.status==states.COMPLETE}
-                <button class="icon" on:click="{()=>status.removeStatus(item.id)}">
-                    <i class="material-icons">close</i>
-                </button>
+                <IconButton
+                    bare="{true}"
+                    small="{true}"
+                    on:click="{()=>status.removeStatus(item.id)}"
+                    icon="close"
+                    />
             {/if}
         </span>
     {/each}
