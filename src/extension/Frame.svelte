@@ -20,15 +20,16 @@
      getRoot().style.width = `calc(100% - ${width}px)`
  }
 
-$: visible && maximize(width)
+ $: visible && maximize(width)
  
  function minimize () {
      visible = false;
      getRoot().style.width = '100%'
  }
  let url
- let port = 58942
- $: url = `http://localhost:${port}/sidebar`;// '//localhost:5000';
+ let port = undefined
+ $: url = port && `http://localhost:${port}/sidebar` || 'https://gourmet-svelte.netlify.app/sidebar'
+ 
  
 </script>
 <link
