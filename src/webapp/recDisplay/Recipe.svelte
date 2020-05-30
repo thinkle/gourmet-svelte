@@ -1,7 +1,6 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  export let rec=undefined;
-
  export let onChange=undefined;;
  export let onOpenSubRec=undefined;
 
@@ -225,7 +224,7 @@
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide growRight="true" leftBasis="300px" rightBasis="600px">
+        <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
 	    <h3 slot="leftHead"> 
 	        Ingredients
                 {#if !editMode && editable}
