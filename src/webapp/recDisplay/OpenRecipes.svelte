@@ -1,4 +1,11 @@
 <script>
+ export function open (id) {
+     hide = false;
+     if (id!==undefined) {
+         activeRecipeId = id;
+     }
+ }
+
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  import {fade,slide} from 'svelte/transition';
  import {flip} from 'svelte/animate';
@@ -6,12 +13,6 @@
  import Recipe from './Recipe.svelte'
  import IconButton from '../../widgets/IconButton.svelte';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../../stores/recipeStores.js';
- export function open (id) {
-     hide = false;
-     if (id!==undefined) {
-         activeRecipeId = id;
-     }
- }
  function getTabTitle (id) {
      return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || '???'; // fixme
  }
