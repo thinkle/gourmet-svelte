@@ -345,12 +345,14 @@ export function parseUnit (text, requireIngredient=false) {
         let unit = m[1]
         let pretext = text.substr(0,m.index);
         let posttext = text.substr(m.index+unit.length)
-        if (posttext) {
-            text = cleanupWhitespace(posttext)
+        text = ''
+        if (pretext.replace(/^\W+|\W+$/g)) {
+            text = pretext + ' '
         }
-        else {
-            text = cleanupWhitespace(pretext);
+        if (posttext.replace(/^\W+|\W+$/g)) {
+            text += cleanupWhitespace(posttext)
         }
+        text = cleanupWhitespace(text);
         if (requireIngredient) {
             if (unit && !text) {
                 text = unit;
