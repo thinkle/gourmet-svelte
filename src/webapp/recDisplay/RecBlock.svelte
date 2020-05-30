@@ -1,7 +1,6 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS,'Ing',);
  export let value
- export let prop
  export let editable=true;
  export let forceEdit=true;
  export let showLabel=true;
