@@ -1,6 +1,6 @@
 <script>
  import Tester from '../widgets/Tester.svelte';
- import localApi from '../data/localApi.js';
+ import localApi from '../data/dexieApi.js';
  
 async function addRec () {
      results = await localApi.addRecipe({title:'Hello world'});
