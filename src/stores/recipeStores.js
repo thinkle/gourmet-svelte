@@ -159,6 +159,7 @@ export const recipeActions = {
             nextPage:response.nextPage,
             prevPage:response.prevPage,
             count:response.count,
+            last:response.last,
         
         })
         ssp(actionState,'querying',false);
