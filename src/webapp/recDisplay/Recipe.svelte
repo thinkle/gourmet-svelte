@@ -23,6 +23,7 @@
  import { watchResize } from "svelte-watch-resize";
  import deepcopy from 'deepcopy';
 
+ $: { if (rec && !rec.title) {editMode=true}}
 
  let valid = false;
  $: {
