@@ -93,7 +93,23 @@ function handlePlainIngredient (chunk) {
     // fixme :)
     let text = chunk.text || chunk;
     let amount = parseAmount(text);
+    console.log('Got amount',amount)
+    if (amount.posttext && amount.pretext) {
+        let main,extra,utext;
+        if (amount.posttext.length > amount.pretext.length) {
+            main = amount.posttext; extra = amount.pretext;
+        }
+        if (amount.posttext.length > amount.pretext.length) {
+            extra = amount.posttext; main = amount.pretext;
+        }
+        if (extra.replace(/\W+/).length == 0) {
+            utext = main;
+        } else {
+            utext = main + ' - ' + extra;
+        }
+    }
     let unitAndText = parseUnit(amount.posttext||amount.pretext);
+
     delete amount.posttext;
     delete amount.pretext;
     amount.unit = unitAndText.unit
