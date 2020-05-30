@@ -77,16 +77,29 @@ export function handleIngredient (chunk, context, recipe) {
     return {} // no context -- we are are complete in ourselves... 
 }
 
+export function handleIngredients (chunk, context, recipe) {
+    chunk.text.split('\n').forEach(
+        function (line) {
+            if (line.replace(/^\s+|\s+$/g)) {
+                context = handleIngredient(line,context,recipe);
+            }
+        }
+    );
+    return context;
+}
+
+
 function handlePlainIngredient (chunk) {
     // fixme :)
-    let amount = parseAmount(chunk.text);
+    let text = chunk.text || chunk;
+    let amount = parseAmount(text);
     let unitAndText = parseUnit(amount.posttext||amount.pretext);
     delete amount.posttext;
     delete amount.pretext;
     amount.unit = unitAndText.unit
     amount.standardUnit = unitAndText.standardUnit
     return {
-        originalText:chunk.text,
+        originalText:text,
         amount,
         text:unitAndText.text,
     }
