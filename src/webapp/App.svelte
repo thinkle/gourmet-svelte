@@ -46,8 +46,10 @@
 </script>
 
 <div>
-    <p>{name}</p>
     <Landing>
+        <span slot="rightnav">
+            {#if page!==RecipeList}<a href="/">Recipe List</a>{/if}
+        </span>
         <svelte:component this={page} {...params}/>
     </Landing>
     <div style="position: fixed; z-index: 99; bottom: 0; right: 0; font-size: 8pt;">{$stamp}</div>
@@ -61,6 +63,8 @@
      margin: auto;
      max-width: 1200px;
  }
+
+
 
  :root {
      /* Colors */
@@ -85,9 +89,11 @@
      --recipeHeadFont : Lora,'Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;
      --brandFont : 'Gimlet Sans Web','Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;
      --uiFont : 'Noto Sans', Ubuntu, Cantarell, -apple-system, sans-serif;
+     --large : 2rem;
      --small : 0.8rem;
      --xsmall : 0.6rem;
-
+     /* Sizes */
+     --navHeight: 30px;
  }
 
  
