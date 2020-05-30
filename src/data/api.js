@@ -37,13 +37,26 @@ const api = {
     },
     async updateRecipe (recipe) {
         recipe.last_modified = new Date().getTime();
-        try {
-            let remoteRec = await remoteApi.updateRecipe(recipe);
-            recipe.savedRemote = true;
-            recipe._id = remoteRec._id;
-        }
-        catch (err) {
-            recipe.savedRemote = false;
+        if (recipe._id) {
+            try {
+                let remoteRec = await remoteApi.updateRecipe(recipe);
+                recipe.savedRemote = true;
+                recipe._id = remoteRec._id;
+            }
+            catch (err) {
+                recipe.savedRemote = false;
+                console.log('Error updating remote recipe:',recipe,err);
+                // Update status?
+            }
+        } else {
+            try {
+                let remoteRec = await remoteApi.addRecipe(recipe);
+                recipe.savedRemote = true;
+                recipe._id = remoteRec._id;
+            }
+            catch (err) {
+                console.log('Error adding remote recipe',recipe,err)
+            }
         }
         await localApi.updateRecipe(recipe);
         return recipe;
