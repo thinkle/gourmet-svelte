@@ -69,7 +69,7 @@ const dexieApi = {
 
     async getRecipes({query,fields,limit,page}={}) {
         let q = dexieApi.db.recipes
-        if (query.fulltext) {
+        if (query && query.fulltext) {
             if (query.fulltext.indexOf(' ')>-1) {
                 query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
                 q = await dexieApi.searchWords(
