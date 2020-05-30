@@ -56,7 +56,7 @@
         </button>
     {/if}
     <div>
-        <OpenRecipes bind:this={opener} recipes={open}/>
+        <OpenRecipes bind:this={opener}/>
     </div>    
     <RecipeList
         onRecipeClick="{
