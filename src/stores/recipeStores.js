@@ -91,7 +91,6 @@ export const localRecipes = {
 }
 
 export const openLocalRecipes = derived(local,($local)=>{
-    console.log('regenerate open...',Object.keys($local));
     return Object.keys($local)
 }
 );
@@ -150,7 +149,7 @@ export const recipeActions = {
         return localCopy;
     },
     
-    async getRecipes ({query,fields,limit,page}) {
+    async getRecipes ({query,fields,limit,page}={}) {
         ssp(actionState,'querying',{query,fields,limit,page});
         let response = await api.getRecipes({query,fields,limit,page});
         setStoredRecs(response.result);
@@ -168,18 +167,14 @@ export const recipeActions = {
     async updateRecipe (recipe) {
         let updatedRecipe = await api.updateRecipe(recipe);
         setStoredRec(updatedRecipe);
-        console.log('updated Recipe!');
     },
 
     async revertRecipe (id) {
         let storedRecipe = await this.getRecipe(id); //get(stored)[id]
-        console.log('Revert to: ',storedRecipe)
         ssp(local,id,deepcopy(storedRecipe));
-        console.log('Reverted!')
     },
 
     async deleteRecipe (id) {
-        console.log('RD say delete',id)
         await api.deleteRecipe(id);            
         stored.update((data)=>{delete data[id]; return data});
         local.update((data)=>{delete data[id]; return data});
@@ -214,7 +209,6 @@ export const recipeState = derived(
             }
             recState[key].last_modified = $stored[key].last_modified
         }
-        console.log('RECIPE STATE STORE: update state');
         return recState;
     }
 );
