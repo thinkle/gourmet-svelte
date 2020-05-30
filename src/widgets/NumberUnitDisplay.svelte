@@ -2,7 +2,7 @@
  import {formatAmount} from '../utils/numbers.js';
  export let value
  export let mode='inline'
- export let multipliable=true
+ /*  export let multipliable=true */
 
  import {getContext} from 'svelte';
  let multiplier = getContext('multiplier')
