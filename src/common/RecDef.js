@@ -145,7 +145,7 @@ var Metadata = {
          edit:MCMB,
          summaryView:true,
          displayAsTag:true,
-         options:['Dessert','Entree','Salad','Soup'],
+         options:[{name:'Dessert'},{name:'Entree'},{name:'Salad'},{name:'Soup'}],
          empty:[{name:''}],
          testValue:[{name:'Dessert'}],
 	 toHtml:(v)=>v.name,
