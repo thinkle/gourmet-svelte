@@ -1,3 +1,4 @@
+import {DB} from './mongoConnect.js';
 import setupHandler from './setupDB.js';
 import {getUser} from './users.js';
 import recipeApi from './recipeFunctions.js';
@@ -63,6 +64,7 @@ const handler = async (event, context) => {
 
 function echo (event,context,user,params) {
     return {params,
+            DB,
             user:user||'no user logged in',
             context,event}
 }
