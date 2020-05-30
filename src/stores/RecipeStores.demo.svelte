@@ -1,6 +1,10 @@
 <script>
+ import JsonDebug from '../widgets/JsonDebug.svelte';
  import {
+     connected,
      recipeState,
+     recipeActionState,
+     recipeActionGeneralState,
      storedRecipes,
      localRecipes,
      openLocalRecipes,
@@ -9,61 +13,58 @@
  import Tester from '../widgets/Tester.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
  export let initialShow
- let lastRec;
- let theRec = {title:'?'};
- $: {
-     if ($recipeData.localState && $recipeData.localState.recipe) {
-         theRec = $recipeData.localState.recipe
-     }
- }
-
- $: {
-     if ($recipeData.localState && $recipeData.localState.state=='doneFetching') {
-         theRec = $recipeData.localState.lastFetched[
-             Math.floor(Math.random()*$recipeData.localState.lastFetched.length) // rando item
-         ]
-     }
- }
-
+ let action;
+ let theRec;
  function changeTheRec () {
      theRec.title += '~!~';
  }
 
- function s () {
-     lastRec = theRec;
+ let storesToShow = {
+     $recipeState,
+     $recipeActionState,
+     $recipeActionGeneralState,
+     $storedRecipes,
+     $localRecipes,
+     $openLocalRecipes,
+     $recipePage,
+ }
+ function setTheRec (d) {
+     theRec=d
  }
 
 </script>
 <div>
     <Tester name="Recipe Store" {initialShow}>
-        <br>$recipeData.connected {$recipeData.connected}
+        <br>$connected {$connected}
+        {#if action}
+            {#await action}
+                Running action...
+            {:then json}
+                Ran Action, got Data: <JsonDebug data="{json}"/>
+                {setTheRec(json)}
+            {:catch err}
+                Got Error? <JsonDebug data="{err}"/>
+            {/await}
+        {/if}
         <br>
-        <button on:click={()=>{s();recipeActions.createRecipe(testRecs.standard)}}>Create Standard</button>
-        <button on:click={()=>{s();recipeActions.createRecipe(testRecs.empty)}}>Create Empty</button>
-        <button on:click={()=>{s();recipeActions.getRecipe(theRec.id)}}>Get Recipe</button>
-        <button on:click={()=>{s();recipeActions.getRecipes()}}>Get Recipe<u>s</u></button>
-        <button on:click={()=>{s();recipeActions.deleteRecipe(theRec.id)}}>Delete Recipe</button>
-        <button on:click={()=>{
+        <button on:click={async ()=>{action=await recipeActions.createRecipe(testRecs.standard)}}>Create Standard</button>
+        <button on:click={async ()=>{action=await recipeActions.createRecipe(testRecs.empty)}}>Create Empty</button>
+        <button on:click={async ()=>{action=await recipeActions.getRecipe(1)}}>Get Recipe</button>
+        <button on:click={async ()=>{action=await recipeActions.getRecipes()}}>Get Recipe<u>s</u></button>
+        <button on:click={async ()=>{action=await recipeActions.deleteRecipe(1)}}>Delete Recipe</button>
+        <button on:click={async ()=>{action=await localRecipes.open(1)}}>Open Recipe</button>
+        <button on:click={async ()=>{action=await localRecipes.close(1)}}>Close Recipe</button>
+        <button on:click={async ()=>{
                          changeTheRec();
-                         recipeActions.updateRecipe(theRec);
+                         action = await recipeActions.updateRecipe(theRec);
                          }}>Update Recipe</button>
         <br>
-        <h2>LOCAL STATE:</h2>
-        <div>{JSON.stringify($recipeData.localState,null,2)}</div>
-        <br>
-        {#if lastRec}
-            <h2>Last Recipe</h2>
-            <div>recipeData {JSON.stringify($recipeData[lastRec.id],null,2)}
-            </div>
-        {/if}
         {#if theRec}
-            <h2>The Recipe</h2>
-            <div>RD: {JSON.stringify(theRec,null,2)}</div>
-            <div>{JSON.stringify($recipeData[theRec.id],null,2)}</div>
+            The Recipe <JsonDebug data="{theRec}"/>
         {/if}
-        <h2>All the Data</h2>
-        <div>{JSON.stringify($recipeData,null,2)}</div>
-
+        {#each Object.keys(storesToShow) as store}
+            {store} : <JsonDebug data="{storesToShow[store]}"/>
+        {/each}
     </Tester>
 </div>
 
