@@ -31,6 +31,9 @@ function validateRec (rec) {
     if (!rec.ingredients) {
         rec.ingredients = []
     }
+    if (!rec.images) {
+        rec.images = []
+    }
     rec.ingredients.map((i)=>crawlIngredient(i,rec.flatIngredients))
     rec.fullText = getFullText(rec)
 }
