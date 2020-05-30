@@ -157,7 +157,7 @@ var Metadata = {
          displayAsTag:true,
          summaryView:true,
          testValue:{url:'http://tomhinkle.net/',name:'Fake Source'},
-	 toHtml:(s)=>s&&s.url&&`<span><a href=${s.url}>${s.name||s.url.substr(0,30)}</a></span>`||s.name||'',
+	 toHtml:(s)=>s&&s.url&&`<span><a target="_blank" href=${s.url}>${s.name||s.url.substr(0,30)}</a></span>`||s.name||'',
          empty:[{name:'',url:''}],
          array:true,
          edit:LNK,
