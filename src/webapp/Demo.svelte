@@ -6,7 +6,7 @@
  import WidgetTests from '../widgets/Widgets.demo.svelte';
  import widgetTestPaths from '../widgets/widgetDemos.js';
  import LocalDataTester from '../data/LocalData.demo.svelte';
- import RecipeDataTester from '../stores/RecipeStores.demo.svelte';
+ import RecStoreTester from '../stores/RecipeStores.demo.svelte';
  import RemoteApiTester from '../data/RemoteApi.demo.svelte';
  import HighlightTest from '../extension/parser/Highlight.demo.svelte';
  import RecipeTextTest from './recDisplay/RecipeText.demo.svelte';
@@ -18,7 +18,7 @@
      rec : RecDisplayTests,
      localData : LocalDataTester,
      remote: RemoteApiTester,     
-     rd : RecipeDataTester,
+     recipeStores : RecStoreTester,
      highlight : HighlightTest,
      ...widgetTestPaths,
  }
