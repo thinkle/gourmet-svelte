@@ -59,8 +59,8 @@
     {/if}
     {#each functions as f}
         <button on:click={()=>{
-                         console.log('Run action',name);
-                         currentFunction=name;
+                         console.log('Run action',f.name);
+                         currentFunction=f.name;
                          f.action();
                          }}>
             {f.name}
