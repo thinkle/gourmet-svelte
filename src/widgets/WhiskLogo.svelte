@@ -21,7 +21,7 @@
 </script>
 {#if show}
     <div on:click={restart}>
-        <svg out:fade width={300} height={300}>
+        <svg out:fade width={size} height={size}>
             
 
             <path
