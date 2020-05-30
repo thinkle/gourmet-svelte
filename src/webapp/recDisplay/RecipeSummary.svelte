@@ -12,9 +12,8 @@
      }
  }
 </script>
-<tr class='summary' style={`--maxImageWidth:${maxImageWidth}px`}>
-    <slot/>
-    <td>
+
+    <td style={`--maxImageWidth:${maxImageWidth}px`}>
         {#if thumb}
             <img src={thumb.thumbnailUrl||thumb.url} alt={thumb.alt||recipe.title}/>
         {/if}
@@ -27,7 +26,7 @@
             <RecPropDisplay prop={prop} value={recipe[prop.name]}></RecPropDisplay>
         </td>
     {/each}        
-</tr>
+
 <style>
  .clickable:hover {
      text-decoration: underilne;
