@@ -1,5 +1,6 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {fade,slide} from 'svelte/transition';
  import {flip} from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
  import Recipe from './Recipe.svelte'
@@ -58,8 +59,8 @@
     </div>
 {/if}
 <div class="fixedContainer">
-    {#if ($openLocalRecipes.length > 0)}
-        <div class="tabbox" class:hidden={hide}>
+    {#if ($openLocalRecipes.length > 0) && !hide}
+        <div class="tabbox" in:slide out:fade>
             <div class="tabs">
                 {#each $openLocalRecipes as id (id)}
                     <span
@@ -77,11 +78,6 @@
                     <IconButton on:click="{()=>hide=!hide}"
                                 icon={hide&&"expand_more"||"expand_less"}
                     >
-                        {#if hide}
-                            Show Recipes
-                        {:else}
-                            Hide Recipes
-                        {/if}
                     </IconButton>
                 </div>
             </div> <!-- close tabs -->
@@ -136,9 +132,6 @@
      margin: auto;
  }
 
- .tabbox.hidden {
-     width : 95%;
- }
 
  .content {
      height: 90vh;
@@ -168,9 +161,6 @@
      overflow: hidden;
  }
 
- .tabbox.hidden .tabs span {
-     display: none;
- }
 
  .tabbox .content {
      background-color: white;
