@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300,400,500,600,700,900;0,300,400,500,700,900
-;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300,400,500,600,700,900;0,300,400,500,700,900;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
 @font-face {
@@ -181,10 +180,6 @@ a:hover {
 
 a:visited {
 	color: rgb(0,80,160);
-}
-
-label {
-	display: block;
 }
 
 input, button, select, textarea, .input {
