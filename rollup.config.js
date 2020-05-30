@@ -11,6 +11,7 @@ import { terser } from 'rollup-plugin-terser';
 const production = !process.env.ROLLUP_WATCH;
 
 export default [
+    // Main App
     {
         input: 'src/webapp/main.js',
         output: {
@@ -20,7 +21,6 @@ export default [
 	    file: 'public/build/bundle.js'
         },
         plugins: [
-            json(),
             replace({
                 DEV : !production,
                 BUILD_TIME : ()=>new Date()+'',
@@ -61,6 +61,7 @@ export default [
 	    clearScreen: false
         }
     },
+    // Functions...
     {
         input : 'src/data/functions/api.js',
         output : {
@@ -71,12 +72,13 @@ export default [
         },
         plugins : [
             json(),
-            production && replace(
-                'MONGO_DB_NAME','Gourmet'
+            production && replace(                
+                {'MONGO_DB_NAME':'Gourmet'},
             ),
-            !production && replace(
-                'MONGO_DB_NAME','devtest',
-            ),
+            !production && replace({
+                'MONGO_DB_NAME':'devtest',
+            }
+                                  ),
         ]
     },
     {
@@ -165,6 +167,8 @@ export default [
 
 
 ];
+
+
 
 function serve() {
     let started = false;
