@@ -17,7 +17,9 @@ export const connected = readable(false,(set)=>{
         ()=>{
             set(true)
         }
-    );
+    ).catch((err)=>{
+        console.log('Error connecting:',err);
+    });
 });
 function ssp (store,p,v) {
     // set store prop to value...
