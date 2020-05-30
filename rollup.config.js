@@ -105,16 +105,16 @@ export default [
             file : 'extension/content.js',
         },
         plugins : [
+            replace({
+                BUILD_TIME : ()=>new Date()+'',
+                BUILD_MS : ()=>new Date().getTime(),
+            }),
             svelte({
 	        // enable run-time checks when not in production
 	        dev: !production
 	        // we'll extract any component CSS out into
 	        // a separate file  better for performance
 	    }),
-            replace({
-                BUILD_TIME : ()=>new Date()+'',
-                BUILD_MS : ()=>new Date().getTime(),
-            }),
             resolve({
 	        browser: true,
 	        dedupe: ['svelte']
@@ -151,6 +151,11 @@ export default [
             file : 'extension/embed.js',
         },
         plugins : [
+            replace({
+                DEV : !production,
+                BUILD_TIME : ()=>new Date()+'',
+                BUILD_MS : ()=>new Date().getTime(),
+            }),
             svelte({
 	        // enable run-time checks when not in production
 	        dev: !production
