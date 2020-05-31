@@ -143,9 +143,16 @@ export function parseTimes (s, includeSentence) {
             let seconds = getSecondsFromString(matchString)
             // fix whitespace!
             if (seconds) {
-                let [ts,leading,content,trailing]  = matchString.match(
+                let ts,leading,content,trailing
+                let whitespaceMatch = matchString.match(
                         /^(\s*)(.+?)(\s*)$/
                 );
+                if (whitespaceMatch) {
+                    [ts,leading,content,trailing]  = whitespaceMatch;
+                } else {
+                    content = matchString;
+                    leading = ''; trailing = '';
+                }
                 if (lastMatchOffset > offset) {
                     lastMatchOffset = s.length // scratch it if we're nested
                 }
