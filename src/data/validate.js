@@ -135,12 +135,14 @@ export function prepRecLocal (rec) {
     rec.ings = []
     rec.flatIngredients.forEach(
         (i)=>{
-            if (i.text) {rec.ings.push(i.text.toLowerCase());}
+            if (i.text) {
+                rec.ings.push(i.text.toLowerCase());
+                if (i.text.split().length > 1) {
+                    rec.ings = [...rec.ings,...i.text.split()];
+                }
+            }
             if (i.ingkey) {
                 rec.ings.push(i.ingkey.toLowerCase());
-            }
-            if (i.text.split().length > 1) {
-                rec.ings = [...rec.ings,...i.text.split()];
             }
         });
     rec.ings = stopword.removeStopwords(rec.words);
