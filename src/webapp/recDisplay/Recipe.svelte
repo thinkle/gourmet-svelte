@@ -23,7 +23,7 @@
  import { watchResize } from "svelte-watch-resize";
  import deepcopy from 'deepcopy';
 
- $: { if (rec && !rec.title) {editMode=true}}
+ $: { if (rec && !rec.title && editable) {editMode=true}}
 
                            let valid = false;
  $: {
@@ -116,6 +116,7 @@
      else {
          imageCentered = false
      }
+     console.log('Adjusted max image width to',maxImageWidth)
      maxImageWidth = rightBlockWidth - 20;
      
  }
