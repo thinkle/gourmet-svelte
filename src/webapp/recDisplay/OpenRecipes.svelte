@@ -8,6 +8,7 @@
 
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  import {fade,slide} from 'svelte/transition';
+ import {send,receive} from './pickerTransition.js';
  import {flip} from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
  import Recipe from './Recipe.svelte'
@@ -22,13 +23,11 @@
 
  function openOne () {
      activeRecipeId = $openLocalRecipes[0]
-     console.log('Got open recs',$openLocalRecipes);
  }
 
  $: {if (!activeRecipeId && $openLocalRecipes.length && $openLocalRecipes[0]) {
      openOne()
     }}
-            console.log('Got recs',$openLocalRecipes);
 
  let showCloseModalFor
 
@@ -43,13 +42,11 @@
          }
          activeRecipeId = $openLocalRecipes[index]; // change ID
      } else {
-         console.log('Set closed modal!');
          showCloseModalFor = id;
      }
  }
 
  function onOpenSubRec (id) {
-     console.log('Request to open recipe!',id);
      recipeActions.openRecipe(id);
  }
 
@@ -69,7 +66,7 @@
                         class:active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>
                         <div class='close'>
                             <IconButton bare={true} small={true} on:click={()=>window.open(`/rec/${id}`,'_blank')} icon='open_in_new'/>
-                            <IconButton bare={true} small={true} on:click={()=>{console.log('close fired',id);closeRec(id)}} icon='close'/>
+                            <IconButton bare={true} small={true} on:click={()=>{closeRec(id)}} icon='close'/>
                         </div>
                         {getTabTitle(id)}
                         
@@ -83,14 +80,13 @@
                 </div>
             </div> <!-- close tabs -->
 
-            <div class="content">
+            <div class="content" in:receive out:send>
                 <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
                 {#if $localRecipes[activeRecipeId]}
                     <Recipe
                         rec="{$localRecipes[activeRecipeId]}"
                         {onOpenSubRec}
                         onChange="{(rec)=>{
-                                  console.log('OpenRecipes got onChange from recipe!');
                                   $localRecipes[rec.id]=rec;
                                   }}"
                     />
