@@ -35,5 +35,7 @@
  .table {
      display: table-cell
  }
-
+ .amount {
+     white-space: nowrap;
+ }
 </style>
