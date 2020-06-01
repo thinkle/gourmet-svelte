@@ -1,6 +1,4 @@
 <script>
-
- import {getContext} from 'svelte'
  export let floatWidth
  export let value
  export let prop
@@ -9,6 +7,8 @@
  export let showLabel=true;
  export let onChange;
  export let smallLabel=true;
+
+ import {getContext} from 'svelte'
  import RecDef from '../../common/RecDef.js';
  import IconButton from '../../widgets/IconButton.svelte';
 
@@ -77,8 +77,7 @@
                     <IconButton small={smallLabel} icon="done" bare="true" on:click={turnEditOff}/>
                 {/if}
             </div>
-        {/if}
-        {#if prop.hideLabel && editable && !forceEdit}
+        {:else if editable && !forceEdit}
             <div class='floatingEditButton'>
                 {#if editable && !edit}
                     <span class="editbutton" ><IconButton bare="true" icon="edit" on:click={turnEditOn}/></span>
