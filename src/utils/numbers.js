@@ -135,11 +135,12 @@ function getFraction (n, d, unicodeFractions=true) {
 	        return f.word
 	    }
         }
+        return n + '⁄' + d; // fancy unicode fraction slash
     }
     return n+'/'+d
 }
 
-function floatToFrac (n, {denominators=[2,3,4,6,8,10,16], approx=0.01, fallbackDigits=2,
+function floatToFrac (n, {denominators=[2,3,4,5,6,8,16], approx=0.01, fallbackDigits=2,
                           unicodeFractions=true,multiplier=1}={}) {
     n *= multiplier
     if (n===0) {
@@ -198,11 +199,11 @@ function fracToFloat (s) {
     if (!s.split) {
         return Number(s); // if we are not a string, just use Number...
     }
-    if (s[s.length-1]=='/') {
+    if (['/','⁄'].indexOf(s[s.length-1])>-1) {
         // if we end with a slash, we are not a number...
         return NaN
     }
-    var parts = s.split(/ +/);
+    var parts = s.split(/\s+/);
     if (parts.length==2) {
 	var num = Number(parts[0]);
 	var frac = parts[1];
@@ -211,7 +212,7 @@ function fracToFloat (s) {
 	var num = 0;
 	var frac = parts[0];
     }
-    var frac_split = frac.split(/\//);
+    var frac_split = frac.split(/[\/⁄]/);
     if (frac_split.length==2) {
 	return  num + (Number(frac_split[0])/Number(frac_split[1]))
     }
@@ -244,7 +245,7 @@ function fracToFloat (s) {
 var numBase = `([0-9]|${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}`;
 numBase += '|' + NUMBER_WORDS.map((w)=>w.matcher.toString().replace(/(^\/|\/i$)/g,'')).join('|')
 var numNaked = numBase + ')';
-var numMid = numBase + '|[,./])' 
+var numMid = numBase + '|[,./⁄])' 
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
 numMatchString = `${numMatchString}(\\s+${numMatchString})?`
 var numberMatcher = new RegExp(numMatchString,'i');
@@ -315,7 +316,7 @@ function increment (n) {
     }
 }
 
-function getNearestFraction (n, options=[1,2,3,4,8,16],approx=0.1) {
+function getNearestFraction (n, options=[1,2,3,4,5,8,10,16],approx=0.1) {
     for (let o of options) {
         let answer =  fractify(n,o,approx);
         if (answer) {
@@ -366,7 +367,7 @@ function decrement (n) {
     }
 }
 
-let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/])')
+let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/⁄])')
 
 function parseAmount (s) {
     let amount = {}
