@@ -16,6 +16,7 @@
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {floatToFrac} from '../../utils/numbers.js';
  import {onMount,tick} from 'svelte';
+ import {flip} from 'svelte/animate'
  import {highlightItem} from '../../utils/ingredientUtils.js';
  let highlightedIngredient = getContext('highlightedIngredient');
  let groups;
@@ -64,12 +65,14 @@
 
  function changeIngredient (original, updated) {
      console.log('Replacing',original,'with',updated)
-     // swap out enumerable properties of ingredient object
-     for (let prop in original) {
-         delete original[prop]
-     }
-     for (let prop in updated) {
-         original[prop] = updated[prop]
+     if (original !== updated) {
+         // swap out enumerable properties of ingredient object
+         for (let prop in original) {
+             delete original[prop]
+         }
+         for (let prop in updated) {
+             original[prop] = updated[prop]
+         }
      }
      ingredients = ingredients; // tell svelte it's changed
      triggerChange(); // tell parent we've changed
@@ -127,7 +130,7 @@
      $highlightedIngredient.hover = undefined
  }
  function addIngredient (list=ingredients,ingredient={text:'',amount:{}}) {
-     ingredients.push(ingredient);
+     list.push(ingredient);
      ingredients = ingredients;
      triggerChange();
      return true; // when used as a direct handler, tells us to clear entry after adding.
@@ -138,6 +141,7 @@
 <div style="max-width:{maxWidth}px;">
     <table bind:this={ref}  class:edit-mode={editMode} class="inglist" style={getStyle(idealWidth)}>
 	{#each ingredients as i,n (i)}
+            <tbody animate:flip>
             {#if i.ingredients}
                 <!-- nested ingredients...! -->
                 <tr class:highlighted={i.text==$highlightedIngredient.highlighted}
@@ -156,6 +160,7 @@
                         {/if}
                         <table class="inglist">
                             {#each i.ingredients as ii,nn (ii)}
+                                <tbody animate:flip>
                                 <Ingredient
                                     ing="{ii}"
                                     {onOpenSubRec}
@@ -169,15 +174,13 @@
                                     parent={i.ingredients}
                                     position={nn}
                                 />
+                                </tbody>
                             {/each}
                             <!-- Button for adding more rows... -->
                             {#if editMode}
                                 <tr>
-                                    <td>
-                                        <IconButton icon="add" bare="true"
-                                                    on:click="{()=>{addIngredient(i.ingredients)}}"
-                                                    type="icon"><i class='material-icons'/>
-                                        </IconButton>
+                                    <td colspan="4" class="new">
+                                        <IngredientInput showAddButton="true" onEnter={(newIng)=>addIngredient(i.ingredients,newIng)}/>                                    
                                     </td>
                                 </tr>
                             {/if}
@@ -201,14 +204,13 @@
                     position={n}
                 />
             {/if} <!-- End if nested ingredient block -->
+            </tbody>
 	{/each} <!-- End each i in ingredients -->
+        
         {#if editMode}
             <tr>
-                <td colspan=3>
-                    <IngredientInput onEnter={(i)=>addIngredient(ingredients,i)}/>
-                </td>
-                <td>
-                    <IconButton bare={true} icon="add"/>
+                <td colspan=3 class="new">
+                    <IngredientInput showAddButton="true" onEnter={(newIng)=>addIngredient(ingredients,newIng)}/>
                 </td>
             </tr>
             <tr>
@@ -298,5 +300,14 @@
      color: var(--note-light-fg);
  }
 
- 
+ .inglist .inglist {
+     border-left : 1px solid var(--light-underline);
+     border-bottom : 1px solid var(--light-underline);
+     padding-left: 3px;
+     padding-bottom: 3px;
+ }
+ .new {
+     color: var(--grey);
+     font-style: italic;
+ }
 </style>
