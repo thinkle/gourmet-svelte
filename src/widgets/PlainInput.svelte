@@ -88,7 +88,8 @@ function adjustSize () {
      onMount(adjustSize)
 
 </script>
-{#if oneLiner}
+
+{#if oneLiner && false}
     <input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:keyup on:keydown bind:value={value} type="text">
 {:else}
     <p class="input" placeholder={placeholder} contenteditable="true" bind:textContent={value} on:change on:keyup on:keydown bind:this={ref}>
