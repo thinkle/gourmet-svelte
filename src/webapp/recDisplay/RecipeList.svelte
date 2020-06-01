@@ -21,7 +21,6 @@
  import FancyInput from '../../widgets/PlainInput.svelte';
  import _ from 'lodash';
 
- let opened;
  function getAll () {
      if ($connected) {
          console.log('Fetch those recipes...');
