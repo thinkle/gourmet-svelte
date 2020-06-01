@@ -117,7 +117,7 @@
                     {#if $connected}
                         <IconButton
                             icon="add"
-                            on:click={()=>recipeActions.createRecipe()}>
+                            on:click={async ()=>onRecipeClick(await recipeActions.createRecipe())}>
                             Create a Recipe?
                         </IconButton>
                     {:else}
