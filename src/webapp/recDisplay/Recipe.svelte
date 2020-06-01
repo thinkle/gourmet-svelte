@@ -25,7 +25,7 @@
 
  $: { if (rec && !rec.title) {editMode=true}}
 
- let valid = false;
+                           let valid = false;
  $: {
      valid = isValid(rec);
  }
@@ -92,7 +92,7 @@
  let rightBlock;
  let widthLeftOfImage = ''
  let imageCentered = false;
-
+ let maxImageWidth = 100;
  /* onMount(()=>{
   *     handleResize()
   * }
@@ -116,6 +116,8 @@
      else {
          imageCentered = false
      }
+     maxImageWidth = rightBlockWidth - 20;
+     
  }
 
  function resizeOnUpdate (node) {
@@ -252,7 +254,9 @@
                 <div class="topblock" style={`--widthLeftOfImage:${widthLeftOfImage}px`}>
                     <div class="props" >
                         
-                        <div class="images" class:centered={imageCentered} use:resizeOnUpdate bind:this={imageBlock}>
+                        <div class="images" class:centered={imageCentered} use:resizeOnUpdate bind:this={imageBlock}
+                             style="{`--max-image-width:${maxImageWidth}px`}"
+                        >
                             {#each rec.images as image}
                                 <!-- Small: <img alt={image.alt||rec.title} src={image.thumbnailUrl}/> -->
                                 <img alt={image.alt||rec.title} src={image.url}/>
@@ -331,5 +335,8 @@
      margin-left: 1em;
      margin-right: auto;
      display: flex;
+ }
+ .images img {
+     max-width: var(--max-image-width);
  }
 </style>
