@@ -18,7 +18,10 @@
  import {onMount,tick} from 'svelte';
  import {highlightItem} from '../../utils/ingredientUtils.js';
  let highlightedIngredient = getContext('highlightedIngredient');
+ let groups;
 
+ $: groups = ingredients.filter((i)=>i.ingredients)
+ 
  console.log("IngredientList created: onChange=",onChange)
  function triggerChange () {
      console.log('Ingredients trigger change!')
@@ -93,7 +96,23 @@
      focusNext = list[index-1]
  }
 
-
+ function moveIngredient (list, index, delta, newParent) {
+     console.log('moveIngredient',list, index, delta, newParent) 
+     let item = list[index]
+     list.splice(index,1);
+     if (newParent) {
+         if (newParent=='top') {
+             ingredients.push(item);
+         }
+         else {
+             newParent.push(item);
+         }
+     } else {
+         list.splice(index+delta,0,item);
+     }
+     ingredients = ingredients; // tell svelte something happened
+ }
+ 
  function toggleHighlight (ingredient) {
      if ($highlightedIngredient.highlighted != ingredient.text) {
          $highlightedIngredient.highlighted = ingredient.text
@@ -140,11 +159,15 @@
                                 <Ingredient
                                     ing="{ii}"
                                     {onOpenSubRec}
+                                    onMove="{(delta,newParent)=>moveIngredient(i.ingredients,nn,delta,newParent)}"
                                     onChange="{(v)=>changeIngredient(ii,v)}"
                                     onEnter="{(v)=>insertIngredient(v,i.ingredients,nn)}"
                                     onDelete="{()=>removeIngredient(i.ingredients,nn)}"
                                     shouldFocus="{focusNext===ii}"
                                     edit="{editMode}"
+                                    {groups}
+                                    parent={i.ingredients}
+                                    position={nn}
                                 />
                             {/each}
                             <!-- Button for adding more rows... -->
@@ -167,11 +190,15 @@
                 <Ingredient
                     {onOpenSubRec}
                     onEnter="{(v)=>insertIngredient(v,ingredients,n)}"
+                    onMove="{(delta,newParent)=>moveIngredient(ingredients,n,delta,newParent)}"
                     onChange="{(v)=>changeIngredient(i,v)}"
                     onDelete="{()=>{removeIngredient(ingredients,n)}}"
                     shouldFocus="{focusNext===i}"
                     ing="{i}"
                     edit="{editMode}"
+                    {groups}
+                    parent={ingredients}
+                    position={n}
                 />
             {/if} <!-- End if nested ingredient block -->
 	{/each} <!-- End each i in ingredients -->
