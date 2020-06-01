@@ -51,7 +51,7 @@
     {#if $connected}
         <br>
         <button
-            on:click="{()=>recipeActions.createRecipe()}">
+            on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
             New Recipe
         </button>
     {/if}
