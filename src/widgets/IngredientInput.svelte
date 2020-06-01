@@ -7,6 +7,8 @@
  export let onChange
  export let onInput
  export let shouldFocus
+ export let showAddButton=false;
+ import IconButton from './IconButton.svelte';
  let originalValue;
 
  console.log('ing:',ing)
@@ -86,20 +88,25 @@
          }
      }
  }
+
+ function doSubmit () {
+     if (onEnter) {
+         console.log('Fire on enter!');
+         let result = onEnter(parsed);
+         if (result) {
+             clear()
+         }
+         else {
+             markupAndChange();
+         }     
+     }
+ }
+ 
  function onKeypress (event) {
      // Check for "enter" key
      if (event.keyCode==13) {
-         if (onEnter) {
-             console.log('Fire on enter!');
-             let result = onEnter(parsed);
-             if (result) {
-                 clear()
-             }
-             else {
-                 markupAndChange();
-             }
-             event.preventDefault();
-         }
+         doSubmit();         
+         event.preventDefault();
      }
  }
  /* else {
@@ -184,10 +191,21 @@
  $: handleIncomingIng(ing)
 </script>
 
-<div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
+<div class:withButton="{showAddButton}">
+    <div on:blur={markupAndChange} bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
+    </div>
+    {#if showAddButton}
+        <IconButton bare={true} icon="add" on:click="{doSubmit}" />
+    {/if}
 </div>
 <style>
-
+ .withButton {
+     display: flex;
+     flex-direction: row;
+ }
+ .withButton div {
+     flex-grow: 1;
+ }
  .input {
      margin-top: var(--xsmall);
      padding-left: calc(2.4 * var(--xsmall));
