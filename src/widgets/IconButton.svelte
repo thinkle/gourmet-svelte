@@ -25,8 +25,12 @@
     class="icon" 
     style={`--fontSize:${fontSize};--iconSize:${iconSize}`}
            class:customSize={fontSize}
-    
-    on:click bind:this={b}>
+    on:click
+    on:focus
+    on:blur
+    on:keypress
+    on:keyup
+    bind:this={b}>
     <slot>
     </slot>
     <i class:customSize={iconSize}  class="material-icons">
