@@ -57,7 +57,6 @@
  setContext('toolbar',
             {
                 addItem (item) {
-                    debugger;
                     extraItems = [...extraItems,item];
                     return {
                         unmount () {
