@@ -2,15 +2,18 @@
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  export let ing
  export let edit
+ export let groups
  export let onChange
  export let onEnter
  export let onDelete
+ export let onMove
  export let shouldFocus
  export let onOpenSubRec
+ export let parent
+ export let position
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
- import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
- import IngredientInput from '../../widgets/IngredientInput.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
+ import IngredientEditor from './IngredientEditor.svelte';
  import {getContext} from 'svelte';
 
  /* Linked Recipe opener */
@@ -63,16 +66,27 @@
  /* End highlighting code */
 
 </script>
-{#if ing}
-    {#if ing.reference} <!-- Recipes as ingredients (embedded...) -->
-        <tr class="ing ingref" >
+
+    {#if ing}
+        <tr class="ing" class:ingref="{ing.reference}"
+            class:highlighted="{ing.text==$highlightedIngredient.highlighted}"
+            class:hover="{ing.text==$highlightedIngredient.hover}"
+            use:scroll="{$highlightedItem}"
+        >
             {#if edit}
-                <NumberUnitInput
-                    bind:value="{ing.amount}"
+                <IngredientEditor
                     {onChange}
+                    {onMove}
+                    {onEnter}
+                    {onDelete}
+                    {shouldFocus}
+                    {groups}
+                    {parent}
+                    {position}
+                    bind:ing="{ing}"
+                    
                 />
-                <td>FIX ME</td>
-            {:else}
+            {:else if ing.reference} <!-- Recipes as ingredients (embedded...) -->
                 <NumberUnitDisplay
                     mode="table"
                     value="{ing.amount}"
@@ -84,36 +98,7 @@
                        on:click="{handleReferenceClick}"
                     >{ing.text}</a>
                 </td>
-
-            {/if}
-        </tr>
-    {:else} <!-- Standard Ingredient -->
-        <tr class="ing"
-            class:highlighted="{ing.text==$highlightedIngredient.highlighted}"
-            class:hover="{ing.text==$highlightedIngredient.hover}"
-            use:scroll="{$highlightedItem}"
-        >
-            {#if edit}
-                <!-- Editor -->
-                <td colspan="3">
-                    <IngredientInput
-                        {onChange}
-                        {onDelete}
-                        {onEnter}
-                        {shouldFocus}  
-                        {ing}
-                    />
-                </td>
-                <td>
-                    <IconButton
-                        small="{true}"
-                        bare="{true} "
-                        icon="delete"
-                        on:click="{onDelete}"
-                    />
-                </td>
-            {:else}
-                <!-- Display -->
+            {:else} <!-- Standard Ingredient -->
                 <NumberUnitDisplay  mode="table" value={ing.amount}/>
 	        <td
                     on:click="{()=>toggleHighlight(ing)}"
@@ -124,14 +109,14 @@
                 </td>
             {/if}
         </tr>
+    {:else}
+        <tr>
+            Error: null ingredient
+        </tr>
     {/if}
-{:else}
-    <tr>
-        Error: null ingredient
-    </tr>
-{/if}
 
 <style>
+ 
  .link {
      color : --var(link);
  }
@@ -156,7 +141,6 @@
      background-color: var(--note-light-bg);
      color: var(--note-light-fg);
  }
-
 
  
 </style>
