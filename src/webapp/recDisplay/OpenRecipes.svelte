@@ -14,7 +14,7 @@
  import IconButton from '../../widgets/IconButton.svelte';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../../stores/recipeStores.js';
  function getTabTitle (id) {
-     return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || '???'; // fixme
+     return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || 'Untitled'; // fixme
  }
 
  let activeRecipeId
