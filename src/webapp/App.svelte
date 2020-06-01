@@ -64,7 +64,9 @@
      max-width: 1200px;
  }
 
-
+ :global(body) {
+     overflow-y: hidden; /* Mistake? */
+ }
 
  :root {
      /* Colors */
