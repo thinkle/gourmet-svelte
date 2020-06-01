@@ -1,6 +1,6 @@
 <script>
  import { tick } from 'svelte';
- import { fly } from 'svelte/transition';
+ import { fly,slide,fade } from 'svelte/transition';
  import { flip } from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
  import IconButton from './IconButton.svelte';
@@ -285,7 +285,7 @@
 
  let focused
  let inputRef
-
+ 
  function checkFocus () {
      focused = (inputRef==document.activeElement) 
  }
@@ -294,12 +294,12 @@
 <span class='cmb'>
     <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value}/>
     <IconButton class="icon" on:click={toggleMenu}
-                       icon={showMenu&&"arrow_drop_up"||"arrow_drop_down"}
+                       icon={showMenu&&focused&&"arrow_drop_up"||"arrow_drop_down"}
                 small={true}
                 bare={true}
     />
-    {#if showMenu && focused}
-        <ul transition:fly>            
+    {#if showMenu}
+        <ul transition:slide>            
             {#each matches as match,i (match)}
                 <li key={match} class:current={currentMatch==i}
                     on:click={()=>doSelect(match)}
