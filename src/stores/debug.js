@@ -14,13 +14,10 @@ export const stamp = new derived(
 export function registerBuild (time,module) {
      latestBuildTime.update(
          (oldTime)=>{
-             console.log('Register build at...',module,time);
              if (time > oldTime) {
-                 console.log('newest!')
                  return time
              }
              else {
-                 console.log('newly registered build not newer than',oldTime);
                  return oldTime
              }
          }
