@@ -1,6 +1,5 @@
 <script>
  export let onRecipeClick
-
  import {flip} from 'svelte/animate'
  import {fade} from 'svelte/transition'
  import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
@@ -21,8 +20,8 @@
  import RecipeSummary from './RecipeSummary.svelte';
  import FancyInput from '../../widgets/PlainInput.svelte';
  import _ from 'lodash';
- let items = []
 
+ let opened;
  function getAll () {
      if ($connected) {
          console.log('Fetch those recipes...');
@@ -93,12 +92,12 @@
         {#each $recipePage as id,n (n)}
             <tr class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
-                    onClick={()=>onRecipeClick(id)}
+                    onClick={()=>{opened=id;onRecipeClick(id)}}
                    recipe={$storedRecipes[id]}
                 />
                 <td>
                     {#if $localRecipes[id]}
-                        <IconButton icon="fullscreen" on:click={onRecipeClick(id)}/>
+                        <IconButton icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
                     {/if}
                 </td>
             </tr>
@@ -117,7 +116,7 @@
                     {#if $connected}
                         <IconButton
                             icon="add"
-                            on:click={async ()=>onRecipeClick(await recipeActions.createRecipe())}>
+                            on:click="{async ()=>onRecipeClick(await recipeActions.createRecipe().id)}">
                             Create a Recipe?
                         </IconButton>
                     {:else}
