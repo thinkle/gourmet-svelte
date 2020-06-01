@@ -5,6 +5,7 @@ import { readable,writable,get,derived } from 'svelte/store';
 import {tick} from 'svelte'
 import api from '../data/api.js';
 import deepcopy from 'deepcopy'
+import {diffRecs} from '../data/diff.js';
 const stored = writable({});
 const local = writable({});
 const activePage = writable([]);
@@ -200,11 +201,15 @@ export const recipeState = derived(
         let recState = {}
         for (let key in $local) {
             recState[key] = {} //...$state[key])}
-            if (JSON.stringify($local[key]) !== JSON.stringify($stored[key])) {
-                if (!recState[key].edited) {
-                    let o1 = $local[key];
-                    let o2 = $stored[key];
-                }
+            let diff = diffRecs($local[key],$stored[key]);
+            if (diff) {
+                // if (!recState[key].edited) {
+                //     let o1 = $local[key];
+                //     let o2 = $stored[key];
+                //     console.log(o1,'differs from',o2);
+                // }
+                recState.changes = diff;
+                console.log('Recs differ! Changed:',diff);
                 recState[key].edited = true;
             }
             else {
