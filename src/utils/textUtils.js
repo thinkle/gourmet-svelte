@@ -43,7 +43,6 @@ export function getSurroundingSentence (text, targetOffset, startAfter=-1) {
     let beginningIndex = startAfter + 1; // if we never find a sentence boundary
     for (let i=targetOffset; i>startAfter; i--) {
         if (sentenceBoundaries.indexOf(text[i])>-1) {
-            console.log('found start boundary:',i)
             beginningIndex = i+1; // override if we find a sentence boundary
             break;
         }
@@ -51,14 +50,10 @@ export function getSurroundingSentence (text, targetOffset, startAfter=-1) {
     let finalIndex = text.length; // if we never find an end boundary...
     for (let i=targetOffset; i<text.length; i++) {
         if (sentenceBoundaries.indexOf(text[i])>-1) {
-            console.log('found final boundary:',i)
             finalIndex = i+1;
             break;
         }
     }
-    //console.log('chopping at ',beginningIndex,finalIndex,text);
-    //console.log(`"${text.substr(beginningIndex,finalIndex-beginningIndex)}"`)
-    console.log('Beginning with text ',text,'\nFound sentence around',targetOffset,'and after',startAfter,':',text.substr(beginningIndex,finalIndex-beginningIndex));
     return text
         .substr(beginningIndex,finalIndex-beginningIndex)
         .replace(/^\s*|\s*$/g,''); 
