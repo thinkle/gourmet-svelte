@@ -91,7 +91,7 @@
         {#each $recipePage as id,n (n)}
             <tr class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
-                    onClick={()=>{opened=id;onRecipeClick(id)}}
+                    onClick={()=>{onRecipeClick(id)}}
                    recipe={$storedRecipes[id]}
                 />
                 <td>
