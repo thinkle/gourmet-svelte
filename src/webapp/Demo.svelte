@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
  import Tester from '../widgets/Tester.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
  import Recipe from './recDisplay/Recipe.svelte';
@@ -10,6 +11,7 @@
  import RemoteApiTester from '../data/RemoteApi.demo.svelte';
  import HighlightTest from '../extension/parser/Highlight.demo.svelte';
  import RecipeTextTest from './recDisplay/RecipeText.demo.svelte';
+ import RecipePickerTest from './recDisplay/RecipePicker.demo.svelte';
  export let demo
  
  let demos = {
@@ -20,6 +22,7 @@
      remote: RemoteApiTester,     
      recipeStores : RecStoreTester,
      highlight : HighlightTest,
+     recpicker : RecipePickerTest,
      ...widgetTestPaths,
  }
 
