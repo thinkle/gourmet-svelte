@@ -101,6 +101,8 @@ function adjustSize () {
      width : 100%
  }
  .input {
+     width : 100%
      margin: 0;
+     flex-grow: 1;
  }
 </style>
