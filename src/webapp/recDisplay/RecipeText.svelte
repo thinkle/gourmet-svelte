@@ -48,6 +48,7 @@
      font-family: var(--recipeFont);
      font-size : 1rem;
      line-height: 1.4;
+     max-width: 45em; /* readability... */
  }
 
  div :global(h1),div :global(h2),div :global(h3),div :global(h4),div :global(h5),div :global(h6) {
