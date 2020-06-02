@@ -65,7 +65,25 @@ export function addTags (tabId, tags) {
                   }});
 }
 
+function checkForPageChange(tabId, tag) {
+    let parseInfo = parsed[tabId]
+    if (!parseInfo) {return}
+    if (tag.id=='pageInfo') {
+        if (JSON.stringify(parseInfo.pageInfo) !== JSON.stringify(tag)) {
+            console.log('Page changed: ',parseInfo.pageInfo,'++>',tag);
+            console.log('Forgetting all our parse info');
+            // FIX ME: this is a bit dangerous as we could lose user
+            // data here if they accidentally navigate away in a tab,
+            // open up again, and start fresh. The *right* solution is
+            // probably to tie our import data to URLs instead of tabs
+            // anyway
+            parseInfo[tabId] = {}             
+        }
+    }
+}
+
 export function addTag (tabId, tag) {
+    checkForPageChange(tabId,tag)
     if (!parsed[tabId]) {
         parsed[tabId] = {}
     }
@@ -151,7 +169,7 @@ function listenForSidebar () {
             console.log('background page info?');
             let pageInfo = await contentGetPageInfo.send(null,sender.tab)
             console.log('Got pageInfo',pageInfo);
-            pageInfo.id = 'pageInfo';
+            pageInfo.id = 'pageInfo';            
             addTag(sender.tab.id,pageInfo);
             respondToPoll(sender.tab.id)
             return pageInfo
