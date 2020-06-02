@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS,'IL');
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
  import Ingredient from './Ingredient.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import {getContext} from 'svelte';
@@ -209,7 +209,7 @@
         
         {#if editMode}
             <tr>
-                <td colspan=3 class="new">
+                <td colspan="4" class="new">
                     <IngredientInput showAddButton="true" onEnter={(newIng)=>addIngredient(ingredients,newIng)}/>
                 </td>
             </tr>
