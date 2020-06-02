@@ -228,7 +228,9 @@
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px">
+        <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px"
+                    maxWidthRight='45rem' maxWidthLeft='45rem'
+        >
 	    <h3 slot="leftHead"> 
 	        Ingredients
                 {#if !editMode && editable}
@@ -251,7 +253,7 @@
 	        </IL>
 	    </div>		
 	    
-	    <div slot="right" bind:this={rightBlock} use:resizeOnUpdate style={`--widthRightBlock:${rightBlockWidth}px`}>
+	    <div class='rectext' slot="right" bind:this={rightBlock} use:resizeOnUpdate style={`--widthRightBlock:${rightBlockWidth}px`}>
                 <div class="topblock" style={`--widthLeftOfImage:${widthLeftOfImage}px`}>
                     <div class="props" >
                         
@@ -339,5 +341,11 @@
  }
  .images img {
      max-width: var(--max-image-width);
+ }
+ .recipe {
+     max-width: 90rem;
+     margin: auto;
+     display: flex;
+     flex-direction: column;
  }
 </style>
