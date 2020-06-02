@@ -26,7 +26,6 @@
 
 </script>
 <div>
-    <div style="font-size:5pt">BUILD_TIME</div> FOOF!
     {#if !imported}
         <p>Import {pageInfo.title}?</p>
     {/if}
