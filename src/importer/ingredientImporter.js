@@ -124,7 +124,7 @@ function handlePlainIngredient (chunk) {
 export function handleIngredientText (chunk, context, recipe, parent) {
     let ing = getIng(context,recipe,parent);
     ing.text = cleanupWhitespace(chunk.text);
-    if (ing.amount.unit) {
+    if (ing.amount && ing.amount.unit) {
         const replacer = new RegExp('^\\s*'+ing.amount.unit+'\\s+','gi');
         ing.text = ing.text.replace(replacer,'');
     }
