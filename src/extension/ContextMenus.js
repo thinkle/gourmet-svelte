@@ -1,8 +1,21 @@
 import Metadata from '../common/RecDef.js';
 import {addTags,addTag} from './parser/backgroundParser.js';
-import {contentParsePage,contentParseSelection} from './messaging/parsing.js';
+import {backgroundParseSelection,
+        contentParsePage,
+        contentParseSelection,
+       } from './messaging/parsing.js';
 /* Create context menu for marking up data */
 function init () {
+    let imageCount = 0;
+    backgroundParseSelection.receive(
+        async (tagname,sender)=>{
+            console.log('Got',tagname);
+            let tagData =  await contentParseSelection.send(tagname,sender.tab);
+            addTag(sender.tab.id,tagData)
+            return tagData;
+        },
+        true // EXTERNAL
+    );
 
     chrome.contextMenus.create({
         title:'Gourmet Parse Recipe',
@@ -13,6 +26,22 @@ function init () {
             let tags = await contentParsePage.send(undefined,tabInfo);
             addTags(tabInfo.id,tags)
         }   
+    });
+
+    chrome.contextMenus.create({
+        title : 'Gourmet: tag image',
+        id : 'gourmet-image',
+        contexts:['image'],
+        onclick : async (info, tabInfo)=>{
+            imageCount += 1;
+            addTag(tabInfo.id,
+                   {
+                       id : 'image'+imageCount,
+                       html : `<img src="${info.srcUrl}">`,
+                       tag : 'image'
+                   }
+                  );
+        }
     });
         
     // chrome.contextMenus.create({
