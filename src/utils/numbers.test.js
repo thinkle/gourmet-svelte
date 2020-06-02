@@ -139,3 +139,15 @@ it(
         expect(a.rangeAmount).toEqual(20);
     }
 );
+
+it(
+    'parse amount input edge cases',
+    ()=>{
+        let a = parseAmount('3 1/2–4 1/2'); // handle NBSP
+        console.log('got',a)
+        expect(a.amount).toEqual(4.5)
+        expect(a.rangeAmount).toEqual(3.5)
+        let b = parseAmount('3 1⁄7'); // handle NBSP
+        expect(b.amount).toEqual(3 + 1/7)
+    }
+);
