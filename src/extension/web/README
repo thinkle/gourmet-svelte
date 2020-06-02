@@ -1,3 +1,28 @@
 These files are actually served via the "web app" but from a user's
 perspective they are part of the extension, served up in iFrames as
 sidebars etc.
+
+Let's re-think this work-flow now...
+
+When we open the sidebar, we want to...
+=> See what this page is and what capabilities we have...
+=> Autoparse as best as we can...
+Once parsed:
+=> Allow Saving
+=> Show the "summary" view for convenience sake
+=> Show the full recipe
+=> Allow "tagging" the recipe to edit the import...
+
+So we have...
+-> Loading view...
+-> Autoparse
+   => If success, options to save / summarize / full
+   => Option to mark-up
+
+So we will want...
+=> Loading Screen => Sidebar.svelte
+=> Parsed Screen to display recipes => SidebarRecipeViews.svelte
+=> Tagging Screen => Tagger.svelte
+
+If we parse smoothly, we jump straight to the parsed recipe
+views. Otherwise, we go straight to the tagging screen.
