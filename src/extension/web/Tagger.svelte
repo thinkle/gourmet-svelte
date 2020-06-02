@@ -5,7 +5,9 @@
  import JsonDebug from '../../widgets/JsonDebug.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
 
- import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';
+ import {backgroundParsePage,
+        backgroundClearAll,
+        backgroundParseSelection} from '../messaging/parsing.js';
 
  let tags, tagCount;
 
@@ -37,22 +39,32 @@
  function doClearParsed () {
      console.log('Clearing parsed...');
      clearing = backgroundClearAll.send(); // silent mode
-     imported = false;
  }
 
 
 
 </script>
 
-<p>I should really implement this</p>
-<p>For now, use the right-click menu to add tags to the page.</p>
+<p>Grab that Recipe!</p>
 <IconButton icon="import_export" on:click={doParseRecipe}>Auto-Tag Recipe</IconButton>
 <IconButton icon="delete" on:click={doClearParsed}>Clear All Tags</IconButton>
 <h6>Select text, then choose:</h6>
 <ul>
     {#each RecDef.importProps as prop}
         <li>
-            <IconButton icon="label">{prop.label}</IconButton> {#if tags[prop.name]}({tags[prop.name]} already tagged){/if}
+            <IconButton
+                icon="label"
+                on:click="{
+                      ()=>parsing=backgroundParseSelection.send(
+                      prop.name
+                      )}"
+
+            >
+                {prop.label}
+            </IconButton>
+            {#if tags[prop.name]}
+                ({tags[prop.name]} already tagged)
+            {/if}
         </li>
     {/each}
 </ul>
