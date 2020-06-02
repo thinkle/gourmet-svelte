@@ -9,7 +9,6 @@
  $: {
      if (!inFocus||!editing) {
          displayValue = formatAmount(value,{unicodeFractions:!inFocus})
-         console.log('Reactive set of displayValue!',displayValue,inFocus,editing);
          if (inFocus) {
              editing = true;
          }
@@ -60,10 +59,8 @@
  }
 
  function onchange (e) {
-     console.log('onchange',e)
      let val = parseAmount(e.target.value);
      if (val != value) {
-         console.log('dispatching change event')
          dispatch('change',val);
          value = val;
      }
@@ -78,23 +75,18 @@
      if (DOWNCODES.indexOf(event.keyCode) > -1) {
          doDecrement()
      }
-     console.log('key down',event.key)
  }
 
  function oninput (event) {
      let val = parseAmount(event.target.value);
-     console.log('input: val=',val);
      if (val && (val.amount != value.amount || val.rangeAmount != value.rangeAmount)) {
          if (formatAmount(val,{unicodeFractions:false}) == event.target.value) {
-             console.log('dispatch a change event...');
              value = val;
              dispatch('change',val);
          }
          else {
-             console.log('Holding off update so as not to screw up input: ',event.target.value,'=>',val)
          }
      }
-     console.log('Value is ',event.target.value,'?')
  }
 
  
