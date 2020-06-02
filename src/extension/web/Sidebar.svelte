@@ -93,10 +93,11 @@
     {#if !tagMode}
         <Views recipe={recipe}/>
         <JsonDebug data="{recipe}"/>
-    {:else if tagMode}
-        <Tagger parsed={parsed}/>
-        Tag that baby up!
     {/if}
+{/if}
+{#if tagMode}
+    <Tagger parsed={parsed}/>
+    Tag that baby up!
 {/if}
 <JsonDebug data="{parsed}"/>
 <spacer>
