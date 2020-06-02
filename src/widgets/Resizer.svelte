@@ -30,8 +30,6 @@
      function listenMove (event) {
 	 var dx = origin.x - event.pageX;
 	 var dy = origin.y - event.pageY;
-	 console.log('move!',dx,dy)
-
 	 onDrag(dx,dy);			
      }
      window.addEventListener('mouseup', listenUp);
