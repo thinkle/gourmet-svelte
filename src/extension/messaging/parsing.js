@@ -37,7 +37,16 @@ export const contentParseSelection = new Channel({
     name:'parseSelection',
     type:'content',
     requestDef:is_in(tags),
-    responseDef:{id:'',tag:is_in(tags)}
+    responseDef:{id:'',tag:is_in(tags)},
+    chatty:true
+});
+
+export const backgroundParseSelection = new Channel({
+    name:'parseSelection',
+    type:'background',
+    requestDef:is_in(tags),
+    responseDef:{id:'',tag:is_in(tags)},
+    chatty:true
 });
 
 export const backgroundClearAll = new Channel({
