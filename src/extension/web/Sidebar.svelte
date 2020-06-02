@@ -1,49 +1,117 @@
 <script>
+ import Tagger from './Tagger.svelte';
+ import Views from './SidebarRecipeViews.svelte';
  import {onMount} from 'svelte';
- import {extensionUrl} from '../id.js';
- import {backgroundGetPageInfo} from '../messaging/parsing.js';
- import SidebarImport from './SidebarImport.svelte';
- import JsonDebug from '../../widgets/JsonDebug.svelte';
- 
- let messagePromise
+ import {listenToExtension} from '../messaging/polling.js'
+ import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';
 
- function doGet () {
-     messagePromise = backgroundGetPageInfo.send(null);
+ import IconButton from '../../widgets/IconButton.svelte';
+ import JsonDebug from '../../widgets/JsonDebug.svelte';
+ import Whisk from '../../widgets/WhiskLogo.svelte';
+
+ import {parseData} from '../../importer/importer.js';
+
+ // our data...
+ let parsed;
+ let recipe;
+
+ // our state
+ let ready;
+ let firstConnect = true;
+ // promises
+ let parsing;
+ 
+ onMount(
+     ()=>{
+         let poller
+         console.log('Set up poller!');
+         poller = listenToExtension(
+             (msg)=>{
+                 console.log('Got poller message!',msg);
+                 parsed = msg.parsed
+                 if (firstConnect) {
+                     if (Object.keys(parsed).length < 2 ) {
+                         autoparsePage()
+                     }
+                     firstConnect = false;
+                 }
+             }
+         );
+         return function cleanUp () {
+             console.log('disconnecting poller');
+             poller.disconnect();
+         }
+     }
+ );
+
+ function autoparsePage () {
+     parsing = backgroundParsePage.send(true);
  }
 
- onMount(doGet)
 
- let now = new Date().getTime()
- let longAgo = (now - BUILD_MS)/(1000 * 60)
+ $: recipe = parsed && parseData(parsed);
+ $: ready = recipe && recipe.ingredients.length > 0;
+ let tagMode = false;
+ let forceTagMode;
+ $: tagMode = forceTagMode || alreadyAutoTagged && !ready;
+ let alreadyAutoTagged = false;
+ function setTagged () {alreadyAutoTagged=true; parsing=undefined; return 'Tried to read the recipe'}
+ function turnOnTagMode () {tagMode=true; return 'Better mark it up by hand now'}
 </script>
-
-<pre>BUILD_TIME {longAgo} minutes ago</pre>
-{#if messagePromise}
-    {#await messagePromise}
-        <p>One second...</p>
-        <p>Impatient? Give it <a on:click={doGet}>a kick</a></p>
-    {:then pageInfo}
-        <SidebarImport pageInfo={pageInfo} />
-        Got pageInfo
-        <JsonDebug data="{pageInfo}"/>
-    {:catch error}
-        <p>Error connecting. Perhaps you haven't installed the
-            Chrome Extension? (in which case, I'm not sure how
-            you have arrived at this page).</p>
-        <p>Visit <a href={extensionUrl}>our extension page</a>
-            to download the latest extension</p>
-        {#if error.message.indexOf('closed before')>-1}
-            {doGet()}
-        {/if}
-        <JsonDebug data="{error}"/>
-    {/await}
+<section>
+<h2>Gourmet</h2>
+{#if parsed && parsed.pageInfo}
+    <p>Importing {parsed.pageInfo.title}</p>
 {/if}
+{#if !ready}
+    {#if parsing}
+        {#await parsing}
+            Seeing what we can read automagically...
+        {:then data}
+            Done parsing, let me read this thing...
+            <JsonDebug data="{data}"/>
+            {setTagged()}
+        {:catch err}
+            <JsonDebug data="{err}"/>
+        {/await}
+    {:else if !alreadyAutoTagged}
+        <IconButton icon="spy" on:click={autoparsePage}>Read Recipe</IconButton>
+    {:else}
+        <p>Apparently, we couldn't tag the recipe.</p>
+        {turnOnTagMode()}
+    {/if}
+{/if}
+{#if !ready && !tagMode}
+    <Whisk size="200" />
+{/if}
+{#if ready}
+    {#if tagMode}
+        <span on:click="{()=>forceTagMode=false}">Switch to Viewing Recipe</span>
+    {:else}
+        <span on:click="{()=>forceTagMode=true}">Mark Up Recipe/Edit Mark-Up</span>
+    {/if}
+    {#if !tagMode}
+        <Views recipe={recipe}/>
+        <JsonDebug data="{recipe}"/>
+    {:else if tagMode}
+        <Tagger parsed={parsed}/>
+        Tag that baby up!
+    {/if}
+{/if}
+<JsonDebug data="{parsed}"/>
+<spacer>
+</section>
 
 <style>
- :root {
-     --grey : #727272;
-     --black : #efefef;
-     --white : #121212;
-     --font : Futura, sans-serif;
+ section {
+     height: 90vh;
+     overflow-y: scroll;
  }
- </style>
+ spacer {
+     height: 10vh;
+ }
+ span:hover {
+     text-decoration: underline;
+ }
+</style>
+    
