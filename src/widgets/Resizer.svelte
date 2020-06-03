@@ -14,29 +14,29 @@
 	 x:event.clientX,
 	 y:event.clientY
      }
-     listen();
-     onStart();
+     resizing = true
+     onStart(origin);
  }
  
  
- function listen () {
-     function listenUp () {
-	 window.removeEventListener('mouseup',listenUp)
-	 window.removeEventListener('mousemove',listenMove)
-         resizing = false;
-	 onFinish();
-     }
+ function listenUp () {
+     resizing = false;
+     onFinish();
+ }
      
-     function listenMove (event) {
-	 var dx = origin.x - event.pageX;
-	 var dy = origin.y - event.pageY;
-	 onDrag(dx,dy);			
+ function listenMove (event) {
+     if (resizing) {
+         var dx = origin.x - event.pageX;
+         var dy = origin.y - event.pageY;
+         onDrag(dx,dy);
      }
-     window.addEventListener('mouseup', listenUp);
-     window.addEventListener('mousemove',listenMove);
  }
  
 </script>
+<svelte:window
+    on:mouseup="{listenUp}"
+    on:mousemove="{listenMove}"
+/>
 <div
     class="resizer"
     class:resizing
