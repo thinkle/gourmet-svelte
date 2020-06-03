@@ -88,6 +88,11 @@ export function handleChunk (chunk, context, recipe, parent) {
     else {
         chunk.handled = true; // only run once per chunk
     }
+    if (!chunk.text && !chunk.html) {
+        debugger;
+        console.log('Weird, empty chunk? IGNORING',chunk);
+        return context.localContext; // no change - reject
+    }
     if (chunk.tag=='title') {
         return handleTitle(chunk,context,recipe);
     }
@@ -129,7 +134,26 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
+export function ignoreMatchingChildren (chunk,context) {
+    if (!chunk) {return}
+    if (!chunk.tag) {return}
+    if (chunk.children) {
+        chunk.children.forEach(
+            (child)=>{
+                if (context.chunkMap[child]) {
+                    let ch = context.chunkMap[child]
+                    if (ch.tag==chunk.tag) {
+                        ch.handled = true;
+                    }
+                }
+            }
+        );
+    }
+}
+
 function handleCategory (chunk, context, recipe) {
+    ignoreMatchingChildren(chunk,context);
+    if (!chunk.text) {return context && context.localContext}
     if (!recipe.categories) {
         recipe.categories = [];
     }
@@ -139,6 +163,8 @@ function handleCategory (chunk, context, recipe) {
 }
 
 function handleYields (chunk, context, recipe) {
+    ignoreMatchingChildren(chunk,context);
+    if (!chunk.text) {return context && context.localContext}
     let amount = parseAmount(chunk.text);
     if (amount.pretext && amount.posttext) {
         cleanupWhitespace(amount.pretext +' '+amount.posttext)
@@ -159,6 +185,7 @@ function handleImage (chunk, context, recipe) {
 }
 
 function handleSource (chunk, context, recipe) {
+    ignoreMatchingChildren(chunk,context);
     let name = cleanupWhitespace(chunk.text)
     let url = getUrl(chunk,{baseUrl:context.url})
     if (!url) {
@@ -196,6 +223,8 @@ function handleText (chunk, context, recipe) {
 }
 
 function handleTitle (chunk, context, recipe) {
+    ignoreMatchingChildren(chunk,context);
+    if (!chunk.text) {return context && context.localContext}
     let title = cleanupWhitespace(chunk.text)
     if (!recipe.title) {
         recipe.title = title;
