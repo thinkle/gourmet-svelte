@@ -27,6 +27,7 @@ function getIng (context, recipe, parent) {
 }
 
 export function handleIngredientAmount (chunk, context, recipe, parent) {
+    if (!chunk.text) {return context && context.localContext}
     let ing = getIng(context,recipe,parent);
     let amount  = parseAmount(chunk.text);
     if (!ing.amount) {
@@ -43,6 +44,7 @@ export function handleIngredientAmount (chunk, context, recipe, parent) {
 }
 
 export function handleIngredientUnit (chunk, context, recipe, parent) {
+    if (!chunk.text) {return context.localContext}
     let ing = getIng(context,recipe,parent);
     if (!ing.amount) {
         ing.amount = {}
@@ -78,6 +80,7 @@ export function handleIngredient (chunk, context, recipe) {
 }
 
 export function handleIngredients (chunk, context, recipe) {
+    if (!chunk.text) {return context && context.localContext}
     chunk.text.split('\n').forEach(
         function (line) {
             if (line.replace(/^\s+|\s+$/g)) {
@@ -92,6 +95,7 @@ export function handleIngredients (chunk, context, recipe) {
 function handlePlainIngredient (chunk) {
     // fixme :)
     let text = chunk.text || chunk;
+    if (!text) {return}
     let amount = parseAmount(text);
     console.log('Got amount',amount)
     if (amount.posttext && amount.pretext) {
@@ -102,7 +106,7 @@ function handlePlainIngredient (chunk) {
         if (amount.posttext.length > amount.pretext.length) {
             extra = amount.posttext; main = amount.pretext;
         }
-        if (extra.replace(/\W+/).length == 0) {
+        if (!extra || extra.replace(/\W+/).length == 0) {
             utext = main;
         } else {
             utext = main + ' - ' + extra;
@@ -122,6 +126,7 @@ function handlePlainIngredient (chunk) {
 }
 
 export function handleIngredientText (chunk, context, recipe, parent) {
+    if (!chunk.text) {return context && context.localContext}
     let ing = getIng(context,recipe,parent);
     ing.text = cleanupWhitespace(chunk.text);
     if (ing.amount && ing.amount.unit) {
@@ -132,6 +137,7 @@ export function handleIngredientText (chunk, context, recipe, parent) {
     return undefined; // we don't propagate after the text
 }
 export function handleIngredientGroup (chunk, context, recipe) {
+    if (!chunk.text) {return context && context.localContext}
     let groupname = cleanupWhitespace(chunk.text);
     let ing = {text:groupname,ingredients:[]}
     recipe.ingredients.push(ing);
