@@ -30,7 +30,6 @@
  let highlightedItem =  derived(highlightedIngredient,($highlightedIngredient)=>$highlightedIngredient.highlighted);
 
  function scroll (node,highlighted) {
-     console.log('use scroll');
 
      return {
          update (highlighted) {
