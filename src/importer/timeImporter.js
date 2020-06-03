@@ -2,8 +2,10 @@ import {parse, end, toSeconds, pattern} from 'iso8601-duration';
 import Times from '../utils/times.js';
 import {parseAmount} from '../utils/numbers.js';
 import {cleanupWhitespace,titleCase} from '../utils/textUtils.js';
+import {ignoreMatchingChildren} from './importer.js';
 
 export function handleTime (chunk, context, recipe) {
+    ignoreMatchingChildren(chunk,context);
     console.log('handleTime!',chunk)
     let amount;
     if (!amount) {
