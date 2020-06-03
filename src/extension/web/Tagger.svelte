@@ -4,6 +4,7 @@
  import RecDef from '../../common/RecDef.js';
  import JsonDebug from '../../widgets/JsonDebug.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
+ import TagEditor from './TagEditor.svelte';
 
  import {backgroundParsePage,
         backgroundClearAll,
@@ -11,7 +12,7 @@
 
  let tags, tagCount;
 
- $: updateParsedSummary(parsed);
+ $: parsed && updateParsedSummary(parsed);
  
  function updateParsedSummary () {
      tags = {
@@ -41,8 +42,6 @@
      clearing = backgroundClearAll.send(); // silent mode
  }
 
-
-
 </script>
 
 <p>Grab that Recipe!</p>
@@ -52,6 +51,7 @@
 <ul>
     {#each RecDef.importProps as prop}
         <li>
+            {prop.label}
             <IconButton
                 icon="label"
                 on:click="{
@@ -60,10 +60,13 @@
                       )}"
 
             >
-                {prop.label}
             </IconButton>
-            {#if tags[prop.name]}
-                ({tags[prop.name]} already tagged)
+            {#if tags && tags[prop.name]}
+                <TagEditor
+                    label="{prop.label}"
+                    name="{prop.name}"
+                    {tags} {parsed}
+                />                
             {/if}
         </li>
     {/each}
