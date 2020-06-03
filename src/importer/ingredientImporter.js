@@ -61,7 +61,7 @@ export function handleIngredient (chunk, context, recipe) {
     // Begin with plain text parsing...
     let ing = handlePlainIngredient(chunk)
     let ingredients = context.ingredients || recipe.ingredients;
-    ingredients.push(ing);
+    if (ing) {ingredients.push(ing)};
     // Now override plain text parsing if need be...
     if (chunk.children && chunk.children.length > 0) {
         for (let childID of chunk.children) {
