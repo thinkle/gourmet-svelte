@@ -97,16 +97,6 @@
 </div>
 
 <style>
- blockquote {
-     visibility: hidden;
-     position: absolute;
-     z-index: 999999999;
-     background-color: pink;
-     color: navy;
- }
- div:hover blockquote {
-     visibility: visible;
- }
  .zzgrmthighlighterblock {
      display: inline-block;
      padding : 0;
@@ -124,8 +114,11 @@
  .zzgrmttag {
      transition: all 200ms;
      position: absolute;
-     right : calc(-0.85 * var(--width));
-     top : calc(-0.85 * var(--height));
+     z-index: 999999999;
+     right: 0;
+     top: 0;
+     right : 0; /* calc(-0.85 * var(--width)); */
+     top : 0; /* calc(-0.85 * var(--height)); */
  }
  .zzgrmthighlight {
      background-color: #fdf7d7;
