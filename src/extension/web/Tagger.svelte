@@ -1,6 +1,7 @@
 <script>
  export let parsed;
-
+ export let selectionActive;
+ 
  import RecDef from '../../common/RecDef.js';
  import JsonDebug from '../../widgets/JsonDebug.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
@@ -52,15 +53,17 @@
     {#each RecDef.importProps as prop}
         <li>
             {prop.label}
-            <IconButton
-                icon="label"
-                on:click="{
-                      ()=>parsing=backgroundParseSelection.send(
-                      prop.name
-                      )}"
+            {#if selectionActive}
+                <IconButton
+                    icon="label"
+                    on:click="{
+                          ()=>parsing=backgroundParseSelection.send(
+                          prop.name
+                          )}"
 
-            >
-            </IconButton>
+                >Tag
+                </IconButton>
+            {/if}
             {#if tags && tags[prop.name]}
                 <TagEditor
                     label="{prop.label}"
