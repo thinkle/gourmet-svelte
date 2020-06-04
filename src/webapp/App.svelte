@@ -28,32 +28,26 @@
  router('/rl',()=>{page = RecipeList; params={}});
  router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
  router('/demo/',(ctx)=>{
-     console.log('Demo...',ctx);
      page = Demo
      params = {
      }
  });
 
  router('/demo/:demo',(ctx)=>{
-     console.log('Demo...',ctx);
      page = Demo
      params = ctx.params
  });
  
  router.start();
  $: {
-     console.log('params:',params);
-     console.log('page:',page);
  }
  
  function detectKeyboardUser (event) {
-     console.log('Keypress',event);
      if (event.keyCode==9) {
          keyboardUser = true;
      }
  }
  function detectMouseUser () {
-     console.log('mouse!',event);
      keyboardUser = false;
  }
  
