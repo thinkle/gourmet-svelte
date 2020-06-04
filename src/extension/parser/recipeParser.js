@@ -1,5 +1,6 @@
 import {contentParsePage} from '../messaging/parsing.js';
 import {recipeSchemaSelector,importer} from './recipeSchema.js'
+import {generateParser} from './dynamicParser.js';
 
 const defaultParsers = [
     {selector:'h1',tag:'title'},
@@ -130,6 +131,7 @@ function Parser (tagger) {
 
         auto_parse : function (silent) {
             self.results = [];
+            self.parsedNodes = [];
             var domain = document.domain;
             let parsers;
             if (byDomain[domain]) {
@@ -143,16 +145,17 @@ function Parser (tagger) {
                 }
             }
             if (!parsers) {
-                parsers = defaultParsers
+                //parsers = defaultParsers
+                parsers = generateParser();
             }
             parsers.forEach((parser)=>{
-                self.maybe_add(parser)
+                self.maybe_add(parser);
             });
             if (!silent) {tagger.finishTagging()}; // async do all the dom manipulation...
             return self.results
         },
         
-        maybe_add : function ({selector, tag, ignoreSlug, xpath,detail}) {
+        maybe_add : function ({selector, tag, xpath,detail}) {
             // Make a list of elements, then move through them -- we can't iterate through xpath results
             // and change the document as we go.
             if (xpath) {
@@ -164,18 +167,28 @@ function Parser (tagger) {
                     result = iterator.iterateNext();
                 }
                 for (let result of results) {
-                    console.log('Tag',result,tag,detail)
-                    self.results.push(
-                        tagger.tagElement(result,tag,undefined,detail,true) // true flag delays actually inserting tag
-                    );
+                    if (sanityCheck(result,tag)) {
+                        let tagResult = tagger.tagElement(result,tag,undefined,detail,true) // true flag delays actually inserting tag
+                        tagResult.rule = {xpath,tag,detail}
+                        self.results.push(tagResult);
+                    } else {
+                        console.log('Sanity check refuses:',result,tag)
+                    }
+                        
                 }
             }
             if (selector) {
                 document.querySelectorAll(selector).forEach(function (el) {
-                    console.log('Tag',el,tag,detail)
-                    self.results.push(
-                        tagger.tagElement(el,tag,undefined,detail,true) // true flag delays actually inserting tag
-                    );
+                    if (sanityCheck(el,tag)) {
+                        let tagResult = tagger.tagElement(el,tag,undefined,detail,true) // true flag delays actually inserting tag
+                        tagResult.rule = {selector,tag,detail}
+                        self.results.push(
+                            tagResult
+                        );
+                    } else {
+                        console.log('Sanity check refuses:',result,tag)
+                    }
+                        
                 });
             }
         },
@@ -187,4 +200,18 @@ function Parser (tagger) {
     return self;
 }
 
+function sanityCheck (el, tag) {
+    if (['time','title','source','category','amount','unit','ingredientText'].indexOf(tag)>-1) {
+        if (!el.textContent) {
+            return false
+        }
+        if (el.textContent.length > 200) {
+            return false
+        }
+    } else {
+        return true
+    }
+}
+
+        
 export default Parser;
