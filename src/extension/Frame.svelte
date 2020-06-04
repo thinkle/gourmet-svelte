@@ -4,6 +4,7 @@
  export let id;
  import IB from '../widgets/IconButton.svelte';
  import Resizer from '../widgets/Resizer.svelte';
+ import ComponentSandbox from './parser/ComponentSandbox.svelte';
  let cookie = chrome.extension.getURL("images/cookie.png");
  let width = 300;
  let resizeWidth = '5px'; /* Hard-coded in CSS below */
@@ -28,7 +29,7 @@
      getRoot().style.width = '100%'
  }
  let url
- let port = undefined
+ let port = 57144
  $: url = port && `http://localhost:${port}/sidebar` || 'https://gourmet-svelte.netlify.app/sidebar'
  let startWidth
  let inputShield;
@@ -49,14 +50,22 @@
                 onFinish="{()=>{inputShield=false}}"
             />
             <div>
-                <div class='head'>
-                    <img style="margin-right: auto" width=50 src="{cookie}" alt="cookie">
-                    <h2>Gourmet</h2>
-                    <span style="margin-left: auto"><IB on:click="{minimize}" icon="chevron_right"></IB>
-                        <button on:click="{()=>width+=50}">+</button>
-                        <button on:click="{()=>width-=50}">-</button>
-                </div>
-                <input bind:value="{port}">
+                <ComponentSandbox>
+                    <link
+                        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons&display=swap"
+                        rel="stylesheet"
+                    />
+                    <div class='head'>
+                        <img style="margin-right: auto" width=50 src="{cookie}" alt="cookie">
+                        <span style="font-weight:bold">Gourmet</span>
+                        <span style="margin-left: auto">
+                            <IB on:click="{minimize}" icon="chevron_right"></IB>
+                            <button on:click="{()=>width+=50}">+</button>
+                            <button on:click="{()=>width-=50}">-</button>
+                        </span>
+                    </div>
+                    <input bind:value="{port}">
+                </ComponentSandbox>
                 <div>
                     <div class:inputShield></div>
                     <iframe title="Gourmet Sidebar" src={url} id="{id}">
