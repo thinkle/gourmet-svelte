@@ -1,5 +1,6 @@
 //import {sendToWeb,onConnectToPoll} from '../messaging/polling.js';
-import {sendParsedToWeb} from '../messaging/webMessages.js';
+import {sendParsedToWeb,sendSelectionToWeb} from '../messaging/webMessages.js';
+import {reportSelection} from '../messaging/uiMessages.js';
 import {backgroundParsePage,
         contentParsePage,
         backgroundGetPageInfo,
@@ -26,18 +27,31 @@ const waitingChildren = {
 }
 
 function updateSidebar (tabId) {
-    console.log('Send to web!',tabId,parsed[tabId])
     sendParsedToWeb.send(tabId,parsed[tabId]);
 }
 
 sendParsedToWeb.onWebConnect(
-    (tabid)=>updateSidebar(tabid)
+    (tabid)=>{
+        updateSidebar(tabid)
+        reportSelection.backgroundReceive(
+            tabid,
+            (message)=>{
+                sendSelectionToWeb.send(tabid,message);
+            }
+        );
+    }
 );
 sendParsedToWeb.initializeSender();
+sendSelectionToWeb.initializeSender();
+sendSelectionToWeb.onWebConnect(
+    (tabid)=>{
+        // Necessary null listener...
+        //console.log('Selection listener attached to web',tabid);
+    }
+);
 
 function addWaitingChildren (tabId, tag) {
     if (waitingChildren[tabId] && waitingChildren[tabId][tag.id]) {
-        console.log('Adding waiting children!');
         tag.children = [...tag.children,...waitingChildren[tabId][tag.id]]
     }    
 }
@@ -49,7 +63,7 @@ export function clearTags (tabId) {
 }
 
 export function addTags (tabId, tags) {
-    console.log('Adding tag (request from content)',tags);
+    //console.log('Adding tag (request from content)',tags);
     if (!parsed[tabId]) {
         parsed[tabId] = {
         }
@@ -58,7 +72,7 @@ export function addTags (tabId, tags) {
         addWaitingChildren(tabId,tag);
         parsed[tabId][tag.id]=tag;       
     }
-    console.log(`Done adding ${tags.length} tags to parsed: `,parsed[tabId]);
+    //console.log(`Done adding ${tags.length} tags to parsed: `,parsed[tabId]);
     updateSidebar(tabId,
                   {lastRequest : { // second argument currently ignored
                       action : 'addTags',
