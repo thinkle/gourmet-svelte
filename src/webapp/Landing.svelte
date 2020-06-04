@@ -54,6 +54,7 @@
 
 
  let extraItems = []
+ let hide;
  setContext('toolbar',
             {
                 addItem (item) {
@@ -73,6 +74,12 @@
                         }
                     }
                 },
+                hideWhenLoggedIn () {
+                    hide = true
+                },
+                showWhenLoggedIn () {
+                    hide = false
+                }
             }
  );
  console.log('set toolbar context');
@@ -81,7 +88,7 @@
 </script>
 
 {#if isLoggedIn}    
-    <nav>
+    <nav class:hide>
         <div>Hello, {username}
             <slot name="leftnav"/>
         </div>
@@ -122,6 +129,9 @@
 
 
 <style>
+ .hide {
+     display: none;
+ }
  article {
      display: flex;
      align-items: center;
