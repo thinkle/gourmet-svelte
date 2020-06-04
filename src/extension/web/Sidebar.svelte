@@ -91,13 +91,15 @@
     <h2>
         Gourmet
     </h2>
+    
+    <div class="tabs" >
+        <span class:active="{tagMode}" on:click="{()=>tagMode=true}">Tag</span>
+        <span class:active="{!tagMode}" on:click="{()=>tagMode=false}">View</span>
+    </div>
+
     {#if parsed && parsed.pageInfo}
         <p>Importing {parsed.pageInfo.title}</p>
     {/if}
-    <div class="tabs" >
-    <span class:active="{tagMode}" on:click="{()=>tagMode=true}">Tag</span>
-    <span class:active="{!tagMode}" on:click="{()=>tagMode=false}">View</span>
-    </div>
 
     {#if parsing}
         {#await parsing}
@@ -119,7 +121,7 @@
     {/if}
     {#if tagMode}
         Tag that baby up!
-        <Tagger parsed={parsed}/>
+        <Tagger {selectionActive} parsed={parsed}/>
     {:else}
         View that thing!
         <Views recipe={recipe}/>
