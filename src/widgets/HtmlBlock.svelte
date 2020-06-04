@@ -49,7 +49,6 @@
  //onMount(addToRoot)
  function addSelfToDom (node,i) {
      let target = components[i].node;
-     console.log('Adding node to our dom',node,target)
      target.parentElement.insertBefore(node,target);
      target.remove();
  }
