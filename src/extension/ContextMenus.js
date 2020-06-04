@@ -23,7 +23,7 @@ function init () {
         contexts:['page'],
         onclick: async (info,tabInfo)=>{
             console.log('Clicked "Parse"!')
-            let tags = await contentParsePage.send(undefined,tabInfo);
+            let tags = await contentParsePage.send(false,tabInfo);
             addTags(tabInfo.id,tags)
         }   
     });
