@@ -8,7 +8,7 @@ if (document.getElementById(id)) {
 } else {
     const frame = new Frame(
         {
-            target : document.body,
+            target : document.body || document.querySelector('div'),
             props:{id:id},
             intro:true        
         }
