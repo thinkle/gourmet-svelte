@@ -4,6 +4,7 @@ import TimerTests from './Timer.demo.svelte';
 import IngredientInput from './IngredientInput.demo.svelte';
 import SVG from './SVGs.demo.svelte';
 import MenuDemo from './Menu.demo.svelte';
+import TabsDemo from './Tabs.demo.svelte';
 
  export default {
      'inputs':InputTests,
@@ -11,4 +12,5 @@ import MenuDemo from './Menu.demo.svelte';
      'ingredient':IngredientInput,
      'svg':SVG,
      'menu':MenuDemo,
+     'tabs':TabsDemo,
  }
