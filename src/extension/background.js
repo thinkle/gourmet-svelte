@@ -22,3 +22,19 @@ console.log('We made context menus...')
 //     },
 //     5000
 // );
+// import {hello} from './messaging/uiMessages.js';
+// console.log('Try to connect in 5...')
+// setTimeout(
+//     ()=>{
+//         hello.backgroundReceive(
+//             580,
+//             (message)=>{
+//                 console.log('Got message from 580:',message);
+//             }
+//         );},
+//     5000
+// );
+// setInterval(()=>{
+//     console.log('send a message back to content?')
+//     hello.send('Send a message back to content?',580);
+// },5500);
