@@ -1,6 +1,49 @@
 import Parser from './parser/recipeParser.js';
 import tagger from './parser/tagger.js';
 const parser = Parser(tagger);
+import {
+    //hello,
+    reportSelection
+} from './messaging/uiMessages.js';
+// console.log('Set up hello listener?');
+// hello.contentReceive(
+//     (msg)=>{
+//         console.log('Got message from content!',msg);
+//     }
+// );
+
+// hello.onPortConnect(
+//     ()=>{
+//         console.log("hello connected! Let's send a message on every click");
+//         document.addEventListener(
+//             'click',
+//             (event)=>{
+//                 console.log('User clicked, send it along...');
+//                 hello.send({event:'click',x:event.clientX,y:event.clientY})
+//             }
+//         );
+//     }
+// );
+
+// This call opens the port
+reportSelection.contentReceive(
+    (msg)=>{
+        //console.log('Why is background telling US about selections anyway?',msg)
+    }
+);
+reportSelection.onPortConnect(
+    ()=>{
+        //console.log('CONTENT got onPortConnect for selection');
+        document.addEventListener(
+            'selectionchange',
+            ()=>{
+                let textSelected = !document.getSelection().isCollapsed
+                reportSelection.send(textSelected);
+            }
+        );
+    }
+);
+
 
 console.log('Extension last built at BUILD_TIME')
 
