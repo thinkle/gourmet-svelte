@@ -11,6 +11,7 @@ import {backgroundAddChild} from '../messaging/tags.js';
 import {contentParseSelection,
         contentGetPageInfo,
         contentClearAll,
+        contentClearMany,
         contentClearOne} from '../messaging/parsing.js';
 let highlights = {}
 window.highlights = highlights
@@ -63,7 +64,7 @@ var Tagger = function () {
                     targetContent:content,
                     name:tagname,
                     detail:detail,
-                    address:nodeAddress,
+                    //address:nodeAddress, 
                     id:id
                 }
             })
@@ -95,7 +96,9 @@ var Tagger = function () {
     }
 
     function clear (id) {
-        highlights[id].remove();
+        if (highlights[id]) {
+            highlights[id].remove();
+        }
         return true;
     }
 
@@ -145,6 +148,9 @@ var Tagger = function () {
             }
         );
         contentClearOne.receive((id)=>clear(id));
+        contentClearMany.receive(
+            (ids)=>ids.map((id)=>clear(id))
+        );
     }
 
     function finishTagging () {
