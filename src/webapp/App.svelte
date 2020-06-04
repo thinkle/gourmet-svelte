@@ -15,6 +15,7 @@
  let name = 'Gourmet';
  let page;
  let params = {};
+ let keyboardUser;
  router('/',()=>{page = MainView; params={}});
  router('/admin',()=>{page = Admin; params={}});
  router('/rec/:id',(ctx)=>{
@@ -29,23 +30,36 @@
  router('/demo/',(ctx)=>{
      console.log('Demo...',ctx);
      page = Demo
-     params = {}
-              });
-
-     router('/demo/:demo',(ctx)=>{
-         console.log('Demo...',ctx);
-         page = Demo
-         params = ctx.params
-     });
-
-     router.start();
-     $: {
-         console.log('params:',params);
-         console.log('page:',page);
+     params = {
      }
+ });
+
+ router('/demo/:demo',(ctx)=>{
+     console.log('Demo...',ctx);
+     page = Demo
+     params = ctx.params
+ });
+ 
+ router.start();
+ $: {
+     console.log('params:',params);
+     console.log('page:',page);
+ }
+ 
+ function detectKeyboardUser (event) {
+     console.log('Keypress',event);
+     if (event.keyCode==9) {
+         keyboardUser = true;
+     }
+ }
+ function detectMouseUser () {
+     console.log('mouse!',event);
+     keyboardUser = false;
+ }
+ 
 </script>
 
-<div>
+<div class:keyboardUser>
     <Landing>
         <!-- <span slot="rightnav">
              {#if page!==MainView}<a href="/">Recipe List</a>{/if}
@@ -54,7 +68,12 @@
     </Landing>
     <div style="position: fixed; z-index: 99; bottom: 0; right: 0; font-size: 8pt;">{$stamp}</div>
 </div>
+<svelte:window on:keyup={detectKeyboardUser} on:mousedown={detectMouseUser}/>
+
 <style>
+ @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300,400,500,600,700,900;0,300,400,500,700,900;1,400;1,700&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+
  p {
      font-size : var(--small);
      font-family: var(--brandFont);
@@ -96,6 +115,12 @@
      --xsmall : 0.6rem;
      /* Sizes */
      --navHeight: 30px;
+ }
+ :global(*) {
+     outline-color: transparent;
+ }
+ .keyboardUser :global(*) {
+     outline-color : var(--focus-border);
  }
 
  
