@@ -72,6 +72,21 @@ export const contentClearOne = new Channel({
     responseDef:true,
 });
 
+export const backgroundClearMany = new Channel({
+    name:'clearMany',
+    type:'background',
+    requestDef:[],
+    responseDef:true,
+});
+
+export const contentClearMany = new Channel({
+    name:'clearMany',
+    type:'content',
+    requestDef:[],
+    responseDef:true,
+});
+
+
 export const backgroundClearOne = new Channel({
     name:'clearOne',
     type:'background',
