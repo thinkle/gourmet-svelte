@@ -18,32 +18,8 @@ export function ChannelToWeb  ({name, messageDef={},chatty=true}) {
             console.log(name,'Setting up receiver for messages...',port.sender);
         }
         port.onMessage.addListener(receiveCallback)
-        // port.onMessage.addListener(
-        //     (msg)=>{
-        //         if (chatty) {
-        //             console.log('received ',msg,'at port',port);
-        //         }
-        //         receiveCallback(msg);
-        //     }
-        // );
         return port.disconnect
     }
-    // In a world where we receive all the messages and have to filter...
-    // function receive (receiveCallback, tab) {
-    //     let port = chrome.runtime.connect(
-    //         chromeExtensionId,{name}
-    //     );
-    //     port.onMessage.addListener(
-    //         function (message) {
-    //             if (message.tab==tab) {
-    //                 receiveCallback(message.message);
-    //             }
-    //             else if (chatty) {
-    //                 console.log('Ignoring message for other tab: ',message,'we are tab ',tab);
-    //             }
-    //         }
-    //     )
-    // }
 
     function initializeSender () {
         initialized = true;
@@ -64,7 +40,6 @@ export function ChannelToWeb  ({name, messageDef={},chatty=true}) {
     }
 
     function send (tab, message) {
-        debugger;
         tab = Number(tab);
         if (isNaN(tab)) {
             throw `Tab must be a numeric ID, but we got ${tab}`
@@ -93,14 +68,6 @@ export function ChannelToWeb  ({name, messageDef={},chatty=true}) {
         onConnect = handler;
     }
     
-    // function send (message, tab) {
-    //     if (!sendingPorts[tab.id]) {
-    //         setupSendingPort(tab.id);
-    //     }
-    //     validate( );
-        
-    // }
-
     return {
         send,initializeSender,receive,onWebConnect,ports
     }
