@@ -4,6 +4,8 @@
  import Recipe from '../../webapp/recDisplay/Recipe.svelte'
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
  import IconButton from '../../widgets/IconButton.svelte';
+ import Tabs from '../../widgets/Tabs.svelte';
+ import Tab from '../../widgets/Tabs.svelte';
  let mode = 'full'
 
  // promise
@@ -14,11 +16,11 @@
  }
 
 </script>
-<div>
-    <span class:active="{mode=='full'}" on:click="{()=>{mode='full'}}">Whole Recipe</span>
-    <span class:active="{mode=='summary'}" on:click="{()=>{mode='summary'}}">Summary</span>
-    <span class="important" class:active="{mode=='save'}" on:click="{()=>{mode='save'}}">Save</span>
-</div>
+<Tabs sticky="{true}" top="2.2em">
+    <Tab active="{mode=='full'}" on:click="{()=>{mode='full'}}">Whole Recipe</Tab>
+    <Tab active="{mode=='summary'}" on:click="{()=>{mode='summary'}}">Summary</Tab>
+    <Tab active="{mode=='save'}" on:click="{()=>{mode='save'}}"><span class="important">Save</span></Tab>
+</Tabs>
 {#if mode=='full'}
     <Recipe editable={false} rec={recipe}/>
 {:else if mode=='summary'}
@@ -39,17 +41,7 @@
     {/if}
 {/if}
 <style>
- span {
-     display: inline-block;
-     padding : 5px;
-     font-weight: 500;
-     border-bottom: 1px solid var(--light-underline);
- }
- span.active {
-     font-weight: 900;
-     border-bottom: 3px solid var(--heavy-underline);
- }
  .important {
-     border: 1px solid var(--light-underline);
+     color: #444;
  }
 </style>
