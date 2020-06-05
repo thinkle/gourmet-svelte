@@ -74,8 +74,8 @@
         on:keyup="{oninput}" bind:value={displayValue} width=2 on:keydown={onkey} on:change={onchange} >
     {#if showPlusMinusButtons}
         <div class="minibuttons">
-            <IB on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IB>
-            <IB on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IB>
+            <IB compact="{true}" fontSize="0.8rem" on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IB>
+            <IB compact="{true}" fontSize="0.8rem" on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IB>
         </div>
     {/if}
 </span>

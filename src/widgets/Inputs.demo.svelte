@@ -12,6 +12,8 @@
  import RichText from './RichText.svelte';
  import NumberUnitInput from './NumberUnitInput.svelte';
  import NumberUnitDisplay from './NumberUnitDisplay.svelte';
+ import IconButton from './IconButton.svelte';
+ import Button from './Button.svelte';
 
  let testStringVal = '' 
  let testArrayString = ['Apple']
@@ -41,6 +43,8 @@
 
 </script>
 <Tester name="Input Tests" initialShow="{initialShow}" >
+    <Button>This is a button</Button>
+    <IconButton icon="chevron_left">This is an Icon Button</IconButton>
     <Tester name="NumberUnitInput"  initialShow="{initialShow}">
         <br>Multiply by: <AmountInput bind:value={$multiplier} showPlusMinusButtons={true}/>
         <br>Input: <NumberUnitInput bind:value={amount}/>
