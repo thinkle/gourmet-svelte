@@ -3,7 +3,11 @@ import {parseAmount} from '../utils/numbers.js';
 import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup,handleIngredients} from './ingredientImporter.js';
 import {handleTime} from './timeImporter.js'
+
+import sanitizeHtml from 'sanitize-html';
+
 export function preprocessChunks (parsedChunks, context) {
+    // Remove any duplicates...
     parsedChunks.sort(
         (a,b)=>{
             return (a.address>b.address&&1
@@ -16,6 +20,16 @@ export function preprocessChunks (parsedChunks, context) {
     parsedChunks = parsedChunks.map(
         (o)=>({...o})
     );
+    let uniqueOnly = [];
+    for (let chunk of parsedChunks) {
+        if (uniqueOnly.length==0) {uniqueOnly.push(chunk)}
+        else if (uniqueOnly[uniqueOnly.length-1].address != chunk.address) {
+            uniqueOnly.push(chunk)
+        } else {
+            console.log('IGNORING DUPLICATE CHUNK',chunk,'duplicates',uniqueOnly[uniqueOnly.length-1]);
+        }
+    }
+    parsedChunks = uniqueOnly;
     findChildren(parsedChunks)
     context.chunkMap = {}
     parsedChunks.forEach(
@@ -127,6 +141,7 @@ export function handleChunk (chunk, context, recipe, parent) {
         return handleIngredientGroup(chunk,context,recipe,parent);
     }
     else if (chunk.tag=='ingredients') {
+        debugger;
         return handleIngredients(chunk,context,recipe,parent);
     }
     else if (chunk.tag=='image') {
@@ -134,7 +149,7 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
-export function ignoreMatchingChildren (chunk,context) {
+export function ignoreMatchingDescendants (chunk,context) {
     if (!chunk) {return}
     if (!chunk.tag) {return}
     if (chunk.children) {
@@ -144,6 +159,7 @@ export function ignoreMatchingChildren (chunk,context) {
                     let ch = context.chunkMap[child]
                     if (ch.tag==chunk.tag) {
                         ch.handled = true;
+                        ignoreMatchingDescendants(ch,context); // recursive!
                     }
                 }
             }
@@ -152,7 +168,7 @@ export function ignoreMatchingChildren (chunk,context) {
 }
 
 function handleCategory (chunk, context, recipe) {
-    ignoreMatchingChildren(chunk,context);
+    ignoreMatchingDescendants(chunk,context);
     if (!chunk.text) {return context && context.localContext}
     if (!recipe.categories) {
         recipe.categories = [];
@@ -163,7 +179,7 @@ function handleCategory (chunk, context, recipe) {
 }
 
 function handleYields (chunk, context, recipe) {
-    ignoreMatchingChildren(chunk,context);
+    ignoreMatchingDescendants(chunk,context);
     if (!chunk.text) {return context && context.localContext}
     let amount = parseAmount(chunk.text);
     if (amount.pretext && amount.posttext) {
@@ -185,7 +201,7 @@ function handleImage (chunk, context, recipe) {
 }
 
 function handleSource (chunk, context, recipe) {
-    ignoreMatchingChildren(chunk,context);
+    ignoreMatchingDescendants(chunk,context);
     let name = cleanupWhitespace(chunk.text)
     let url = getUrl(chunk,{baseUrl:context.url})
     if (!url) {
@@ -206,24 +222,17 @@ function handleSource (chunk, context, recipe) {
 }
 
 function handleText (chunk, context, recipe) {
-    if (chunk.children && chunk.children.length) {
-        for (let childId of chunk.children) {
-            let child = context.chunkMap[childId]
-            if (child.tag=='text') {
-                // don't bother with nested text children -- we'll just let the parent handle it
-                child.handled = true;
-            }
-            // FIXME : Add header handling?
-        }
-    }
+    ignoreMatchingDescendants(chunk,context);
     recipe.text.push({
-        body:chunk.html,
+        body:sanitizeHtml(chunk.html,
+                          {allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']}
+                         ),
         header:chunk.detail||getHeader(chunk,recipe),
     });
 }
 
 function handleTitle (chunk, context, recipe) {
-    ignoreMatchingChildren(chunk,context);
+    ignoreMatchingDescendants(chunk,context);
     if (!chunk.text) {return context && context.localContext}
     let title = cleanupWhitespace(chunk.text)
     if (!recipe.title) {
@@ -236,12 +245,8 @@ function handleTitle (chunk, context, recipe) {
 
 function getHeader (chunk,recipe) {
     // implement?
-    if (recipe.text.length) {
-        return ''
-    }
-    else {
-        return 'Instructions'
-    }
+    let el = getElement(chunk,{selector:'h1,h2,h3,h4,h5,h6'});
+    return el && el.textContent || ''
 }
 
 function getElement (chunk, {selector, baseUrl}={}) {
