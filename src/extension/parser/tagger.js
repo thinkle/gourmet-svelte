@@ -6,6 +6,7 @@
  * @license GPL
  */
 import Highlight from './Highlight.svelte';
+import {getNodeAddress} from './nodeAddress.js';
 import {tagClassname} from './metadata.js';
 import {backgroundAddChild} from '../messaging/tags.js';
 import {contentParseSelection,
@@ -16,41 +17,12 @@ import {contentParseSelection,
 let highlights = {}
 window.highlights = highlights
 
+
 var Tagger = function () {
     var markupId = 0;
     var salt = 'oiweras0';
     var delayed = []
     
-    function getNodePath (node, addressList) {
-        // Given a node with parents, we crawl the whole document...
-        // and return our position...
-        if (!addressList) {addressList = []}
-        var parent = node.parentElement
-        if (!parent) {
-            return addressList
-        }
-        var idx = Array.prototype.indexOf.call(parent.childNodes,node)
-        if (idx===undefined) {
-            addressList.push(99999);
-        }
-        addressList.push(idx);
-        // Go up a step...
-        return getNodePath(parent,addressList);
-    }
-
-    function getNodeAddress (node) {
-        var path = getNodePath(node);
-        path.reverse();
-        path = path.map(
-            (i)=>{
-                while ((''+i).length < 5) {
-                    i = '0' + i;
-                }
-                return i
-            });
-        return path.join('-');
-    }
-
     function tagElement (el, tagname, content, detail, delayHighlight=false) {
         markupId += 1;
         let nodeAddress = getNodeAddress(el)
