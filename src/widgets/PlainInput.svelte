@@ -6,6 +6,7 @@
  export function focus () {
      ref.focus();
  }
+ export let shouldFocus=false;
  
  let ref;
  let fontSize;
@@ -85,8 +86,8 @@ function adjustSize () {
      }
  }
 
-     onMount(adjustSize)
-
+ onMount(adjustSize)
+ $: shouldFocus && ref && focus()
 </script>
 
 {#if oneLiner && false}
@@ -104,5 +105,15 @@ function adjustSize () {
      width : 100%;
      margin: 0;
      flex-grow: 1;
+     border: var(--inputBorder);
+     border-right: none;
+     border-left: none;
+     border-top: none;
+     border-radius: var(--inputRadius);
  }
+ .input:focus {
+    border-width: 3px;
+ }
+ 
+ 
 </style>
