@@ -1,14 +1,14 @@
 <script>
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
  import {onMount} from 'svelte';
+ import Resizer from './Resizer.svelte';
  export let height;
- export let growRight = false;
- export let growLeft  = false;
- export let growEven = false;
- export let leftBasis = '';
- export let rightBasis = '';
- export let stackSidesAt = 500;
+ export let stackSidesAt = 700;
+ export let maxWidth = 1200;
  let stackMode = false;
  let ref
+ export let leftWidth=300
+ let initialLeftWidth
  import {watchResize} from 'svelte-watch-resize';
 
  onMount(
@@ -30,13 +30,12 @@
 </script>
 
 <div use:watchResize={handleResize} bind:this={ref} class="top"
-     style={`--height:${height};--leftBasis:${leftBasis};--rightBasis:${rightBasis}`}
-     class:growRight
-     class:growLeft
-     class:growEven
+     style="{`--height:${height};
+            --max-width:${maxWidth};
+           `}"
      class:stackMode
 >
-    <div class="side l">
+    <div class="side l" style="{`width:${leftWidth}px`}">
 	<div class="head scrollHead">
 	    <slot name="leftHead">
 	    </slot>
@@ -46,6 +45,10 @@
 	</div>
 	
     </div>
+    <Resizer
+        onStart="{({x,y})=>initialLeftWidth=leftWidth}"
+        onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
+    />
     <div class="side r">
 	<div class="head scrollHead">
 	    <slot name="rightHead">
@@ -73,44 +76,29 @@
  .side .scrollBox {
      flex-grow: 1;
  }
- .growEven .l,.growLeft .l {
-     flex-grow: 1
- }
- .growEven .r, .growRight .r {
-     flex-grow: 1;
- }
- .growLeft .r {
-     flex-shrink : 2;
- }
- .growRight .l {
-     flex-shrink: 2;
- }
- .l {
-     flex-basis: var(--leftBasis);
- }
- .r {
-     flex-basis: var(--rightBasis);
- }
  .top {
      display: flex;
-     background-color: 100px;
+     max-width: calc(var(--maxWidthRight) + var(--maxWidthLeft));
+     margin: auto;
  }
  .top.stackMode {
      display: block;
+     overflow-y: scroll;
  }
  .scrollBox {
      overflow-y: scroll; 
  }
  .l {
-
      height: var(--height);
+     max-width: var(--maxWidthLeft);
  }
  .r {
-
      height: var(--height);
+     max-width: var(--maxWidthRight);
  }
  .stackMode .l,.stackMode .r {
      height: auto;
  }
  
 </style>
+.
