@@ -129,10 +129,13 @@
  function hoverOff (ingredient) {
      $highlightedIngredient.hover = undefined
  }
- function addIngredient (list=ingredients,ingredient={text:'',amount:{}}) {
+ function addIngredient (list=ingredients,ingredient={text:'',amount:{}},focus=false) {
      list.push(ingredient);
      ingredients = ingredients;
      triggerChange();
+     if (focus) {
+         focusNext = ingredient
+     }
      return true; // when used as a direct handler, tells us to clear entry after adding.
  }
 
@@ -149,12 +152,14 @@
                     class:ing={!i.ingredients} class:grouphead={i.ingredients}>
                     <td colspan="4">
                         {#if editMode}
-                            <FancyInput on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
+                            <div style="display: flex">
+                            <FancyInput shouldFocus={focusNext==i} on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
                             {#if (i.ingredients.length==0)}
                                 <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange() }}">
                                     <i class="material-icons" >delete</i>
                                 </button>
                             {/if}
+                            </div>
                         {:else}
                             <h3>{i.text}</h3>
                         {/if}
@@ -219,7 +224,7 @@
                 </td>
                 <td>
                     <IconButton icon="add" bare="true"
-                                on:click="{addIngredient}"
+                                on:click="{()=>addIngredient(ingredients,{text:'',amount:{}},true)}"
                                 type="icon">
                     </IconButton>
                 </td>
@@ -229,7 +234,9 @@
                         bare='true'
                         on:click="{()=>{
                                   addIngredient(
-                                      {text:'',ingredients:[] }
+                                      ingredients,
+                                      {text:'',ingredients:[] },
+                                      true // focus
                                   )
                                   }}"
                     >
@@ -265,15 +272,6 @@
      max-width: var(--idealWidth);
      min-width: calc(var(--idealWidth)/2)
  }
- .ing > :global(td) {
-     border-bottom: 1px solid var(--light-underline);
- }
- .ing:last-child > :global(td) {
-     border-bottom: none;
- }
- .ing :global(.amount,.unit,.item) {
-     font-family: var(--recipeFont);     
- }
  .grouphead {
      font-weight: bold;
  }
@@ -303,8 +301,10 @@
  .inglist .inglist {
      border-left : 1px solid var(--light-underline);
      border-bottom : 1px solid var(--light-underline);
-     padding-left: 3px;
-     padding-bottom: 3px;
+ }
+ .inglist .inglist > :global(tr td:first-child),
+ .inglist .inglist > :global(tbody td:first-child) {
+     padding-left: 13px;
  }
  .new {
      color: var(--grey);
