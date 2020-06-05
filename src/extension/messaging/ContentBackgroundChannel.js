@@ -1,8 +1,10 @@
 // Two-way port between content and background
 
 export function ContentBackgroundChannel ({name, messageDef={}, chatty=true,
-                                           reconnect=true
+                                           //reconnect=true
                                           }) {
+    let reconnect =  false;  // Reconnect was a BAD idea (extension ends up gobbling CPU -- either fix or forget it)
+
     let ports = {}
     let initialized
     let onConnect;
