@@ -55,5 +55,29 @@
      margin-bottom: 3px;
      border-bottom: 1px solid var(--light-underline);
  }
+ div :global(ol) {
+     list-style: none;
+     counter-reset: my-awesome-counter;
+     padding-left: 2rem;
+ }
+
+ div :global(ol li) {
+     margin-top: 1rem;
+     counter-increment: my-awesome-counter;
+     position: relative;
+ }
+
+ div :global(ol li::before) {
+     content: counter(my-awesome-counter);
+     color: white;
+     background-color: var(--accent-bg);
+     font-weight: var(--accent-fg);
+     position: absolute;
+     left: -2rem;
+     font-size: 1.5rem;
+     border-radius: 3px;
+     padding: 4px;
+ }
+
  
 </style>
