@@ -1,5 +1,6 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS,'Ing',);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import Button from './Button.svelte';
  let b;
  export let invisible=false; // useful if we want to take up the normal space in our layout whether active or not
  export let inverse=false;
@@ -10,21 +11,35 @@
  export let iconSize=undefined;
  export let fontSize=undefined;
  export let small=undefined;
+ export let left=false;
+ export let compact=false;
+ 
  export function focus () {
      b.focus()
  }
+ function getStyle () {
+     if (iconSize) {
+         return `font-size: ${iconSize};`
+     }
+     else if (fontSize) {
+         return `font-size: ${fontSize};`
+     } else if (small) {
+         return 'font-size: 12px';
+     } else {
+         return ''
+     }
+ }
 </script>
 
-<button
-    class:bare
-    class:inverse
-    class:invisible
-    class:toggle
-    class:toggled
-    class:small
-    class="icon" 
-    style={`--fontSize:${fontSize};--iconSize:${iconSize}`}
-           class:customSize={fontSize}
+<Button
+    {bare}
+    {inverse}
+    {invisible}
+    {toggle}
+    {toggled}
+    {small}
+    {compact}
+    rtl="{left}"
     on:click
     on:focus
     on:blur
@@ -33,62 +48,22 @@
     bind:this={b}>
     <slot>
     </slot>
-    <i class:customSize={iconSize}  class="material-icons">
+    <i class="material-icons"
+       class:compact
+       class:left
+       style="{getStyle(small,iconSize,fontSize)}" >
         {icon}
     </i>
-</button>
+</Button>
 <style>
- .inverse {
-     background-color: #232323;
-     color: white;
+ i {
+     margin-left: 6px;
  }
- button {
-     font-family : var(--uiFont);
-     display: inline-flex;
-     justify-content: center;
-     align-content: center;
-     border-radius: 10px;
-     transition: all 300ms;
+ i.left {
+     margin-left: 0px;
+     margin-right: 6px;
  }
- 
- button.customSize {
-     font-size: var(--fontSize);
+ i.compact {
+     margin: 0;
  }
- 
- i.customSize {
-     font-size: var(--iconSize) 
- }
- button.small i {
-     font-size: var(--small);
- }
- 
- button.bare {
-     border: none;
-     background-color: transparent;
- }
-
- button.icon:hover {
-     background-color: var(--light-bg);
-     color: var(--light-fg);
- }
- button.icon:focus {
-     border: 1px solid #7474f4;
- }
- button.toggle {
-     transition: all 0.8s;
- }
-
- button.toggled {
-     background-color: var(--medium-bg);
-     color: var(--medium-fg);
-     font-weight: 500;
- }
- button.active-toggle {
-     background-color: #747474;
-     color: white;
- }
- .invisible {
-     visibility: hidden;
- }
-
 </style>
