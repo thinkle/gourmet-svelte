@@ -2,6 +2,7 @@
  import Tag from './Tag.svelte';
  import {backgroundUpdateTag,backgroundRemoveTag} from '../messaging/tags.js';
  import ComponentSandbox from './ComponentSandbox.svelte';
+ import Moveable from 'svelte-moveable';
  import {onMount} from 'svelte';
  export let name='?';
  export let detail='';
@@ -71,7 +72,7 @@
  
  $: { if (detail) {updateDetailDebounced()}}
 
- let tagWidth
+                               let tagWidth
  let tagHeight
 
  function onResize(w,h) {
@@ -83,13 +84,16 @@
      return `--width:${tagWidth}px;--height:${tagHeight}px`
  }
 
+
 </script>
 
-<div class:zzgrmthighlighterblock={true} class={tagClassname} class:makeWay class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=true} on:blur={()=>makeWay=false}>
+<div class:zzgrmthighlighterblock={true} class={tagClassname} class:makeWay="{true}" class:zzgrmthighlight id={id} style={getStyle(tagWidth,tagHeight)} on:click={()=>makeWay=!makeWay}>
     <span contenteditable={zzgrmthighlight} on:input={updateTextDebounced}  bind:this={ref} on:blur={()=>makeWay=false}>
     </span>
     <div bind:this={tagElement} class="zzgrmttag">
-        <ComponentSandbox onResize={onResize}
+        <ComponentSandbox
+            onResize={onResize}
+            
         >
             <Tag  bind:name={name}  detail={detail} onRemove={doRemove}/>
         </ComponentSandbox>
