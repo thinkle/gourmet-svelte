@@ -254,12 +254,9 @@ var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:
 
 var rangeMatcher = new RegExp(rangeMatcherString,'i')
 var groupsInNumMatcher = ' '.match(new RegExp(numMatchString+'|\\s')).length
-console.log('numMatcher has ? groups',groupsInNumMatcher);
 var groupsInRangeMatcher = ' '.match(new RegExp(rangeMatcherString+'|\\s')).length
-console.log('rangeMatcher has ? groups',groupsInRangeMatcher)
 //var firstRangeGroup = 1
 //var secondRangeGroup = 1 + groupsInNumMatcher + 1 + 1 + 1  // container group for first number + all the number groups for that number + range group + 1 + 1
-//console.log('!!!Range matcher second range group is #',secondRangeGroup)
 function incrementOld (value) {
      var nextOne = false;
      if (value < 1) {
