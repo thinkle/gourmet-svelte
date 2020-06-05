@@ -105,16 +105,22 @@
     >
     {#if showPlusMinusButtons}
         <div class="minibuttons">
-            <IB on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IB>
-            <IB on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IB>
+            <IB fontSize="0.8rem" compact="{true}" on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IB>
+            <IB fontSize="0.8rem" compact="{true}" on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IB>
         </div>
     {/if}
 </span>
 
 
 <style>
- input {width: 6rem;}
- span {position: relative;}
+ input {
+     width: 6rem;
+     box-sizing: border-box;
+ }
+ span {
+     position: relative;
+     display : inline-block;
+ }
  div {
      width: 1rem;
      position: absolute;
@@ -123,17 +129,21 @@
      font-size: 0.3rem;
  }
  
- .buttonMode {
-     width: 5rem;
+ .buttonMode input {
+     padding: 3px;
+     padding-right: 1rem;
+     border-top: var(--inputBorder);
+     border-left: var(--inputBorder);
+     border-right: var(--inputBorder);
  }
 
- :global(.minibuttons button.icon) {
+ .minibuttons :global(button.icon) {
      padding: 0;
      margin: 0;
      width: 1rem;
  }
 
- :global(.minibuttons button.icon i.material-icons) {
+ .minibuttons :global(i.material-icons) {
      font-size: 0.8rem;
  }
 
