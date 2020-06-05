@@ -228,7 +228,7 @@
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide height="80vh" growRight="true" leftBasis="300px" rightBasis="600px"
+        <SideBySide height="80vh" leftWidth={325} maxWidth={1250} stackSidesAt={550}
                     maxWidthRight='45rem' maxWidthLeft='45rem'
         >
 	    <h3 slot="leftHead"> 
