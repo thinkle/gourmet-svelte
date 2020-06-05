@@ -167,10 +167,11 @@ function Parser (tagger) {
                     result = iterator.iterateNext();
                 }
                 for (let result of results) {
-                    if (sanityCheck(result,tag)) {
+                    if (sanityCheck(result,tag,self.parsedNodes)) {
                         let tagResult = tagger.tagElement(result,tag,undefined,detail,true) // true flag delays actually inserting tag
                         tagResult.rule = {xpath,tag,detail}
                         self.results.push(tagResult);
+                        self.parsedNodes.push(result);
                     } else {
                         console.log('Sanity check refuses:',result,tag)
                     }
@@ -179,9 +180,10 @@ function Parser (tagger) {
             }
             if (selector) {
                 document.querySelectorAll(selector).forEach(function (el) {
-                    if (sanityCheck(el,tag)) {
+                    if (sanityCheck(el,tag,self.parsedNodes)) {
                         let tagResult = tagger.tagElement(el,tag,undefined,detail,true) // true flag delays actually inserting tag
                         tagResult.rule = {selector,tag,detail}
+                        self.parsedNodes.push(el);
                         self.results.push(
                             tagResult
                         );
@@ -200,7 +202,11 @@ function Parser (tagger) {
     return self;
 }
 
-function sanityCheck (el, tag) {
+function sanityCheck (el, tag, parsedNodes) {
+    if (parsedNodes.indexOf(el)>-1) {
+        // don't parse the same node twice
+        return false
+    }
     if (['time','title','source','category','amount','unit','ingredientText'].indexOf(tag)>-1) {
         if (!el.textContent) {
             return false
@@ -208,9 +214,8 @@ function sanityCheck (el, tag) {
         if (el.textContent.length > 200) {
             return false
         }
-    } else {
-        return true
     }
+    return true
 }
 
         
