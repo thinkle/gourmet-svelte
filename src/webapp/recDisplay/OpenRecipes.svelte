@@ -13,6 +13,8 @@
  import { quintOut } from 'svelte/easing';
  import Recipe from './Recipe.svelte'
  import IconButton from '../../widgets/IconButton.svelte';
+ import Tabs from '../../widgets/Tabs.svelte';
+ import Tab from '../../widgets/Tab.svelte';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../../stores/recipeStores.js';
  function getTabTitle (id) {
      return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || 'Untitled'; // fixme
@@ -29,7 +31,7 @@
      openOne()
     }}
 
- let showCloseModalFor
+            let showCloseModalFor
 
  function closeRec (id,confirmed=false) {
      
@@ -59,18 +61,20 @@
 <div class="fixedContainer">
     {#if ($openLocalRecipes.length > 0) && !hide}
         <div class="tabbox" in:slide out:fade>
-            <div class="tabs">
+            <!-- <div class="tabs"> -->
+            <Tabs>
                 {#each $openLocalRecipes as id (id)}
-                    <span
-                        animate:flip={{delay:100,duration:250,easing:quintOut}}
-                        class:active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>
-                        <div class='close'>
-                            <IconButton bare={true} small={true} on:click={()=>window.open(`/rec/${id}`,'_blank')} icon='open_in_new'/>
-                            <IconButton bare={true} small={true} on:click={()=>{closeRec(id)}} icon='close'/>
-                        </div>
-                        {getTabTitle(id)}
-                        
-                    </span>
+                    <div
+                        animate:flip={{delay:100,duration:250,easing:quintOut}}>
+                        <Tab
+                            active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>
+                            <div class='close'>
+                                <IconButton bare={true} small={true} on:click={()=>window.open(`/rec/${id}`,'_blank')} icon='open_in_new'/>
+                                <IconButton bare={true} small={true} on:click={()=>{closeRec(id)}} icon='close'/>
+                            </div>
+                            {getTabTitle(id)}
+                        </Tab>
+                    </div>
                 {/each}
                 <div class='toggle'>
                     <IconButton on:click="{()=>hide=!hide}"
@@ -78,7 +82,7 @@
                     >
                     </IconButton>
                 </div>
-            </div> <!-- close tabs -->
+            </Tabs> <!-- close tabs -->
 
             <div class="content" in:receive out:send>
                 <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
@@ -193,15 +197,15 @@
      color: var(--light-fg);
      font-weight: 500;
  }
- .toggle {
-     margin-left: auto;
- }
-
  .tabs .active {
      border-bottom: 3px solid var(--heavy-underline);
      font-weight: 500;
  }
- .tabs span .close {
+ .close {
      float : right;
  }
+ .toggle {
+     margin-left: auto;
+ }
+
 </style>
