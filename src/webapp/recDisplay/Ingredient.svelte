@@ -14,6 +14,7 @@
  import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import IconButton from '../../widgets/IconButton.svelte';
  import IngredientEditor from './IngredientEditor.svelte';
+
  import {getContext} from 'svelte';
 
  /* Linked Recipe opener */
@@ -123,8 +124,16 @@
  .link:hover {
      text-decoration : underline;
  }
+ .ing :global(td) {
+     padding-top: 3px;
+     padding-bottom: 3px;
+ }
  .ing :global(.amount,.unit,.item) {
      font-family: var(--recipeFont);     
+ }
+
+ .ing :global(.amount) {
+     white-space : nowrap;
  }
  .ing > :global(td) {
      border-bottom: 1px solid var(--light-underline);
