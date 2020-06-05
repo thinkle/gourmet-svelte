@@ -45,10 +45,12 @@
 	</div>
 	
     </div>
-    <Resizer
-        onStart="{({x,y})=>initialLeftWidth=leftWidth}"
-        onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
-    />
+    {#if !stackMode}
+        <Resizer
+            onStart="{({x,y})=>initialLeftWidth=leftWidth}"
+            onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
+                    />
+    {/if}
     <div class="side r">
 	<div class="head scrollHead">
 	    <slot name="rightHead">
