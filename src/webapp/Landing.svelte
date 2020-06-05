@@ -139,7 +139,7 @@
      height: calc(100vh - var(--navHeight));
  }
 
- article button {
+ article :global(button) {
      font-size : var(--large);
      margin: var(--large);
  }
