@@ -53,17 +53,17 @@
     {#each RecDef.importProps as prop}
         <li>
             {prop.label}
-            {#if selectionActive}
-                <IconButton
-                    icon="label"
-                    on:click="{
+            <IconButton
+                invisible={!selectionActive}
+                icon="label"
+                left="true"
+                on:click="{
                           ()=>parsing=backgroundParseSelection.send(
                           prop.name
                           )}"
-
+                
                 >Tag
-                </IconButton>
-            {/if}
+            </IconButton>
             {#if tags && tags[prop.name]}
                 <TagEditor
                     label="{prop.label}"
