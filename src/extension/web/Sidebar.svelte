@@ -1,8 +1,9 @@
 <script>
  import Tagger from './Tagger.svelte';
+ import Tabs from '../../widgets/Tabs.svelte';
+ import Tab from '../../widgets/Tab.svelte';
  import Views from './SidebarRecipeViews.svelte';
  import {onMount,getContext} from 'svelte';
- import {listenToExtension} from '../messaging/polling.js'
  import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';
 
  import IconButton from '../../widgets/IconButton.svelte';
@@ -49,28 +50,6 @@
              disconnectSelectionListener();
              disconnectParseListener();
          }
-         /* let messenger
-          * console.log('Set up poller!'); */
-         /* messenger = listenToExtension(
-          *     (msg)=>{
-          *         if (msg.type=='parsed') {
-          *             console.log('Got poller message!',msg);
-          *             parsed = msg.parsed
-          *             if (firstConnect) {
-          *                 if (parsed && Object.keys(parsed).length < 2 ) {
-          *                     autoparsePage()
-          *                 }
-          *                 firstConnect = false;
-          *             }
-          *         } else if (msg.type = 'selection') {
-          *             selectionActive = msg.active
-          *         }
-          *     }
-          * ); */
-         /* return function cleanUp () {
-          *     console.log('disconnecting poller');
-          *     messenger.disconnect();
-          * } */
      }
  );
 
@@ -92,10 +71,10 @@
         Gourmet
     </h2>
     
-    <div class="tabs" >
-        <span class:active="{tagMode}" on:click="{()=>tagMode=true}">Tag</span>
-        <span class:active="{!tagMode}" on:click="{()=>tagMode=false}">View</span>
-    </div>
+    <Tabs sticky="{true}">
+        <Tab active="{tagMode}" on:click="{()=>tagMode=true}">Tag</Tab>
+        <Tab active="{!tagMode}" on:click="{()=>tagMode=false}">View</Tab>
+    </Tabs>
 
     {#if parsed && parsed.pageInfo}
         <p>Importing {parsed.pageInfo.title}</p>
