@@ -65,8 +65,8 @@
 <svelte:window on:keyup={detectKeyboardUser} on:mousedown={detectMouseUser}/>
 
 <style>
- @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300,400,500,600,700,900;0,300,400,500,700,900;1,400;1,700&display=swap');
- @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+ @import url('//fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+ @import url('//fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 
  p {
      font-size : var(--small);
@@ -109,12 +109,29 @@
      --xsmall : 0.6rem;
      /* Sizes */
      --navHeight: 30px;
+     /* Inputs and Buttons */
+     --inputBorder : 1px solid #aaa;
+     --focusedInputBorder : 3px solid #777;
+     --inputRadius : 3px;
+     --inputPadding: 5px;
  }
- :global(*) {
-     outline-color: transparent;
+ :global(input,textarea,[contenteditable]) {
+     border : var(--inputBorder);
+     padding: var(--inputPadding);
+     border-left: none;
+     border-top: none;
+     border-right: none;
  }
- .keyboardUser :global(*) {
-     outline-color : var(--focus-border);
+ :global(input:focus,textarea:focus,[contenteditable]:focus) {
+     border-width: 3px
+ }
+ 
+ :global(:focus) {
+     outline-style: none;
+ }
+ .keyboardUser :global(:focus) {
+     outline-color: var(--focus-border);
+     outline-style : auto;
  }
 
  
