@@ -45,35 +45,39 @@
 
 </script>
 
-<p>Grab that Recipe!</p>
-<IconButton icon="import_export" on:click={doParseRecipe}>Auto-Tag Recipe</IconButton>
+<IconButton icon="import_export" on:click={doParseRecipe}>Tag Recipe Automatically (YMMV)</IconButton>
 <IconButton icon="delete" on:click={doClearParsed}>Clear All Tags</IconButton>
-<h6>Select text, then choose:</h6>
-<ul>
+<h6>Tags:</h6>
+<p>Select text on left to add new tags</p>
+<table>
     {#each RecDef.importProps as prop}
-        <li>
-            {prop.label}
-            <IconButton
-                invisible={!selectionActive}
-                icon="label"
-                left="true"
-                on:click="{
-                          ()=>parsing=backgroundParseSelection.send(
-                          prop.name
-                          )}"
-                
+        <tr>
+            <td>
+                <IconButton
+                    invisible={!selectionActive}
+                    icon="label"
+                    left="true"
+                    on:click="{
+                              ()=>parsing=backgroundParseSelection.send(
+                              prop.name
+                              )}"
+                    
                 >Tag
-            </IconButton>
-            {#if tags && tags[prop.name]}
-                <TagEditor
-                    label="{prop.label}"
-                    name="{prop.name}"
-                    {tags} {parsed}
-                />                
-            {/if}
-        </li>
+                </IconButton>
+            </td>
+            <td>{prop.label}</td>
+            <td>
+                {#if tags && tags[prop.name]}
+                    <TagEditor
+                        label="{prop.label}"
+                        name="{prop.name}"
+                        {tags} {parsed}
+                    />                
+                {/if}
+                </td>
+        </tr>
     {/each}
-</ul>
+</table>
 
 Tag Data<JsonDebug data="{tags}" />
 {#if clearing}
@@ -104,5 +108,5 @@ Tag Data<JsonDebug data="{tags}" />
 {/if}
 
 <style>
-    li {list-style: none}
+ li {list-style: none}
 </style>
