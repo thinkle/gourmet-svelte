@@ -49,7 +49,7 @@ export function highlightItem (item, stag='<b>', etag='</b>') {
         return highlightItemText(item.text);
     }
     else {
-        return 'No item'
+        return ''
     }
 }
 
