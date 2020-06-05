@@ -1,5 +1,5 @@
-//import sampleChunks from './parseData.js';
-//import {sampleData} from './parseData.js';
+
+import {nytExample,poorlyTagged} from './parseData.js';
 import {parseData,parseChunks,handleChunk,findChildren} from './importer.js';
 import RecDef from '../common/RecDef.js';
 
@@ -53,7 +53,7 @@ it(
         let localContext = handleChunk({
             tag:'source',text:'Mark Bittman',
             html:'<a href="http://www.markbittman.com/">Mark Bittman</a>',
-        },undefined,recipe
+        },{},recipe
                                       );
         expect(localContext).toEqual(
             expect.objectContaining({
@@ -77,7 +77,7 @@ it(
             tag:'source',text:'Alton Brown - www.altonbrown.com',
             html:'<span>Alton Brown - www.altonbrown.com</span>',
         },
-                                        undefined,recipe);
+                    {},recipe);
         expect(recipe.sources[1]).toEqual(
             expect.objectContaining(
                 {
@@ -130,7 +130,7 @@ it(
             expect.objectContaining({
                 text:'30 minutes',
                 seconds:30*60,
-                label:'Time'
+                name:'Time'
             })
         );
 
@@ -144,7 +144,7 @@ it(
             expect.objectContaining({
                 text:'Total time 1 1/2 hours',
                 seconds:60*60*1.5,
-                label:'Total Time'
+                name:'Total Time'
             })
         );
 
@@ -163,7 +163,7 @@ it(
             expect.objectContaining({
                 text:'1 hour, 25 mins',
                 seconds:85*60,
-                label:'Cook Time'
+                name:'Cook Time'
             })
         );
 
@@ -172,7 +172,7 @@ it(
     }
 );
 
-fit(
+it(
     'Images',
     ()=>{
         let recipe = {images:[]}
@@ -186,11 +186,11 @@ fit(
     }
 );
 
-xit(
+it(
     'Full sample recipe with groups and nestedness and stuff',
     ()=>{
         console.log('full sample full full fullgroups and stuff!');
-        let result = parseData(sampleData);
+        let result = parseData(nytExample);
         console.log('Ingredients are:',
                     result.ingredients.map((i)=>JSON.stringify(i))
                    )
@@ -198,17 +198,22 @@ xit(
     
 );
 
-xit(
-    'Full Sample Recipe',
+
+fit(
+    'Handle ugly data with duplicates and nesting',
     ()=>{
-        let result = parseChunks(sampleChunks,{url:'https://cooking.nytimes.com/recipes/1020045-coconut-miso-salmon-curry'})
+        let result = parseData(poorlyTagged);
+        expect(result.text.length).toEqual(1); // don't import all the nested text tags as duplicates
+        expect(result.text[0].header).toEqual('How to Make This Recipe');
+        let firstIng = result.ingredients[0];
+        console.log('got ing',firstIng);
+        expect(firstIng.amount).toBeDefined();
+        expect(firstIng.amount.amount).toEqual(1);
+        expect(firstIng.amount.unit).toEqual('pound');
+        expect(firstIng.text).toMatch(/dry pasta/)
+        let secondIng = result.ingredients[1]; // don't double-import ingredients - second one should be right...
+        expect(secondIng.text).toMatch(/yellow/) // yellow bell pepper is #2 :)
         console.log('Got result: ',result);
-        expect(result).toEqual(
-            expect.objectContaining({
-                ingredients : expect.any(Array),
-                text : expect.any(Array)
-            })
-        );
+        expect(result.text[0].body).not.toMatch(/googlesyndication.com/) // make sure we stripped out the ad
     }
 );
-
