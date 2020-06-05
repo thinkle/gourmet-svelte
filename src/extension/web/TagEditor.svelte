@@ -4,6 +4,8 @@
  export let tags;
 
  import IconButton from '../../widgets/IconButton.svelte';
+ import Modal from '../../widgets/Modal.svelte';
+ import ModalLauncher from '../../widgets/ModalLauncher.svelte';
  import JsonDebug from '../../widgets/JsonDebug.svelte';
  import {backgroundClearOne,backgroundClearMany} from '../messaging/parsing.js';
 
@@ -50,38 +52,36 @@
 <!-- Per tag view for editing mark-up... -->
 <span>
     {tags[name]} already tagged
-    {#if show}
-        <IconButton icon="chevron_up"
-            on:click="{()=>show=false}"
-        >
-            hide
-        </IconButton>
-        {#each Object.keys(rules) as ruleKey}
-            {#if rules[ruleKey] && rules[ruleKey][0] && rules[ruleKey][0].rule && rules[ruleKey][0].rule.selector}
-                <li>
-                    <strong>
-                        {rules[ruleKey][0].rule.selector}: {rules[ruleKey].length}
-                    </strong>
-                    <IconButton icon="delete" on:click="{()=>removeRule(ruleKey)}">Remove rule</IconButton>
-                    {#each rules[ruleKey] as parsedItem,n}
-                        <div class='popup'>
-                            {@html parsedItem.html}
-                        </div><IconButton icon="close" bare="true" on:click="{()=>removeItem(parsedItem)}"/>
-                        {#if n < rules[ruleKey].length - 1}
-                            ,
-                        {/if}
-                    {/each}
-                </li>
-            {:else}
-                <div>
-                    What's up with {ruleKey} => <JsonDebug data={rules[ruleKey]}/>
-                </div>
-            {/if}
-        {/each}
-    {:else}
+    <ModalLauncher modalVisible="{show}">
         <IconButton icon="info" bare="true"
                     on:click="{()=>show=true}"
         />
+    </ModalLauncher>
+    {#if show}
+        <Modal onClose={()=>show=false}>
+            {#each Object.keys(rules) as ruleKey}
+                {#if rules[ruleKey] && rules[ruleKey][0]}
+                    <li>
+                        {#if rules[ruleKey][0].rule && rules[ruleKey][0].rule.selector}
+                            <strong>
+                                {rules[ruleKey][0].rule.selector}: {rules[ruleKey].length}
+                            </strong>
+                            <IconButton icon="delete" on:click="{()=>removeRule(ruleKey)}">Remove rule</IconButton>
+                        {/if}
+                        {#each rules[ruleKey] as parsedItem,n}
+                            <div class='popup'>
+                                {@html parsedItem.html}
+                            </div><IconButton icon="close" bare="true" on:click="{()=>removeItem(parsedItem)}"/>
+                            {#if n < rules[ruleKey].length - 1}
+                                ,
+                            {/if}
+                        {/each}
+                    </li>
+                {:else}
+                    {console.log('Empty rule: ',ruleKey,rules[ruleKey])}
+            {/if}
+        {/each}
+        </Modal>
     {/if}
 </span>
 
