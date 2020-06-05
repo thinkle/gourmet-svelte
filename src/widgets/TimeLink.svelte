@@ -65,18 +65,20 @@
         </div>
         {#if !timerHidden}
             <Moveable
-                target={timerBox}
-                       origin={false}
-                scrollable={true}
-                       draggable={draggable}
-                on:drag={(arg) => {
+                target="{timerBox}"
+                origin="{false}"
+                scrollable="{true}"
+                draggable="{draggable}"
+                on:drag="{(arg) => {
                         const {target,beforeTranslate} = arg.detail;
                         frame.translate = beforeTranslate;
                         target.style.transform = `translate(${beforeTranslate[0]}px, ${beforeTranslate[1]}px)`;
-                        }}
-                       on:dragStart={({ detail: { set } }) => {
-                                    set(frame.translate)
-                                    }}
+                        }}"
+                on:dragStart="{
+                        ({ detail: { set } }) => {
+                           set(frame.translate)
+                           }
+                        }"
             />
         {/if}
     {/if}
