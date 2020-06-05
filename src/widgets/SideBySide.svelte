@@ -80,7 +80,8 @@
  }
  .top {
      display: flex;
-     max-width: calc(var(--maxWidthRight) + var(--maxWidthLeft));
+     max-width: var(--max-width);
+     width: 100%;
      margin: auto;
  }
  .top.stackMode {
@@ -92,11 +93,9 @@
  }
  .l {
      height: var(--height);
-     max-width: var(--maxWidthLeft);
  }
  .r {
      height: var(--height);
-     max-width: var(--maxWidthRight);
  }
  .stackMode .l,.stackMode .r {
      height: auto;
