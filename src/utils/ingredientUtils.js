@@ -3,6 +3,28 @@ import {reToString} from './regExpUtil.js'
 import prepWords from './ingPrepWords.js';
 import {inTag} from './textUtils.js';
 
+
+export function mergeAmounts (a1, a2) {
+    if (!a1 && a2) {return a2}
+    if (!a2 && a1) {return a1}
+    if (!a1 && !a2) {return undefined}
+    return {
+        ...a1,
+        ...a2,
+        amount : a1.amount || a2.amount,
+        rangeAmount : a2.amount || a2.amount,
+        unit : a1.unit || a2.unit,
+    }
+}
+
+export function mergeIngredients (i1, i2) {
+    return {
+        text : i1.text || i2.text,
+        alternateText : i1.text && i2.text,
+        amount : mergeAmounts(i1.amount,i2.amount)
+    }
+}
+
 export function parseIngredients (text, ingredients) {
     for (let i of ingredients) {
         text = markupTextForIngredient(text,i);
