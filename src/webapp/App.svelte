@@ -1,6 +1,6 @@
 <script>
  import {stamp} from '../stores/debug.js'
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS,'App',);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"),'App',);
  import router from 'page';
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';
@@ -99,6 +99,8 @@
      --note-fg : #333333;
      --note-light-bg : #ffffdd;
      --note-light-fg: #333;
+     --accent-bg: #46092b;
+     --accent-fg: #facfde;
      /* Typography */
      --recipeFont : Lora, Ubuntu, Cantarell, serif;
      --recipeHeadFont : Lora,'Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;

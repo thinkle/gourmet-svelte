@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from './recDisplay/RecipeList.svelte';
  import OpenRecipes from './recDisplay/OpenRecipes.svelte';
  import Status from '../widgets/Status.svelte';

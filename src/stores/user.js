@@ -12,7 +12,6 @@ const mock = {
     username: "Joe Schmoe",
 }
 function createUser() {
-    console.log('createUser...');
     const localUser = JSON.parse(localStorage.getItem('gotrue.user'))
 
     let u = null
@@ -46,7 +45,6 @@ function createUser() {
             set(currentUser)
             api.doFetch('getUser',currentUser).then(
                 (result)=>{
-                    console.log('Got user confirmed from db...');
                     currentUser.dbuser = result
                     set(currentUser);
                     if (netlifyIdentity.gotrue) {

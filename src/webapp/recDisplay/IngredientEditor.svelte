@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {slide,fade} from 'svelte/transition'
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import IngredientInput from '../../widgets/IngredientInput.svelte'

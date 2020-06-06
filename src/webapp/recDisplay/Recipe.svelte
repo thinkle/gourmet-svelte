@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  export let rec=undefined;
  export let onChange=undefined;;
  export let onOpenSubRec=undefined;
@@ -21,11 +21,11 @@
  import {onMount,setContext} from 'svelte'
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
- import deepcopy from 'deepcopy';
+ import deepcopy from 'deepcopy'; 
 
  $: { if (rec && !rec.title && editable) {editMode=true}}
 
-                           let valid = false;
+                   let valid = false;
  $: {
      valid = isValid(rec);
  }

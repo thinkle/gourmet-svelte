@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import IconButton from '../../widgets/IconButton.svelte';
  import RecipePicker from './RecipePicker.svelte';
  import { send,receive } from './pickerTransition.js';

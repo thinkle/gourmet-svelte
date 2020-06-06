@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import status,{states} from '../stores/status.js';
  import Progress from './Progress.svelte';
  import { fly } from 'svelte/transition';

@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import ComboInput from './ComboInput.svelte';
  import IB from './IconButton.svelte';
  import { flip } from 'svelte/animate';

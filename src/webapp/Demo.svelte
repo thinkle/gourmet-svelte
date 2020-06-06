@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import Tester from '../widgets/Tester.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
  import Recipe from './recDisplay/Recipe.svelte';

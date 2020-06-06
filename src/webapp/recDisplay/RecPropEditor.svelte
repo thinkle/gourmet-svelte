@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecDef from '../../common/RecDef.js';
  import RecBlock from './RecBlock.svelte';
  import PlainInput from '../../widgets/PlainInput.svelte';

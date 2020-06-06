@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte';
  import Resizer from './Resizer.svelte';
  export let height;

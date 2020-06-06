@@ -2,7 +2,7 @@
  export let onRecipeClick
  import {flip} from 'svelte/animate'
  import {fade} from 'svelte/transition'
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  //import {recipeData,recipeActions,connected} from '../../stores/recipeData.js';
  import {connected,
         localRecipes,

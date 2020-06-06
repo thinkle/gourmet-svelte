@@ -14,7 +14,6 @@
  import {parseIngredients} from '../../utils/ingredientUtils.js';
  let parsed
  $: {
-     console.log('Parsing text: ',text);
      if (text) {
          if (ingredientList && $ingredientList && $ingredientList.length > 1) {
              parsed = parseIngredients(text,$ingredientList);
@@ -62,22 +61,49 @@
  }
 
  div :global(ol li) {
-     margin-top: 1rem;
      counter-increment: my-awesome-counter;
-     position: relative;
  }
 
  div :global(ol li::before) {
      content: counter(my-awesome-counter);
-     color: white;
      background-color: var(--accent-bg);
-     font-weight: var(--accent-fg);
+     color: var(--accent-fg);
      position: absolute;
      left: -2rem;
+     width: 1.2rem;
+     text-align: center;
+     top: 0.5rem;
      font-size: 1.5rem;
      border-radius: 3px;
      padding: 4px;
  }
 
+ div :global(ul) {
+     padding-left: 2rem;
+ }
+ div :global(ul li::before) {
+     content: " ";
+     background-color: var(--accent-bg);
+     color: var(--accent-fg);
+     position: absolute;
+     left: -2rem;
+     top: 0.25rem;
+     font-size: 1.5rem;
+     border-radius: 0.25rem;
+     padding: 4px;
+     width: 1rem;
+     height: 0.5rem;
+     display: flex;
+     align-content: center;
+     justify-content: center;
+ }
+
+ div :global(li) {
+     min-height: 2rem;
+     position: relative;
+     margin-bottom: 0.5rem;
+     margin-top: 0.5rem;
+
+ }
  
 </style>

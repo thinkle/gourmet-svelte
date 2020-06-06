@@ -6,7 +6,7 @@
      }
  }
 
- import {registerBuild} from '../../stores/debug.js'; registerBuild(BUILD_MS);
+ import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {fade,slide} from 'svelte/transition';
  import {send,receive} from './pickerTransition.js';
  import {flip} from 'svelte/animate';
@@ -91,6 +91,7 @@
                         rec="{$localRecipes[activeRecipeId]}"
                         {onOpenSubRec}
                         onChange="{(rec)=>{
+                                  console.log('OpenRecipes got change!',rec);
                                   $localRecipes[rec.id]=rec;
                                   }}"
                     />

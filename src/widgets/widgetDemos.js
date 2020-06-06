@@ -1,4 +1,4 @@
-import {registerBuild} from '../stores/debug.js'; registerBuild(BUILD_MS);
+import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
 import InputTests from './Inputs.demo.svelte';
 import TimerTests from './Timer.demo.svelte';
 import IngredientInput from './IngredientInput.demo.svelte';

@@ -1,6 +1,6 @@
 import {writable,derived} from 'svelte/store';
 import times from '../utils/times.js';
-export const latestBuildTime = new writable(BUILD_MS)
+export const latestBuildTime = new writable(Number("BUILD_MS"))
 export const stamp = new derived(
     latestBuildTime,
     ($bt)=>{
@@ -24,5 +24,5 @@ export function registerBuild (time,module) {
      );
 }
 /* To use, add:
-import {registerBuild} from 'debug.js'; registerBuild(BUILD_MS);
+import {registerBuild} from 'debug.js'; registerBuild(Number("BUILD_MS"));
 */

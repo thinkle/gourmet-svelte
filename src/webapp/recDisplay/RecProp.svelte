@@ -9,6 +9,13 @@
  export let smallLabel=true;
 
  import {getContext} from 'svelte'
+ import { crossfade } from 'svelte/transition';
+ import { fly,fade } from 'svelte/transition';
+ const [send, receive] = crossfade({
+     duration: 2000,
+     fallback: fade,
+ });
+
  import RecDef from '../../common/RecDef.js';
  import IconButton from '../../widgets/IconButton.svelte';
 
@@ -26,7 +33,7 @@
  }
 
  import { quintOut } from 'svelte/easing';
- import { fly } from 'svelte/transition';
+
 
 
  var edit;
@@ -91,7 +98,8 @@
 
         <div>
             {#if edit}
-                <div out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}>
+                <div out:send in:receive>
+                    <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                     <RecPropEditor
                         bind:this={ref}
                                   bind:value={value}
@@ -100,7 +108,8 @@
                     />
                 </div>
             {:else}
-                <div out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}>
+                <div out:send in:receive>
+                    <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                 <RecPropDisplay
                     value={value}
                     prop={prop}
