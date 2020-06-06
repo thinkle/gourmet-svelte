@@ -5,13 +5,11 @@
  import {getContext} from 'svelte';
  export let recursive=false;
  export let ingredients;
- export let maxWidth=250;
+ export let maxWidth=undefined;
  export let editable = true;
  export let editMode = false;
  export let onChange = undefined;
  export let onOpenSubRec = undefined;
- import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
- import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
  import IngredientInput from '../../widgets/IngredientInput.svelte'
  import FancyInput from '../../widgets/PlainInput.svelte';
  import {floatToFrac} from '../../utils/numbers.js';
@@ -23,9 +21,7 @@
 
  $: groups = ingredients.filter((i)=>i.ingredients)
  
- console.log("IngredientList created: onChange=",onChange)
  function triggerChange () {
-     console.log('Ingredients trigger change!')
      onChange && onChange(ingredients)
  }
 
@@ -64,7 +60,6 @@
  }
 
  function changeIngredient (original, updated) {
-     console.log('Replacing',original,'with',updated)
      if (original !== updated) {
          // swap out enumerable properties of ingredient object
          for (let prop in original) {
@@ -100,7 +95,6 @@
  }
 
  function moveIngredient (list, index, delta, newParent) {
-     console.log('moveIngredient',list, index, delta, newParent) 
      let item = list[index]
      list.splice(index,1);
      if (newParent) {
