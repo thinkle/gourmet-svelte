@@ -6,12 +6,14 @@ import SVG from './SVGs.demo.svelte';
 import MenuDemo from './Menu.demo.svelte';
 import TabsDemo from './Tabs.demo.svelte';
 import ButtonDemo from './Button.demo.svelte';
+import ModalDemo from './Modal.demo.svelte';
  export default {
-     'inputs':InputTests,
-     'timers':TimerTests,
-     'ingredient':IngredientInput,
-     'svg':SVG,
-     'menu':MenuDemo,
-     'tabs':TabsDemo,
-     'button':ButtonDemo,
+     inputs:InputTests,
+     timers:TimerTests,
+     ingredient:IngredientInput,
+     svg:SVG,
+     menu:MenuDemo,
+     tabs:TabsDemo,
+     button:ButtonDemo,
+     modal:ModalDemo,
  }
