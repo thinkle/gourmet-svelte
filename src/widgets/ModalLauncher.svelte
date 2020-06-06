@@ -1,6 +1,6 @@
 <script>
  export let modalVisible
- import {send,receive} from './modalTransition.js'
+ import {send,receive} from './transitions/modalTransition.js'
 </script>
 
 
