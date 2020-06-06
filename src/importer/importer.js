@@ -103,7 +103,6 @@ export function handleChunk (chunk, context, recipe, parent) {
         chunk.handled = true; // only run once per chunk
     }
     if (!chunk.text && !chunk.html) {
-        debugger;
         console.log('Weird, empty chunk? IGNORING',chunk);
         return context.localContext; // no change - reject
     }
@@ -141,7 +140,6 @@ export function handleChunk (chunk, context, recipe, parent) {
         return handleIngredientGroup(chunk,context,recipe,parent);
     }
     else if (chunk.tag=='ingredients') {
-        debugger;
         return handleIngredients(chunk,context,recipe,parent);
     }
     else if (chunk.tag=='image') {
@@ -149,7 +147,7 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
-export function ignoreMatchingDescendants (chunk,context) {
+export function ignoreMatchingDescendants (chunk,context,{extraTagsToIgnore}={}) {
     if (!chunk) {return}
     if (!chunk.tag) {return}
     if (chunk.children) {
@@ -157,9 +155,9 @@ export function ignoreMatchingDescendants (chunk,context) {
             (child)=>{
                 if (context.chunkMap[child]) {
                     let ch = context.chunkMap[child]
-                    if (ch.tag==chunk.tag) {
+                    if (ch.tag==chunk.tag || extraTagsToIgnore && extraTagsToIgnore.indexOf(ch.tag)>-1) {
                         ch.handled = true;
-                        ignoreMatchingDescendants(ch,context); // recursive!
+                        ignoreMatchingDescendants(ch,context,{extraTagsToIgnore}); // recursive!
                     }
                 }
             }
@@ -223,11 +221,17 @@ function handleSource (chunk, context, recipe) {
 
 function handleText (chunk, context, recipe) {
     ignoreMatchingDescendants(chunk,context);
+    let header
+    if (chunk.detail) {
+        header = chunk.detail
+    } else {
+        header = getHeader(chunk); // may modify HTML
+    }
     recipe.text.push({
         body:sanitizeHtml(chunk.html,
                           {allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']}
                          ),
-        header:chunk.detail||getHeader(chunk,recipe),
+        header
     });
 }
 
@@ -244,9 +248,12 @@ function handleTitle (chunk, context, recipe) {
 }
 
 function getHeader (chunk,recipe) {
-    // implement?
     let el = getElement(chunk,{selector:'h1,h2,h3,h4,h5,h6'});
-    return el && el.textContent || ''
+    let header = el && el.textContent || ''
+    if (header) {
+        chunk.html = chunk.html.replace(el.outerHTML,'');
+    }
+    return header
 }
 
 function getElement (chunk, {selector, baseUrl}={}) {
