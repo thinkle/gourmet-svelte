@@ -1,6 +1,8 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+
  import RecipeList from './RecipeList.svelte';
+ import Modal from '../../widgets/Modal.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import { crossfade, scale } from 'svelte/transition';
  import {fade} from 'svelte/transition';
@@ -10,21 +12,15 @@
  export let onClose;
  
 </script>
-<section class='screen' in:fade="{{duration:500}}" out:fade="{{duration:500}}">
-    <div class='dialog'
-         in:receive out:send
-    >
-        <span class="close"><IconButton bare="true" icon="close" on:click="{onClose()}" /></span>
-        
-        <h2>
-            {message}
-        </h2>
-        <RecipeList
-            onRecipeClick={onSelected}
-        />
-        
-    </div>    
-</section>
+<Modal {onClose}>
+    <!-- <span class="close"><IconButton bare="true" icon="close" on:click="{onClose()}" /></span> -->
+    <h2>
+        {message}
+    </h2>
+    <RecipeList
+        onRecipeClick={onSelected}
+    />
+</Modal>
 <style>
  section {
      position: fixed;
