@@ -1,13 +1,17 @@
 <script>
- import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
- import {onMount} from 'svelte';
- import Resizer from './Resizer.svelte';
  export let height;
  export let stackSidesAt = 700;
  export let maxWidth = 1200;
+ export let leftWidth=300
+ export let maxWidthLeft = undefined;
+ export let maxWidthRight = undefined;
+
+ import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {onMount} from 'svelte';
+ import Resizer from './Resizer.svelte';
  let stackMode = false;
  let ref
- export let leftWidth=300
+
  let initialLeftWidth
  import {watchResize} from 'svelte-watch-resize';
 
@@ -32,7 +36,9 @@
 <div use:watchResize={handleResize} bind:this={ref} class="top"
      style="{`--height:${height};
             --max-width:${maxWidth};
-           `}"
+            --max-left:${maxWidthLeft};
+            --max-right:${maxWidthRight};
+            `}"
      class:stackMode
 >
     <div class="side l" style="{`width:${leftWidth}px`}">
@@ -93,9 +99,11 @@
  }
  .l {
      height: var(--height);
+     max-width: var(--max-left);
  }
  .r {
      height: var(--height);
+     max-width: var(--max-right);
  }
  .stackMode .l,.stackMode .r {
      height: auto;
