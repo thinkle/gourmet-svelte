@@ -1,6 +1,7 @@
 <script>
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from './recDisplay/RecipeList.svelte';
+ import ModalLauncher from '../widgets/ModalLauncher.svelte';
  import OpenRecipes from './recDisplay/OpenRecipes.svelte';
  import Status from '../widgets/Status.svelte';
  import IconButton from '../widgets/IconButton.svelte';
@@ -19,31 +20,6 @@
  import {getContext,onMount} from 'svelte';
  import {writable} from 'svelte/store'
  let hideOpenButton = writable(true);
- $: {
-     toolbarItem && $openLocalRecipes.length>=0 && toolbarItem.show()
- }
- $: {
-     toolbarItem && $openLocalRecipes.length<=0 && toolbarItem.hide()
- }
-
- let toolbar = getContext('toolbar');
- let toolbarItem;
- onMount(
-     ()=>{
-         if (!toolbar) {return}
-         let {onUnmount,show,hide} = toolbar.addItem({
-             content : 'Open Recipes',
-             props : {
-                 icon : 'expand_more',
-             },
-             'onClick' : opener.open
-         });
-         toolbarItem = {
-             show,hide
-         }
-         return onUnmount
-     }
- );
  
 </script>
 
