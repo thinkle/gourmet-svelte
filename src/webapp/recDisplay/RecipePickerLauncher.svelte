@@ -2,6 +2,7 @@
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import IconButton from '../../widgets/IconButton.svelte';
  import RecipePicker from './RecipePicker.svelte';
+ import ModalLauncher from '../../widgets/ModalLauncher.svelte';
  import { send,receive } from './pickerTransition.js';
 
  export let icon;
@@ -23,17 +24,16 @@
  
 
 </script>
-
-<div on:click="{()=>show=true}">
-    <slot>
-        <IconButton {...icon}>
-            Select Recipe
-        </IconButton>
-    </slot>    
-    {#if !show}<span
-        in:receive out:send
-    >   
-    </span>{/if}
+<div on:click="{()=>{
+               console.log("They clicked the div");
+               show=true}}">
+    <ModalLauncher modalVisible="{show}"  >
+        <slot>
+            <IconButton {...icon}>
+                Select Recipe
+            </IconButton>
+        </slot>
+    </ModalLauncher>
 </div>
 {#if show}
     <RecipePicker
