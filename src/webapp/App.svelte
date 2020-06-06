@@ -83,10 +83,10 @@
 
  :root {
      /* Colors */
+     --white : #fefffa;
+     --black : #223540;
      --link : #0033a0;
      --grey : #727272;
-     --black : #efefef;
-     --white : #121212;
      --light-bg : #fbf6ff;
      --light-fg : #111122;
      --medium-bg: #dadaff;
