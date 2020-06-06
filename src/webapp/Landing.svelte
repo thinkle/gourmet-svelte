@@ -1,9 +1,10 @@
 <script>
  import IconButton from '../widgets/IconButton.svelte';
  import {setContext} from 'svelte';
- import netlifyIdentity from 'netlify-identity-widget'
- import { user, redirectURL } from '../stores/user.js'
- import remoteApi from '../data/remoteApi.js'
+ import netlifyIdentity from 'netlify-identity-widget';
+ import { user, redirectURL } from '../stores/user.js';
+ import ModalLauncher from '../widgets/ModalLauncher.svelte';
+ import remoteApi from '../data/remoteApi.js';
  let adminMode = false;
  netlifyIdentity.init();
 
@@ -71,7 +72,15 @@
                         show () {
                             item.hide = false;
                             extraItems = extraItems;
-                        }
+                        },
+                        hideModal () {
+                            item.modalVisible = false
+                            extraItems = extraItems;
+                        },
+                        showModal () {
+                            item.modalVisible = true
+                            extraItems = extraItems;
+                        },
                     }
                 },
                 hideWhenLoggedIn () {
@@ -94,22 +103,26 @@
         </div>
         <div class='brand'>Gourmet</div>
         <div>
-            {#each extraItems.filter((i)=>!i.hide) as item (item)}
-                {#if item.component}
-                    <svelte:component this="{item.component}"
-                                      {...item.props}
-                    >
-                        {item.content}  {JSON.stringify(item.props)}
-                    </svelte:component>
-                {:else if item.props.icon}
-                    <IconButton {...item.props} on:click={item.onClick}>
-                        {item.content}
-                    </IconButton>
-                {:else}
-                    <span {...item.props} on:click="{item.onClick}">
-                        {item.content}
-                    </span>
-                {/if}
+            {#each extraItems as item (item)}
+                <ModalLauncher modalVisible="{item.modalVisible}">
+                    {#if !item.hide}
+                        {#if item.component}
+                            <svelte:component this="{item.component}"
+                                              {...item.props}
+                        >
+                                {item.content}  {JSON.stringify(item.props)}
+                            </svelte:component>
+                        {:else if item.props.icon}
+                            <IconButton {...item.props} on:click={item.onClick}>
+                                {item.content}
+                            </IconButton>
+                        {:else}
+                            <span {...item.props} on:click="{item.onClick}">
+                                {item.content}
+                            </span>
+                        {/if}
+                    {/if}
+                </ModalLauncher>
             {/each}
             <IconButton on:click={() => doLogout()} icon="close">Log Out</IconButton>
         </div>
@@ -150,12 +163,16 @@
      align-items: center;
      font-size: var(--small);
  }
+ nav div {
+     display: flex;
+ }
  nav div:first-child {
      margin-right: auto;
  }
  nav div:last-child {
      margin-left: auto;
  }
+ 
  .brand {
      font-family: var(--brandFont);
  }
