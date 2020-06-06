@@ -1,7 +1,7 @@
 <script>
- export let floatWidth
  export let value
  export let prop
+ export let floatWidth=undefined
  export let editable=false;
  export let forceEdit=false;
  export let showLabel=true;
@@ -9,10 +9,10 @@
  export let smallLabel=true;
 
  import {getContext} from 'svelte'
- import { crossfade } from 'svelte/transition';
+ import { blockCrossfade } from '../../widgets/transitions/blockCrossFade.js';
  import { fly,fade } from 'svelte/transition';
- const [send, receive] = crossfade({
-     duration: 2000,
+ const [send, receive] = blockCrossfade({
+     duration: 300,
      fallback: fade,
  });
 
@@ -108,7 +108,7 @@
                     />
                 </div>
             {:else}
-                <div out:send in:receive>
+                <div in:receive>
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                 <RecPropDisplay
                     value={value}
