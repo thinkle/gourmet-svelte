@@ -1,6 +1,7 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {slide,fade} from 'svelte/transition'
+ import SmallLabel from '../../widgets/SmallLabel.svelte';
  import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
  import IngredientInput from '../../widgets/IngredientInput.svelte'
  import IconButton from '../../widgets/IconButton.svelte';
@@ -49,6 +50,7 @@
         {onChange}
     />    
     <td>
+        <SmallLabel>Recipe</SmallLabel>
         <input type="text" bind:value="{ing.text}">
         <RecipePickerLauncher
             onSelected="{addRecipeReference}"
