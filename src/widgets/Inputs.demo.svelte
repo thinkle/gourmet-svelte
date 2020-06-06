@@ -47,7 +47,7 @@
     <IconButton icon="chevron_left">This is an Icon Button</IconButton>
     <Tester name="NumberUnitInput"  initialShow="{initialShow}">
         <br>Multiply by: <AmountInput bind:value={$multiplier} showPlusMinusButtons={true}/>
-        <br>Input: <NumberUnitInput bind:value={amount}/>
+        <br>Num Unit Input: <NumberUnitInput bind:value={amount}/>
         <br>Display: <NumberUnitDisplay bind:value={amount}/>
             {JSON.stringify(amount)}
 
