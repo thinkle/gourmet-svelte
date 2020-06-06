@@ -12,7 +12,6 @@ let remoteApi;
 
 user.subscribe(
     (u)=>{
-        console.log('remoteApi got a new user',u);
         remoteApi = RecipeApi(u);
     });
 
@@ -95,7 +94,6 @@ const api = {
                     recsToFetch.push(remoteRec)
                 }
             }
-            console.log('Checking recipes on server',recsToFetch.length,'of',remoteRecs.length,'possible...');
             let keepGoing = true;
             let page = 0;
             while (keepGoing && recsToFetch.length > 0) {
@@ -110,15 +108,12 @@ const api = {
                     query:{_id:{$in:recsToFetch.map((r)=>r._id)}},
                     limit:10, page, 
                 })
-                console.log('updating with local recipes...');
                 fullRecResponse.result.forEach((r)=>r.savedRemote=true); // mark all as saved :)
                 await localApi.updateRecipes(fullRecResponse.result);
                 if (onPartialSync) {
                     onPartialSync(fullRecResponse.result);
                 }
-                console.log('Done...');
                 if (test) {
-                    console.log('SYNC EXITING EARLY - THIS IS JUST A TEST BABY');
                     status.complete(statusId,{name:'Exiting early - testing mode!'});
                     return
                 }
@@ -126,7 +121,6 @@ const api = {
                 page = fullRecResponse.page;
                 if (page < fullRecResponse.count) {
                     keepGoing = true;
-                    console.log('more to fetch... keep fetching... ',page,fullRecResponse.count)
                 }
                 else {
                     keepGoing = false;
