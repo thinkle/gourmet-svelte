@@ -7,7 +7,7 @@
  export let label=""
  export let timestring=""
  import { fly } from 'svelte/transition';
- export let value;
+ export let value=undefined;
  let draggable = true;
  let active = false;
  let timerHidden = false;
