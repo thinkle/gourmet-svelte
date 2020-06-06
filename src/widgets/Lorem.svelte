@@ -2,6 +2,7 @@
  import ipsum from '../common/mocks/ipsum.js';
  export let chars=undefined
  export let graphs=undefined
+ export let inline=false;
  let text
  $: if (!graphs && !chars) {graphs = 2;}
  $: if (!text && graphs) {text = ipsum.generateParagraphs(graphs)}
@@ -12,6 +13,6 @@
  }
 
 </script>
-<div on:click={changeIpsum}>
+<div on:click="{changeIpsum}" style="{inline&&'display:inline'||''}">
     {@html text}
 </div>
