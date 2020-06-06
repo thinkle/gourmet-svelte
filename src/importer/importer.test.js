@@ -211,6 +211,7 @@ fit(
         expect(firstIng.amount.amount).toEqual(1);
         expect(firstIng.amount.unit).toEqual('pound');
         expect(firstIng.text).toMatch(/dry pasta/)
+        console.log(result.ingredients)
         let secondIng = result.ingredients[1]; // don't double-import ingredients - second one should be right...
         expect(secondIng.text).toMatch(/yellow/) // yellow bell pepper is #2 :)
         console.log('Got result: ',result);
