@@ -1,6 +1,7 @@
 <script>
  import { createEventDispatcher, setContext, getContext } from 'svelte';
  import RangeInput from './RangeInput.svelte';
+ import SmallLabel from './SmallLabel.svelte';
  import {formatAmount,floatToFrac} from '../utils/numbers.js';
  export let mode='inline'
  const dispatch = createEventDispatcher();
@@ -39,7 +40,7 @@
 
 </script>
 <div>
-    <label on:click={()=>nref.focus()}>Number:</label> 
+    <SmallLabel on:click={()=>nref.focus()}>Number:</SmallLabel> 
     <RangeInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={amountValue}/>
     <i>
         {#if multipliable && $multiplier!=1}
@@ -48,7 +49,7 @@
     </i>
 </div>
 <div>
-    <label on:click={()=>uref.focus()}>Unit:</label> 
+    <SmallLabel on:click={()=>uref.focus()}>Unit:</SmallLabel> 
     <input bind:this={uref} on:change={change} class="name" type="text" bind:value={value.unit}>
 </div>
 
