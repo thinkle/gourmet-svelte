@@ -2,7 +2,7 @@ import RecDef from '../common/RecDef.js'
 
 export function diffRecs (r1, r2) {
     let diffs = []
-    for (let p of [...RecDef.titleProps,RecDef.recProps,{name:'images',array:true},{name:'ingredients',array:true}]) {
+    for (let p of [...RecDef.titleProps,...RecDef.recProps,{name:'images',array:true},{name:'ingredients',array:true}]) {
         if (!propIsEqual(r1[p.name],r2[p.name],p)) {
             diffs.push(p,r1[p.name],r2[p.name])
         }
