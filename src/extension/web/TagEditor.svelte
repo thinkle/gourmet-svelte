@@ -68,14 +68,16 @@
                             </strong>
                             <IconButton icon="delete" on:click="{()=>removeRule(ruleKey)}">Remove rule</IconButton>
                         {/if}
-                        {#each rules[ruleKey] as parsedItem,n}
-                            <div class='popup'>
-                                {@html parsedItem.html}
-                            </div><IconButton icon="close" bare="true" on:click="{()=>removeItem(parsedItem)}"/>
-                            {#if n < rules[ruleKey].length - 1}
-                                ,
-                            {/if}
-                        {/each}
+                        <ul>
+                            {#each rules[ruleKey] as parsedItem,n}
+                                <li>
+                                    <div class='popup'>
+                                        {@html parsedItem.html}
+                                    </div>
+                                    <IconButton icon="close" bare="true" on:click="{()=>removeItem(parsedItem)}"/>
+                                </li>
+                            {/each}
+                        </ul>
                     </li>
                 {:else}
                     {console.log('Empty rule: ',ruleKey,rules[ruleKey])}
