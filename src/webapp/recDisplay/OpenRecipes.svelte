@@ -7,14 +7,18 @@
  }
 
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {getContext,onMount} from 'svelte';
  import {fade,slide} from 'svelte/transition';
  import {send,receive} from './pickerTransition.js';
  import {flip} from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
  import Recipe from './Recipe.svelte'
+ import Button from '../../widgets/Button.svelte';
  import IconButton from '../../widgets/IconButton.svelte';
  import Tabs from '../../widgets/Tabs.svelte';
  import Tab from '../../widgets/Tab.svelte';
+ import Modal from '../../widgets/Modal.svelte';
+ import ModalLauncher from '../../widgets/ModalLauncher.svelte';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../../stores/recipeStores.js';
  function getTabTitle (id) {
      return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || 'Untitled'; // fixme
@@ -52,70 +56,109 @@
      recipeActions.openRecipe(id);
  }
 
+
+ let toolbar = getContext('toolbar');
+ let toolbarItem;
+ $: {
+     toolbarItem && $openLocalRecipes.length>=0 && toolbarItem.show()
+ }
+ $: {
+     toolbarItem && $openLocalRecipes.length<=0 && toolbarItem.hide()
+ }
+
+ onMount(
+     ()=>{
+         if (!toolbar) {
+             console.log('No toolbar :(')
+             return
+         }
+         toolbarItem = toolbar.addItem({
+             content : 'Open Recipes',
+             modalVisible : false,
+             props : {
+                 icon : 'expand_more',
+             },
+             'onClick' : open
+         });
+         return toolbarItem.onUnmount
+     }
+ );
+
+ $: {
+     if (toolbarItem)
+     {if (hide) {
+         toolbarItem.hideModal()
+     } else {
+         toolbarItem.showModal()
+     }
+     };
+ }
+
 </script>
 {#if !hide && $openLocalRecipes.length > 0}
     <div class="screen" on:click="{()=>{hide=true}}">
         
     </div>
 {/if}
-<div class="fixedContainer">
-    {#if ($openLocalRecipes.length > 0) && !hide}
-        <div class="tabbox" in:slide out:fade>
-            <!-- <div class="tabs"> -->
-            <Tabs>
-                {#each $openLocalRecipes as id (id)}
-                    <div
-                        animate:flip={{delay:100,duration:250,easing:quintOut}}>
-                        <Tab
-                            active={activeRecipeId==id} on:click={()=>activeRecipeId=id}>
-                            <div class='close'>
-                                <IconButton bare={true} small={true} on:click={()=>window.open(`/rec/${id}`,'_blank')} icon='open_in_new'/>
-                                <IconButton bare={true} small={true} on:click={()=>{closeRec(id)}} icon='close'/>
-                            </div>
-                            {getTabTitle(id)}
-                        </Tab>
-                    </div>
-                {/each}
-                <div class='toggle'>
-                    <IconButton on:click="{()=>hide=!hide}"
-                                icon={hide&&"expand_more"||"expand_less"}
-                    >
-                    </IconButton>
+
+
+{#if ($openLocalRecipes.length > 0) && !hide}
+    <Modal onClose="{()=>hide=true}" showClose="{false}" width="1200px" maxWidth="96em">
+        <Tabs sticky={true}>
+            {#each $openLocalRecipes as id (id)}
+                <div
+                    animate:flip="{{delay:100,duration:250,easing:quintOut}}">
+                    <Tab
+                        active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}">
+                        <div class='close'>
+                            <IconButton bare="{true}" small="{true}" on:click="{()=>window.open(`/rec/${id}`,'_blank')}" icon='open_in_new'/>
+                            <IconButton bare="{true}" small="{true}" on:click="{()=>{closeRec(id)}}" icon='close'/>
+                        </div>
+                        {getTabTitle(id)}
+                    </Tab>
                 </div>
-            </Tabs> <!-- close tabs -->
+            {/each}
+            <div class='toggle'>
+                <IconButton
+                    bare="{true}"
+                    on:click="{()=>hide=!hide}"
+                    icon="{hide&&'expand_more'||'expand_less'}"
+                >
+                </IconButton>
+            </div>
+        </Tabs> <!-- close tabs -->
+        
+        <div class="content">
+            <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
+            {#if $localRecipes[activeRecipeId]}
+                <Recipe
+                    rec="{$localRecipes[activeRecipeId]}"
+                    {onOpenSubRec}
+                    onChange="{(rec)=>{
+                              console.log('OpenRecipes got change!',rec);
+                              $localRecipes[rec.id]=rec;
+                              }}"
+                />
+            {:else}
+                {$openLocalRecipes.length>0 && openOne()}                    
+            {/if}
+            <!-- Are you sure you want to close modal... -->
+            {#if showCloseModalFor!==undefined}
+                <div class="modal" >
+                    {$localRecipes[showCloseModalFor] && $localRecipes[showCloseModalFor].title} has changed, close and lose changes?
+                    <Button on:click="{()=>closeRec(showCloseModalFor,true)}">
+                        Close anyway, I don't care about my changes
+                    </Button>
+                    <Button on:click="{()=>showCloseModalFor=undefined}">
+                        Oh wait, nevermind, I'm so sorry!
+                    </Button>
+                </div>
+            {/if}
+        </div> <!-- close content -->
 
-            <div class="content" in:receive out:send>
-                <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
-                {#if $localRecipes[activeRecipeId]}
-                    <Recipe
-                        rec="{$localRecipes[activeRecipeId]}"
-                        {onOpenSubRec}
-                        onChange="{(rec)=>{
-                                  console.log('OpenRecipes got change!',rec);
-                                  $localRecipes[rec.id]=rec;
-                                  }}"
-                    />
-                {:else}
-                    {$openLocalRecipes.length>0 && openOne()}                    
-                {/if}
-                <!-- Are you sure you want to close modal... -->
-                {#if showCloseModalFor!==undefined}
-                    <div class="modal" >
-                        {$localRecipes[showCloseModalFor] && $localRecipes[showCloseModalFor].title} has changed, close and lose changes?
-                        <button on:click={()=>closeRec(showCloseModalFor,true)}>
-                            Close anyway, I don't care about my changes
-                        </button>
-                        <button on:click={()=>showCloseModalFor=undefined}>
-                            Oh wait, nevermind, I'm so sorry!
-                        </button>
-                    </div>
-                {/if}
-            </div> <!-- close content -->
-
-        </div> <!-- close tabbox -->
-
+</Modal>
     {/if}
-</div>
+
 <style>
 
  .screen {
