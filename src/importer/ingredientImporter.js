@@ -1,11 +1,10 @@
 import {parseAmount} from '../utils/numbers.js';
 import {parseUnit} from '../utils/unitAmounts.js';
 import {cleanupWhitespace} from '../utils/textUtils.js';
-import {handleChunk} from './importer.js';
+import {handleChunk,ignoreMatchingDescendants} from './importer.js';
 import {mergeIngredients} from '../utils/ingredientUtils.js';
 function getIng (context, recipe, parent) {
-    let ing
-    
+    let ing    
     if (parent) {
         ing = parent
     }
@@ -54,8 +53,18 @@ export function handleIngredientUnit (chunk, context, recipe, parent) {
         tag : 'ingredient',
         value : ing,
     }
-
 }
+
+// export function handleIngredientPart (chunk, context, recipe, parent) {
+//     let text = chunk.text
+//     if (!text) {return}
+//     const lastIng = context.localContext;
+    
+//     let unit = parseUnit();
+    
+    
+// }
+
 export function handleIngredient (chunk, context, recipe) {
     // always start a fresh ingredient for the ingredient tag.
     // Begin with plain text parsing...
@@ -79,10 +88,54 @@ export function handleIngredient (chunk, context, recipe) {
     return {} // no context -- we are are complete in ourselves... 
 }
 
+function getPlainIngredientsFromChunk (chunk) {
+    if (chunk.html) {
+        console.log('Try parsing...',chunk.html);
+        let doc = new DOMParser().parseFromString(chunk.html,'text/html');
+        // we'll use xpath to grab all non-nested list items
+        let iterator = document.evaluate('//li[not(ul)] | //tr[not(td//tr)]',doc,null, XPathResult.ANY_TYPE, null );
+        let result = iterator.iterateNext();
+        let results = [];
+        while (result) {
+            results.push(result);
+            result = iterator.iterateNext();
+        }
+        if (results.length > 0) {
+            console.log("Using HTML-based results...")
+            return results.map((node)=>node.textContent)
+        }
+    }
+    return chunk.text && chunk.text.split(/\n+/) || []
+}
+
 export function handleIngredients (chunk, context, recipe) {
-    if (!chunk.text && !chunk.children) {return context && context.localContext}
+    if (!chunk.text && !chunk.html) {return context && context.localContext}
     // plain text-based handling, this is the simplest...
-    debugger;
+    
+    let ings = getPlainIngredientsFromChunk(chunk)
+
+    ings.forEach(
+        function (line) {
+            if (line.replace(/^\s+|\s+$/g)) {
+                context.localContext = handleIngredient(line,context,recipe);
+            }
+        }
+    );
+    // And now ignore everything else...
+    ignoreMatchingDescendants(
+        chunk,context,{
+            extraTagsToIgnore : [
+                'ingredient',
+                'ingredientText',
+                'amount',
+                'unit',
+                'ingredients',
+                'inggroup',
+            ],
+        });
+    return context.localContext
+    // Code below is the "right" way to do this which is broken so screw it...
+    // I'll leave this dead code here in case I return to fight another day...
     let tempRec = {ingredients:[]}
     let textContext = {
         ...context,
