@@ -2,7 +2,7 @@
  import Tester from '../../widgets/Tester.svelte';
  import {testRecs} from '../../common/mocks/recipes.js'
  import Recipe from './Recipe.svelte';
- export let initialShow
+ export let initialShow=true;
 </script>
 
 <div> 
