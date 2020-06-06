@@ -158,7 +158,7 @@ export function parseTimes (s, includeSentence) {
                 }
                 let context = getSurroundingSentence(s,offset,lastMatchOffset).replace("'","\\'");
                 lastMatchOffset = offset + matchString.length - 1;
-                return `${leading}<duration context='${context}' seconds=${seconds}>${content}</duration>${trailing}`
+                return `${leading}<duration timestring='${context}' seconds=${seconds}>${content}</duration>${trailing}`
             }
             else {
                 return matchString;
