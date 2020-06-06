@@ -20,7 +20,6 @@ import { get } from 'svelte/store';
 
 beforeAll(
     async () => {
-        console.log('Connecting to MONGO_URL?',process.env.MONGO_URL)
         mockLambdaFunction(user);
         user.fake(mockUser);
     }
@@ -29,9 +28,12 @@ beforeAll(
 it(
     'Connection to mocks works :)',
     async ()=>{
-        await tick();
-        expect(get(connected)).toBe(true)
-        user.fake(mockUser);
+        // first subscriber triggers connection
+        get(connected); 
+        // wait one tick for the connection to happen
+        await tick(); 
+        // expect it to happen
+        expect(get(connected)).toBe(true) 
     }
 );
 
@@ -41,6 +43,8 @@ describe(
     ()=>{
         beforeAll(
             async ()=>{
+                get(connected); 
+                await tick();
                 await setupEmptyDB(user)
             }
         );
@@ -48,13 +52,10 @@ describe(
         it(
             'Create a new recipe!',
             async ()=>{
-                get(connected);
-                await tick();
                 await recipeActions.createRecipe(testRecs.standard)
                 await tick()
                 let id = get(recipeActionGeneralState).created;
                 expect(id).toBeDefined()
-                console.log('Created ID',id);
                 await tick();
                 let loc = get(localRecipes)[id]
                 let stored = get(storedRecipes)[id]
@@ -73,7 +74,8 @@ describe(
     ()=>{
         beforeAll(
             async ()=>{
-                console.log('Setting up recipes for',user);
+                get(connected);
+                await tick();
                 await setupDBwithRecs(user)
             }
         );
@@ -83,14 +85,45 @@ describe(
             'Syncing grabs new recipes',
             
             async ()=>{
-                await recipeActions.doSync();
+                await recipeActions.doSync(true); // test mode -- just a few
                 await tick();
                 let current = get(storedRecipes);
                 expect(current).toBeDefined();
                 expect(Object.keys(current).length).toBeGreaterThan(10);
-                console.log(
-                    jsonConcisify(current)
+            }
+        );
+
+        xit(
+            'Opening and editing recipe updates state correctly',
+
+            async ()=> {
+                await recipeActions.doSync(true); // test mode -- just a few
+                await tick();
+                let current = get(storedRecipes);
+                expect(current).toBeDefined();
+                expect(Object.keys(current).length).toBeGreaterThan(5);
+                await tick();
+                let page = get(recipePage)
+                await tick();
+                expect(page).toBeDefined()
+                expect(page.length).toBeGreaterThan(5);
+                let recs = get(storedRecipes);
+                let rec1 = page[0];
+                let rec2 = page[1];
+                console.log('got recs',rec1,rec2);
+                let openRec = await localRecipes.open(rec1.id);
+                let openRec2 = await localRecipes.open(rec2.id);
+                let localRecs = get(localRecipes);
+                expect(localRecs).toBeDefined()
+                let localCopy = localRecs[rec1.id];
+                localCopy.title += 'Foo'; // change the title
+                // We have made a change to the object...
+                localRecipes.update(
+                    $localRecipes=>$localRecipes
                 );
+                let recState = get(recipeState);
+                expect(recState[rec1.id].edited).toBeTruthy()
+                expect(recState[rec2.id].edited).toBeFalsy()
             }
         );
     }    
