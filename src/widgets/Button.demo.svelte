@@ -20,7 +20,7 @@
 <IconButton {bare} {small} icon="save" on:click="{()=>clickCount+=1}">This is a small IconButton</IconButton>
 <IconButton {bare} {small} icon="cloud" toggle="true" toggled="{active}" on:click="{()=>active=!active}">This is a toggle lefty IconButton</IconButton>
 <IconButton {bare} {small} left="true" icon="chevron_right" on:click="{()=>clickCount+=1}">This is a Plain lefty IconButton</IconButton>
-<IconButton {bare} {small} left="true" icon="save" small="true" on:click="{()=>clickCount+=1}">This is a lefty small IconButton</IconButton>
+<IconButton {bare} {small} left="true" icon="save" on:click="{()=>clickCount+=1}">This is a lefty small IconButton</IconButton>
 <IconButton {bare} {small} left="true" icon="cloud" toggle="true" toggled="{active}" on:click="{()=>active=!active}">This is a lefty toggle IconButton</IconButton>
 <IconButton {bare} {small} icon="close" inverse="true" toggle="true" toggled="{active}" on:click="{()=>active=!active}">Inverse Toggle IconButton</IconButton>
 <IconButton {bare} {small} icon="cloud" inverse="true" on:click="{()=>active=!active}">Inverse IconButton</IconButton>
