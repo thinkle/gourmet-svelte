@@ -35,6 +35,8 @@ export function handleTime (chunk, context, recipe) {
     if (!recipe.times) {
         recipe.times = []
     }
-    recipe.times.push(amount);
+    if (amount.seconds) {
+        recipe.times.push(amount);
+    }
 }
 
