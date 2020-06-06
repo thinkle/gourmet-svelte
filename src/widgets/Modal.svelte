@@ -1,21 +1,60 @@
 <script>
- import {send,receive} from './modalTransition.js'
+ export let onClose=undefined;
+ export let closeOnClickOutside=true;
+ export let width=undefined;
+ export let maxWidth=undefined;
+ export let insertInBody=true;
+ export let showClose=true;
+ 
+ import {send,receive} from './transitions/modalTransition.js'
  import {fade} from 'svelte/transition';
  import IconButton from './IconButton.svelte';
- export let onClose;
+
+ function stopEvents (event) {
+     event.stopPropagation();
+ }
+ 
+ function maybeClose (event) {
+     if (closeOnClickOutside) {
+         onClose && onClose();
+     }
+     event.stopPropagation();
+ }
+
+ function moveToBody (node) {
+     if (insertInBody) {
+         document.body.appendChild(node);
+     }
+ }
 
 </script>
-<section class='screen' in:fade="{{duration:500}}" out:fade="{{duration:500}}">
+
+<section
+    use:moveToBody
+    class='screen' in:fade="{{duration:500}}" out:fade="{{duration:500}}"
+    on:scroll="{stopEvents}"
+    on:click="{maybeClose}"
+    style="{`
+           --max-width:${maxWidth};
+           --width:${width};
+           `}"
+    
+
+>
     <div class='dialog'
 	 in:receive={{key:1}} out:send={{key:1}}
+         on:click="{stopEvents}"
     >
-        <span class="close">
-	    <IconButton bare="true" icon="close" on:click="{onClose}"/>
-	</span>
+        {#if showClose}
+            <span class="close">
+	        <IconButton bare="true" icon="close" on:click="{onClose}"/>
+	    </span>
+        {/if}
         <slot/>
         
     </div>    
 </section>
+
 <style>
  section {
      position: fixed;
@@ -31,16 +70,22 @@
 
  .dialog {
      height: 80vh;
-     max-width: 1200px;
+     width: var(--width);
+     max-width: var(--max-width);
      margin: auto;
-     background: white;
-     padding: 10px;
+     background-color: var(--white);
+     color: var(--black);
+     padding: 16px;
      box-shadow: 4px 4px #777;
      overflow-y: scroll;
+     z-index: 3;
+
  }
 
  .close {
-     float: right
+     float: right;
+     position: sticky;
+     top: 0;
  }
  
 </style>
