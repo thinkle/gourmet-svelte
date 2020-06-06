@@ -47,6 +47,7 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
+    "sanitize-html": "^1.26.0",
     "scrollparent": "^2.0.1",
     "sirv-cli": "^0.4.4",
     "stopword": "^1.0.1",
