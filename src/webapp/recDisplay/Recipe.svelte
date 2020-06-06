@@ -21,11 +21,12 @@
  import {onMount,setContext} from 'svelte'
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
- import deepcopy from 'deepcopy'; 
+ // import deepcopy from 'deepcopy'; 
+ import {deepcopy} from './libraries.js'; 
 
  $: { if (rec && !rec.title && editable) {editMode=true}}
 
-                   let valid = false;
+                           let valid = false;
  $: {
      valid = isValid(rec);
  }
@@ -101,7 +102,6 @@
  let  rightBlockWidth
  function handleResize () {
      if (!imageBlock || !rightBlock) {
-         console.log('Weird: blocks not ready yet? img',imageBlock,'rght',rightBlock);
          return;
      }
      if (!imageCentered) {
@@ -116,7 +116,6 @@
      else {
          imageCentered = false
      }
-     console.log('Adjusted max image width to',maxImageWidth)
      maxImageWidth = rightBlockWidth - 20;
      
  }
@@ -228,8 +227,12 @@
             </div>
         </div> <!-- End top section -->
         <!-- Main recipe  -->
-        <SideBySide height="80vh" leftWidth={325} maxWidth={1250} stackSidesAt={550}
-                    maxWidthRight='45rem' maxWidthLeft='45rem'
+        <SideBySide
+            height="80vh"
+            leftWidth="{325}"
+            maxWidth="{1250}"
+            stackSidesAt="{550}"
+            maxWidthRight='45rem' maxWidthLeft='45rem'
         >
 	    <h3 slot="leftHead"> 
 	        Ingredients
@@ -248,7 +251,6 @@
                     onChange="{triggerChange}"
                     editMode="{editMode||ingeditmode}"
                     bind:ingredients="{rec.ingredients}"
-                    maxWidth="350"
                 >
 	        </IL>
 	    </div>		
@@ -268,7 +270,13 @@
 
                         {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
                             <div class="prop">                                
-                                <RecProp onChange={triggerChange} editable={editable} forceEdit={editMode} prop={prop} bind:value={rec[prop.name]}/>                                
+                                <RecProp
+                                    floatWidth="{widthLeftOfImage}"
+                                    onChange="{triggerChange}"
+                                    editable="{editable}"
+                                    forceEdit="{editMode}"
+                                    prop="{prop}"
+                                    bind:value="{rec[prop.name]}"/>   
                             </div>
                             <!-- Close flowing props  -->
                         {/each}
@@ -276,11 +284,11 @@
                         {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
                             <div class="prop bottomProp">
                                 <RecProp
-                                    floatWidth={widthLeftOfImage}
-                                               onChange={triggerChange}
-                                    editable={editable}
-                                               forceEdit={editMode}
-                                    prop={prop} bind:value={rec[prop.name]}/>
+                                    floatWidth="{widthLeftOfImage}"
+                                    onChange="{triggerChange}"
+                                    editable="{editable}"
+                                    forceEdit="{editMode}"
+                                    prop="{prop}" bind:value="{rec[prop.name]}"/>
                             </div>
                         {/each}
                         <!-- end block props -->
@@ -318,8 +326,14 @@
  /* .props {
     display: inline-block;
     } */
- h2,h3,h4,h5,h5 {
+ div :global(h2,h3,h4,h5,h5,h6) {
      font-family: var(--recipeHeadFont);
+ }
+ h2 {
+     flex-grow: 2;
+     font-weight: bold;
+     text-align: center;
+     font-size: 2rem;
  }
  .prop:first-child {
      margin-top: 0;
