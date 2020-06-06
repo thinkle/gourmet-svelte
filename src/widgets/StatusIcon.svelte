@@ -3,7 +3,7 @@
  import IconButton from './IconButton.svelte';
  export let icon
  export let tooltip
- export let showTooltip
+ export let showTooltip=false;
  export let tooltipLeft=false
  export let tooltipRight=true
  export let tooltipAbove=false
