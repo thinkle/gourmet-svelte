@@ -52,13 +52,13 @@
 <!-- Per tag view for editing mark-up... -->
 <span>
     {tags[name]} already tagged
-    <ModalLauncher modalVisible="{show}">
+    <ModalLauncher modalVisible="{show}" key="tagEdit">
         <IconButton icon="info" bare="true"
                     on:click="{()=>show=true}"
         />
     </ModalLauncher>
     {#if show}
-        <Modal onClose={()=>show=false}>
+        <Modal onClose={()=>show=false} key="tagEdit">
             {#each Object.keys(rules) as ruleKey}
                 {#if rules[ruleKey] && rules[ruleKey][0]}
                     <li>
