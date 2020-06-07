@@ -3,6 +3,10 @@ let words = [...UNIT_NAMES,
              // words added directly here won't have any attempts to handle
              // suffixes, which may be what we want
              'seeded', // but not seeds/seed
+             'torn',
+             'fry',
+             'frying',
+             'fried', // but not fries...
             ]
 
 let adjs = [
@@ -16,6 +20,9 @@ let adjs = [
     'small',
     'thick',
     'thin',
+    'rough',
+    'smooth',
+    'delicate',
 ];
 let verbs = [
     'bake',
@@ -32,7 +39,6 @@ let verbs = [
     'discard',
     'flambe',
     'flambé',
-    'fry',
     'grill',
     'grind',
     'halve',
@@ -62,9 +68,12 @@ let verbs = [
     'squirt',
     'stem',
     'stir',
+    'taste',
     'throw',
     'thrown',
     'toss',
+    'trim',
+    'wash',
     'whisk'
 ];
 // we'll be grammatical profligates...
