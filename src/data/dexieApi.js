@@ -10,7 +10,7 @@ import Dexie from 'dexie';
 const dexieApi = {
     async connect () {
         dexieApi.db = new Dexie('Recipes');
-        dexieApi.db.version(1)
+        dexieApi.db.version(2)
             .stores({
                 recipes:'++id,&_id,*words,*ings,*isShoppingList'
             });
@@ -67,7 +67,6 @@ const dexieApi = {
     async getRecipes({query,fields,limit,page}={}) {
         let q = dexieApi.db.recipes
         if (query && query.isShoppingList) {
-            debugger;
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
         }
         if (query && query.fulltext) {
