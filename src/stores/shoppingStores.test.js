@@ -12,7 +12,7 @@ import deepcopy from 'deepcopy';
 import {jsonConcisify} from '../utils/textUtils.js';
 import {user} from './user.js';
 import {connected,localRecipes,openLocalRecipes,storedRecipes,recipePage,recipeActions,recipeState,recipeActionState,recipeActionGeneralState} from './recipeStores.js';
-import {shoppingList} from './shoppingStores.js';
+import {shoppingList, storedShopRec} from './shoppingStores.js';
 
 import { tick } from "svelte";
 import { get } from 'svelte/store';
@@ -26,6 +26,19 @@ beforeAll(
     }
 );
 
+async function getUpdatedSL () {
+    let sl = await get(shoppingList);
+    await tick();
+    await Promise.resolve()
+    await tick();
+    sl = await get(shoppingList);
+    await Promise.resolve()
+    await tick();
+    sl = await get(shoppingList);
+    console.log('Got',sl);
+    return sl;
+}
+
 describe(
     'Starting empty',
     ()=>{
@@ -34,26 +47,40 @@ describe(
         }
                  );
 
-        it(
+        xit(
             'Create empty shopping list',
             async ()=>{
-                let sl = await shoppingList.get();
-                await tick();
-                await Promise.resolve()
-                let $shoppingList = get(shoppingList);
-                await tick();
-                await Promise.resolve()
-                $shoppingList = get(shoppingList);
-                expect($shoppingList).toBeDefined()
-                expect($shoppingList.length).toEqual(0);
+                shoppingList.get();
+                //let $shoppingList = await getUpdatedSL()
+                //expect($shoppingList).toBeDefined()
+                //expect($shoppingList.length).toEqual(0);
+                //await tick();
                 let id = shoppingList.getShoppingRecipeId();
+                let $storedRec = get(storedShopRec)
+                console.log('Stored Rec?',$storedRec)
+                await tick()
+                $storedRec = get(storedShopRec)
+                console.log('Stored Rec?',$storedRec)
                 // Now fetch a second time and expect it to work again...
-                await shoppingList.get();
+                shoppingList.get();
+                await tick();
                 let newId = shoppingList.getShoppingRecipeId();
                 expect(id).toEqual(newId);
             }
         );
 
+        it(
+            'Add custom item to shopping list',
+            async ()=>{
+                await shoppingList.get();
+                let id = await shoppingList.addItem({amount:{amount:1,unit:'can'},text:'tomatoes'});
+                expect(id).toBeDefined()
+                let id2 = await shoppingList.addItem({amount:{amount:1,unit:'can'},text:'beans'});
+                expect(id).not.toEqual(id2)
+                let sl = await getUpdatedSL()
+                expect(sl.length).toEqual(2);
+            }
+        );
 
         
     }
@@ -89,21 +116,18 @@ describe(
                 let sl = await get(shoppingList);
                 await tick()
                 let shoppingRecID = shoppingList.getShoppingRecipeId();
+                expect(shoppingRecID).toBeDefined();
                 sl = await get(shoppingList);
                 expect(sl.length).toEqual(0)
                 let recipeIds = await getSomeIDs()
                 await shoppingList.addRecipe(recipeIds[1]);
-                await get(shoppingList);
-                await Promise.resolve()
-                sl = await get(shoppingList);
+                sl = await getUpdatedSL()
                 expect(sl.length).toBeGreaterThan(1)
                 let listLength = sl.length;
                 await shoppingList.addRecipe(recipeIds[2]);
                 await shoppingList.addRecipe(recipeIds[3]);
                 await shoppingList.addRecipe(recipeIds[4]); // add three more recipes...
-                sl = await get(shoppingList);
-                await Promise.resolve()
-                sl = await get(shoppingList);
+                sl = await getUpdatedSL()
                 expect(sl.length).toBeGreaterThan(listLength);
             }
         );
@@ -115,17 +139,14 @@ describe(
                 await shoppingList.clear();
                 let recipeIds = await getSomeIDs()
                 await shoppingList.addRecipe(recipeIds[3]);
-                let sl = await get(shoppingList);
-                await Promise.resolve()
-                sl = await get(shoppingList);
+                let sl = await getUpdatedSL()
                 expect(sl.length).toBeGreaterThan(1)
                 shoppingList.removeRecipe(recipeIds[3]);
-                sl = await get(shoppingList);
-                await Promise.resolve()
-                sl = await get(shoppingList);
+                sl = await getUpdatedSL()
                 expect(sl.length).toEqual(0)
             }
         );
+
         
     }
 );
