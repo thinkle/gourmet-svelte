@@ -102,7 +102,7 @@
 
 
 {#if ($openLocalRecipes.length > 0) && !hide}
-    <Modal onClose="{()=>hide=true}" showClose="{false}" width="1200px" maxWidth="96em">
+    <Modal key="OpenRecipes" onClose="{()=>hide=true}" showClose="{false}" width="1200px" maxWidth="96em">
         <Tabs sticky={true}>
             {#each $openLocalRecipes as id (id)}
                 <div
