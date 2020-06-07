@@ -10,7 +10,6 @@
  import Sidebar from '../extension/web/Sidebar.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
-
  let name = 'Gourmet';
  let page;
  let params = {};
