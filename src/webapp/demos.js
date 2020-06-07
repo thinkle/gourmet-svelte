@@ -1,6 +1,8 @@
 import LocalData from "../data/LocalData.demo.svelte";
 import RemoteApi from "../data/RemoteApi.demo.svelte";
 import RemoteRecipe from "../data/RemoteRecipe.demo.svelte";
+import ShoppingList from "../shopDisplay/ShoppingList.demo.svelte";
+import ShoppingListItems from "../shopDisplay/ShoppingListItems.demo.svelte";
 import RecipeStores from "../stores/RecipeStores.demo.svelte";
 import Button from "../widgets/Button.demo.svelte";
 import IngredientInput from "../widgets/IngredientInput.demo.svelte";
@@ -21,6 +23,8 @@ export default {
     LocalData,
     RemoteApi,
     RemoteRecipe,
+    ShoppingList,
+    ShoppingListItems,
     RecipeStores,
     Button,
     IngredientInput,
