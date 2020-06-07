@@ -26,7 +26,9 @@
 <div on:click="{()=>{
                console.log("They clicked the div");
                show=true}}">
-    <ModalLauncher modalVisible="{show}"  >
+    <ModalLauncher modalVisible="{show}"
+                   key="picker"
+    >
         <slot>
             <IconButton {...icon}>
                 Select Recipe
