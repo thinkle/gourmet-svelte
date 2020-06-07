@@ -10,6 +10,7 @@ let localShopRec = writable() // holds the shopping list recipe
 let sl = derived(
     [localShopRec,localRecipes],
     async ([$localShopRec,$localRecipes],set) => {
+        console.log('Re-create derived shopping list store');
         if (!$localShopRec) {
             set([]);
         } else {
@@ -22,13 +23,13 @@ let sl = derived(
     }
 );
 
-async function crawlIngredients (ingredientList,source,$localRecipes,items) {
+async function crawlIngredients (ingredientList,source,$localRecipes,items,multiplier) {
     // TODO - check for circular references...
     //console.log('Crawl',ingredientList.length,'items',new Date().getTime());
     for (let ingredient of ingredientList) {
         if (ingredient.ingredients) {
             //console.log('Crawl group...')
-            await crawlIngredients(ingredient.ingredients,source,$localRecipes,items);
+            await crawlIngredients(ingredient.ingredients,source,$localRecipes,items,multiplier);
         } else if (ingredient.reference) {
             //console.log('Lookup recipe for ',ingredient.reference);
             let recipe = $localRecipes[ingredient.reference];
@@ -37,13 +38,17 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items) {
                 recipe = await localRecipes.open(ingredient.reference);
             }
             if (recipe && recipe.ingredients) {
-                crawlIngredients(recipe.ingredients,recipe,$localRecipes,items);
+                let recMultiplier
+                if (ingredient.amount && ingredient.amount.amount && ingredient.amount.amount != 1) {
+                    recMultiplier = ingredient.amount.amount
+                }
+                crawlIngredients(recipe.ingredients,recipe,$localRecipes,items,recMultiplier);
             }
             else {
                 //console.log('WARNING: DID NOT FIND LINKED RECIPE FOR ITEM',ingredient,'from',source);
             }
         } else {
-            items.push({source,ingredient});
+            items.push({source,ingredient,multiplier});
         }
     }
 }
@@ -145,6 +150,24 @@ export const shoppingList = {
             }
         );
     },
+
+    setShopItem (item, shopItem) {
+        if (!item.source) {
+            throw new Error('item must have source to change shopitem');
+        }
+        if (!item.source.id) {
+            throw new Error('item source must have ID to change shopitem');
+        }
+        item.ingredient.shopItem = shopItem; // the object is actually attached to our local recipe anyway...
+        localRecipes.update(
+            ($localRecipes)=>{
+                $localRecipes[item.source.id] = $localRecipes[item.source.id];
+                return $localRecipes;
+            }
+        );
+
+    },
+    
     /* Add custom item to shopping list */
     addItem (ingredient) {
         return new Promise((resolve,reject)=>{
@@ -181,6 +204,7 @@ export const shoppingList = {
             }
         );
     },
+
     /* Update recipe list item */
     updateItem (shoppingItem) {
         return new Promise((resolve,reject)=>{
