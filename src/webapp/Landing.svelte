@@ -104,7 +104,13 @@
         <div class='brand'>Gourmet</div>
         <div>
             {#each extraItems as item (item)}
-                <ModalLauncher modalVisible="{item.modalVisible}">
+                <!-- Fix me if we add another one...
+                     modal launcher key should be in toolbaritem, not hard-coded here
+                -->
+                <ModalLauncher
+                    key="OpenRecipes"
+                    modalVisible="{item.modalVisible}"
+                    >
                     {#if !item.hide}
                         {#if item.component}
                             <svelte:component this="{item.component}"
