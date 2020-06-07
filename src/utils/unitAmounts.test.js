@@ -1,4 +1,5 @@
 import {getInAConversion,getMultiplierConversion,
+        addAmounts,
         getStandardUnit,parseUnit,UNIT_REGEXP} from './unitAmounts.js';
 
 it(
@@ -70,5 +71,47 @@ it(
         expect(getMultiplierConversion(
             'c','fl oz'
         )).toBeCloseTo(8);
+    }
+);
+
+fit(
+    'add amounts',
+    ()=>{
+        let r = addAmounts([{amount:1,unit:'asdf'},{amount:2,unit:'asdf'}]);
+        expect(r).toEqual(
+            expect.arrayContaining(
+                [{amount:3,unit:'asdf'}]
+            )
+        );
+        r = addAmounts([{amount:1.5,unit:'cup'},{amount:2.25,unit:'c'}]);
+        expect(r).toEqual(
+            expect.arrayContaining(
+                [{amount:3.75,unit:'c'}]
+            )
+        );
+
+        r = addAmounts([{amount:1.75,unit:'cup'},{amount:4,unit:'Tbs.'}]);
+        expect(r).toEqual(
+            expect.arrayContaining(
+                [{amount:2,unit:'c'}]
+            )
+        );
+
+        r = addAmounts([{amount:4,unit:'Tbs.'},{amount:1.75,unit:'cup'}]);
+        expect(r).toEqual(
+            expect.arrayContaining(
+                [{amount:2,unit:'c'}]
+            )
+        );
+        r = addAmounts([{amount:4},{amount:2,unit:'cup'}]);
+        expect(r).toEqual(
+            expect.arrayContaining(
+                [{amount:2,unit:'c'},
+                 {amount:4,unit:''}
+                ]
+            )
+        );
+
+
     }
 );
