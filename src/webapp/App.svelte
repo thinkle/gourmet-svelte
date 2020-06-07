@@ -4,9 +4,8 @@
  import router from 'page';
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';
- import Recipe from './recDisplay/Recipe.svelte';
  import MainView from './MainView.svelte';
- import SingleRecipe from './recDisplay/SingleRecipe.svelte';
+ import SingleRecipe from '../recDisplay/SingleRecipe.svelte';
  import Demo from './Demo.svelte';
  import Sidebar from '../extension/web/Sidebar.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
