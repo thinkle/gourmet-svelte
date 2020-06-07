@@ -21,6 +21,11 @@ export default [
 	    file: 'public/build/bundle.js'
         },
         plugins: [
+            bundleDemos({
+                target : 'src/webapp/demos.js',
+                root : 'src',
+                pathBase : '../',
+            }),
             replace({
                 DEV : !production,
                 BUILD_TIME : ()=>new Date()+'',
@@ -190,4 +195,47 @@ function serve() {
 	    }
 	}
     };
+}
+
+
+import fs from 'fs';
+import path from 'path';
+import glob from 'glob';
+
+function bundleDemos (options) {
+    console.log('called bundle...');
+
+    return {
+        generateBundle () {            
+            let rootDirectory = options.root
+            let pathBase = options.pathBase || './'
+            let files = []
+            let globExpression = '*.demo.svelte';
+            for (let level=0; level<5; level++) {
+                files = [...files,...glob.sync(globExpression)];
+                globExpression = '*/'+globExpression;
+            }
+            let moduleNames = []
+            let importStatements = files.map(
+                (fn)=>{
+                    let bn = path.basename(fn);
+                    let moduleName = bn.split('.')[0];
+                    let pathname = pathBase + fn.replace(/^[^/]+\//,'');
+                    moduleNames.push(moduleName);
+                    return `import ${moduleName} from "${pathname}";`
+                }
+            ).join('\n');
+
+            let exportStatement = ` 
+export default {
+    ${moduleNames.join(',\n    ')}
+} 
+`;
+            let currentContents = fs.readFileSync(options.target);
+            let newContents =  `${importStatements}\n\n${exportStatement}`
+            if (currentContents != newContents) {
+                fs.writeFileSync(options.target,newContents);
+            }
+        }
+    }
 }
