@@ -79,7 +79,7 @@
                                 value="{subitem.ingredient.amount}"
                                 multiplyBy="{subitem.multiplier}"/>
                             {subitem.ingredient.text}
-                            {#if titleCase(subitem.ingredient.text) !== item.item}
+                            {#if titleCase(subitem.ingredient.text) !== item.item && item.items.length > 1}
                                 <Button on:click={()=>shoppingList.setShopItem(subitem,titleCase(subitem.ingredient.text))}>
                                     Separate
                                 </Button>
