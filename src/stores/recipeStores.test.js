@@ -5,7 +5,6 @@ jestFetchMocks.enableMocks()
 import indexedDB from 'fake-indexeddb';
 import IDBKeyRange from"fake-indexeddb/lib/FDBKeyRange";
 
-
 import {testRecs} from "../common/mocks/recipes.js"
 import mockUser from "../common/mocks/user.js"
 import {mockLambdaFunction} from '../data/functions/mockFunction.js';
@@ -74,9 +73,12 @@ describe(
     ()=>{
         beforeAll(
             async ()=>{
+                console.log('BEFORE_ALL Connect')
                 get(connected);
                 await tick();
                 await setupDBwithRecs(user)
+                await recipeActions.doSync(true); // test mode -- just a few
+                await tick();
             }
         );
 
@@ -85,20 +87,27 @@ describe(
             'Syncing grabs new recipes',
             
             async ()=>{
-                await recipeActions.doSync(true); // test mode -- just a few
-                await tick();
                 let current = get(storedRecipes);
                 expect(current).toBeDefined();
                 expect(Object.keys(current).length).toBeGreaterThan(10);
             }
         );
 
-        xit(
+        it(
+            'Syncing AGAIN grabs new recipes',
+            
+            async ()=>{
+                let current = get(storedRecipes);
+                expect(current).toBeDefined();
+                expect(Object.keys(current).length).toBeGreaterThan(10);
+            }
+        );
+
+
+        it(
             'Opening and editing recipe updates state correctly',
 
             async ()=> {
-                await recipeActions.doSync(true); // test mode -- just a few
-                await tick();
                 let current = get(storedRecipes);
                 expect(current).toBeDefined();
                 expect(Object.keys(current).length).toBeGreaterThan(5);
@@ -108,22 +117,23 @@ describe(
                 expect(page).toBeDefined()
                 expect(page.length).toBeGreaterThan(5);
                 let recs = get(storedRecipes);
-                let rec1 = page[0];
-                let rec2 = page[1];
-                console.log('got recs',rec1,rec2);
-                let openRec = await localRecipes.open(rec1.id);
-                let openRec2 = await localRecipes.open(rec2.id);
+                let id1 = page[0];
+                let id2 = page[1];
+                expect(id1).toBeDefined();
+                expect(id2).toBeDefined();
+                let openRec = await localRecipes.open(id1);
+                let openRec2 = await localRecipes.open(id2);
                 let localRecs = get(localRecipes);
                 expect(localRecs).toBeDefined()
-                let localCopy = localRecs[rec1.id];
+                let localCopy = localRecs[id1];
                 localCopy.title += 'Foo'; // change the title
                 // We have made a change to the object...
                 localRecipes.update(
                     $localRecipes=>$localRecipes
                 );
                 let recState = get(recipeState);
-                expect(recState[rec1.id].edited).toBeTruthy()
-                expect(recState[rec2.id].edited).toBeFalsy()
+                expect(recState[id1].edited).toBeTruthy()
+                expect(recState[id2].edited).toBeFalsy()
             }
         );
     }    
