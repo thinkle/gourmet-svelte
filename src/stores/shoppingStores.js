@@ -1,7 +1,9 @@
 import { readable, writable, get, derived } from 'svelte/store';
-import { localRecipes, recipeActions } from './recipeStores.js';
+import { makeLocalRecipeStore, recipeActions } from './recipeStores.js';
 import api from '../data/api.js';
 import deepcopy from 'deepcopy';
+
+const {localRecipes,recipeState} = makeLocalRecipeStore();
 
 export let storedShopRec = writable() // holds stored copy of recipe
 let localShopRec = writable() // holds the shopping list recipe

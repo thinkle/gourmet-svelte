@@ -7,12 +7,13 @@ import api from '../data/api.js';
 import deepcopy from 'deepcopy'
 import {diffRecs} from '../data/diff.js';
 const stored = writable({});
-const local = writable({});
+
 const activePage = writable([]);
 export const pageInfo = writable({
 });
 const actionState = writable({}) // for e.g. "searching recipes..."
 const individualActionState = writable({}) // for e.g. updating recipe #123124
+
 export const connected = readable(false,(set)=>{
     api.connect().then(
         ()=>{
@@ -62,49 +63,6 @@ function setStoredRecs (recs) {
     );
 }
 
-export const localRecipes = {
-    open (id) {
-        return new Promise((resolve,reject)=>{
-            if (isNaN(Number(id))) {
-                reject(`Open should be called with a numeric local ID, but got ${id}`);
-            }
-            let alreadyOpenCopy = get(localRecipes)[id]
-            if (alreadyOpenCopy) {resolve(alreadyOpenCopy)}
-            let $storedRecipes = get(storedRecipes)
-            const storedRec = $storedRecipes[id]
-            if (!storedRec) {
-                reject('No stored recipe exists!');
-            }
-            else {
-                let localCopy = deepcopy(storedRec);
-                try {
-                local.update(
-                    ($localRecipes)=>{
-                        $localRecipes[id] = localCopy
-                        return $localRecipes;
-                    }
-                ); } catch (err) {
-                    reject('Error updating local',err);
-                }
-                resolve(localCopy);
-            }
-        });
-    },
-    close (id) {
-        local.update(
-            ($local) => {
-                delete $local[id];
-                return $local;
-            }
-        );
-    },
-    ...local
-}
-
-export const openLocalRecipes = derived(local,($local)=>{
-    return Object.keys($local)
-}
-);
 
 export const storedRecipes = {
     subscribe : stored.subscribe,
@@ -210,32 +168,89 @@ export const recipeActionGeneralState = {
 export const recipeActionState = {
     subscribe : individualActionState.subscribe
 }
-export const recipeState = derived(
-    [local,stored],
-    ([$local,$stored])=>{
-        let recState = {}
-        for (let key in $local) {
-            recState[key] = {} //...$state[key])}
-            let diff = diffRecs($local[key],$stored[key]);
-            if (diff) {
-                // if (!recState[key].edited) {
-                //     let o1 = $local[key];
-                //     let o2 = $stored[key];
-                //     console.log(o1,'differs from',o2);
-                // }
-                recState.changes = diff;
-                console.log('Recs differ! Changed:',diff);
-                recState[key].edited = true;
-            }
-            else {
-                recState[key].edited = false;
-            }
-            if ($stored[key].savedRemote) {
-                recState[key].savedRemote = true
-            }
-            recState[key].last_modified = $stored[key].last_modified
-        }
-        return recState;
+
+
+export function makeLocalRecipeStore () {
+    const local = writable({});
+    const localRecipes = {
+        open (id) {
+            return new Promise((resolve,reject)=>{
+                if (isNaN(Number(id))) {
+                    reject(`Open should be called with a numeric local ID, but got ${id}`);
+                }
+                let alreadyOpenCopy = get(localRecipes)[id]
+                if (alreadyOpenCopy) {resolve(alreadyOpenCopy)}
+                let $storedRecipes = get(storedRecipes)
+                const storedRec = $storedRecipes[id]
+                if (!storedRec) {
+                    reject('No stored recipe exists!');
+                }
+                else {
+                    let localCopy = deepcopy(storedRec);
+                    try {
+                        local.update(
+                            ($localRecipes)=>{
+                                $localRecipes[id] = localCopy
+                                return $localRecipes;
+                            }
+                        ); } catch (err) {
+                            reject('Error updating local',err);
+                        }
+                    resolve(localCopy);
+                }
+            });
+        },
+        close (id) {
+            local.update(
+                ($local) => {
+                    delete $local[id];
+                    return $local;
+                }
+            );
+        },
+        ...local
     }
-);
+
+    const openLocalRecipes = derived(local,($local)=>{
+        return Object.keys($local)
+    }
+                                    );
+
+    const recipeState = derived(
+        [local,stored],
+        ([$local,$stored])=>{
+            let recState = {}
+            for (let key in $local) {
+                recState[key] = {} //...$state[key])}
+                let diff = diffRecs($local[key],$stored[key]);
+                if (diff) {
+                    // if (!recState[key].edited) {
+                    //     let o1 = $local[key];
+                    //     let o2 = $stored[key];
+                    //     console.log(o1,'differs from',o2);
+                    // }
+                    recState.changes = diff;
+                    console.log('Recs differ! Changed:',diff);
+                    recState[key].edited = true;
+                }
+                else {
+                    recState[key].edited = false;
+                }
+                if ($stored[key].savedRemote) {
+                    recState[key].savedRemote = true
+                }
+                recState[key].last_modified = $stored[key].last_modified
+            }
+            return recState;
+        }
+    );
+
+    return {
+        localRecipes,
+        openLocalRecipes,
+        recipeState,
+    }
     
+}
+const {localRecipes,openLocalRecipes,recipeState} = makeLocalRecipeStore();
+export {localRecipes,openLocalRecipes,recipeState}
