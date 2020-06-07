@@ -13,9 +13,9 @@ export function mockLambdaFunction (user) {
 
     fetch.mockResponse(
         async (request)=>{
-            if (request.url.indexOf('getR')>-1) {
-                debugger;
-            }
+            // if (request.url.indexOf('getR')>-1) {
+            //     debugger;
+            // }
             request.queryStringParameters = querystring.parse(request.url.split('?')[1])
             let response = await handler(request,context)
             response.status = response.statusCode
