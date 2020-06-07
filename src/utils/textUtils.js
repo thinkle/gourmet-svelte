@@ -56,7 +56,7 @@ export function getSurroundingSentence (text, targetOffset, startAfter=-1) {
     }
     return text
         .substr(beginningIndex,finalIndex-beginningIndex)
-        .replace(/^\s*|\s*$/g,''); 
+        .replace(/^\s*|\s*$/g,'');
 }
 
 export function inTag (idx, text) {
