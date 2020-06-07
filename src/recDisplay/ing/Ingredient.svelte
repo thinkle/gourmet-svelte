@@ -32,7 +32,7 @@
  import {highlightItem} from '../../utils/ingredientUtils.js';
  let highlightedIngredient = getContext('highlightedIngredient');
  let highlightersActive
- $: highlightersActive = ing && $highlightedIngredient.active && $highlightedIngredient.active.indexOf(ing.text) > -1;
+ $: highlightersActive = ing && $highlightedIngredient && $highlightedIngredient.active && $highlightedIngredient.active.indexOf(ing.text) > -1;
 
  function toggleHighlight (ingredient) {
      if (!highlightersActive) {return}
@@ -53,11 +53,11 @@
  }
 
  import {derived} from 'svelte/store'
- let highlightedItem =  derived(highlightedIngredient,($highlightedIngredient)=>$highlightedIngredient.highlighted);
+ let highlightedItem =  derived(highlightedIngredient,($highlightedIngredient)=>$highlightedIngredient && $highlightedIngredient.highlighted);
  function scroll (node,highlighted) {
      return {
          update (highlighted) {
-             if (highlighted===ing.text && $highlightedIngredient.scrolledIngFor!==ing.text) {
+             if (highlighted===ing.text && $highlightedIngredient && $highlightedIngredient.scrolledIngFor!==ing.text) {
                  scrollIntoView(node);
                  $highlightedIngredient.scrolledIngFor = ing.text;
              }              
@@ -68,12 +68,12 @@
 
 </script>
 
-    {#if ing}
-        <tr class="ing" class:ingref="{ing.reference}"
-            class:highlighted="{ing.text==$highlightedIngredient.highlighted}"
-            class:hover="{ing.text==$highlightedIngredient.hover}"
-            use:scroll="{$highlightedItem}"
-        >
+{#if ing}
+    <tr class="ing" class:ingref="{ing.reference}"
+        class:highlighted="{$highlightedIngredient&&ing.text==$highlightedIngredient.highlighted}"
+        class:hover="{$highlightedIngredient&&ing.text==$highlightedIngredient.hover}"
+        use:scroll="{$highlightedItem}"
+    >
             {#if edit}
                 <IngredientEditor
                     {onChange}
