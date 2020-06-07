@@ -124,7 +124,7 @@
                     {/if}
                 </ModalLauncher>
             {/each}
-            <IconButton on:click={() => doLogout()} icon="close">Log Out</IconButton>
+            <IconButton bare="true" on:click={() => doLogout()} icon="close">Log Out</IconButton>
         </div>
     </nav>
     <slot/>
