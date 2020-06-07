@@ -1,9 +1,12 @@
 <script>
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
+ import ShoppingList from '../shopDisplay/ShoppingList.svelte';
  import ModalLauncher from '../widgets/ModalLauncher.svelte';
+ import Modal from '../widgets/Modal.svelte';
  import OpenRecipes from '../recDisplay/OpenRecipes.svelte';
  import Status from '../widgets/Status.svelte';
+ import Button from '../widgets/Button.svelte';
  import IconButton from '../widgets/IconButton.svelte';
  import {connected,
         localRecipes,
@@ -20,16 +23,29 @@
  import {getContext,onMount} from 'svelte';
  import {writable} from 'svelte/store'
  let hideOpenButton = writable(true);
- 
+ let showShoppingList = false;
 </script>
 
 <div>
     {#if $connected}
         <br>
-        <button
+        <Button
             on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
             New Recipe
-        </button>
+        </Button>
+        <ModalLauncher
+            key="ShoppingList"
+            modalVisible="{showShoppingList}">
+            <Button on:click="{()=>showShoppingList=true}">Shopping List</Button>
+        </ModalLauncher>
+        {#if showShoppingList}
+            <Modal
+                key="ShoppingList"
+                width="1000px"
+                onClose="{()=>showShoppingList=false}">
+                <ShoppingList/>
+            </Modal>
+        {/if}
     {/if}
     <div>
         <OpenRecipes bind:this={opener}/>
