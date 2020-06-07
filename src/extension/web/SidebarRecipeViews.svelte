@@ -1,7 +1,7 @@
 <script>
  export let recipe
  
- import Recipe from '../../webapp/recDisplay/Recipe.svelte'
+ import Recipe from '../../recDisplay/rec/Recipe.svelte'
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
  import IconButton from '../../widgets/IconButton.svelte';
  import Tabs from '../../widgets/Tabs.svelte';
