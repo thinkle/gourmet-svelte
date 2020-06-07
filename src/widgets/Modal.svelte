@@ -5,10 +5,11 @@
  export let maxWidth=undefined;
  export let insertInBody=true;
  export let showClose=true;
- 
- import {send,receive} from './transitions/modalTransition.js'
+ export let key
  import {fade} from 'svelte/transition';
  import IconButton from './IconButton.svelte';
+ import {getCrossfade} from './transitions/modalTransition.js'
+ let [send,receive] = getCrossfade(key);
 
  function stopEvents (event) {
      event.stopPropagation();
