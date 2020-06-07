@@ -277,6 +277,7 @@ function createUnitMapping (baseUnit, mapping) {
 
 
 export function getStandardUnit (unit) {
+    if (!unit) {return}
     return UNIT_LOOKUP[unit]
 }
 
@@ -369,6 +370,53 @@ export function parseUnit (text, requireIngredient=false) {
         return {text:cleanupWhitespace(text)}
     }
 }
+
+// Return the smallest list of possible representing the amounts in
+// the list handed to us, adding where possible.
+export function addAmounts (amounts, item) {
+    let byUnit = {}
+    for (let amountObj of amounts) {
+        let unit = getStandardUnit(amountObj.unit)||amountObj.unit||'';
+        let amount = amountObj.amount;
+        if (byUnit[unit]) {
+            console.log('Found same unit, adding',amount,'to',byUnit[unit]);
+            byUnit[unit] += (amount||1);            
+        } else {
+            let addedYet = false;
+            for (let otherUnit in byUnit) {
+                let conversion = getMultiplierConversion(unit,otherUnit);
+                if (conversion) {
+                    // Keep the bigger unit...
+                    if (conversion <= 1) {
+                        //console.log('Converting to unit, adding',amount,unit,'to',byUnit[otherUnit],otherUnit);
+                        byUnit[otherUnit] += (amount||1) * conversion
+                        //console.log('Got',byUnit[otherUnit]);
+                    } else {
+                        //console.log('Converting to unit (swap units), adding',amount,unit,'to',byUnit[otherUnit],otherUnit);
+                        conversion = getMultiplierConversion(otherUnit,unit);
+                        let otherAmount = byUnit[otherUnit] * conversion
+                        delete byUnit[otherUnit]
+                        byUnit[unit] = (amount||1) + otherAmount;
+                        //console.log('Got',byUnit[unit],unit);
+                    }
+                    
+                    addedYet = true;
+                    break;
+                }
+            }
+            if (!addedYet) {
+                byUnit[unit] = amount||1
+            }
+        }
+    }
+    return Object.keys(byUnit).map(
+        (unit)=>({
+            unit,
+            amount : byUnit[unit]
+        })
+    )
+}
+
 
 export default {
     UNIT_REGEXP_STRING,
