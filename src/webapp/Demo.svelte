@@ -1,30 +1,7 @@
 <script>
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
- import Tester from '../widgets/Tester.svelte';
- import {testRecs} from '../common/mocks/recipes.js'
- import Recipe from './recDisplay/Recipe.svelte';
- import RecDisplayTests from './recDisplay/Recipe.demo.svelte';
- import WidgetTests from '../widgets/Widgets.demo.svelte';
- import widgetTestPaths from '../widgets/widgetDemos.js';
- import LocalDataTester from '../data/LocalData.demo.svelte';
- import RecStoreTester from '../stores/RecipeStores.demo.svelte';
- import RemoteApiTester from '../data/RemoteApi.demo.svelte';
- import HighlightTest from '../extension/parser/Highlight.demo.svelte';
- import RecipeTextTest from './recDisplay/RecipeText.demo.svelte';
- import RecipePickerTest from './recDisplay/RecipePicker.demo.svelte';
+ import demos from './demos.js';
  export let demo
- 
- let demos = {
-     rectext : RecipeTextTest,
-     widgets : WidgetTests,
-     rec : RecDisplayTests,
-     localData : LocalDataTester,
-     remote: RemoteApiTester,     
-     recipeStores : RecStoreTester,
-     highlight : HighlightTest,
-     recpicker : RecipePickerTest,
-     ...widgetTestPaths,
- }
 
  $: {
      console.log('Demo is',demo);
