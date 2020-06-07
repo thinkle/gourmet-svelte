@@ -1,6 +1,8 @@
 <script>
  export let modalVisible
- import {send,receive} from './transitions/modalTransition.js'
+ export let key
+ import {getCrossfade} from './transitions/modalTransition.js'
+ let [send,receive] = getCrossfade(key);
 </script>
 
 
