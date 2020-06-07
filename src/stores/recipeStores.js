@@ -65,6 +65,9 @@ function setStoredRecs (recs) {
 export const localRecipes = {
     open (id) {
         return new Promise((resolve,reject)=>{
+            if (isNaN(Number(id))) {
+                reject(`Open should be called with a numeric local ID, but got ${id}`);
+            }
             let alreadyOpenCopy = get(localRecipes)[id]
             if (alreadyOpenCopy) {resolve(alreadyOpenCopy)}
             let $storedRecipes = get(storedRecipes)
@@ -74,12 +77,15 @@ export const localRecipes = {
             }
             else {
                 let localCopy = deepcopy(storedRec);
+                try {
                 local.update(
                     ($localRecipes)=>{
                         $localRecipes[id] = localCopy
                         return $localRecipes;
                     }
-                );
+                ); } catch (err) {
+                    reject('Error updating local',err);
+                }
                 resolve(localCopy);
             }
         });
@@ -102,7 +108,16 @@ export const openLocalRecipes = derived(local,($local)=>{
 
 export const storedRecipes = {
     subscribe : stored.subscribe,
+    get : async function (id,mongoId) {
+        let $stored = get(stored);
+        if ($stored[id]) {
+            return $stored[id];
+        } else {
+            return await recipeActions.getRecipe(id,mongoId);
+        }
+    }
 }
+
 export const recipePage = {
     subscribe : activePage.subscribe,
     
