@@ -12,7 +12,7 @@ const dexieApi = {
         dexieApi.db = new Dexie('Recipes');
         dexieApi.db.version(1)
             .stores({
-                recipes:'++id,&_id,*words,*ings'
+                recipes:'++id,&_id,*words,*ings,*isShoppingList'
             });
         return true;
     },
@@ -50,18 +50,15 @@ const dexieApi = {
             let subIds = await subResults.primaryKeys()
             if (!ids) {
                 ids = subIds;
-                console.log('DX: ',word,'=>',ids.length,'results');
             } else {
                 ids = ids.filter(
                     (id)=>subIds.indexOf(id)>-1
                 );
-                console.log('DX Down to ',ids.length,'results',word);
                 if (ids.length == 0) {
                     return undefined
                 }
             }
         }
-        console.log('Got IDs',ids);
         q = q.where(':id').anyOf(ids);
         q.alreadyCounted = ids.length;
         return q;
@@ -69,6 +66,10 @@ const dexieApi = {
 
     async getRecipes({query,fields,limit,page}={}) {
         let q = dexieApi.db.recipes
+        if (query && query.isShoppingList) {
+            debugger;
+            q = dexieApi.db.recipes.where('isShoppingList').equals(1)
+        }
         if (query && query.fulltext) {
             if (query.fulltext.indexOf(' ')>-1) {
                 query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
@@ -88,15 +89,14 @@ const dexieApi = {
         }
         let count
         if (q.alreadyCounted) {
-            console.log('Already counted')
             count = q.alreadyCounted
         }
-        else if (q.clone) {
-            console.log('Clone count?');
+        //else if (q.clone) {
+        try {
             count = await q.clone().count()
         }
-        else {
-            console.log('Collection count');
+        //else {
+        catch (err) {
             count = await q.count();
         }
         if (page) {q = q.offset(page)}
