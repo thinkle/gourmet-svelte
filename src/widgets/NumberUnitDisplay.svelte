@@ -2,22 +2,31 @@
  import {formatAmount} from '../utils/numbers.js';
  export let value
  export let mode='inline'
- /*  export let multipliable=true */
+ export let multipliable=true 
+ export let multiplyBy=undefined;
 
- import {getContext} from 'svelte';
+ import {getContext,setContext} from 'svelte';
+ import {writable} from 'svelte/store';
+ if (multiplyBy) {
+     setContext('multiplier',
+                writable(multiplyBy)
+     )
+ }
+
  let multiplier = getContext('multiplier')
+ 
 </script>
 {#if value}
     {#if mode=='table'}
-        <td class="amount" class:multiplied={$multiplier!=1}>
-            {formatAmount(value,{multiplier:$multiplier})}
+        <td class="amount" class:multiplied={multipliable && $multiplier!=1}>
+            {formatAmount(value,multipliable&&{multiplier:$multiplier})}
         </td>
         &nbsp;
         <td class="unit" >{value.unit||''}</td>
 
     {:else}
-        <span class="amount" class:multiplied={$multiplier!=1}>
-            {formatAmount(value,{multiplier:$multiplier})}
+        <span class="amount" class:multiplied={multipliable&&$multiplier!=1}>
+            {formatAmount(value,multipliable&&{multiplier:$multiplier})}
         </span>
         &nbsp;
         <span class="unit" >{value.unit||''}</span>
