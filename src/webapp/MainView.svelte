@@ -1,8 +1,8 @@
 <script>
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
- import RecipeList from './recDisplay/RecipeList.svelte';
+ import RecipeList from '../recDisplay/RecipeList.svelte';
  import ModalLauncher from '../widgets/ModalLauncher.svelte';
- import OpenRecipes from './recDisplay/OpenRecipes.svelte';
+ import OpenRecipes from '../recDisplay/OpenRecipes.svelte';
  import Status from '../widgets/Status.svelte';
  import IconButton from '../widgets/IconButton.svelte';
  import {connected,
