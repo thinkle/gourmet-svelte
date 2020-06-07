@@ -17,7 +17,13 @@ export function cleanupWhitespace (text, condenseMiddleSpaces=true) {
 
 export function titleCase (words) {
     return words.split(/\s/).map(
-        (word)=>word[0].toUpperCase()+word.substr(1).toLowerCase()
+        (word)=>{
+            if (word.length < 2) {
+                return word
+            } else {
+                return word[0].toUpperCase()+word.substr(1).toLowerCase()
+            }
+        }
     ).join(' ')
 }
 
