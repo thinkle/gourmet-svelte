@@ -2,11 +2,11 @@
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  export let text=''
  export let ing = undefined;
- export let onEnter
- export let onDelete
- export let onChange
- export let onInput
- export let shouldFocus
+ export let onEnter=undefined;
+ export let onDelete=undefined;
+ export let onChange=undefined;
+ export let onInput=undefined;
+ export let shouldFocus=undefined;
  export let showAddButton=false;
  import IconButton from './IconButton.svelte';
  let originalValue;
