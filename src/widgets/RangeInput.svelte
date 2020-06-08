@@ -1,8 +1,9 @@
 <script>
- import IB from './IconButton.svelte';
- import {formatAmount,increment,decrement,parseAmount} from '../utils/numbers.js';
  export let value
  export let showPlusMinusButtons=false
+
+ import IB from './IconButton.svelte';
+ import {formatAmount,increment,decrement,parseAmount} from '../utils/numbers.js';
  let UPCODES = [38,187]
  let DOWNCODES = [40]
  let displayValue
