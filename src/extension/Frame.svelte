@@ -29,7 +29,7 @@
      getRoot().style.width = '100%'
  }
  let url
- let port = 57144
+ let port
  $: url = port && `http://localhost:${port}/sidebar` || 'https://gourmet-svelte.netlify.app/sidebar'
  let startWidth
  let inputShield;
