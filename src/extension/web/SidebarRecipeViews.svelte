@@ -5,7 +5,7 @@
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
  import IconButton from '../../widgets/IconButton.svelte';
  import Tabs from '../../widgets/Tabs.svelte';
- import Tab from '../../widgets/Tabs.svelte';
+ import Tab from '../../widgets/Tab.svelte';
  let mode = 'full'
 
  // promise
