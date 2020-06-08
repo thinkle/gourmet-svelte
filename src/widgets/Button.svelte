@@ -5,8 +5,10 @@
  export let toggle=false
  export let toggled=false
  export let rtl=false
+ export let width;
  export let fontSize=undefined;
  export let small=undefined;
+ export let inactive=undefined;
  export let compact=false; /* No padding, no margin */
  export function focus () {
      b.focus()
@@ -14,6 +16,7 @@
  let b;
 </script>
 <button
+    class:inactive
     class:compact
     class:rtl
     class:bare
@@ -22,7 +25,7 @@
     class:toggle
     class:toggled
     class:small
-    style="{`--fontSize:${fontSize}`}"
+    style="{`--fontSize:${fontSize};--button-width:${width}`}"
     class:customSize={fontSize}
            on:click
     on:focus
@@ -50,6 +53,7 @@
      border-style: solid;
      padding: 5px;
      transition: all 300ms;
+     width: var(--button-width);
  }
  
  button.customSize {
@@ -138,6 +142,10 @@
  }
  .compact span {
      margin: 0;
+ }
+ .inactive {
+     color: var(--grey);
+     cursor: busy;
  }
 
 </style>

@@ -13,6 +13,7 @@
  export let small=undefined;
  export let left=false;
  export let compact=false;
+ export let width;
  
  export function focus () {
      b.focus()
@@ -39,6 +40,7 @@
     {toggled}
     {small}
     {compact}
+    {width}
     rtl="{left}"
     on:click
     on:focus
