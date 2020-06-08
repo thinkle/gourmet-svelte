@@ -183,7 +183,13 @@ export function makeLocalRecipeStore () {
                 let $storedRecipes = get(storedRecipes)
                 const storedRec = $storedRecipes[id]
                 if (!storedRec) {
-                    reject('No stored recipe exists!');
+                    //reject('No stored recipe exists!');
+                    let result = storedRecipes.get(id).then(
+                        (recipe)=>{
+                            console.log('Fetched from stored, call self recursively now...');
+                            localRecipes.open(id).then(resolve).catch(reject);
+                        }
+                    );
                 }
                 else {
                     let localCopy = deepcopy(storedRec);
