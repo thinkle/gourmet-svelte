@@ -2,14 +2,16 @@ import {UNIT_NAMES} from './unitAmounts.js';
 let words = [...UNIT_NAMES,
              // words added directly here won't have any attempts to handle
              // suffixes, which may be what we want
-             'seeded', // but not seeds/seed
-             'torn',
+             'fried', // but not fries...
              'fry',
              'frying',
-             'fried', // but not fries...
+             'lengthwise',
+             'seeded', // but not seeds/seed
+             'torn',
             ]
 
 let adjs = [
+    'delicate',
     'fine',
     'flavorful',
     'fresh',
@@ -17,12 +19,11 @@ let adjs = [
     'large',
     'light',
     'medium',
+    'rough',
     'small',
+    'smooth',
     'thick',
     'thin',
-    'rough',
-    'smooth',
-    'delicate',
 ];
 let verbs = [
     'bake',
@@ -37,6 +38,7 @@ let verbs = [
     'devein',
     'dice',
     'discard',
+    'divide',
     'flambe',
     'flambé',
     'grated',
@@ -52,6 +54,7 @@ let verbs = [
     'peel',
     'poach',
     'process',
+    'reserve',
     'retain',
     'rub',
     'saute',
@@ -75,7 +78,7 @@ let verbs = [
     'toss',
     'trim',
     'wash',
-    'whisk'
+    'whisk',
 ];
 // we'll be grammatical profligates...
 for (let v of verbs) {
