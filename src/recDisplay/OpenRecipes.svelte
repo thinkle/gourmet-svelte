@@ -5,7 +5,7 @@
          activeRecipeId = id;
      }
  }
-
+ import {shoppingList} from '../stores/shoppingStores.js';
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {getContext,onMount} from 'svelte';
  import {fade,slide} from 'svelte/transition';
@@ -74,6 +74,7 @@
          toolbarItem = toolbar.addItem({
              content : 'Open Recipes',
              modalVisible : false,
+             key:'OpenRecipes',
              props : {
                  icon : 'expand_more',
              },
@@ -111,6 +112,7 @@
                         active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}">
                         <div class='close'>
                             <IconButton bare="{true}" small="{true}" on:click="{()=>window.open(`/rec/${id}`,'_blank')}" icon='open_in_new'/>
+                            <IconButton bare="{true}" small="{true}" on:click="{()=>{shoppingList.addRecipe(id)}}" icon='shopping_cart'/>
                             <IconButton bare="{true}" small="{true}" on:click="{()=>{closeRec(id)}}" icon='close'/>
                         </div>
                         {getTabTitle(id)}
