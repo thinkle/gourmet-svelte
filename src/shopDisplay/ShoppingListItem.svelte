@@ -64,15 +64,15 @@
                 separate items
             {/if})
             {#if !showItems}
-                <span class="origin" in:receive out:send>
+                <span class="origin" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
                 </span>
             {/if}
         </small>
         
-        <div class="break">
-            {#if showItems}
+        {#if showItems}
+            <div class="break" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
                 {#each item.items as subitem}
-                    <div in:receive out:send>
+                    <div in:receive={{key:subitem.ingredient}} out:send={{key:subitem.ingredient}}>
                         <small>
                             <!-- <Ingredient ing={subitem.ingredient} edit="{false}" /> -->
                             <NumberUnitDisplay
@@ -92,8 +92,8 @@
                         </small>
                     </div>
                 {/each}
-            {/if}
-        </div>
+            </div>
+        {/if}
     </td>
 </tr>
 
@@ -120,6 +120,9 @@
  }
  table :global(td) {
      text-align: center;
+ }
+ td {
+     padding-right: 1em;
  }
  td div {
      display: inline-flex;
