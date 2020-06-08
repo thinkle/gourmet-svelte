@@ -247,7 +247,8 @@ numBase += '|' + NUMBER_WORDS.map((w)=>w.matcher.toString().replace(/(^\/|\/i$)/
 var numNaked = numBase + ')';
 var numMid = numBase + '|[,./⁄])' 
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
-numMatchString = `${numMatchString}(\\s+${numMatchString})?`
+var fracMatchString = `(${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}|\\d[/⁄]\\d)`
+numMatchString = `${numMatchString}(\\s+${fracMatchString})?`
 var numberMatcher = new RegExp(numMatchString,'i');
 var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})` // FF doesn't support named groups :(
 //var rangeMatcherString = `(${numMatchString})(\\s*(to|or|-|:|–|—|―)\\s*)(${numMatchString})`
@@ -368,28 +369,32 @@ let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/⁄])')
 
 function parseAmount (s) {
     let amount = {}
-    let match = s.match(rangeMatcher);
-    if (match) {
-        amount.rangeAmount = fracToFloat(match.groups.first);
-        amount.amount = fracToFloat(match.groups.second);
-        amount.textAmount = match.groups.second
-        amount.textRangeAmount = match.groups.first
-        //amount.rangeAmount = fracToFloat(match[1]);
-        //amount.amount = fracToFloat(match[secondRangeGroup]);
-    }
-    else {
-        match = s.match(numberBeforeUnitMatcher);
-        if (match) {
-            amount.amount = fracToFloat(match[0])
-            amount.textAmount = match[0]
-        }
-        else {
-            match = s.match(numberMatcher);
-            if (match) {
-                amount.amount = fracToFloat(match[0])
-                amount.textAmount = match[0]
-            }
-        }
+    let rangeMatch = s.match(rangeMatcher);
+    let numberMatch = s.match(numberMatcher);
+    let numberBeforeUnitMatch = s.match(numberBeforeUnitMatcher);
+    let match
+    // If our rangeMatch is first in the string, use it...
+    if (rangeMatch && (!numberMatch || rangeMatch.index <= numberMatch.index)) {
+        amount.rangeAmount = fracToFloat(rangeMatch.groups.first);
+        amount.amount = fracToFloat(rangeMatch.groups.second);
+        amount.textAmount = rangeMatch.groups.second
+        amount.textRangeAmount = rangeMatch.groups.first
+        match = rangeMatch
+    } else if (numberBeforeUnitMatch) {
+        // maybe we should just use the first number -- but let's try a
+        // "number before unit" thing which tries to grab the number preferentially
+        // in front of a unit, but that can go badly it seems... when you have things like
+        // 1 14 oz can, what is right?
+        // maybe (14) (oz) (1 can...)
+        // or maybe (1) () (14 oz can)
+        // of course (1) (14 oz) (can) is never going to happen...
+        amount.amount = fracToFloat(numberBeforeUnitMatch[0])
+        amount.textAmount = numberBeforeUnitMatch[0]
+        match = numberBeforeUnitMatch        
+    } else if (numberMatch) {
+        amount.amount = fracToFloat(numberMatch[0])
+        amount.textAmount = numberMatch[0]
+        match = numberMatch
     }
     if (match) {
         amount.pretext = s.substr(0,match.index)
