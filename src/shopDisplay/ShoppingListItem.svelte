@@ -1,5 +1,6 @@
 <script>
  export let item
+ export let ignored=false
  import {floatToFrac} from '../utils/numbers.js';
  import {crossfade} from 'svelte/transition'
  import PlainInput from '../widgets/PlainInput.svelte';
@@ -7,45 +8,90 @@
  import Ingredient from '../recDisplay/ing/Ingredient.svelte'
  import IconButton from '../widgets/IconButton.svelte';
  import Button from '../widgets/Button.svelte';
+ import Checkbox from '../widgets/Checkbox.svelte';
  import {shoppingList} from '../stores/shoppingStores.js';
  import {titleCase} from '../utils/textUtils.js';
 
  let [send,receive] = crossfade({duration:300});
 
- export let showItems=true;
+ export let showSubItems=true;
 
  let editingItem
- function onItemChanged (event) {
+
+ 
+ function setShopItem () {
      for (let itm of item.items) {
-         shoppingList.setShopItem(itm,newShopItem)
+         shoppingList.setShopItem(itm,...arguments)
      }
-     console.log('done!');
-     editingItem = false
-     console.log('cool');
  }
+ 
+ function onItemChanged (event) {
+     setShopItem(newShopItem.replace(/^\s+|\s+$/g,''));
+     editingItem = false
+ }
+
+ function onItemIgnore (event) {
+     setShopItem(undefined,true)
+ }
+ function onItemDontIgnore (event) {
+     setShopItem(undefined,false)
+ }
+
+ function setPurchased (event) {
+     if (event.target.checked) {
+         console.log('We should make it purchased!');
+     } else {
+         console.log('We should make it not purchased!');
+
+     }
+ }
+
  let newShopItem = item && item.item || '';
 
 </script>
-<tr>
+<tr class:ignored>
+    <td>
+        {#if !ignored}
+        <Checkbox size="36"
+                  value="{item.purchased}"
+                  on:change="{setPurchased}"
+        />
+        {/if}
+    </td>
     <td>
         <table>
             {#each item.amounts as amount,n}
                 <tr>
-                    <NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
+                    {#if n}+{/if}<NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
                 </tr>
             {/each}
         </table>
     </td>
     <td>
         {#if !editingItem}
-            <div
-                on:click="{()=>editingItem=true}"
-            >
-                {item.item}
-                <IconButton
-                    small="true"
-                    icon="edit"
-                    bare="true"/>
+            <div>
+                <div
+                    on:click="{()=>editingItem=true}"
+                >
+                    {item.item}
+                    <IconButton
+                        small="true"
+                        icon="edit"
+                        bare="true"/>
+                </div>
+                {#if !ignored}
+                    <IconButton
+                        small="true"
+                        icon="remove_shopping_cart"
+                        bare="true"
+                        on:click={()=>onItemIgnore()}/>
+                {:else}
+                    <IconButton
+                        small="true"
+                        icon="add_shopping_cart"
+                        bare="true"
+                        on:click={()=>onItemDontIgnore()}/>
+                {/if}
             </div>
         {:else}
             <div>
@@ -56,20 +102,20 @@
                             on:click={()=>onItemChanged()}/>
             </div>
         {/if}
-        <small on:click="{()=>showItems=!showItems}">
+        <small on:click="{()=>showSubItems=!showSubItems}">
             ({item.items.length}
             {#if item.items.length==1}
                 item
             {:else}
                 separate items
             {/if})
-            {#if !showItems}
+            {#if !showSubItems}
                 <span class="origin" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
                 </span>
             {/if}
         </small>
         
-        {#if showItems}
+        {#if showSubItems}
             <div class="break" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
                 {#each item.items as subitem}
                     <div in:receive={{key:subitem.ingredient}} out:send={{key:subitem.ingredient}}>
@@ -130,5 +176,9 @@
  td div.break,
  td div.break div {
      display: block
+ }
+ 
+ .ignored {
+     font-style: italic;
  }
 </style>

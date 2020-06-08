@@ -1,6 +1,5 @@
 <script>
  export let items
- 
  import {flip} from 'svelte/animate';
  import JsonDebug from '../widgets/JsonDebug.svelte';
  import Button from '../widgets/Button.svelte';
@@ -13,6 +12,10 @@
 
  let byShopItem = {}
  let uniqueItems = []
+
+ import {crossfade} from 'svelte/transition';
+
+ let [send,receive] = crossfade({duration:300});
 
  $: items && organizeItems();
 
@@ -28,6 +31,7 @@
          }
      }
  }
+
 
  function summarizeAmount (items,shopItem) {
      let multiplied = items.map(
@@ -52,6 +56,7 @@
  }
 
  function organizeItems () {
+     console.log('Re organizing items!');
      byShopItem = {
      }
      for (let item of items) {
@@ -71,21 +76,54 @@
              items : byShopItem[si]
          })
      );
+     uniqueItems.forEach(
+         (i)=>{
+             if (i.items.find((ii)=>ii.ingredient.shopIgnore)) {
+                 i.ignore = true
+             }
+         }
+     );
+
  }
  
- let showItems=true
+ let showSubItems=true
 
+ let shoppingItems = []
+ let ignoredItems = []
+ $: shoppingItems = uniqueItems.filter((i)=>!i.ignore);
+ $: ignoredItems = uniqueItems.filter((i)=>i.ignore);
+ 
 </script>
-<Button toggle="true" toggled="{showItems}" on:click="{()=>showItems=!showItems}">Show details</Button>
+<div class="top">
+    <h2>Shopping List</h2>
+    <Button toggle="true" toggled="{showSubItems}" on:click="{()=>showSubItems=!showSubItems}">Show details</Button>
+</div>
 <table>
-    {#each uniqueItems as item (item.item)}
-        <tbody animate:flip>
-            <ShoppingListItem {showItems} {item}/>
+    {#each shoppingItems as item (item.item)}
+        <tbody animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}">
+            <ShoppingListItem {showSubItems} {item}/>
         </tbody>
     {:else}
         Nothing in your shopping list buddy!
     {/each}
 </table>
+
+{#if ignoredItems.length > 0}
+    <table class="ignore">
+        <tr class="ignoreHeader"><td colspan="3">Ignored Items</td></tr>
+        <tr class="ignoreDesc">
+            <td colspan="3">
+                You removed these from the list -- maybe you already have them? Maybe you don't actually use them.
+            </td>
+        </tr>
+        {#each ignoredItems as item (item.item)}
+            <tbody class="ignore" animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}">
+                <ShoppingListItem ignored={true} {showSubItems} {item}/>
+            </tbody>
+        {/each}
+    </table>
+{/if}
+
 Items:<JsonDebug data="{uniqueItems}"/>
 Unique Items:<JsonDebug data="{uniqueItems}"/>
 
@@ -94,4 +132,34 @@ Unique Items:<JsonDebug data="{uniqueItems}"/>
      max-width: 35em;
      margin: auto;
  }
+
+ .ignoreHeader {
+     font-size: var(--large);
+     margin-top: 2em;
+ }
+ .ignoreDesc {
+     color: var(--grey);
+     font-size: var(--small);
+ }
+ .ignore {
+     color : var(--grey);
+ }
+ h2 {
+     font-family: var(--uiFont);
+     font-size: var(--large);
+ }
+ .top {
+     display: flex;
+     justify-content: center;
+     position: sticky;
+     top: 0;
+     padding-top: 3px;
+     background-color: var(--white);
+     color: var(--black);
+     z-index: 2;
+ }
+ .top :global(button) {
+     margin-left: 2em;
+ }
+
 </style>

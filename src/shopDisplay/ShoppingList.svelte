@@ -13,7 +13,9 @@
 
  onMount(
      ()=>{
-         //shoppingList.get();
+         if (!$shoppingList || $shoppingList.length < 1) {
+             shoppingList.get();
+         }
      }
  );
  let saving
@@ -60,32 +62,39 @@
                 <Button>Add Recipe to List</Button>
             </RecipePickerLauncher>
         </div>
-        <div>
+        <table>
             {#each $recipesOnList as recipe}
-                <li>{recipe.title}                    
-                    <span>
-                        &times;
-                        <AmountInput
-                            showPlusMinusButtons="{true}"
-                            value={recipe.multiplier}
-                            on:change="{(event)=>{
-                                       console.log('Setting quantity to',event.detail);
-                                       shoppingList.updateRecipeQuantity(
-                                           recipe.id,
-                                           event.detail
-                                       )
-                                       }}"
-                        />
-                    </span>
-                    <IconButton
-                        icon="clear"
-                        on:click="{()=>shoppingList.removeRecipe(recipe.id)}"
-                    >
-                        Remove
-                    </IconButton>
-                </li>
+                <tr>
+                    <td>
+                        <span>                         
+                            <AmountInput
+                                showPlusMinusButtons="{true}"
+                                value={recipe.multiplier}
+                                                      on:change="{(event)=>{
+                                                                 console.log('Setting quantity to',event.detail);
+                                                                 shoppingList.updateRecipeQuantity(
+                                                                     recipe.id,
+                                                                     event.detail
+                                                                 )
+                                                                 }}"
+                            />
+                            &times;
+                        </span>
+                    </td>
+                    <td>
+                        {recipe.title}
+                    </td>
+                    <td>
+                        <IconButton
+                            bare="true"
+                            icon="clear"
+                            on:click="{()=>shoppingList.removeRecipe(recipe.id)}"
+                        >
+                        </IconButton>
+                    </td>
+                </tr>
             {/each}
-        </div>
+        </table>
         <div>
             <ShoppingListItems items="{$shoppingList}"/>
         </div>
@@ -94,7 +103,19 @@
 </div>
 
 <style>
+ table {
+     margin: auto;
+ }
  .top {
      display: flex;
+     align-items: center;
+     justify-content: flex-end;
+ }
+.top :global(button) {
+     margin-left: 1em;
+ }
+ div {
+     font-family: var(--recipeFont);
+     
  }
 </style>
