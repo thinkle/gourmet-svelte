@@ -39,6 +39,7 @@ let verbs = [
     'discard',
     'flambe',
     'flambé',
+    'grated',
     'grill',
     'grind',
     'halve',
@@ -86,6 +87,11 @@ for (let v of verbs) {
     if (v.substr(v.length-1)=='y') {
         words.push(v.substr(0,v.length-1)+'ied')
         words.push(v.substr(0,v.length-1)+'ies')
+    }
+    if (v.substr(v.length-1)=='e') {
+        words.push(v.substr(0,v.length-1)+'ing');
+        words.push(v.substr(0,v.length-1)+'d');
+        words.push(v.substr(0,v.length-1)+'s');
     }
     words.push(v+'ed')
     words.push(v+'ing')
