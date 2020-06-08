@@ -1,5 +1,5 @@
 <script>
- import {slide} from 'svelte/transition'
+ import {fade,slide} from 'svelte/transition'
  import {connected} from '../stores/recipeStores.js';
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
  import JsonDebug from '../widgets/JsonDebug.svelte';
@@ -81,10 +81,11 @@
         </div>
 
         {#if showAdd}
-            <table in:slide out:slide>
+            <table in:fade="{{duraton:300}}" out:fade="{{duration:300}}">
                 <IngredientInput
                     showAddButton="true"
                     onEnter="{addItem}"
+                    shouldFocus="{true}"
                 />
             </table>
         {/if}
