@@ -379,7 +379,7 @@ export function addAmounts (amounts, item) {
         let unit = getStandardUnit(amountObj.unit)||amountObj.unit||'';
         let amount = amountObj.amount;
         if (byUnit[unit]) {
-            console.log('Found same unit, adding',amount,'to',byUnit[unit]);
+            //console.log('Found same unit, adding',amount,'to',byUnit[unit]);
             byUnit[unit] += (amount||1);            
         } else {
             let addedYet = false;
