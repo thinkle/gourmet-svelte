@@ -88,7 +88,7 @@
         />
     </div>
     <table>
-        {#each $recipePage as id,n (n)}
+        {#each $recipePage as id,n (id)}
             <tr class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
                 <RecipeSummary
                     onClick={()=>{onRecipeClick(id)}}
