@@ -121,7 +121,7 @@ export function getItemMatchers (text) {
 }
 
 export function extractItems (text) {
-    let words = text.split(/\W+/)
+    let words = text.split(/[^\w\u00C0-\u017F]+/)
     words = stopword.removeStopwords(words);
     words = stopword.removeStopwords(words,prepWords);
     words = stopword.removeStopwords(words,
