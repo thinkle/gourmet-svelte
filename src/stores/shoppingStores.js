@@ -3,11 +3,10 @@ import { makeLocalRecipeStore, recipeActions } from './recipeStores.js';
 import api from '../data/api.js';
 import deepcopy from 'deepcopy';
 
-const {localRecipes,recipeState} = makeLocalRecipeStore();
+const {localRecipes,recipeState,openLocalRecipes} = makeLocalRecipeStore();
 
 export let storedShopRec = writable() // holds stored copy of recipe
 let localShopRec = writable() // holds the shopping list recipe
-
 
 let sl = derived(
     [localShopRec,localRecipes],
@@ -18,25 +17,40 @@ let sl = derived(
         } else {
             //console.log('Crawling recipes for ingredients...',$localShopRec,new Date().getTime());
             let allItems = [];
-            await crawlIngredients($localShopRec.ingredients,$localShopRec,$localRecipes,allItems);
+            await crawlIngredients($localShopRec.ingredients,$localShopRec,$localRecipes,allItems,[$localShopRec.id]);
             set(allItems);
             //console.log('Set!',allItems.length,'items',new Date().getTime());
         }
     }
 );
 
-async function crawlIngredients (ingredientList,source,$localRecipes,items,multiplier) {
+export let recipesOnList = derived(
+    localShopRec,
+    ($localShopRec)=>$localShopRec && $localShopRec.ingredients.map(
+        (i)=>({
+            id:i.reference,
+            title:i.text,
+            multiplier:i.amount && i.amount.amount
+        })
+    ) || []
+);
+
+async function crawlIngredients (ingredientList,source,$localRecipes,items,multiplier,parentRecs=[]) {
     // TODO - check for circular references...
     //console.log('Crawl',ingredientList.length,'items',new Date().getTime());
     for (let ingredient of ingredientList) {
         if (ingredient.ingredients) {
             //console.log('Crawl group...')
-            await crawlIngredients(ingredient.ingredients,source,$localRecipes,items,multiplier);
+            await crawlIngredients(ingredient.ingredients,source,$localRecipes,items,multiplier,parentRecs);
         } else if (ingredient.reference) {
+            if (parentRecs.includes(ingredient.reference)) {
+                console.log('Avoiding recursive crawl on',ingredient.reference);
+                return
+            }
             //console.log('Lookup recipe for ',ingredient.reference);
             let recipe = $localRecipes[ingredient.reference];
             if (!recipe) {
-                //console.log('Fetch sub-rec...');
+                console.log('Fetch sub-rec...',ingredient.reference,ingredient.text);
                 recipe = await localRecipes.open(ingredient.reference);
             }
             if (recipe && recipe.ingredients) {
@@ -44,7 +58,7 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
                 if (ingredient.amount && ingredient.amount.amount && ingredient.amount.amount != 1) {
                     recMultiplier = ingredient.amount.amount
                 }
-                crawlIngredients(recipe.ingredients,recipe,$localRecipes,items,recMultiplier);
+                crawlIngredients(recipe.ingredients,recipe,$localRecipes,items,recMultiplier,[...parentRecs,recipe.id]);
             }
             else {
                 //console.log('WARNING: DID NOT FIND LINKED RECIPE FOR ITEM',ingredient,'from',source);
@@ -105,21 +119,27 @@ export const shoppingList = {
     /**
        Add recipe to shopping list
     **/
-    async addRecipe (id, quantity) {
-        // maybe a problem down the road? We might not want to open all these recipes...
-        // We could basically make a copy of the local recipes store here...
+    async addRecipe (id, quantity=1) {
         let recipe = await localRecipes.open(id);
         let ingredient = {
             amount : {
-                amount : 1,
+                amount : quantity,
                 unit : 'recipe'
             },
-            item : recipe.title,
+            text : recipe.title,
             reference : id
+        }
+        if (!get(localShopRec)) {
+            await shoppingList.get();
         }
         localShopRec.update(
             ($localShopRec)=>{
-                $localShopRec.ingredients.push(ingredient);
+                let alreadyThere = $localShopRec.ingredients.find((i)=>i.reference==id);
+                if (alreadyThere) {
+                    alreadyThere.amount.amount += quantity;
+                } else {
+                    $localShopRec.ingredients.push(ingredient);
+                }
                 return $localShopRec;
             }
         );
@@ -203,6 +223,7 @@ export const shoppingList = {
                 $localShopRec.ingredients = $localShopRec.ingredients.filter(
                     (i)=>i.id != id
                 );
+                return $localShopRec;
             }
         );
     },
@@ -235,8 +256,16 @@ export const shoppingList = {
         // FIX ME
         let result = await api.updateRecipe(get(localShopRec))
         storedShopRec.update(()=>result);
+        // Now update our local recipes as well...
+        let $recipeState = get(recipeState)
+        let $localRecipes = get(localRecipes)
+        for (let recid of get(openLocalRecipes)) {
+            if ($recipeState[recid].edited) {
+                await api.updateRecipe($localRecipes[recid]);
+            }
+        }
         return result;
     },
-    
+
     subscribe : sl.subscribe,
 }
