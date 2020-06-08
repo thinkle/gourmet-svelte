@@ -175,7 +175,10 @@
             {#if showShopping}
                 <IconButton
                     icon="shopping_cart"
-                    on:click="{()=>shoppingList.addRecipe(rec.id,$multiplier)}">
+                    on:click="{async ()=>{
+                              await shoppingList.addRecipe(rec.id,$multiplier);
+                              shoppingList.save();
+                              }}">
                     Add to List
                 </IconButton>
             {/if}
