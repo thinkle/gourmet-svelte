@@ -32,8 +32,8 @@
                  shoppingList.removeItem(itm.ingredient.id);
              }
          } else { 
-             shoppingList.setShopItem(itm,...arguments)
-         }
+                shoppingList.setShopItem(itm,...arguments)
+                }
      }
  }
  
@@ -64,10 +64,10 @@
 <tr class:ignored>
     <td>
         {#if !ignored}
-        <Checkbox size="36"
-                  value="{item.purchased}"
-                  on:change="{setPurchased}"
-        />
+            <!-- checked="{item.purchased}" -->
+            <Checkbox size="36"
+                      on:change="{setPurchased}"
+            />
         {/if}
     </td>
     <td>
