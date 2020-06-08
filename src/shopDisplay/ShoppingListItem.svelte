@@ -21,7 +21,19 @@
  
  function setShopItem () {
      for (let itm of item.items) {
-         shoppingList.setShopItem(itm,...arguments)
+         if (itm.source.isTheShoppingList) {
+             // special case when we are a custom item
+             if (arguments[0]) {
+                 // i.e. changing item
+                 itm.ingredient.text = arguments[0];
+                 shoppingList.updateItem(itm.ingredient);
+             } else {
+                 // i.e. removing item
+                 shoppingList.removeItem(itm.ingredient.id);
+             }
+         } else { 
+             shoppingList.setShopItem(itm,...arguments)
+         }
      }
  }
  

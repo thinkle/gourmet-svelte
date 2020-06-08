@@ -3,8 +3,8 @@
  import {flip} from 'svelte/animate';
  import JsonDebug from '../widgets/JsonDebug.svelte';
  import Button from '../widgets/Button.svelte';
+ import IconButton from '../widgets/IconButton.svelte';
  import ShoppingListItem from './ShoppingListItem.svelte';
-
  
  import {extractItems} from '../utils/ingredientUtils.js';
  import {titleCase} from '../utils/textUtils.js';
@@ -86,18 +86,17 @@
 
  }
  
- let showSubItems=true
+ export let showSubItems=true
+ let showAdd=false
 
  let shoppingItems = []
  let ignoredItems = []
  $: shoppingItems = uniqueItems.filter((i)=>!i.ignore);
  $: ignoredItems = uniqueItems.filter((i)=>i.ignore);
  
+
 </script>
-<div class="top">
-    <h2>Shopping List</h2>
-    <Button toggle="true" toggled="{showSubItems}" on:click="{()=>showSubItems=!showSubItems}">Show details</Button>
-</div>
+
 <table>
     {#each shoppingItems as item (item.item)}
         <tbody animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}">
@@ -143,23 +142,6 @@ Unique Items:<JsonDebug data="{uniqueItems}"/>
  }
  .ignore {
      color : var(--grey);
- }
- h2 {
-     font-family: var(--uiFont);
-     font-size: var(--large);
- }
- .top {
-     display: flex;
-     justify-content: center;
-     position: sticky;
-     top: 0;
-     padding-top: 3px;
-     background-color: var(--white);
-     color: var(--black);
-     z-index: 2;
- }
- .top :global(button) {
-     margin-left: 2em;
  }
 
 </style>

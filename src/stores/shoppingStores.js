@@ -17,7 +17,7 @@ let sl = derived(
         } else {
             //console.log('Crawling recipes for ingredients...',$localShopRec,new Date().getTime());
             let allItems = [];
-            await crawlIngredients($localShopRec.ingredients,$localShopRec,$localRecipes,allItems,[$localShopRec.id]);
+            await crawlIngredients($localShopRec.ingredients,{title:'Shopping List',isTheShoppingList:true,id:-1},$localRecipes,allItems,1,[$localShopRec.id]);
             set(allItems);
             //console.log('Set!',allItems.length,'items',new Date().getTime());
         }
@@ -26,7 +26,7 @@ let sl = derived(
 
 export let recipesOnList = derived(
     localShopRec,
-    ($localShopRec)=>$localShopRec && $localShopRec.ingredients.map(
+    ($localShopRec)=>$localShopRec && $localShopRec.ingredients.filter((i)=>i.reference).map(
         (i)=>({
             id:i.reference,
             title:i.text,
@@ -64,7 +64,9 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
                 //console.log('WARNING: DID NOT FIND LINKED RECIPE FOR ITEM',ingredient,'from',source);
             }
         } else {
-            items.push({source,ingredient,multiplier});
+            items.push({source,
+                        ingredient,
+                        multiplier});
         }
     }
 }
@@ -252,6 +254,7 @@ export const shoppingList = {
                         });
                     if (replaced) {resolve($localShopRec.ingredients)}
                     else {reject(`No item with ID ${id} found in ${$localShopRec.ingredients}`)}
+                    return $localShopRec;    
                 }
             ); // end update
         }); // end promise
