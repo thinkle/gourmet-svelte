@@ -173,14 +173,20 @@ export const shoppingList = {
         );
     },
 
-    setShopItem (item, shopItem) {
+    setShopItem (item, shopItem, shopIgnore) {
+        console.log('setShopItem',item,shopItem,shopIgnore);
         if (!item.source) {
             throw new Error('item must have source to change shopitem');
         }
         if (!item.source.id) {
             throw new Error('item source must have ID to change shopitem');
         }
-        item.ingredient.shopItem = shopItem; // the object is actually attached to our local recipe anyway...
+        if (shopItem) {
+            item.ingredient.shopItem = shopItem; // the object is actually attached to our local recipe anyway...
+        }
+        if (shopIgnore!==undefined) {
+            item.ingredient.shopIgnore = shopIgnore;
+        }
         localRecipes.update(
             ($localRecipes)=>{
                 $localRecipes[item.source.id] = $localRecipes[item.source.id];
