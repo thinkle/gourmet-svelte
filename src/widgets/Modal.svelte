@@ -87,6 +87,7 @@
      float: right;
      position: sticky;
      top: 0;
+     z-index: 3;
  }
  
 </style>
