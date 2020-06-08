@@ -81,6 +81,13 @@
                             item.modalVisible = true
                             extraItems = extraItems;
                         },
+                        update (props) {
+                            Object.assign(
+                                item,
+                                props
+                            );
+                            extraItems = extraItems;
+                        }
                     }
                 },
                 hideWhenLoggedIn () {
@@ -108,7 +115,7 @@
                      modal launcher key should be in toolbaritem, not hard-coded here
                 -->
                 <ModalLauncher
-                    key="OpenRecipes"
+                    key="{item.key}"
                     modalVisible="{item.modalVisible}"
                     >
                     {#if !item.hide}
