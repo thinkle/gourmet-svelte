@@ -2,20 +2,35 @@
 import {parseChunks,handleChunk} from './importer.js';
 import RecDef from '../common/RecDef.js';
 
-it('Parsing ingredients',
-   ()=>{
-       let chunk = {
-           tag:'ingredient',
-           text:'½   cucumber, peeled, halved lengthwise, seeded, and diced fine (1/2 cup)'};
-       let rec = {ingredients:[]}
-       handleChunk(chunk,{},rec);
-       console.log('Got recs:',rec.ingredients)
-       let result = rec.ingredients[0]
-       expect(result.text).toMatch(
-               /cucumber, peeled, halved lengthwise, seeded.*/
-       );
-       expect(result.amount.amount).toEqual(0.5);
-   }
+fit('Parsing ingredients',
+    ()=>{
+
+        function parseIng (text) {
+            let chunk = {
+                tag:'ingredient',
+                text
+            }
+            let rec = {ingredients:[]}
+            handleChunk(chunk,{},rec);
+            console.log('Got recs:',rec.ingredients)
+            return rec.ingredients[0]
+        }
+        let result = parseIng('½   cucumber, peeled, halved lengthwise, seeded, and diced fine (1/2 cup)');
+        expect(result.text).toMatch(
+                /cucumber, peeled, halved lengthwise, seeded.*/
+        );
+        expect(result.amount.amount).toEqual(0.5);
+        result = parseIng('6 ounces medium-large shrimp, (31 to 40 per pound), peeled, deveined, halved lengthwise, and halved crosswise');
+        expect(result.text).toMatch(
+                /medium-large shrimp/
+        );
+        expect(result.amount.unit).toMatch('ounces');
+        expect(result.amount.amount).toEqual(6);
+        debugger;
+        result = parseIng('1 28 oz can San Marzano tomatoes');
+        expect(result.amount.unit).toMatch('oz');
+        expect(result.amount.amount).toEqual(28);
+    }
   );
 
 it('Ingredient container',
