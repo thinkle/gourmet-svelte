@@ -1,9 +1,10 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+
  export let rec=undefined;
  export let onChange=undefined;;
  export let onOpenSubRec=undefined;
-
+ export let showShopping = true;
  export let editMode = false;
  export let editable = true;
  export let minPropWidth = 150;
@@ -21,6 +22,7 @@
 
 
  import {recipeState,recipeActions} from '../../stores/recipeStores.js';
+ import {shoppingList} from '../../stores/shoppingStores.js';
  import {onMount,setContext} from 'svelte'
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
@@ -147,50 +149,63 @@
 {#if valid}
     <div class="recipe"> <!-- top-level container...  -->
         <!-- Above the side-by-side view... -->
-        <div class="top" use:watchResize={handleResize}>
+        <div class="top" use:watchResize="{handleResize}">
             <h2>
 	        {#each RecDef.titleProps as prop}
                     <span>
                         <RecProp
-                            onChange={triggerChange}
-                            showLabel={false}
-                            editable={editable}
-                            forceEdit={editMode}
-                            prop={prop}
-                            bind:value={rec[prop.name]}
+                            onChange="{triggerChange}"
+                            showLabel="{false}"
+                            editable="{editable}"
+                            forceEdit="{editMode}"
+                            prop="{prop}"
+                            bind:value="{rec[prop.name]}"
                         />
                     </span>
                 {/each}        
             </h2>
             <div class='multiplier' style="width:6em">
                 &times;
-                <AmountInput value={$multiplier} on:change={(e)=>$multiplier=e.detail}
-                             showPlusMinusButtons={true}
+                <AmountInput
+                    value="{$multiplier}"
+                    on:change="{(e)=>$multiplier=e.detail}"
+                    showPlusMinusButtons="{true}"
                 />
             </div>
+            {#if showShopping}
+                <IconButton
+                    icon="shopping_cart"
+                    on:click="{()=>shoppingList.addRecipe(rec.id,$multiplier)}">
+                    Add to List
+                </IconButton>
+            {/if}
             {#if editable}
-                <IconButton icon="edit" toggle={true} toggled={editMode} on:click={()=>editMode=!editMode}>
+                <IconButton
+                    icon="edit"
+                    toggle="{true}"
+                    toggled="{editMode}"
+                    on:click="{()=>editMode=!editMode}">
                     Edit{#if editMode}ing{/if}
                     Recipe
                 </IconButton>
 
                 {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
                     <IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
-                                busy={$recipeState[rec.id].updating}
+                                busy="{$recipeState[rec.id].updating}"
                     >
                         Revert Changes
                     </IconButton>
                     <IconButton
                         icon="save"
                         tooltip="Attempt to save?"
-                        busy={$recipeState[rec.id].updating}
-                              on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        busy="{$recipeState[rec.id].updating}"
+                        on:click="{()=>recipeActions.updateRecipe(rec)}">
                         Save
                     </IconButton>
                 {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
                     <IconButton
-                        busy={$recipeState[rec.id].updating}
-                             icon="cloud_upload"
+                        busy="{$recipeState[rec.id].updating}"
+                        icon="cloud_upload"
                         on:click="{()=>recipeActions.updateRecipe(rec)}">
                         Save to Cloud
                     </IconButton>
@@ -241,9 +256,17 @@
 	        Ingredients
                 {#if !editMode && editable}
                     {#if ingeditmode}
-                        <IconButton small={true} bare="true" on:click={()=>ingeditmode=false } icon="done"/>
+                        <IconButton
+                            small="{true}"
+                            bare="true"
+                            on:click="{()=>ingeditmode=false }"
+                            icon="done"/>
                     {:else}
-                        <IconButton small={true} bare="true" on:click={()=>ingeditmode=true } icon="edit" />
+                        <IconButton
+                            small="{true}"
+                            bare="true"
+                            on:click="{()=>ingeditmode=true }"
+                            icon="edit" />
                     {/if}
                 {/if}
 	    </h3>
@@ -258,16 +281,16 @@
 	        </IL>
 	    </div>		
 	    
-	    <div class='rectext' slot="right" bind:this={rightBlock} use:resizeOnUpdate style={`--widthRightBlock:${rightBlockWidth}px`}>
-                <div class="topblock" style={`--widthLeftOfImage:${widthLeftOfImage}px`}>
+	    <div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
+                <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
                     <div class="props" >
                         
-                        <div class="images" class:centered={imageCentered} use:resizeOnUpdate bind:this={imageBlock}
+                        <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
                              style="{`--max-image-width:${maxImageWidth}px`}"
                         >
                             {#each rec.images as image}
-                                <!-- Small: <img alt={image.alt||rec.title} src={image.thumbnailUrl}/> -->
-                                <img alt={image.alt||rec.title} src={image.url}/>
+                                <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
+                                <img alt="{image.alt||rec.title}" src="{image.url}"/>
                             {/each}
                         </div> <!-- close images -->
 
