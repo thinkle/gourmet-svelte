@@ -24,6 +24,30 @@
  import {writable} from 'svelte/store'
  let hideOpenButton = writable(true);
  let showShoppingList = false;
+
+
+ let toolbar = getContext('toolbar');
+
+ onMount(
+     ()=>{
+         if (!toolbar) {
+             console.log('No toolbar :(')
+             return
+         }
+         toolbarItem = toolbar.addItem({
+             content : 'Shopping List',
+             modalVisible : false,
+             key:'ShoppingList',
+             props : {
+                 icon : 'shopping_cart',
+             },
+             'onClick' : ()=>showShoppingList=true
+         });
+         return toolbarItem.onUnmount
+     }
+ );
+
+
 </script>
 
 <div>
@@ -33,11 +57,6 @@
             on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
             New Recipe
         </Button>
-        <ModalLauncher
-            key="ShoppingList"
-            modalVisible="{showShoppingList}">
-            <Button on:click="{()=>showShoppingList=true}">Shopping List</Button>
-        </ModalLauncher>
         {#if showShoppingList}
             <Modal
                 key="ShoppingList"
