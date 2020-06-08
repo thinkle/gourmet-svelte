@@ -5,6 +5,7 @@ import ShoppingList from "../shopDisplay/ShoppingList.demo.svelte";
 import ShoppingListItems from "../shopDisplay/ShoppingListItems.demo.svelte";
 import RecipeStores from "../stores/RecipeStores.demo.svelte";
 import Button from "../widgets/Button.demo.svelte";
+import Checkbox from "../widgets/Checkbox.demo.svelte";
 import IngredientInput from "../widgets/IngredientInput.demo.svelte";
 import Inputs from "../widgets/Inputs.demo.svelte";
 import Menu from "../widgets/Menu.demo.svelte";
@@ -27,6 +28,7 @@ export default {
     ShoppingListItems,
     RecipeStores,
     Button,
+    Checkbox,
     IngredientInput,
     Inputs,
     Menu,
