@@ -51,16 +51,47 @@
   -> Set up magic links and stuff (x)
   -> Think through login business... (x)
 
-* Next up:
+- Improve side-by-side widget code. (x)
 - Support adding new linked recipes as ingredients (x)
-- Make chrome extension a bit more slick...
-- Make chrome extension notice when we've already imported a page.
-- Add shopping list support
-- Improve side-by-side widget code.
+- Make chrome extension a bit more slick... (x)
+
+* Next up:
+- Make chrome extension notice when we've already imported a page. 
+- Make chrome extension "helper" view
+
+- Improve autoparsing
+  -> Build proper testing framework for looking at import and parser w/o having
+     to wait for extension reloads
+     -> Test our node address handler -- it seems like we're managing to double
+        or triple import the same stuff when automatically parsing, and if we
+        could clear that up, it would be much better.
+
+
+- Add shopping list support (x)
+  > A shopping list is a recipe w/ only ingredients (?) (x)
+  > We fetch the ingredients from nested recipes - otherwise our display is pretty similar (x)
+  > We add metadata to ingredients as needed (shopping item) (x)
+  > We make shopping display of ingredient (shopping item vs. regular item) (x)
+  > We add metadata to ingredients (don't buy/buy)
+
+
+- Consider automated test of recipe editing -- it seems really easy to
+  screw up the state handling so the save/revert buttons don't show
+  up. (speaking of - we broke recipe editing state updates again
+  somehow???)
+  
 - Improve magic ingredient editor code (change on the fly?)
 - Sync from local to cloud...
 - Export to file
 
+- Consider module reorganization before release... (x)
+  > Components (x)
+    > Recipe Components (More specific to our use case) (x)
+      > Recipe Widgets (x)
+      > Views
+    > UI (general purpose styling -- doesn't know about recipe/stores/etc)
+      > Widgets
+      > Layout
 
 
 
