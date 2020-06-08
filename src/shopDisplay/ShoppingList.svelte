@@ -21,7 +21,7 @@
  let saving
 
 </script>
-<div>
+<div class="contain">
     {#if !$connected}
         Connecting to DB...
     {:else if !$shoppingList}
@@ -117,5 +117,9 @@
  div {
      font-family: var(--recipeFont);
      
+ }
+ .contain {
+     overflow-y: scroll;
+     max-height: 100vh;
  }
 </style>
