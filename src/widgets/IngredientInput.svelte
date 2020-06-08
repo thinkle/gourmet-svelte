@@ -210,6 +210,7 @@
      margin-top: var(--xsmall);
      padding-left: calc(2.4 * var(--xsmall));
      text-indent: calc(-2.4 * var(--xsmall));
+     min-width: 8em;
  }
  .input :global(span.amount),.input :global(span.unit) {
      border-top: 1px solid black;
