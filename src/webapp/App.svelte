@@ -8,6 +8,7 @@
  import SingleRecipe from '../recDisplay/SingleRecipe.svelte';
  import Demo from './Demo.svelte';
  import Sidebar from '../extension/web/Sidebar.svelte';
+ import ShoppingList from '../shopDisplay/ShoppingList.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
  let name = 'Gourmet';
@@ -24,6 +25,7 @@
  });
  router('/sidebar',()=>{page = Sidebar; params={}});
  router('/rl',()=>{page = RecipeList; params={}});
+ router('/shop',()=>{page = ShoppingList; params={}});
  router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
  router('/demo/',(ctx)=>{
      page = Demo
