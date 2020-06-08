@@ -34,7 +34,7 @@
              console.log('No toolbar :(')
              return
          }
-         toolbarItem = toolbar.addItem({
+         let toolbarItem = toolbar.addItem({
              content : 'Shopping List',
              modalVisible : false,
              key:'ShoppingList',
