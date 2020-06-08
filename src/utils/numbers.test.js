@@ -137,6 +137,12 @@ it(
         a = parseAmount('20 to 30 minutes');
         expect(a.amount).toEqual(30);
         expect(a.rangeAmount).toEqual(20);
+        a = parseAmount('3 14 23');
+        expect(a.amount).toEqual(3);
+        a = parseAmount('3 - 14 23');
+        expect(a.amount).toEqual(14);
+        expect(a.rangeAmount).toEqual(3);
+
     }
 );
 
