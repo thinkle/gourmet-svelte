@@ -23,6 +23,7 @@ import {
 // runs in background tab
 export const parsed = {
 }
+
 const waitingChildren = {
 }
 
@@ -31,7 +32,16 @@ function updateSidebar (tabId) {
 }
 
 sendParsedToWeb.onWebConnect(
-    (tabid)=>{
+    async (tabid)=>{
+        console.log('onWebConnect!');
+        if (!parsed[tabid]) {parsed[tabid] = {}};
+        let pageInfo = await contentGetPageInfo.send(null,{id:tabid})
+        if (parsed[tabid].pageInfo && parsed[tabid].pageInfo.url !== pageInfo.url) {
+            // auto clear...
+            parsed[tabid] = {pageInfo} // new pageInfo, clear all else
+        } else {
+            parsed[tabid].pageInfo = pageInfo;
+        }
         updateSidebar(tabid)
         reportSelection.backgroundReceive(
             tabid,
@@ -210,6 +220,7 @@ function listenForSidebar () {
             console.log('Got clear all');
             parsed[sender.tab.id] = {}
             await contentClearAll.send(null, sender.tab);
+            parsed[sender.tab.id].pageInfo = await contentGetPageInfo.send(null,sender.tab)
             updateSidebar(sender.tab.id)
             return parsed[sender.tab.id];
         },
