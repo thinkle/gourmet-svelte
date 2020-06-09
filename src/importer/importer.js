@@ -107,7 +107,6 @@ export function handleChunk (chunk, context, recipe, parent) {
         return context.localContext; // no change - reject
     }
     if (chunk.tag=='ignore') {
-        debugger;
         ignoreMatchingDescendants(chunk,context,{ignoreAllTags:true});
         chunk.handled = true;
         return {}
