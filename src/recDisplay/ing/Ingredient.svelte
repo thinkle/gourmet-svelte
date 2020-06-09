@@ -11,8 +11,10 @@
  export let onOpenSubRec
  export let parent
  export let position
- import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte'
- import IconButton from '../../widgets/IconButton.svelte';
+
+ import {NumberUnitDisplay,
+         IconButton} from '../../widgets/';
+
  import IngredientEditor from './IngredientEditor.svelte';
 
  import {getContext} from 'svelte';

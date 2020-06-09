@@ -1,5 +1,4 @@
 <script>
- import Tester from '../../widgets/Tester.svelte';
  import RecipeText from './RecipeText.svelte';
  let hidden=true;
  export let initialShow
@@ -17,15 +16,15 @@
 </script>
 
 
-<Tester name="Recipe Text" initialShow={initialShow} >
+
+<RecipeText value={value} />
+<textarea bind:value={value.body}></textarea>
+
+<button
+    on:click={()=>hidden=!hidden}
+>Toggle</button>
+{#if !hidden}
     <RecipeText value={value} />
-    <textarea bind:value={value.body}></textarea>
+{/if}
 
-    <button
-        on:click={()=>hidden=!hidden}
-    >Toggle</button>
-    {#if !hidden}
-        <RecipeText value={value} />
-    {/if}
 
-</Tester>

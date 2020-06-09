@@ -1,5 +1,8 @@
 <script>
- import JsonDebug from '../widgets/JsonDebug.svelte';
+ import {
+     JsonDebug,
+     Tester
+ } from '../widgets/';
  import {
      connected,
      recipeState,
@@ -10,7 +13,7 @@
      openLocalRecipes,
      recipePage,
      recipeActions} from './recipeStores.js';
- import Tester from '../widgets/Tester.svelte';
+
  import {testRecs} from '../common/mocks/recipes.js'
  export let initialShow
  let action;

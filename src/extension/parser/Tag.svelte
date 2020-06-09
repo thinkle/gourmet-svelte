@@ -1,6 +1,5 @@
 <script>
  import Metadata from '../../common/RecDef.js';
- import Combo from '../../widgets/ComboInput.svelte';
  export let name;
  export let detail;
  let hidden = false;

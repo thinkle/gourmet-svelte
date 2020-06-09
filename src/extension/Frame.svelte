@@ -2,8 +2,7 @@
  import {fly} from 'svelte/transition';
  import {onMount} from 'svelte';
  export let id;
- import IB from '../widgets/IconButton.svelte';
- import Resizer from '../widgets/Resizer.svelte';
+ import {IconButton,Resizer} from '../widgets/';
  import ComponentSandbox from './parser/ComponentSandbox.svelte';
  let cookie = chrome.extension.getURL("images/cookie.png");
  let width = 300;
@@ -59,7 +58,7 @@
                         <img style="margin-right: auto" width=50 src="{cookie}" alt="cookie">
                         <span style="font-weight:bold">Gourmet</span>
                         <span style="margin-left: auto">
-                            <IB on:click="{minimize}" icon="chevron_right"></IB>
+                            <IconButton on:click="{minimize}" icon="chevron_right"></IconButton>
                             <button on:click="{()=>width+=50}">+</button>
                             <button on:click="{()=>width-=50}">-</button>
                         </span>

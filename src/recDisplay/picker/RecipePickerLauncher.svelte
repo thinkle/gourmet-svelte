@@ -1,8 +1,10 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
- import IconButton from '../../widgets/IconButton.svelte';
+
+ import {IconButton,
+         ModalLauncher} from '../../widgets/';
  import RecipePicker from './RecipePicker.svelte';
- import ModalLauncher from '../../widgets/ModalLauncher.svelte';
+
 
  export let icon;
  export let show;

@@ -9,13 +9,12 @@
  export let editable = true;
  export let minPropWidth = 150;
 
- import AmountInput from '../../widgets/AmountInput.svelte';
- import IconButton from '../../widgets/IconButton.svelte';
- import StatusIcon from '../../widgets/StatusIcon.svelte';
- import SideBySide from '../../widgets/SideBySide.svelte';
+ import {AmountInput,
+        IconButton,
+        StatusIcon,
+        SideBySide} from '../../widgets/';
 
-
- import IL from '../ing/IngredientList.svelte';
+ import IngredientList from '../ing/IngredientList.svelte';
  import RecProp from '../props/RecProp.svelte';
 
  import RecDef from '../../common/RecDef.js';
@@ -274,14 +273,14 @@
                 {/if}
 	    </h3>
 	    <div slot="left">
-	        <IL
+	        <IngredientList
                     {editable}
                     {onOpenSubRec}
                     onChange="{triggerChange}"
                     editMode="{editMode||ingeditmode}"
                     bind:ingredients="{rec.ingredients}"
                 >
-	        </IL>
+	        </IngredientList>
 	    </div>		
 	    
 	    <div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">

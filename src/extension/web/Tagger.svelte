@@ -3,8 +3,8 @@
  export let selectionActive;
  
  import RecDef from '../../common/RecDef.js';
- import JsonDebug from '../../widgets/JsonDebug.svelte';
- import IconButton from '../../widgets/IconButton.svelte';
+ import {JsonDebug,
+         IconButton} from '../../widgets/';
  import TagEditor from './TagEditor.svelte';
 
  import {backgroundParsePage,

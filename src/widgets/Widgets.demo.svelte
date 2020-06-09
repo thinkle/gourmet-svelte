@@ -1,12 +1,12 @@
 <script>
  export let initialShow
- import InputTests from './Inputs.demo.svelte';
- import Tester from './Tester.svelte';
+ import {Tester,
+         SideBySide,
+         Status} from './';
  import ipsum from '../common/mocks/ipsum.js';
- import SideBySide from './SideBySide.svelte';
- import Status from './Status.svelte';
+
  import status from '../stores/status.js';
- import paths from './widgetDemos.js';
+
  let sideBySideOptions = {
      left : {
          growLeft:true,
@@ -56,10 +56,6 @@
 <div>
 
     <h3>Widget Tests...</h3>
-    {#each Object.keys(paths) as key}
-        <h4>{key}</h4>
-        <svelte:component this={paths[key]} initialShow="{initialShow}"/>
-    {/each}
     <Tester name="Status" initialShow="{initialShow}">
         <button on:click={randoStatuses}>Kick off some random status magic</button>
         All: <Status/>

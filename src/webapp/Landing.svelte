@@ -1,9 +1,8 @@
 <script>
- import IconButton from '../widgets/IconButton.svelte';
+ import {IconButton,ModalLauncher} from '../widgets/';
  import {setContext} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget';
  import { user, redirectURL } from '../stores/user.js';
- import ModalLauncher from '../widgets/ModalLauncher.svelte';
  import remoteApi from '../data/remoteApi.js';
  let adminMode = false;
  netlifyIdentity.init();

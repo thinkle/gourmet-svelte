@@ -1,5 +1,5 @@
 <script>
- import Tester from '../widgets/Tester.svelte'
+
  import RemoteRecipeTester from './RemoteRecipe.demo.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/user.js'
@@ -92,7 +92,7 @@
  }
 
 </script>
-<Tester name="Test Remote API">
+
     {#if isLoggedIn}
         Howdy {username} (JSON.stringify({$user}))
         <div>
@@ -137,4 +137,4 @@
             RESULT {JSON.stringify(error.result)}
         {/await}
     </div>
-</Tester>
+

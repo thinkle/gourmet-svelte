@@ -13,12 +13,13 @@
         pageInfo,
         recipePage,
         recipeState} from '../stores/recipeStores.js';
- import SearchProgress from '../widgets/SearchProgress.svelte';
- import Whisk from '../widgets/WhiskLogo.svelte';
- import IconButton from '../widgets/IconButton.svelte';
+ import {
+     PlainInput,
+     SearchProgress,
+     WhiskLogo,
+     IconButton} from '../widgets/';
  import Recipe from './rec/Recipe.svelte'
  import RecipeSummary from './rec/RecipeSummary.svelte';
- import FancyInput from '../widgets/PlainInput.svelte';
  import _ from 'lodash';
 
  function getAll () {
@@ -52,7 +53,7 @@
 </script>
 <div>
     <div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
-        Search: <FancyInput type="text" bind:value={searchInput}/>
+        Search: <PlainInput type="text" bind:value={searchInput}/>
         <span width="30px">
             {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
         </span>
@@ -111,7 +112,7 @@
                             No recipes yet? Maybe import some or create them!
                         {/if}
                     </h2>
-                    <div class="center"><Whisk size="250" /></div>
+                    <div class="center"><WhiskLogo size="250" /></div>
                     {#if $connected}
                         <IconButton
                             icon="add"

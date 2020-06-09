@@ -1,12 +1,14 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {slide,fade} from 'svelte/transition'
- import SmallLabel from '../../widgets/SmallLabel.svelte';
- import NumberUnitInput from '../../widgets/NumberUnitInput.svelte'
- import IngredientInput from '../../widgets/IngredientInput.svelte'
- import IconButton from '../../widgets/IconButton.svelte';
- import Menu from '../../widgets/Menu.svelte';
- import MenuItem from '../../widgets/MenuItem.svelte';
+ import {
+     IconButton,
+     Menu,
+     MenuItem,
+     SmallLabel,
+     NumberUnitInput,
+     IngredientInput} from '../../widgets/';
+
  import RecipePickerLauncher from '../picker/RecipePickerLauncher.svelte';
  import {storedRecipes} from '../../stores/recipeStores.js';
  export let ing

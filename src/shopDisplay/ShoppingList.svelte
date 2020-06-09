@@ -2,11 +2,12 @@
  import {fade,slide} from 'svelte/transition'
  import {connected} from '../stores/recipeStores.js';
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
- import JsonDebug from '../widgets/JsonDebug.svelte';
- import Button from '../widgets/Button.svelte';
- import IconButton from '../widgets/IconButton.svelte';
- import AmountInput from '../widgets/AmountInput.svelte';
- import IngredientInput from '../widgets/IngredientInput.svelte'; 
+ import {
+     Button,
+     IconButton,
+     JsonDebug,
+     AmountInput,
+     IngredientInput} from '../widgets/';
  import RecipePicker from '../recDisplay/picker/RecipePicker.svelte';
  import RecipePickerLauncher from '../recDisplay/picker/RecipePickerLauncher.svelte';
  import ShoppingListItems from './ShoppingListItems.svelte';

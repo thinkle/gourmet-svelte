@@ -17,7 +17,7 @@
  });
 
  import RecDef from '../../common/RecDef.js';
- import IconButton from '../../widgets/IconButton.svelte';
+ import {IconButton} from '../../widgets/'
 
  import RecPropEditor from './RecPropEditor.svelte'
  import RecPropDisplay from './RecPropDisplay.svelte'

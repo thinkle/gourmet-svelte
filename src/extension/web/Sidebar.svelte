@@ -1,14 +1,15 @@
 <script>
  import Tagger from './Tagger.svelte';
- import Tabs from '../../widgets/Tabs.svelte';
- import Tab from '../../widgets/Tab.svelte';
+ import {Tab,
+        Tabs,
+        IconButton,
+        JsonDebug,
+        WhiskLogo
+        } from '../../widgets/';
+
  import Views from './SidebarRecipeViews.svelte';
  import {onMount,getContext} from 'svelte';
  import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';
-
- import IconButton from '../../widgets/IconButton.svelte';
- import JsonDebug from '../../widgets/JsonDebug.svelte';
- import Whisk from '../../widgets/WhiskLogo.svelte';
 
  import {parseData} from '../../importer/importer.js';
  import {helloWorld,sendParsedToWeb,sendSelectionToWeb} from '../messaging/webMessages.js';
@@ -83,7 +84,7 @@
     {#if parsing}
         {#await parsing}
             Seeing what we can read automagically...
-            <Whisk size="200" />
+            <WhiskLogo size="200" />
         {:then data}
             Done parsing, let me read this thing...
             <JsonDebug data="{data}"/>

@@ -10,13 +10,14 @@
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecDef from '../../common/RecDef.js';
  import RecBlock from '../text/RecBlock.svelte';
- import PlainInput from '../../widgets/PlainInput.svelte';
- import DurationInput from '../../widgets/DurationInput.svelte';
- import UrlInput from '../../widgets/UrlInput.svelte';
- import ComboInput from '../../widgets/ComboInput.svelte';
- import CategoryInput from '../../widgets/CategoryInput.svelte';
- import NumberUnitInput from '../../widgets/NumberUnitInput.svelte';
- import IconButton from '../../widgets/IconButton.svelte';
+ import {PlainInput,
+         DurationInput,
+         UrlInput,
+         ComboInput,
+         CategoryInput,
+        NumberUnitInput,
+        IconButton} from '../../widgets/';
+
 
  let modes = RecDef.EditModes
 

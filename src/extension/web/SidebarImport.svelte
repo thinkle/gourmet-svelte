@@ -1,5 +1,5 @@
 <script>
- import IconButton from '../../widgets/IconButton.svelte';
+ import {IconButton} from '../../widgets/';
  import ParseStatus from './ParseStatus.svelte';
  export let pageInfo
  import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';

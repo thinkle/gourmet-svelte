@@ -11,13 +11,14 @@
  import {fade,slide} from 'svelte/transition';
  import {flip} from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
- import Recipe from './rec/Recipe.svelte'
- import Button from '../widgets/Button.svelte';
- import IconButton from '../widgets/IconButton.svelte';
- import Tabs from '../widgets/Tabs.svelte';
- import Tab from '../widgets/Tab.svelte';
- import Modal from '../widgets/Modal.svelte';
- import ModalLauncher from '../widgets/ModalLauncher.svelte';
+ import Recipe from './rec/Recipe.svelte';
+ import {
+     Button,
+     IconButton,
+     Tabs,
+     Tab,
+     Modal,
+     ModalLauncher}  from '../widgets/';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../stores/recipeStores.js';
  function getTabTitle (id) {
      return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || 'Untitled'; // fixme

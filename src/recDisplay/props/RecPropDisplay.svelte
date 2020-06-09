@@ -5,8 +5,8 @@
  $: {if (prop.array && !value) {
      value = []
  }}
- import NumberUnitDisplay from '../../widgets/NumberUnitDisplay.svelte';
- import TimeLink from '../../widgets/TimeLink.svelte';
+ import {NumberUnitDisplay,TimeLink} from '../../widgets/';
+
  import RecDef from '../../common/RecDef.js';
  import RecipeText from '../text/RecipeText.svelte';
 

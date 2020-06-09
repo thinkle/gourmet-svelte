@@ -1,5 +1,6 @@
 <script>
- import JsonDebug from '../../widgets/JsonDebug.svelte';
+ import {IconButton,
+        JsonDebug} from '../../widgets/';
  import {onMount} from 'svelte';
  import {parseData} from '../../importer/importer.js';
  import Recipe from '../../webapp/recDisplay/Recipe.svelte'
@@ -9,7 +10,6 @@
  let parsed
  let updateCount = 0;
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
- import IconButton from '../../widgets/IconButton.svelte';
  let creating;
 
  function doCreateRecipe () {

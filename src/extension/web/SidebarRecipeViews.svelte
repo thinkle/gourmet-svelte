@@ -3,9 +3,10 @@
  
  import Recipe from '../../recDisplay/rec/Recipe.svelte'
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
- import IconButton from '../../widgets/IconButton.svelte';
- import Tabs from '../../widgets/Tabs.svelte';
- import Tab from '../../widgets/Tab.svelte';
+ import {IconButton,
+         Tabs,
+         Tab} from '../../widgets/';
+
  let mode = 'full'
 
  // promise

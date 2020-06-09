@@ -2,8 +2,9 @@
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
 
  import RecipeList from '../RecipeList.svelte';
- import Modal from '../../widgets/Modal.svelte';
- import IconButton from '../../widgets/IconButton.svelte';
+ import {Modal,
+         IconButton} from '../../widgets/';
+
  import { crossfade, scale } from 'svelte/transition';
  import {fade} from 'svelte/transition';
  export let message = 'Pick recipe to include as ingredient'

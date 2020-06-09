@@ -3,13 +3,12 @@
  export let ignored=false
  import {floatToFrac} from '../utils/numbers.js';
  import {crossfade} from 'svelte/transition'
- import PlainInput from '../widgets/PlainInput.svelte';
- import NumberUnitDisplay from '../widgets/NumberUnitDisplay.svelte';
- import Ingredient from '../recDisplay/ing/Ingredient.svelte'
- import IconButton from '../widgets/IconButton.svelte';
- import Button from '../widgets/Button.svelte';
- import Checkbox from '../widgets/Checkbox.svelte';
- import {shoppingList} from '../stores/shoppingStores.js';
+ import {
+     Button,IconButton,Checkbox,
+     PlainInput,NumberUnitDisplay,
+ } from '../widgets/';
+  import Ingredient from '../recDisplay/ing/Ingredient.svelte'
+  import {shoppingList} from '../stores/shoppingStores.js';
  import {titleCase} from '../utils/textUtils.js';
 
  let [send,receive] = crossfade({duration:300});

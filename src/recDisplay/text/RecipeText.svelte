@@ -1,6 +1,7 @@
 <script>
- import HtmlBlock from '../../widgets/HtmlBlock.svelte';
- import TimeLink from '../../widgets/TimeLink.svelte';
+ import {HtmlBlock,
+         TimeLink} from '../../widgets/';
+
  import IngHighlight from './IngHighlight.svelte';
  export let value;
  export let header=''

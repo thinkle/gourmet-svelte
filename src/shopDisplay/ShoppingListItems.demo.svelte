@@ -1,6 +1,6 @@
 <script>
  import ShoppingListItems from './ShoppingListItems.svelte';
- import JsonDebug from '../widgets/JsonDebug.svelte';
+ import {JsonDebug} from '../widgets/';
  import items from './demoItems.js';
 
 </script>

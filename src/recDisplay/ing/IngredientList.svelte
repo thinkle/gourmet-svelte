@@ -1,7 +1,6 @@
 <script>
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import Ingredient from './Ingredient.svelte';
- import IconButton from '../../widgets/IconButton.svelte';
  import {getContext} from 'svelte';
  export let recursive=false;
  export let ingredients;
@@ -10,8 +9,8 @@
  export let editMode = false;
  export let onChange = undefined;
  export let onOpenSubRec = undefined;
- import IngredientInput from '../../widgets/IngredientInput.svelte'
- import FancyInput from '../../widgets/PlainInput.svelte';
+ import {IconButton,IngredientInput,PlainInput} from '../../widgets/';
+
  import {floatToFrac} from '../../utils/numbers.js';
  import {onMount,tick} from 'svelte';
  import {flip} from 'svelte/animate'
@@ -147,7 +146,7 @@
                     <td colspan="4">
                         {#if editMode}
                             <div style="display: flex">
-                            <FancyInput shouldFocus={focusNext==i} on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
+                            <PlainInput shouldFocus={focusNext==i} on:change={triggerChange} bind:value={i.text} placeholder="Ingredient Group"/>
                             {#if (i.ingredients.length==0)}
                                 <button on:click="{()=>{ingredients.splice(n,1);ingredients=ingredients;triggerChange() }}">
                                     <i class="material-icons" >delete</i>

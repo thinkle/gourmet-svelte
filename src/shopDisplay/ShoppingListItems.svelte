@@ -1,9 +1,10 @@
 <script>
  export let items
  import {flip} from 'svelte/animate';
- import JsonDebug from '../widgets/JsonDebug.svelte';
- import Button from '../widgets/Button.svelte';
- import IconButton from '../widgets/IconButton.svelte';
+ import {JsonDebug,
+         Button,
+         IconButton} from '../widgets/';
+
  import ShoppingListItem from './ShoppingListItem.svelte';
  
  import {extractItems} from '../utils/ingredientUtils.js';

@@ -1,5 +1,5 @@
 <script>
- import Tester from '../../widgets/Tester.svelte';
+ import {Tester} from '../../widgets/';
  import {testRecs} from '../../common/mocks/recipes.js'
  import Recipe from './Recipe.svelte';
  export let initialShow=true;

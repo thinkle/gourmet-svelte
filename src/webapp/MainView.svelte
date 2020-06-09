@@ -2,12 +2,15 @@
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
- import ModalLauncher from '../widgets/ModalLauncher.svelte';
- import Modal from '../widgets/Modal.svelte';
+ import {
+     Button,
+     IconButton,
+     JsonDebug,
+     ModalLauncher,
+     Modal,
+     Status} from '../widgets/';
  import OpenRecipes from '../recDisplay/OpenRecipes.svelte';
- import Status from '../widgets/Status.svelte';
- import Button from '../widgets/Button.svelte';
- import IconButton from '../widgets/IconButton.svelte';
+
  import {connected,
         localRecipes,
         openLocalRecipes,
@@ -16,9 +19,7 @@
  let syncingPromise
 
 
- // Fix me
  import {storedRecipes} from '../stores/recipeStores.js';
- import JsonDebug from '../widgets/JsonDebug.svelte';
 
  import {getContext,onMount} from 'svelte';
  import {writable} from 'svelte/store'

@@ -1,5 +1,5 @@
 <script>
- import Tester from '../../widgets/Tester.svelte';
+ 
  import tagger from './tagger.js';
  import ipsum from '../../common/mocks/ipsum.js'
  import RecDef from '../../common/RecDef.js';

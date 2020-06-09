@@ -3,10 +3,10 @@
  export let parsed;
  export let tags;
 
- import IconButton from '../../widgets/IconButton.svelte';
- import Modal from '../../widgets/Modal.svelte';
- import ModalLauncher from '../../widgets/ModalLauncher.svelte';
- import JsonDebug from '../../widgets/JsonDebug.svelte';
+ import {IconButton,
+         Modal,
+         ModalLauncher,
+         JsonDebug} from '../../widgets/';
  import {backgroundClearOne,backgroundClearMany} from '../messaging/parsing.js';
 
  let rules, items;

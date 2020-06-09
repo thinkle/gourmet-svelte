@@ -5,8 +5,7 @@
  export let forceEdit=true;
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
- import RichText from '../../widgets/RichText.svelte';
- import FancyInput from '../../widgets/PlainInput.svelte';
+ import {PlainInput,RichText} from '../../widgets/';
  import {getContext} from 'svelte'
  import { createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
@@ -61,7 +60,7 @@
     <div class="top">
         {#if showLabel}
             {#if edit}
-                <FancyInput on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
+                <PlainInput on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
             {:else}
                 <h3>{value.header}</h3>
             {/if}
