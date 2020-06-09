@@ -1,0 +1,67 @@
+<script>
+ export let sticky=false;
+ export let stickyTop = 0;
+ export let data=undefined;
+ export let handleActive=false;
+ export let nowrap=false
+
+ import {flip} from 'svelte/animate';
+ import Tab from './Tab.svelte';
+
+ if (!data && handleActive) {
+     console.log("Tabs.svelte WARNING: You passed Tabs handleActive but not any data. Tabs can't manage  slots if you're using it in slots mode.");
+ }
+
+ function handleClick (tab) {
+     if (handleActive) {
+         for (let t of data) {
+             if (t==tab || t.key==tab.key) {
+                 t.active = true;
+             }
+             else {
+                 t.active = false;
+             }
+         }
+         data = data;
+     }
+     if (tab.action) {
+         tab.action();
+     }
+ }
+ 
+</script>
+
+<ul class:sticky class:nowrap class="tabs" style="{`--stickyTop:${stickyTop}`}">
+    <slot>
+        {#if data}
+            {#each data as tab (tab.key)}
+                <div animate:flip>
+                    <Tab active="{tab.active}" on:click="{()=>handleClick(tab)}">{tab.label}</Tab>
+                </div>
+            {/each}
+        {:else}
+            Either provide data or a slot, please :)
+        {/if}
+    </slot>
+</ul>
+
+<style>
+ .tabs {
+     display: flex;
+     flex-direction: row;
+     background-color: white;
+     width: 100%;
+     margin-bottom: 3px;
+ }
+ .sticky {
+     position: sticky;
+     top: var(--stickyTop);
+ }
+ .nowrap {
+     overflow-x: scroll;
+ }
+ .nowrap :global(*) {
+     white-space : nowrap;
+ }
+</style>
+
