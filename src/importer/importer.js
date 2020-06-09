@@ -106,6 +106,12 @@ export function handleChunk (chunk, context, recipe, parent) {
         console.log('Weird, empty chunk? IGNORING',chunk);
         return context.localContext; // no change - reject
     }
+    if (chunk.tag=='ignore') {
+        debugger;
+        ignoreMatchingDescendants(chunk,context,{ignoreAllTags:true});
+        chunk.handled = true;
+        return {}
+    }
     if (chunk.tag=='title') {
         return handleTitle(chunk,context,recipe);
     }
@@ -147,7 +153,7 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
-export function ignoreMatchingDescendants (chunk,context,{extraTagsToIgnore}={}) {
+export function ignoreMatchingDescendants (chunk,context,{extraTagsToIgnore,ignoreAllTags}={}) {
     if (!chunk) {return}
     if (!chunk.tag) {return}
     if (chunk.children) {
@@ -155,9 +161,9 @@ export function ignoreMatchingDescendants (chunk,context,{extraTagsToIgnore}={})
             (child)=>{
                 if (context.chunkMap[child]) {
                     let ch = context.chunkMap[child]
-                    if (ch.tag==chunk.tag || extraTagsToIgnore && extraTagsToIgnore.indexOf(ch.tag)>-1) {
+                    if (ignoreAllTags || ch.tag==chunk.tag || extraTagsToIgnore && extraTagsToIgnore.includes(ch.tag)) {
                         ch.handled = true;
-                        ignoreMatchingDescendants(ch,context,{extraTagsToIgnore}); // recursive!
+                        ignoreMatchingDescendants(ch,context,{extraTagsToIgnore,ignoreAllTags}); // recursive!
                     }
                 }
             }
