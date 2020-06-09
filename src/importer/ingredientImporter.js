@@ -72,18 +72,54 @@ export function handleIngredient (chunk, context, recipe) {
     let ingredients = context.ingredients || recipe.ingredients;
     if (ing) {ingredients.push(ing)};
     // Now override plain text parsing if need be...
+    const ALL = 1;
+    let stuffToIgnore = false;
     if (chunk.children && chunk.children.length > 0) {
         for (let childID of chunk.children) {
             let childChunk = context.chunkMap[childID]
-            if (childChunk) {
-                handleChunk(childChunk,context,recipe,ing);
-            }
-            else {
-                // warn?
+            if (!childChunk) {
                 console.log('Warning: ingredient claims to have child ID',childID,'that is not found in',context.chunkMap);
+            } else {
+                if (['ingredientText','amount','unit'].includes(childChunk.tag)) {
+                    handleChunk(childChunk,context,recipe,ing);
+                } else if (childChunk.tag=='ignore') {
+                    // this one is trickier...
+                    if (chunk.text.replace(/\s/g,'')==childChunk.text.replace(/\s/g,'')) {
+                        // We are the same thing, we should ignore this whole ingredient...
+                        stuffToIgnore = ALL;
+                    } else {
+                        stuffToIgnore = chunk.text.replace(/^\s+|\s+$/g,'');
+                    }
+                } else {
+                    // warn?
+                    console.log('Warning: ingredient has child of type:',childChunk.tag);
+                    console.log('We will just let it be handled normally.');
+                }
             }
         }
-        // Now handle the remaining ingredient
+    }
+    // NOTE: Ok, this ignore code is awkward. Currently I have one importer where the nutritional
+    // info shows up as an ingredient and I have to ignore it. If we have future use-cases where
+    // e.g. multiple ads show up in the middle of an ingredient and have to be stripped or something,
+    // then we will have to rethink this... a better solution might be to preprocess the whole
+    // tree during preprocessing, which would mean parsing the HTML of every parent with an ignore
+    // child, removing the child elements we're supposed to ignore, and then re-generating
+    // the text and html elements...
+    if (stuffToIgnore==ALL) {
+        // well this is awkward, we have to go back and remove ourselves..
+        let idx = ingredients.indexOf(ing);
+        if (idx == -1) {throw `WTF????, ${ing} not in ${ingredients}`}
+        ingredients.splice(idx,1);
+    } else if (stuffToIgnore) {
+        // Ugh...
+        ing.ignore = stuffToIgnore;
+        if (ing.text.indexOf(ing.ignore)>-1) {
+            ing.ignore.replace(stuffToIgnore,'');
+        } else {
+            console.log('Hmm... we are supposed to ignore',stuffToIgnore,'in',ing,'but how do we do it?');
+            console.log('Ing text is:',ing.text);
+            debugger;
+        }
     }
     return {} // no context -- we are are complete in ourselves... 
 }
