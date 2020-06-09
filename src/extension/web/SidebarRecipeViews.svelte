@@ -22,7 +22,7 @@
     <Tab active="{mode=='save'}" on:click="{()=>{mode='save'}}"><span class="important">Save</span></Tab>
 </Tabs>
 {#if mode=='full'}
-    <Recipe editable={false} rec={recipe}/>
+    <Recipe editable={false} rec={recipe} showShopping="{false}" />
 {:else if mode=='summary'}
     <p>Sorry, this view will be awesome, but I haven't written it yet.</p>
 {:else}
