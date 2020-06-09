@@ -50,7 +50,7 @@ export function ChannelToWeb  ({name, messageDef={},chatty=true}) {
         }
         if (ports[tab]) {
             if (chatty) {
-                console.log(`${name}: ${tab}=>postMessage(${message})`);
+                console.log(`${name}: ${tab}=>postMessage(${message})`,message);
             }
             ports[tab].postMessage(message)
         } else {
