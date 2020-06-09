@@ -37,6 +37,7 @@ const byDomain = {
         {selector:'.recipe-ingredients li',tag:'ingredient'},
         {selector:'.recipe-ingredients .ingredient-name',tag:'ingredientText'},
         {selector:'.recipe-ingredients .quantity',tag:'amount'},
+        {selector:'.nutrition-container',tag:'ignore'},
         {selector:'[itemprop="recipeInstructions"]',tag:'text',detail:'Instructions'},
         {selector:'.recipe-notes',tag:'footnote'},
         {selector:'.topnote',tag:'text'},
