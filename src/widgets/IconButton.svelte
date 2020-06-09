@@ -13,7 +13,7 @@
  export let small=undefined;
  export let left=false;
  export let compact=false;
- export let width;
+ export let width=undefined;
  
  export function focus () {
      b.focus()
