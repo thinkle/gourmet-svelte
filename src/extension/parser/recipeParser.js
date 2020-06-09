@@ -49,9 +49,13 @@ const byDomain = {
     ],
     'www.cooksillustrated.com':[
         // current? May 2020
+        // {
+        //     selector : '.recipe-ingredient-group',
+        //     tag:'ingredient-group'
+        // },
         {
-            selector : '.recipe-ingredient-group',
-            tag:'ingredient-group'
+            selector : '.recipe-ingredient-group__title',
+            tag : 'inggroup'
         },
         {
             selector : '.ingredient__title',
@@ -84,8 +88,8 @@ const byDomain = {
          tag:'title'},
         {selector:'h2[name=title]',
          tag:'title'},
-        {selector:'.ingredients',
-         tag:'ingredients'},
+        // {selector:'.ingredients',
+        //  tag:'ingredients'},
         {selector:'.ingredients h5',
          tag:'inggroup'},
         {selector:'.recipe__ingredient--header',
