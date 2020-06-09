@@ -119,7 +119,7 @@ export function ContentBackgroundChannel ({name, messageDef={}, chatty=true,
             }
             if (ports[tab]) {
                 if (chatty) {
-                    console.log(`${name}: ${tab}=>postMessage(${message})`);
+                    console.log(`${name}: ${tab}=>postMessage(${message})`,message);
                 }
                 try {
                     ports[tab].postMessage(message)
