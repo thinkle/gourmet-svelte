@@ -1,6 +1,6 @@
 <script>
  import FullScreen from './FullScreen.svelte';
- import Container from './Container.svelte';
+ import FullHeight from './FullHeight.svelte';
  import Bar from './Bar.svelte';
  import {Lorem,Button,Tabs,Tab} from '../'
  const footer = {
@@ -15,7 +15,7 @@
  }
 </script>
 
-<FullScreen>
+<FullScreen scrolls={false}>
     <div slot="header">
         <Bar>
             <span slot="left">
@@ -35,9 +35,8 @@
             </span>
         </Bar>
     </div>
-    <div slot="main" >
+    <div slot="main" class="slot">
         <Lorem graphs="2" />
-        <Container>
         <Tabs sticky="{true}">
             <Tab>
                 <span on:click="{()=>header.left = [1,...header.left]}">Add item top left</span>
@@ -49,13 +48,11 @@
                 <span on:click="{()=>header.right = [1,...header.right]}">Add item top right</span>
             </Tab>
         </Tabs>
-        <Container>
+        <h3>And below us a full height container...</h3>
+        <FullHeight scrolls={true}>
             <p>There are some tabs above me for an example UI, but actually they're buttons.</p>
             <Lorem graphs="40" />
-        </Container>
-        <h3>ANd this is outside the container...</h3>
-        <Lorem graphs="40" />
-        </Container>
+        </FullHeight>
     </div>
     <div slot="footer">
         <Bar>
