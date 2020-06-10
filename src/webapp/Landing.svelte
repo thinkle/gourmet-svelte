@@ -31,7 +31,7 @@
 
  netlifyIdentity.on('login',
                     u => {
-                        console.log('Logged in',u);
+                        //console.log('Logged in',u);
                         user.login(u);
                         netlifyIdentity.close();
                         if ($redirectURL !== '') {
