@@ -3,10 +3,13 @@
  import {connected} from '../stores/recipeStores.js';
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
  import {
+     Bar,
      Button,
+     FullHeight,
      IconButton,
      JsonDebug,
      AmountInput,
+     NavActions,
      IngredientInput} from '../widgets/';
  import RecipePicker from '../recDisplay/picker/RecipePicker.svelte';
  import RecipePickerLauncher from '../recDisplay/picker/RecipePickerLauncher.svelte';
@@ -33,54 +36,58 @@
  }
 
 </script>
-<div class="contain">
+
     {#if !$connected}
         Connecting to DB...
     {:else if !$shoppingList}
         Still loading... still no shopping list
     {:else}
         <!-- Toolbar -->
-        <div class="top">
-            {#if $shoppingList.length > 0}
-                <h2>Shopping List</h2>
-                <Button toggle="true" toggled="{showSubItems}" on:click="{()=>showSubItems=!showSubItems}">Show details</Button>
-                <IconButton toggle="true" toggled="{showAdd}" on:click="{()=>showAdd=!showAdd}" icon="add">Add Items</IconButton>
-                {#if !saving}
-                    <Button width="5em" on:click="{()=>saving=shoppingList.save()}">
-                        Save
-                    </Button>
-                {:else}
-                    {#await saving}
-                        <Button width="5em" inactive="true">
-                            Saving...
-                        </Button>
-                    {:then}
-                        <IconButton
-                            icon="close"
-                            on:click="{()=>saving=undefined}"
+        {#if $shoppingList.length > 0}
+            <Bar>
+                <h2 slot="center">Shopping List</h2>
+                <div slot="right">
+                    <NavActions>
+                        <Button toggle="true" toggled="{showSubItems}" on:click="{()=>showSubItems=!showSubItems}">Show details</Button>
+                        <IconButton toggle="true" toggled="{showAdd}" on:click="{()=>showAdd=!showAdd}" icon="add">Add Items</IconButton>
+                        {#if !saving}
+                            <Button width="5em" on:click="{()=>saving=shoppingList.save()}">
+                                Save
+                            </Button>
+                        {:else}
+                            {#await saving}
+                                <Button width="5em" inactive="true">
+                                    Saving...
+                                </Button>
+                            {:then}
+                                <IconButton
+                                    icon="close"
+                                    on:click="{()=>saving=undefined}"
+                                >
+                                    All set!
+                                    {function () {saving=false}()}
+                                </IconButton>
+                            {:catch err}
+                                Something went wrong :(
+                                <IconButton
+                                    icon="close"
+                                    on:click="{()=>saving=undefined}"
+                                >
+                                    Try again later?
+                                </IconButton>
+                                Error: <JsonDebug data="{err}"/>
+                            {/await}
+                        {/if}
+                        <RecipePickerLauncher
+                            onSelected="{shoppingList.addRecipe}"  
                         >
-                            All set!
-                            {function () {saving=false}()}
-                        </IconButton>
-                    {:catch err}
-                        Something went wrong :(
-                        <IconButton
-                            icon="close"
-                            on:click="{()=>saving=undefined}"
-                        >
-                            Try again later?
-                        </IconButton>
-                        Error: <JsonDebug data="{err}"/>
-                    {/await}
-                {/if}
-            {/if}
-            <RecipePickerLauncher
-                onSelected="{shoppingList.addRecipe}"  
-            >
-                <Button>Add Recipe to List</Button>
-            </RecipePickerLauncher>
-        </div>
-
+                            <Button>Add Recipe to List</Button>
+                        </RecipePickerLauncher>
+                    </NavActions>
+                </div>
+            </Bar>
+        {/if}
+        
         {#if showAdd}
             <table in:fade="{{duraton:300}}" out:fade="{{duration:300}}">
                 <IngredientInput
@@ -90,6 +97,7 @@
                 />
             </table>
         {/if}
+        <FullHeight scrolls={true}>
         {#if ($recipesOnList && $recipesOnList.length > 0)}
             <h3 on:click="{()=>showRecipes=!showRecipes}">
                 For {$recipesOnList.length} {#if $recipesOnList.length>1}Recipes{:else}Recipe{/if}
@@ -134,27 +142,13 @@
             <ShoppingListItems showSubItems="{showSubItems}" items="{$shoppingList}"/>
         </div>
         <JsonDebug data="{$shoppingList}"/>
+        </FullHeight>
     {/if}
-</div>
+
 
 <style>
  table {
      margin: auto;
- }
- .top {
-     display: flex;
-     align-items: center;
-     justify-content: flex-end;
-     position: sticky;
-     top: 0;
-     padding-top: 3px;
-     background-color: var(--white);
-     color: var(--black);
-     z-index: 2;
-     margin-bottom: var(--small);
- }
- .top :global(button) {
-     margin-left: 1em;     
  }
  
  h2 {
@@ -165,10 +159,6 @@
  div {
      font-family: var(--recipeFont);
      
- }
- .contain {
-     overflow-y: scroll;
-     max-height: 100vh;
  }
  h3 {
      text-align: center;
