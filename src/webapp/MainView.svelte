@@ -2,6 +2,7 @@
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
+ import {recipesOnList} from '../stores/shoppingStores.js';
  import {
      Bar,
      Button,
@@ -40,7 +41,6 @@
 
 {#if $connected}
     <Bar>
-
         <div slot="left">
             <Tabs>
                 <Tab
@@ -54,6 +54,9 @@
                     on:click="{()=>page='ShoppingList'}"
                 >
                     Shopping List
+                    {#if $recipesOnList && $recipesOnList.length}
+                        ({$recipesOnList.length})
+                    {/if}
                 </Tab>
                 {#if $openLocalRecipes.length > 0}
                     <Tab active="{page=='OpenRecipes'}"
@@ -75,22 +78,21 @@
             </Button>
         </div>
     </Bar>
-    <FullHeight scrolls="true">
-        <LazyIf condition="{page=='ShoppingList'}">
-            <ShoppingList/>
-        </LazyIf>
-        <LazyIf condition="{page=='RecipeList'}">
-            <RecipeList
-                onRecipeClick="{
-                               (id)=>localRecipes.open(id).then(()=>opener.open(id))
-                               }"
-            />
-        </LazyIf>
-        <OpenRecipes bind:this="{opener}"
-                     hide="{page!=='OpenRecipes'}"
-                     onOpen="{()=>page='OpenRecipes'}"
+    
+    <LazyIf condition="{page=='ShoppingList'}">
+        <ShoppingList/>
+    </LazyIf>
+    <LazyIf condition="{page=='RecipeList'}">
+        <RecipeList
+            onRecipeClick="{
+                           (id)=>localRecipes.open(id).then(()=>opener.open(id))
+                           }"
         />
-    </FullHeight>
+    </LazyIf>
+    <OpenRecipes bind:this="{opener}"
+                 hide="{page!=='OpenRecipes'}"
+                 onOpen="{()=>page='OpenRecipes'}"
+    />
     <Bar>
         <div slot="center">
             <Status/>
