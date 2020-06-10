@@ -5,7 +5,8 @@
  export let forceEdit=true;
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
- import {PlainInput,RichText} from '../../widgets/';
+ import {PlainInput} from '../../widgets/';
+ import RichText from '../../widgets/inputs/RichText.svelte';
  import {getContext} from 'svelte'
  import { createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
