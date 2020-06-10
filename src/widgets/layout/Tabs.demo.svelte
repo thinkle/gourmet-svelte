@@ -1,13 +1,15 @@
 <script>
  import Tabs from './Tabs.svelte';
  import Tab from './Tab.svelte';
- import {Lorem} from '../';
+ import {Lorem,Bar,Button} from '../';
  let data = [
      {key:0,label:'Hello',active:true,action:function(){}},
      {key:1,label:'World',active:false,action:function(){}},
      {key:2,label:'Also this',active:false,action:function(){}},
  ];
  let active=1
+ let tabs = ['one','two','three']
+ 
 </script>
 <p>Demo with Slots</p>
 <Tabs>
@@ -36,6 +38,21 @@ Tabs w data that are STICKY!
     <Tab><Lorem chars="{106}"/></Tab>
 </Tabs>
 <h3>Second Sticky with stickyTop and nowrap=true enforced </h3>
+<Bar>
+    <div slot="left" >
+        <Tabs>
+            {#each tabs as tab}
+                <Tab>
+                    {tab}<lorem chars="8"/>
+                </Tab>
+            {/each}
+        </Tabs>
+    </div>
+
+    <div slot="right" >
+        <Button on:click="{()=>tabs = [...tabs,'Another']}">Click to Add More</Button>  
+    </div>
+</Bar>
 <hr/>    
 Empty tabs w/ warning
 <Tabs/>
