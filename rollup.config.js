@@ -206,7 +206,8 @@ function bundleDemos (options) {
     console.log('called bundle...');
 
     return {
-        generateBundle () {            
+        generateBundle () {
+            console.log('***BUNDLE DEMOS...*');
             let rootDirectory = options.root
             let pathBase = options.pathBase || './'
             let files = []
@@ -234,6 +235,7 @@ export default {
             let currentContents = fs.readFileSync(options.target);
             let newContents =  `${importStatements}\n\n${exportStatement}`
             if (currentContents != newContents) {
+                console.log('demos.js changed, rewriting!');
                 fs.writeFileSync(options.target,newContents);
             }
         }
