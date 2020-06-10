@@ -90,7 +90,7 @@
     </div>
     <table>
         {#each $recipePage as id,n (`${n}${id}`)}
-            <tr class='summary' in:fade="{{duration:200,delay:200}}" out:fade="{{duration:300}}">
+            <tr class='summary' in:fade|local="{{duration:200,delay:200}}" out:fade|local="{{duration:300}}">
                 <RecipeSummary
                     onClick={()=>{onRecipeClick(id)}}
                    recipe={$storedRecipes[id]}
@@ -102,7 +102,7 @@
                 </td>
             </tr>
         {:else}
-            <tr in:fade="{{delay:200,duration:800}}" out:fade="{{duration:300}}">
+            <tr in:fade|local="{{delay:200,duration:800}}" out:fade|local="{{duration:300}}">
                 <td>
                 <div class="center">
                     <h2>
