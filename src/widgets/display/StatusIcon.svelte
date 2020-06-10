@@ -55,6 +55,7 @@
      background-color: var(--note-bg);
      color : var(--note-fg);
      padding: 24px;
+     white-space: normal;
  }
 
  .topRight {
