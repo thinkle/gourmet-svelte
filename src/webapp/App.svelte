@@ -15,22 +15,50 @@
  let page;
  let params = {};
  let keyboardUser;
- router('/',()=>{page = MainView; params={}});
- router('/admin',()=>{page = Admin; params={}});
+ let containerScrolls = false;
+ router('/',()=>{
+     page = MainView;
+     containerScrolls = false;
+     params={}}
+ );
+ router('/admin',()=>{
+     page = Admin;
+     containerScrolls = true;
+     params={}}
+ );
  router('/rec/:id',(ctx)=>{
      page = SingleRecipe
+     containerScrolls = false;
      params = {
          id:ctx.params.id
      };
  });
- router('/sidebar',()=>{page = Sidebar; params={}});
- router('/rl',()=>{page = RecipeList; params={}});
- router('/shop',()=>{page = ShoppingList; params={}});
+ router('/sidebar',()=>{
+     page = Sidebar;
+     params={
+     };
+     containerScrolls = false;
+ }
+ );
+ router('/rl',()=>{
+     page = RecipeList;
+     containerScrolls = false;
+     params={}}
+ );
+ router('/shop',()=>{
+     page = ShoppingList;
+     params={
+     };
+     containerScrolls = false;
+ }
+ );
  router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
  router('/demo/',(ctx)=>{
      page = Demo
      params = {
+
      }
+     containerScrolls = true;
  });
 
  router('/demo/:demo',(ctx)=>{
@@ -54,7 +82,7 @@
 </script>
 
 <div class:keyboardUser>
-    <Landing>
+    <Landing scrolls="{containerScrolls}">
         <!-- <span slot="rightnav">
              {#if page!==MainView}<a href="/">Recipe List</a>{/if}
              </span> -->
@@ -108,7 +136,7 @@
      --small : 0.8rem;
      --xsmall : 0.6rem;
      /* Sizes */
-     --navHeight: 30px;
+     --bar-height: 30px;
      /* Inputs and Buttons */
      --inputBorder : 1px solid #aaa;
      --focusedInputBorder : 3px solid #777;
