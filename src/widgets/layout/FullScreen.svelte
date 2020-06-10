@@ -1,23 +1,27 @@
 <script>
- import FullHeight from './FullHeight.svelte';
+ export let header=true;
+ export let footer=true;
  export let headerHeight='28px';
  export let footerHeight='28px';
  export let scrolls=true;
+
+
+ import FullHeight from './FullHeight.svelte';
 </script>
 
 <article style="{`--header-height:${headerHeight};
                  --footer-height:${footerHeight};
                 --container-top:${headerHeight};
                 `}">
-    <section class="header" style="{`--bar-height:${headerHeight}`}">
+    {#if header}<section class="header" style="{`--bar-height:${headerHeight}`}">
         <slot name="header" ></slot>
-    </section>
+    </section>{/if}
     <FullHeight {scrolls}>
         <slot name="main" ></slot>
     </FullHeight>
-    <section class="footer" style="{`--bar-height:${footerHeight}`}">
+    {#if footer}<section class="footer" style="{`--bar-height:${footerHeight}`}">
         <slot name="footer" ></slot>
-    </section>
+    </section>{/if}
 </article>
 
 <style>
