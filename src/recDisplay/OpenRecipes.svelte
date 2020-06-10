@@ -69,18 +69,18 @@
 </script>
 
 <LazyIf condition="{($openLocalRecipes.length > 0) && !hide}">
-    <Tabs sticky={true}>
+    <Tabs sticky={true} nowrap={true}>
         {#each $openLocalRecipes as id (id)}
             <div
                 animate:flip="{{delay:100,duration:250,easing:quintOut}}">
                 <Tab
                     active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}">
+                    {getTabTitle(id)}
                     <div class='close'>
-                        <IconButton bare="{true}" small="{true}" on:click="{()=>window.open(`/rec/${id}`,'_blank')}" icon='open_in_new'/>
                         <IconButton bare="{true}" small="{true}" on:click="{()=>{shoppingList.addRecipe(id)}}" icon='shopping_cart'/>
+                        <IconButton bare="{true}" small="{true}" on:click="{()=>window.open(`/rec/${id}`,'_blank')}" icon='open_in_new'/>
                         <IconButton bare="{true}" small="{true}" on:click="{()=>{closeRec(id)}}" icon='close'/>
                     </div>
-                    {getTabTitle(id)}
                 </Tab>
             </div>
         {/each}
@@ -201,9 +201,6 @@
  .tabs .active {
      border-bottom: 3px solid var(--heavy-underline);
      font-weight: 500;
- }
- .close {
-     float : right;
  }
  .toggle {
      margin-left: auto;
