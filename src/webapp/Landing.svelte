@@ -106,8 +106,8 @@
 
 
 </script>
-<FullScreen {scrolls}>    
-    <div slot="header">
+<FullScreen {scrolls} header={false}>    
+    <div slot="footer">
         <Bar>
             <nav slot="left">
                 {#if isLoggedIn}Hello, {username}{/if}
@@ -148,7 +148,7 @@
             </nav> <!-- end right -->
         </Bar>
     </div>
-    <div slot="main" >
+    <div class="slot" slot="main" >
         {#if isLoggedIn}
             <slot/>
         {:else}
