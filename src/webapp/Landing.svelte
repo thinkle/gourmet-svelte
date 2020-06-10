@@ -1,5 +1,10 @@
 <script>
- import {IconButton,ModalLauncher} from '../widgets/';
+ export let scrolls
+ import {IconButton,
+        ModalLauncher,
+        FullScreen,
+        Bar,
+        } from '../widgets/';
  import {setContext} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget';
  import { user, redirectURL } from '../stores/user.js';
@@ -101,57 +106,59 @@
 
 
 </script>
-
-{#if isLoggedIn}    
-    <nav class:hide>
-        <div>Hello, {username}
-            <slot name="leftnav"/>
-        </div>
-        <div class='brand'>Gourmet</div>
-        <div>
-            {#each extraItems as item (item)}
-                <!-- Fix me if we add another one...
-                     modal launcher key should be in toolbaritem, not hard-coded here
-                -->
-                <ModalLauncher
-                    key="{item.key}"
-                    modalVisible="{item.modalVisible}"
-                    >
-                    {#if !item.hide}
-                        {#if item.component}
-                            <svelte:component this="{item.component}"
-                                              {...item.props}
+<FullScreen {scrolls}>    
+    <div slot="header">
+        <Bar>
+            <nav slot="left">
+                {#if isLoggedIn}Hello, {username}{/if}
+                <slot name="leftnav"/>
+            </nav>
+            <nav slot='center' class='brand'>Gourmet</nav>
+            <nav slot="right">
+                {#if isLoggedIn}
+                    {#each extraItems as item (item)}
+                        <!-- Fix me if we add another one...
+                             modal launcher key should be in toolbaritem, not hard-coded here
+                        -->
+                        <ModalLauncher
+                            key="{item.key}"
+                            modalVisible="{item.modalVisible}"
                         >
-                                {item.content}  {JSON.stringify(item.props)}
-                            </svelte:component>
-                        {:else if item.props.icon}
-                            <IconButton {...item.props} on:click={item.onClick}>
-                                {item.content}
-                            </IconButton>
-                        {:else}
-                            <span {...item.props} on:click="{item.onClick}">
-                                {item.content}
-                            </span>
-                        {/if}
-                    {/if}
-                </ModalLauncher>
-            {/each}
-            <IconButton bare="true" on:click={() => doLogout()} icon="close">Log Out</IconButton>
-        </div>
-    </nav>
-    <slot/>
-{:else}
-    <nav>
-        <div>Not Logged in...</div>
-        <div class='brand'>Gourmet</div>
-        <div></div>
-    </nav>
-    <article>
-        <IconButton on:click={() => doLogin()} icon="login">Log In</IconButton>
-        <IconButton on:click={() => doSignup()} icon="account_box">Sign Up</IconButton>
-    </article>
-{/if}
-
+                            {#if !item.hide}
+                                {#if item.component}
+                                    <svelte:component this="{item.component}"
+                                                      {...item.props}
+                                    >
+                                        {item.content}  {JSON.stringify(item.props)}
+                                    </svelte:component>
+                                {:else if item.props.icon}
+                                    <IconButton {...item.props} on:click={item.onClick}>
+                                        {item.content}
+                                    </IconButton>
+                                {:else}
+                                    <span {...item.props} on:click="{item.onClick}">
+                                        {item.content}
+                                    </span>
+                                {/if}
+                            {/if}
+                        </ModalLauncher>
+                    {/each}
+                    <IconButton bare="true" on:click={() => doLogout()} icon="close">Log Out</IconButton>
+                {/if}
+            </nav> <!-- end right -->
+        </Bar>
+    </div>
+    <div slot="main" >
+        {#if isLoggedIn}
+            <slot/>
+        {:else}
+            <article>
+                <IconButton on:click={() => doLogin()} icon="login">Log In</IconButton>
+                <IconButton on:click={() => doSignup()} icon="account_box">Sign Up</IconButton>
+            </article>
+        {/if}
+    </div>
+</FullScreen>
 
 <style>
  .hide {
