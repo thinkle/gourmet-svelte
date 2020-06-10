@@ -15,6 +15,7 @@ import SVGs from "../widgets/display/SVGs.demo.svelte";
 import Checkbox from "../widgets/inputs/Checkbox.demo.svelte";
 import IngredientInput from "../widgets/inputs/IngredientInput.demo.svelte";
 import Inputs from "../widgets/inputs/Inputs.demo.svelte";
+import FullScreen from "../widgets/layout/FullScreen.demo.svelte";
 import Menu from "../widgets/layout/Menu.demo.svelte";
 import Modal from "../widgets/layout/Modal.demo.svelte";
 import Tabs from "../widgets/layout/Tabs.demo.svelte";
@@ -38,6 +39,7 @@ export default {
     Checkbox,
     IngredientInput,
     Inputs,
+    FullScreen,
     Menu,
     Modal,
     Tabs
