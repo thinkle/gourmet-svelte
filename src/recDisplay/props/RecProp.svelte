@@ -70,8 +70,14 @@
 </script>
 
 {#if (edit || hasValue(value))}
-<div class="block" class:title={prop.isTitle} class:fullWidth={fullWidth}>
-    <div>
+    <div class="block" class:title={prop.isTitle} class:fullWidth={fullWidth}
+         on:dblclick="{turnEditOn}"
+    >
+    <div
+        class:hideLabel="{prop.hideLabel}"
+        class:block="{prop.edit==modes.RCH}"
+        class:title="{prop.isTitle}"
+    >
         {#if showLabel && (!prop.hideLabel)}
             <div class="top" >
                 <label class:small={smallLabel} on:click={()=>ref.focus()}>{prop.label}</label>
@@ -179,10 +185,16 @@
  .small {
      font-size: var(--small);
  }
- .floatingEditButton {
+ 
+ .block .floatingEditButton {
      width: 40px;
      float: right;
  }
+ .title {
+     display: flex;
+     flex-direction: row-reverse;
+ }
+
  .fullWidth {
      clear: right;
  }
