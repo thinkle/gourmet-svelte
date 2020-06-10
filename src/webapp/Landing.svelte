@@ -31,17 +31,17 @@
      handleLogin();
  }
 
- function handleLogin () {
-     netlifyIdentity.on('login',
-                        u => {
-                            user.login(u);
-                            netlifyIdentity.close();
-                            if ($redirectURL !== '') {
-                                console.log('Got redirect: ',$redirectURL);
-                            }
-                            
-     });
- }
+ netlifyIdentity.on('login',
+                    u => {
+                        console.log('Logged in',u);
+                        user.login(u);
+                        netlifyIdentity.close();
+                        if ($redirectURL !== '') {
+                            console.log('Got redirect: ',$redirectURL);
+                        }
+                        
+ });
+ 
  netlifyIdentity.on('init', user => console.log('init', user));
  netlifyIdentity.on('login', user => console.log('login', user));
  netlifyIdentity.on('logout', () => console.log('Logged out'));
