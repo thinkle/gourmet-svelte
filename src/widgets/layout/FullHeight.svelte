@@ -7,18 +7,19 @@
 </section>
 
 <style>
- section > :global(div) {
-     flex-grow: 1;
-     display: flex;
-     flex-direction: column;
+ section > :global(.slot) {
+     display: contents;
  }
  section {
      flex-grow: 1;
+     flex-shrink: 1;
      display: flex;
      flex-direction: column;
+     overflow-y: hidden;
  }
 
  .scrolls {
      overflow-y: scroll;
  }
+ 
 </style>
