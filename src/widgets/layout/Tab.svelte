@@ -13,6 +13,7 @@
      margin-right: 3px;
      font-weight: 300;
      transition: all 300ms;
+     display: flex;
  }
 
  li.active {
