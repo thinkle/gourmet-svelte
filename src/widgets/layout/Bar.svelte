@@ -1,24 +1,47 @@
 <script>
+ export let large=false
+ export let scrollAll=undefined
+ export let scrollLeft=undefined
+ export let scrollRight=undefined
+ export let scrollCenter=undefined
+
+ function stopEvents (event) {
+     event.stopPropagation();
+ }
+ 
+
+
 </script>
-<div class="bar">
-    <div class="left">
+
+<div class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}">
+    <div class="left" class:scroll="{scrollLeft}">
         <slot name="left"/>
     </div>
-    <div class="center">
+    <div class="center" class:scroll="{scrollCenter}">
         <slot name="center"/>
     </div>
-    <div class="right">
+    <div class="right" class:scroll="{scrollRight}">
         <slot name="right"/>
     </div>
 </div>
 
 <style>
+
  .bar {
      display: flex;
      height: var(--bar-height);
      padding: 0.5rem 1rem;
      line-height: 1.5;
      align-items: center;
+     white-space: nowrap;
+ }
+ .bar.large {
+     height: calc(var(--bar-height) * 2);
+ }
+
+ .bar > div > :global(div),
+ .bar > div {
+     display: flex;
  }
 
  .center {
@@ -32,4 +55,8 @@
  .left {
      margin-right: auto;
  }
+ .scroll {
+     overflow-x: scroll;
+ }
+
 </style>
