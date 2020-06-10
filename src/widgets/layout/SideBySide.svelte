@@ -1,11 +1,12 @@
 <script>
- export let height;
+
  export let stackSidesAt = 700;
  export let maxWidth = 1200;
  export let leftWidth=300
  export let maxWidthLeft = undefined;
  export let maxWidthRight = undefined;
 
+ import FullHeight from './FullHeight.svelte';
  import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte';
  import {Resizer} from '../';
@@ -33,8 +34,9 @@
 
 </script>
 
-<div use:watchResize={handleResize} bind:this={ref} class="top"
-     style="{`--height:${height};
+<FullHeight>
+<div use:watchResize={handleResize} bind:this={ref} class="sidebyside"
+     style="
             --max-width:${maxWidth};
             --max-left:${maxWidthLeft};
             --max-right:${maxWidthRight};
@@ -68,6 +70,7 @@
 	
     </div>
 </div>
+</FullHeight>
 
 <style>
  .head > :global(*) {
@@ -84,13 +87,15 @@
  .side .scrollBox {
      flex-grow: 1;
  }
- .top {
+ .sidebyside {
      display: flex;
      max-width: var(--max-width);
      width: 100%;
      margin: auto;
+     max-height: 100%;
+     flex-grow: 1;
  }
- .top.stackMode {
+ .sidebyside.stackMode {
      display: block;
      overflow-y: scroll;
  }
@@ -98,11 +103,9 @@
      overflow-y: scroll; 
  }
  .l {
-     height: var(--height);
      max-width: var(--max-left);
  }
  .r {
-     height: var(--height);
      max-width: var(--max-right);
  }
  .stackMode .l,.stackMode .r {
