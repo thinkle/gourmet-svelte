@@ -75,6 +75,7 @@
     {#if showPlusMinusButtons}
         <div class="minibuttons">
             <IconButton compact="{true}" fontSize="0.8rem" on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IconButton>
+            <br>
             <IconButton compact="{true}" fontSize="0.8rem" on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IconButton>
         </div>
     {/if}
