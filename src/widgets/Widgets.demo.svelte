@@ -1,8 +1,8 @@
 <script>
  export let initialShow
  import {Tester,
-         SideBySide,
-         Status} from './';
+                  Status} from './';
+ import SideBySide from './layout/SideBySide.svelte';
  import ipsum from '../common/mocks/ipsum.js';
 
  import status from '../stores/status.js';
