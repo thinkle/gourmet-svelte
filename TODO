@@ -72,26 +72,30 @@
   > We fetch the ingredients from nested recipes - otherwise our display is pretty similar (x)
   > We add metadata to ingredients as needed (shopping item) (x)
   > We make shopping display of ingredient (shopping item vs. regular item) (x)
-  > We add metadata to ingredients (don't buy/buy)
+  > We add metadata to ingredients (don't buy/buy) -> implemented shopIgnore and shopItem (x)
 
+- Fix source on import (it's not always adding the website for some reason) (x)
+- Consider module reorganization before release... (x)(x)
+- Think through basic UI layout for mobile/app/etc. (x)
+
+
+TODO:
+- Figure out why we can't use keyed lists for the RecipeList - is our store giving us
+  pages with repeats? Why?
+- Add "delete" functionality.
+- Fix RegExps for Firefox compatability
+- Save "purchased" state of shopping list items 
 
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
   up. (speaking of - we broke recipe editing state updates again
-  somehow???)
+  somehow???) 
   
 - Improve magic ingredient editor code (change on the fly?)
 - Sync from local to cloud...
 - Export to file
 
-- Consider module reorganization before release... (x)
-  > Components (x)
-    > Recipe Components (More specific to our use case) (x)
-      > Recipe Widgets (x)
-      > Views
-    > UI (general purpose styling -- doesn't know about recipe/stores/etc)
-      > Widgets
-      > Layout
+
 
 
 
