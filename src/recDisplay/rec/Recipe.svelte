@@ -12,7 +12,9 @@
  import {AmountInput,
         IconButton,
         StatusIcon,
-        SideBySide} from '../../widgets/';
+        FullHeight,
+        }  from '../../widgets/';
+import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
  import IngredientList from '../ing/IngredientList.svelte';
  import RecProp from '../props/RecProp.svelte';
