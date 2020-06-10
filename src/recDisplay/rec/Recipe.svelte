@@ -9,11 +9,13 @@
  export let editable = true;
  export let minPropWidth = 150;
 
- import {AmountInput,
-        IconButton,
-        StatusIcon,
-        FullHeight,
-        }  from '../../widgets/';
+ import {
+     Bar,
+     AmountInput,
+     IconButton,
+     NavActions,
+     StatusIcon,
+ }  from '../../widgets/';
 import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
  import IngredientList from '../ing/IngredientList.svelte';
@@ -148,9 +150,13 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
 </script>
 
 {#if valid}
-    <div class="recipe"> <!-- top-level container...  -->
+    
         <!-- Above the side-by-side view... -->
-        <div class="top" use:watchResize="{handleResize}">
+
+    <!-- <div class="top" use:watchResize="{handleResize}"> -->
+
+    <Bar large="true">
+        <div slot="left">
             <h2>
 	        {#each RecDef.titleProps as prop}
                     <span>
@@ -173,48 +179,8 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
                     showPlusMinusButtons="{true}"
                 />
             </div>
-            {#if showShopping}
-                <IconButton
-                    icon="shopping_cart"
-                    on:click="{async ()=>{
-                              await shoppingList.addRecipe(rec.id,$multiplier);
-                              shoppingList.save();
-                              }}">
-                    Add to List
-                </IconButton>
-            {/if}
-            {#if editable}
-                <IconButton
-                    icon="edit"
-                    toggle="{true}"
-                    toggled="{editMode}"
-                    on:click="{()=>editMode=!editMode}">
-                    Edit{#if editMode}ing{/if}
-                    Recipe
-                </IconButton>
-
-                {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
-                    <IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
-                                busy="{$recipeState[rec.id].updating}"
-                    >
-                        Revert Changes
-                    </IconButton>
-                    <IconButton
-                        icon="save"
-                        tooltip="Attempt to save?"
-                        busy="{$recipeState[rec.id].updating}"
-                        on:click="{()=>recipeActions.updateRecipe(rec)}">
-                        Save
-                    </IconButton>
-                {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
-                    <IconButton
-                        busy="{$recipeState[rec.id].updating}"
-                        icon="cloud_upload"
-                        on:click="{()=>recipeActions.updateRecipe(rec)}">
-                        Save to Cloud
-                    </IconButton>
-                {/if}
-            {/if}
+        </div>
+        <div slot="right">
             <div class="status">
                 <i class='material-icons'>
                     offline_pin
@@ -247,87 +213,131 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
                     {/if}
                 {/if}
             </div>
-        </div> <!-- End top section -->
-        <!-- Main recipe  -->
-        <SideBySide
-            height="80vh"
-            leftWidth="{325}"
-            maxWidth="{1250}"
-            stackSidesAt="{550}"
-            maxWidthRight='45rem' maxWidthLeft='45rem'
-        >
-	    <h3 slot="leftHead"> 
-	        Ingredients
-                {#if !editMode && editable}
-                    {#if ingeditmode}
-                        <IconButton
-                            small="{true}"
-                            bare="true"
-                            on:click="{()=>ingeditmode=false }"
-                            icon="done"/>
-                    {:else}
-                        <IconButton
-                            small="{true}"
-                            bare="true"
-                            on:click="{()=>ingeditmode=true }"
-                            icon="edit" />
-                    {/if}
+            <NavActions>
+            {#if showShopping}
+                <li><IconButton
+                    icon="shopping_cart"
+                    on:click="{async ()=>{
+                              await shoppingList.addRecipe(rec.id,$multiplier);
+                              shoppingList.save();
+                              }}">
+                    Add to List
+                </IconButton></li>
+            {/if}
+            {#if editable}
+                <li><IconButton
+                    icon="edit"
+                    toggle="{true}"
+                    toggled="{editMode}"
+                    on:click="{()=>editMode=!editMode}">
+                    Edit{#if editMode}ing{/if}
+                    Recipe
+                </IconButton></li>
+                {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
+                    <li><IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
+                                busy="{$recipeState[rec.id].updating}"
+                    >
+                        Revert Changes
+                    </IconButton></li>
+                    <li><IconButton
+                        icon="save"
+                        tooltip="Attempt to save?"
+                        busy="{$recipeState[rec.id].updating}"
+                        on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        Save
+                    </IconButton></li>
+                {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
+                    <li><IconButton
+                        busy="{$recipeState[rec.id].updating}"
+                        icon="cloud_upload"
+                        on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        Save to Cloud
+                    </IconButton></li>
                 {/if}
-	    </h3>
-	    <div slot="left">
-	        <IngredientList
-                    {editable}
-                    {onOpenSubRec}
-                    onChange="{triggerChange}"
-                    editMode="{editMode||ingeditmode}"
-                    bind:ingredients="{rec.ingredients}"
-                >
-	        </IngredientList>
-	    </div>		
-	    
-	    <div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
-                <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
-                    <div class="props" >
-                        
-                        <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
-                             style="{`--max-image-width:${maxImageWidth}px`}"
-                        >
-                            {#each rec.images as image}
-                                <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
-                                <img alt="{image.alt||rec.title}" src="{image.url}"/>
-                            {/each}
-                        </div> <!-- close images -->
-
-                        {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
-                            <div class="prop">                                
-                                <RecProp
-                                    floatWidth="{widthLeftOfImage}"
-                                    onChange="{triggerChange}"
-                                    editable="{editable}"
-                                    forceEdit="{editMode}"
-                                    prop="{prop}"
-                                    bind:value="{rec[prop.name]}"/>   
-                            </div>
-                            <!-- Close flowing props  -->
+            {/if}
+            </NavActions>
+        </div>
+    </Bar>
+    <!-- </div> --> <!-- End top section -->
+    <!-- Main recipe  -->
+    <SideBySide
+        leftWidth="{325}"
+        maxWidth="{1250}"
+        stackSidesAt="{550}"
+        maxWidthRight='45rem' maxWidthLeft='45rem'
+    >
+	<h3 slot="leftHead"> 
+	    Ingredients
+            {#if !editMode && editable}
+                {#if ingeditmode}
+                    <IconButton
+                        small="{true}"
+                        bare="true"
+                        on:click="{()=>ingeditmode=false }"
+                        icon="done"/>
+                {:else}
+                    <IconButton
+                        small="{true}"
+                        bare="true"
+                        on:click="{()=>ingeditmode=true }"
+                        icon="edit" />
+                {/if}
+            {/if}
+	</h3>
+	<div slot="left" on:dblclick="{()=>ingeditmode=true}">
+	    <IngredientList
+                {editable}
+                {onOpenSubRec}
+                onChange="{triggerChange}"
+                editMode="{editMode||ingeditmode}"
+                bind:ingredients="{rec.ingredients}"
+            >
+	    </IngredientList>
+	</div>		
+	
+	<div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
+            <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
+                <div class="props" >
+                    
+                    <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
+                         style="{`--max-image-width:${maxImageWidth}px`}"
+                    >
+                        {#each rec.images as image}
+                            <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
+                            <img alt="{image.alt||rec.title}" src="{image.url}"/>
                         {/each}
-                        <!-- block props  -->
-                        {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
-                            <div class="prop bottomProp">
-                                <RecProp
-                                    floatWidth="{widthLeftOfImage}"
-                                    onChange="{triggerChange}"
-                                    editable="{editable}"
-                                    forceEdit="{editMode}"
-                                    prop="{prop}" bind:value="{rec[prop.name]}"/>
-                            </div>
-                        {/each}
-                        <!-- end block props -->
+                    </div> <!-- close images -->
 
-                    </div> <!-- close props -->
-                </div> <!-- close topblock -->
-	    </div> <!-- close right slot -->
-        </SideBySide>
-    </div>  <!-- close container  -->
+                    {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
+                        <div class="prop">                                
+                            <RecProp
+                                floatWidth="{widthLeftOfImage}"
+                                onChange="{triggerChange}"
+                                editable="{editable}"
+                                forceEdit="{editMode}"
+                                prop="{prop}"
+                                bind:value="{rec[prop.name]}"/>   
+                        </div>
+                        <!-- Close flowing props  -->
+                    {/each}
+                    <!-- block props  -->
+                    {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
+                        <div class="prop bottomProp">
+                            <RecProp
+                                floatWidth="{widthLeftOfImage}"
+                                onChange="{triggerChange}"
+                                editable="{editable}"
+                                forceEdit="{editMode}"
+                                prop="{prop}" bind:value="{rec[prop.name]}"/>
+                        </div>
+                    {/each}
+                    <!-- end block props -->
+
+                </div> <!-- close props -->
+            </div> <!-- close topblock -->
+	</div> <!-- close right slot -->
+    </SideBySide>
+
 {:else}
     {#if !rec}
         Loading recipe...
@@ -340,16 +350,16 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
  .small {
      font-size: var(--small);
  }
- .top {
-     display: flex;
-     align-items: center;
- }
- .top button:nth-of-type(1) {
-     margin-left: auto;
- }
- .top button {
-     margin-right: 1em;
- }
+ /* .top {
+    display: flex;
+    align-items: center;
+    }
+    .top button:nth-of-type(1) {
+    margin-left: auto;
+    }
+    .top button {
+    margin-right: 1em;
+    } */
  .images {
      float : right;
  }
@@ -359,12 +369,12 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
  div :global(h2,h3,h4,h5,h5,h6) {
      font-family: var(--recipeHeadFont);
  }
- h2 {
-     flex-grow: 2;
-     font-weight: bold;
-     text-align: center;
-     font-size: 2rem;
- }
+ /* h2 {
+    flex-grow: 2;
+    font-weight: bold;
+    text-align: center;
+    font-size: 2rem;
+    } */
  .prop:first-child {
      margin-top: 0;
  }
