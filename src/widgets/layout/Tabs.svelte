@@ -1,6 +1,6 @@
 <script>
  export let sticky=false;
- export let stickyTop = 0;
+ export let stickyTop = undefined;
  export let data=undefined;
  export let handleActive=false;
  export let nowrap=false
@@ -31,7 +31,7 @@
  
 </script>
 
-<ul class:sticky class:nowrap class="tabs" style="{`--stickyTop:${stickyTop}`}">
+<ul class:sticky class:nowrap class="tabs" style="{stickyTop && `top:${stickyTop}`}">
     <slot>
         {#if data}
             {#each data as tab (tab.key)}
@@ -55,7 +55,7 @@
  }
  .sticky {
      position: sticky;
-     top: var(--stickyTop);
+     top: 0;
  }
  .nowrap {
      overflow-x: scroll;
