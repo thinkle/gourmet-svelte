@@ -77,8 +77,9 @@
         class:hideLabel="{prop.hideLabel}"
         class:block="{prop.edit==modes.RCH}"
         class:title="{prop.isTitle}"
+        class:editing="{edit}"
     >
-        {#if showLabel && (!prop.hideLabel)}
+        {#if (showLabel && (!prop.hideLabel)) || edit}
             <div class="top" >
                 <label class:small={smallLabel} on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !edit}
@@ -193,6 +194,9 @@
  .title {
      display: flex;
      flex-direction: row-reverse;
+ }
+ .editing.title {
+     flex-direction: row;
  }
 
  .fullWidth {
