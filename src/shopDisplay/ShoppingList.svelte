@@ -14,7 +14,7 @@
  import RecipePicker from '../recDisplay/picker/RecipePicker.svelte';
  import RecipePickerLauncher from '../recDisplay/picker/RecipePickerLauncher.svelte';
  import ShoppingListItems from './ShoppingListItems.svelte';
- 
+ import {titleCase} from '../utils/textUtils.js';
  import {onMount} from 'svelte';
 
  onMount(
@@ -31,7 +31,8 @@
  let showSubItems=true
  
  function addItem (item) {
-     shoppingList.addItem(item);
+     item.shopItem = item.text;
+     shoppingList.addItem(titleCase(item));
      return true; // tells input to clear
  }
 
@@ -90,11 +91,16 @@
         
         {#if showAdd}
             <table in:fade="{{duraton:300}}" out:fade="{{duration:300}}">
-                <IngredientInput
-                    showAddButton="true"
-                    onEnter="{addItem}"
-                    shouldFocus="{true}"
-                />
+                <tr>
+                    <td>Add Item:</td>
+                    <td>
+                        <IngredientInput
+                            showAddButton="true"
+                            onEnter="{addItem}"
+                            shouldFocus="{true}"
+                        />
+                    </td>
+                </tr>
             </table>
         {/if}
         <FullHeight scrolls={true}>
