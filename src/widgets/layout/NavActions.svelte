@@ -21,6 +21,8 @@
 
  .desktop :global(li) {
      list-style :none;
+     margin-right: 3px;
+     margin-left: 3px;
  }
  
  @media (max-width: 768px) {
