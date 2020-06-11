@@ -16,6 +16,7 @@ export function cleanupWhitespace (text, condenseMiddleSpaces=true) {
 }
 
 export function titleCase (words) {
+    if (!words) {return words}
     return words.split(/\s/).map(
         (word)=>{
             if (word.length < 2) {
@@ -45,6 +46,7 @@ export function jsonConcisify (o) {
 }
 
 export function getSurroundingSentence (text, targetOffset, startAfter=-1) {
+    if (!text) {return text}
     let sentenceBoundaries = '.!?'
     let beginningIndex = startAfter + 1; // if we never find a sentence boundary
     for (let i=targetOffset; i>startAfter; i--) {
@@ -68,6 +70,7 @@ export function getSurroundingSentence (text, targetOffset, startAfter=-1) {
 export function inTag (idx, text) {
     // Very simple checker to see if we are in a tag... if we search backward and find
     // a < before a >, then we *are* in the tag
+    if (!text) {return text}
     for (let i=idx; i>-1; i--) {
         if (text[i]=='>') {
             return false // that's the end of a tag, so we were not in a tag
