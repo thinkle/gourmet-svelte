@@ -261,9 +261,7 @@
  }
  .inglist {
      padding: 0;
-     border-spacing: 3px;
      max-width: var(--idealWidth);
-     min-width: calc(var(--idealWidth)/2)
  }
  .grouphead {
      font-weight: bold;
@@ -295,10 +293,16 @@
      border-left : 1px solid var(--light-underline);
      border-bottom : 1px solid var(--light-underline);
  }
- .inglist .inglist > :global(tr td:first-child),
- .inglist .inglist > :global(tbody td:first-child) {
-     padding-left: 13px;
+ /* .inglist .inglist > :global(tr td:first-child),
+    .inglist .inglist > :global(tbody td:first-child) {
+    padding-left: 13px;
+    } */
+ 
+ .inglist {
+     border-collapse: separate;
+     border-spacing: 0.3rem 1.5rem;
  }
+ 
  .new {
      color: var(--grey);
      font-style: italic;
