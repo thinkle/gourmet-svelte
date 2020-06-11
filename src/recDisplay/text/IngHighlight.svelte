@@ -33,9 +33,14 @@
 
      return {
          update (highlighted) {
+             if (highlighted===target) {
+                 console.log('Potential scroll target: ',target,node);
+             }
              if (highlighted===target && $highlightedIngredient.scrolledTextFor!==target) {
-                 scrollIntoView(node);
-                 $highlightedIngredient.scrolledTextFor = target;
+                 if (scrollIntoView(node)) {
+                     // it returns true if successful...
+                     $highlightedIngredient.scrolledTextFor = target;
+                 }
              } 
              
          }
