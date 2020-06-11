@@ -7,6 +7,7 @@
         localRecipes,
         recipeState} from '../stores/recipeStores.js';
  import Recipe from './rec/Recipe.svelte';
+ import {FullHeight,Bar} from '../widgets/';
  let rec
 
  async function open () {
@@ -24,10 +25,15 @@
  
 
 </script>
-<div>
-    <a target="_BLANK" href="/">
-        To all recipes...
-    </a>
+
+    <Bar>
+        <a slot="left" target="_BLANK" href="/">
+        Recipe List
+        </a>
+        <span slot="center">{rec && rec.title}</span>
+        <b slot="right">Gourmet</b>
+    </Bar>
+    <FullHeight scroll="{false}">
     {#if rec}
         <Recipe rec={rec}
                 onChange={(rec)=>{$localRecipes[rec.id]=rec}}
@@ -36,17 +42,9 @@
         Loading recipe... just one second
         <button on:click={()=>open(id)}>Kick it</button>
     {/if}
-</div>
+    </FullHeight>
+
 
    
 <style>
- div {
-     max-width: 1400px;
-     margin: auto;
- }
- :global(body) {     
-     margin: 0;
-     width: 100%;
-     height: 100%;
- }
 </style>
