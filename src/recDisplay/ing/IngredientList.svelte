@@ -261,7 +261,8 @@
  }
  .inglist {
      padding: 0;
-     max-width: var(--idealWidth);
+     width: 100%;
+     /* max-width: var(--idealWidth); */
  }
  .grouphead {
      font-weight: bold;
