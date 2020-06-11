@@ -83,7 +83,7 @@ let verbs = [
 // we'll be grammatical profligates...
 for (let v of verbs) {
     words.push(v);
-    if ('bdmpts'.indexOf(v.substr(v.length-1))>-1) {
+    if ('bdgmnprst'.indexOf(v.substr(v.length-1))>-1) {
         words.push(v+v.substr(v.length-1)+'ed');
         words.push(v+v.substr(v.length-1)+'ing');
     }
