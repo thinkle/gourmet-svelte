@@ -126,28 +126,29 @@
  .link:hover {
      text-decoration : underline;
  }
- .ing :global(td) {
-     padding-top: 3px;
-     padding-bottom: 3px;
- }
+ /* .ing :global(td) {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    } */
  .ing :global(.amount,.unit,.item) {
      font-family: var(--recipeFont);     
  }
 
  .ing :global(.amount) {
      white-space : nowrap;
+     text-align: right;
  }
  .ing > :global(td) {
      border-bottom: 1px solid var(--light-underline);
  }
 
- .ing > :global(td:first-child) {
-     padding-left: 0;
- }
+ /* .ing > :global(td:first-child) {
+    padding-left: 0;
+    }
 
- .ing > :global(td) {
-     padding-left: 1em;
- }
+    .ing > :global(td) {
+    padding-left: 1em;
+    } */
  
  .ing:last-child > :global(td) {
      border-bottom: none;
