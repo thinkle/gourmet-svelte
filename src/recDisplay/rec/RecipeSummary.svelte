@@ -12,21 +12,19 @@
      }
  }
 </script>
-
-    <td style={`--maxImageWidth:${maxImageWidth}px`}>
+    <td class="clickable title" on:click={wowAClick}>
+        <h3>{recipe.title}</h3>
+    </td>
+    {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
+        <td class="{prop.name}">
+            <RecPropDisplay prop={prop} value={recipe[prop.name]}></RecPropDisplay>
+        </td>
+    {/each}        
+    <td class="thumb" style={`--maxImageWidth:${maxImageWidth}px`}>
         {#if thumb}
             <img src={thumb.thumbnailUrl||thumb.url} alt={thumb.alt||recipe.title}/>
         {/if}
     </td>
-    <td class="clickable" on:click={wowAClick}>
-        <h3>{recipe.title}</h3>
-    </td>
-    {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
-        <td>
-            <RecPropDisplay prop={prop} value={recipe[prop.name]}></RecPropDisplay>
-        </td>
-    {/each}        
-
 <style>
  .clickable:hover {
      text-decoration: underilne;
