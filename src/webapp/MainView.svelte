@@ -2,7 +2,7 @@
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
- import {recipesOnList} from '../stores/shoppingStores.js';
+ import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
  import {
      Bar,
      Button,
@@ -11,6 +11,7 @@
      LazyIf,
      ModalLauncher,
      Modal,
+     NavActions,
      FullHeight,
      Status,
      Tabs,
@@ -34,6 +35,18 @@
  let hideOpenButton = writable(true);
 
  let page='RecipeList'
+
+ let selectedRecipes = []
+
+ function deleteSelected () {
+     console.log('FIX ME');
+ }
+ function shopSelected () {
+     selectedRecipes.map(shoppingList.addRecipe); // inefficient, but I don't think we'll care
+ }
+ function openSelected () {
+     selectedRecipes.map((id)=>localRecipes.open(id).then(()=>opener.open(id)))
+ }
 
 </script>
 
@@ -83,7 +96,38 @@
         <ShoppingList/>
     </LazyIf>
     <LazyIf condition="{page=='RecipeList'}">
+        {#if selectedRecipes.length > 0}
+            <Bar>
+                <div slot="right">
+                    Bulk Actions:
+                    <NavActions>
+                        <li>
+                            <IconButton icon="delete"
+                                        on:click={deleteSelected}
+                            >
+                                Delete
+                            </IconButton>
+                        </li>
+                        <li>
+                            <IconButton icon="shopping_cart"
+                                        on:click={shopSelected}
+                            >
+                                Add to Shopping List
+                            </IconButton>
+                        </li>
+                        <li>
+                            <IconButton icon="open"
+                                        on:click={openSelected}
+                            >
+                                Open
+                            </IconButton>
+                        </li>
+                    </NavActions>
+                </div>
+            </Bar>
+        {/if}
         <RecipeList
+            onSelectionChange="{(ids)=>selectedRecipes=ids}"
             onRecipeClick="{
                            (id)=>localRecipes.open(id).then(()=>opener.open(id))
                            }"
