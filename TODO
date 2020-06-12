@@ -82,7 +82,8 @@
 TODO:
 - Figure out why we can't use keyed lists for the RecipeList - is our store giving us
   pages with repeats? Why?
-- Add "delete" functionality.
+- Add "delete" functionality. (ok, I can't bring myself to add user-unfriendly delete... we'll go ahead
+  and implement a deleted property the right way --i.e. trash)
 - Fix RegExps for Firefox compatability
 - Save "purchased" state of shopping list items 
 
