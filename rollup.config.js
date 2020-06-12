@@ -6,6 +6,10 @@ import livereload from 'rollup-plugin-livereload';
 import json from 'rollup-plugin-json';
 import replace from 'rollup-plugin-replace';
 import { terser } from 'rollup-plugin-terser';
+//import { scss, coffeescript, pug } from 'svelte-preprocess'
+// import { sass } from 'svelte-preprocess-sass';
+import css from "rollup-plugin-css-only";
+
 
 
 const production = !process.env.ROLLUP_WATCH;
@@ -31,14 +35,19 @@ export default [
                 BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : ()=>new Date().getTime(),
             }),
+            css({ output: "public/build/extra.css" }),
 	    svelte({
 	        // enable run-time checks when not in production
 	        dev: !production,
 	        // we'll extract any component CSS out into
 	        // a separate file  better for performance
-	        css: css => {
+	        css: css => {                    
 		    css.write('public/build/bundle.css');
-	        } 
+	        },
+                // preprocess: {
+                //     style: sass({}, { name: 'scss' }),
+                // },
+                
 	    }),
 
 	    // If you have external dependencies installed from
