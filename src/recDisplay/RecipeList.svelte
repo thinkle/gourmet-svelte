@@ -4,7 +4,7 @@
  
  import {recipesOnList} from '../stores/shoppingStores.js';
  import {flip} from 'svelte/animate'
- import {fade} from 'svelte/transition'
+ import {fade,slide} from 'svelte/transition'
  import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
  //import {recipeData,recipeActions,connected} from '../stores/recipeData.js';
  import {connected,
@@ -18,6 +18,7 @@
         recipeState} from '../stores/recipeStores.js';
  import {
      Checkbox,
+     FullHeight,
      PlainInput,
      SearchProgress,
      StatusIcon,
@@ -30,7 +31,9 @@
  function getAll () {
      if ($connected) {
          console.log('Fetch those recipes...');
-         recipeActions.getRecipes({fields:['title','categories','sources','images'],initial:true});
+         recipeActions.getRecipes({fields:['title','categories','sources','images'],
+                                  query:{deleted:0},
+                                  initial:true});
      }
      else {
          console.log('No connection yet... holding off');
@@ -48,7 +51,7 @@
      recipeActions.getRecipes({
          fields:['title','categories','sources','images'],
          limit,
-         query:{fulltext:search},
+         query:{fulltext:search,deleted:0},
          page,
      });
  }
@@ -69,67 +72,72 @@
  $: $connected && getRecipes(0,search,limit)
 
 </script>
-<div>
-    <div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
-        Search: <PlainInput type="text" bind:value={searchInput}/>
-        <span width="30px">
-            {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
-        </span>
-        <span class="count">
-            {#if $pageInfo.count}
-                Showing recipes
-                {$pageInfo.currentPage}&ndash;{
-                Math.max($pageInfo.currentPage+$recipePage.length)}
-                {#if !$pageInfo.last}
-                    of 
-                    {$pageInfo.count}
-                {/if}
-            {:else}
-                {#if $recipeActionGeneralState.querying}
-                    Looking
-                {:else if search}
-                    No recipes
-                {/if}
+
+<div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
+    Search: <PlainInput type="text" bind:value={searchInput}/>
+    <span width="30px">
+        {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
+    </span>
+    <span class="count">
+        {#if $pageInfo.count}
+            Showing recipes
+            {$pageInfo.currentPage + 1}&ndash;{
+            Math.max($pageInfo.currentPage+$recipePage.length)}
+            {#if !$pageInfo.last}
+                of 
+                {$pageInfo.count}
             {/if}
-        </span>
-        <IconButton
-            invisible="{!$pageInfo.currentPage}"
-            icon="navigate_before"
-            on:click="{
-                       getRecipes($pageInfo.prevPage)
-                       }"
-        />
-        <IconButton
-            invisible="{$pageInfo.last}"
-            icon="navigate_next" on:click="{()=>{
-                                           getRecipes($pageInfo.nextPage)
-                                           }}"
-        />
-    </div>
-    Shopping... {$recipesOnList.map((r)=>r.id)}
+        {:else}
+            {#if $recipeActionGeneralState.querying}
+                Looking
+            {:else if search}
+                No recipes
+            {/if}
+        {/if}
+    </span>
+    <IconButton
+        invisible="{!$pageInfo.currentPage}"
+        icon="navigate_before"
+        on:click="{
+                   getRecipes($pageInfo.prevPage)
+                   }"
+    />
+    <IconButton
+        invisible="{$pageInfo.last}"
+        icon="navigate_next" on:click="{()=>{
+                                       getRecipes($pageInfo.nextPage)
+                                       }}"
+    />
+</div>
+Shopping... {$recipesOnList.map((r)=>r.id)}
+<FullHeight scrolls={true}>
     <table>
-        {#each $recipePage as id,n (`${n}${id}`)}
-            <tr class='summary' in:fade|local="{{duration:200,delay:200}}" out:fade|local="{{duration:300}}">
-                <td class="checkbox">
-                    {#if onSelectionChange}
-                        <Checkbox bind:checked="{selected[id]}" on:change="{updateSelected}"/>
-                    {/if}
-                </td>
-                <RecipeSummary
-                    onClick={()=>{onRecipeClick(id)}}
-                   recipe={$storedRecipes[id]}
-                />
-                <td class="icons">
-                    {#if $localRecipes[id]}
-                        <IconButton icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
-                    {/if}
-                    {#if $recipesOnList.find((r)=>r.id==id)}
-                        <StatusIcon icon="shopping_cart"/>
-                    {/if}
-                </td>
+        {#each $recipePage as id (id)}            
+            <tr in:slide animate:flip class='summary'>
+                {#if $storedRecipes[id]}
+                    <td class="checkbox">
+                        {#if onSelectionChange}
+                            <Checkbox bind:checked="{selected[id]}" on:change="{updateSelected}"/>
+                        {/if}
+                    </td>
+                    <RecipeSummary
+                        onClick={()=>{onRecipeClick(id)}}
+               recipe={$storedRecipes[id]}
+                    />
+                    <td class="icons">
+                        {#if $localRecipes[id]}
+                            <IconButton icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
+                        {/if}
+                        {#if $recipesOnList.find((r)=>r.id==id)}
+                            <StatusIcon icon="shopping_cart"/>
+                        {/if}
+                    </td>
+                {:else}
+                    Huh, page thinks we have recipe {id} but we don't
+                {/if}
             </tr>
         {:else}
-            <tr in:fade|local="{{delay:200,duration:800}}" out:fade|local="{{duration:300}}">
+            <tr in:fade|local="{{delay:200,duration:300}}" out:fade|local="{{duration:300}}">
                 <td>
                     <div class="center">
                         <h2>
@@ -156,13 +164,12 @@
                                 your favorite sites
                             </a>
                         </div>
-                    </div></td>
+                    </div>
+                </td>
             </tr>
         {/each}
     </table>
-</div>
-<div>
-</div>
+</FullHeight>
 <style>
  table {
      margin: auto; /* center  */
@@ -214,7 +221,7 @@
          margin-top: 1em;
          margin-bottom: 1em;
          display : grid;
-         grid-template-columns: 28px auto 200px 200px;
+         grid-template-columns: 28px auto 200px 150px;
          grid-template-areas:
              "checkbox title      title      title   thumb"
              ".        categories categories sources thumb";
@@ -245,9 +252,18 @@
      }
      tr :global(td) {
          vertical-align: middle;
-         margin-top: 1em;
-         margin-bottom: 1em;
      }
+     tr :global(td.thumb) {
+         width: 150px;
+     }
+     tr :global(td.categories),
+     tr :global(td.sources) {
+         width: 200px;
+     }
+     tr :global(td.title) {
+         width: 400px;
+     }
+
  }
  
  .center {
