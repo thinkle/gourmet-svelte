@@ -17,8 +17,7 @@ function requestURI (mode,params) {
 const u = requestURI // shorthand
 
 async function doFetch (mode, user, params) {
-    //console.log('fetch URL',u(mode))
-    
+    //console.log('sending request',mode,params)
     let result = await fetch(u(mode),{
         method : 'post',
         headers : {
@@ -95,6 +94,11 @@ function RecipeApi (user) {
         },
 
         deleteRecipe (_id) {
+            return doFetch(
+                'trashRecipe',
+                user,
+                {_id}
+            );
         }
     }
 
