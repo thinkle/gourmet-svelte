@@ -1,16 +1,29 @@
 import {DB} from './mongoConnect.js';
 import setupHandler from './setupDB.js';
-import {getUser} from './users.js';
+import {fakeUser,setFakeUser} from './netlifyDevUserMock.js';
+import {getUser,
+        addLinkedAccounts,
+        acceptLinkedAccount,
+        changeName,
+        userCache} from './users.js';
+
 import recipeApi from './recipeFunctions.js';
+
 const functions = {
     setup : setupHandler,
-    echo : echo,
-    throwError : throwError,
-    getUser : getUser,
+    echo,
+    throwError,
+    getUser,
+    changeName,
+    addLinkedAccounts,
+    setFakeUser,
+    acceptLinkedAccount,
     ...recipeApi
 }
 
+    
 const handler = async (event, context) => {
+    console.log('Cache is',userCache);
     let params = event.queryStringParameters;
     let jsonBody = {}
     if (event.body) {
@@ -29,11 +42,18 @@ const handler = async (event, context) => {
         user, // actual user info you can use for your serverless functions
     } = context.clientContext
     if (!user && event.headers.referer.indexOf('localhost')>-1) {
-        user = {
-            name:'Fake Local User',
-            email:'tmhinkle@gmail.com',
-        }
+        user = fakeUser
     }
+    console.log('!!!Current user = ',user);
+    if (userCache[user.email]) {
+        user.dbUser = userCache[user.email]
+        user.usedCached = true;
+    } else {
+        console.log('!!!Fetch DB user',user)
+        console.log('getUser(',event,context,user,params,')')
+        user.dbUser = await getUser(event,context,user,params);
+    }
+    user.account = user.dbUser.linked || user.email // keys to the kingdom...
     let f = functions[params.mode]
     if (!f) {
         return {
