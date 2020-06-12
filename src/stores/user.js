@@ -1,5 +1,5 @@
 /* See https://github.com/babycourageous/netlify-identity-demo-svelte/blob/master/src/store.js */
-import { writable } from 'svelte/store'
+import { writable, get } from 'svelte/store'
 import api from '../data/remoteApi.js';
 import netlifyIdentity from 'netlify-identity-widget'
 
@@ -26,13 +26,89 @@ function createUser() {
             id:localUser.id,
         }
     }
-    const { subscribe, set } = writable(u)
+    const userStore = writable(u)
+    const { subscribe, set, update } = userStore;
+    
+    getDBUser();
+    
+    function updateDBUser (dbuser) {
+            userStore.update(
+                ($user)=>{
+                    $user.dbuser = dbuser;
+                    return $user;
+                }
+            )
+    }
 
+    async function getDBUser () {
+        let $user = get(userStore);
+        if ($user) {
+            let dbuser = await api.doFetch('getUser',$user);
+            updateDBUser(dbuser);
+        } else {
+            console.log('No user to fetch...');
+        }
+    }
+
+    
     return {
         subscribe,
-        fake (user) {
-            set(user);
+        fake (u) {
+            set(u);
+            api.doFetch('setFakeUser',get(userStore),u).then(
+                ()=>{
+                    console.log('Told Remote to Faked user: ',user)
+                    getDBUser();
+                }
+            ).catch(
+                (err)=>{
+                    console.log('Error fetching user',err)
+                }
+            );
         },
+        async removeLinkedAccount () {
+            let result = await api.doFetch(
+                'removeLinkedAccount',
+                get(userStore),
+                {}
+            );
+            updateDBUser(result);
+            return
+            
+        },
+        async acceptLinkedAccount (account) {
+            let result = await api.doFetch(
+                'acceptLinkedAccount',
+                get(userStore),
+                {account}
+            );
+            updateDBUser(result);
+            return
+        },
+        async setInvites (accounts) {
+            let result = await api.doFetch(
+                'setLinkedAccounts',
+                get(userStore),
+                {accounts}
+            );
+            updateDBUser(result);
+            return
+        },
+        async addInvite (account) {
+            let result = await api.doFetch(
+                'addLinkedAccounts',
+                get(userStore),
+                {accounts:[account]}
+            );
+            updateDBUser(result);
+            return
+        },
+
+        async setName (newName) {
+            let dbuser = await api.doFetch('changeName',get(userStore),{name:newName})
+            updateDBUser(dbuser)            
+        },
+        getDBUser,
         login(user) {
             const currentUser = {
                 username: user.user_metadata.full_name,
