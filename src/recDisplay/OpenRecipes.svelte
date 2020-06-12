@@ -75,7 +75,7 @@
                 animate:flip="{{delay:100,duration:250,easing:quintOut}}">
                 <Tab
                     active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}">
-                    {getTabTitle(id)}
+                    <span class="tabtitle">{$localRecipes[id].title||'Untitled'}</span>
                     <div class='close'>
                         <IconButton bare="{true}" small="{true}" on:click="{()=>{shoppingList.addRecipe(id)}}" icon='shopping_cart'/>
                         <IconButton bare="{true}" small="{true}" on:click="{()=>window.open(`/rec/${id}`,'_blank')}" icon='open_in_new'/>
@@ -85,7 +85,7 @@
             </div>
         {/each}
     </Tabs> <!-- close tabs -->
-        
+    
     <FullHeight>
         <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
         {#if $localRecipes[activeRecipeId]}
@@ -110,7 +110,7 @@
                 <Button on:click="{()=>showCloseModalFor=undefined}">
                     Oh wait, nevermind, I'm so sorry!
                 </Button>
-                </div>
+            </div>
         {/if}
     </FullHeight>
     
@@ -118,6 +118,12 @@
 
 <style>
 
+ .tabtitle {
+     max-width: 8em;
+     overflow: hidden;
+     text-overflow: ellipsis;
+ }
+ 
  .screen {
      background-color: #9995;
      position: fixed;
