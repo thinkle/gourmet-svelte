@@ -60,6 +60,11 @@ const api = {
         await localApi.updateRecipe(recipe);
         return recipe;
     },
+    async deleteRecipe (id) {
+        let recipe = await api.getRecipe(id);
+        recipe.deleted = true;
+        this.updateRecipe(recipe);
+    },
     async updateRecipes (recipes) {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
