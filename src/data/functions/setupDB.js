@@ -26,7 +26,8 @@ const functions = {
         const {client,db} = await loadDB();
         const c= db.collection('users')
         await c.createIndex({name:1});
-        return await c.createIndex({email:1})
+        await c.createIndex({linkedAccounts:1});
+        return await c.createIndex({email:1},{unique:true})
     },
     query_recipes : async ()=>{
         return queryCollection(
@@ -34,6 +35,11 @@ const functions = {
             {'fullText':/oven/i},
             {});
     },
+    create_users : async (event, context, user, params)=>{
+        let {client,db} = await loadDB();
+        let result = await db.collection('users').drop();
+    },
+
     create_recipes : async (event,context,user,params)=>{
         if (params.user) {
             user = params.user // set up for user
@@ -60,6 +66,7 @@ const functions = {
             [{'fullText.item':'text'},{name:'fulltext'}],
             [{'categories.name':1},{name:'category'}],
             [{'flatIngredients.item':1},{name:'ingredients'}],
+            [{'deleted':1},{}],
             [{'last_modified':1},{}],
         ]) {
             try {
