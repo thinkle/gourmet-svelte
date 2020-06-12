@@ -90,7 +90,15 @@
  function doApiTest(mode,params) {
      apiResponse = remoteApi.doFetch(mode,$user,params);
  }
+ let account;
+ let email;
+ let name;
 
+ function setFakeUser () {
+     doApiTest('setFakeUser',
+               {name,email})
+ }
+ 
 </script>
 
     {#if isLoggedIn}
@@ -98,6 +106,9 @@
         <div>
             <button on:click={() => doLogout()}>Log Out</button>
         </div>
+        <button on:click={()=>setFakeUser()}>Set Fake User</button>
+        Name: <input bind:value={name}>
+        Email: <input bind:value={email}>
     {:else}
         Not Logged in...
         <div>
@@ -106,6 +117,19 @@
             <button on:click={()=>fakeLogin()}>Fake Log In</button>
         </div>
     {/if}
+    Account: <input bind:value="{account}">
+    <button on:click="{()=>{
+                      doApiTest(
+                          'addLinkedAccounts',
+                          {accounts:[account]}
+                      )
+                      }}">Add linked user</button>
+    <button on:click="{()=>{
+                      doApiTest(
+                          'acceptLinkedAccount',
+                          {account}
+                      )
+                      }}">Accept linked user</button>
     <RemoteRecipeTester/>
     <button on:click={testApi}>Test API</button> 
     <button on:click="{setup}">Setup DB</button>
