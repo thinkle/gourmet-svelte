@@ -23,7 +23,7 @@ export const connected = readable(false,(set)=>{
         console.log('Error connecting:',err);
     });
 });
-function ssp (store,p,v) {
+function setStoreProp (store,p,v) {
     // set store prop to value...
     store.update((d)=>{
         d[p] = v;
@@ -78,7 +78,6 @@ export const storedRecipes = {
 
 export const recipePage = {
     subscribe : activePage.subscribe,
-    
 }
 
 // Debug
@@ -100,21 +99,21 @@ export const recipeActions = {
 
     async createRecipe (r) {
         if (!r) {r = {}}
-        ssp(actionState,'creating',true)
+        setStoreProp(actionState,'creating',true)
         let recipe = await api.addRecipe(r);
         setStoredRec(recipe);
         tick()
         localRecipes.open(recipe.id);
-        ssp(actionState,'creating',false)
-        ssp(actionState,'created',recipe.id)
+        setStoreProp(actionState,'creating',false)
+        setStoreProp(actionState,'created',recipe.id)
         return recipe;
     },
     async getRecipe (id,mongoId) {
-        ssp(actionState,'loading',true);
+        setStoreProp(actionState,'loading',true);
         let response = await api.getRecipe(id,{mongoId});
         if (response) {
             setStoredRec(response);
-            ssp(actionState,'loading',false)
+            setStoreProp(actionState,'loading',false)
         }
         return response
     },
@@ -129,7 +128,7 @@ export const recipeActions = {
     },
     
     async getRecipes ({query,fields,limit,page}={}) {
-        ssp(actionState,'querying',{query,fields,limit,page});
+        setStoreProp(actionState,'querying',{query,fields,limit,page});
         let response = await api.getRecipes({query,fields,limit,page});
         setStoredRecs(response.result);
         activePage.set(response.result.map((r)=>r.id));
@@ -141,7 +140,7 @@ export const recipeActions = {
             last:response.last,
         
         })
-        ssp(actionState,'querying',false);
+        setStoreProp(actionState,'querying',false);
     },
     
     async updateRecipe (recipe) {
@@ -151,16 +150,37 @@ export const recipeActions = {
 
     async revertRecipe (id) {
         let storedRecipe = await this.getRecipe(id); //get(stored)[id]
-        ssp(local,id,deepcopy(storedRecipe));
+        setStoreProp(localRecipes,id,deepcopy(storedRecipe));
     },
 
     async deleteRecipe (id) {
-        await api.deleteRecipe(id);            
-        stored.update((data)=>{delete data[id]; return data});
-        local.update((data)=>{delete data[id]; return data});
+        await api.deleteRecipe(id);
+        removeIdFromStores(id);
     },
 
+    async permanentlyDeleteRecipe (id) {
+        await api.permanentlyDeleteRecipe (id);
+        removeIdFromStores(id);
+    }
 }
+
+function removeIdFromStores (id) {
+    activePage.update(
+        ($ids)=>{
+            console.log('Remove ID from page',id);
+            $ids = $ids.filter((recId)=>recId!=id)
+            console.log('Got:',$ids);
+            return $ids;
+        }
+    );
+    stored.update((data)=>{
+        console.log('Remove ID from store',id);
+            delete data[id]; return data});
+    localRecipes.update((data)=>{
+        console.log('Remove ID from local',id);
+        delete data[id]; return data});
+}
+
 
 export const recipeActionGeneralState = {
     subscribe : actionState.subscribe
