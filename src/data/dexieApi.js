@@ -10,9 +10,9 @@ import Dexie from 'dexie';
 const dexieApi = {
     async connect () {
         dexieApi.db = new Dexie('Recipes');
-        dexieApi.db.version(2)
+        dexieApi.db.version(4)
             .stores({
-                recipes:'++id,&_id,*words,*ings,*isShoppingList'
+                recipes:'++id,&_id,*words,*ings,isShoppingList,deleted'
             });
         return true;
     },
@@ -34,19 +34,22 @@ const dexieApi = {
         }
     },
 
-    searchWord (word) {
+    searchWord (word, {deleted}={}) {
         let q = dexieApi.db.recipes
         q = q.where('words').startsWith(
             word.toLowerCase()
-        ); // fix for multiple words...        
+        ); 
+        if (deleted!==undefined) {
+            q = q.and((o)=>o.deleted==deleted);
+        }
         return q
     },
 
-    async searchWords (words) {
+    async searchWords (words, {deleted}={}) {
         let q = dexieApi.db.recipes
         var ids = undefined;
         for (let word of words) {
-            let subResults = dexieApi.searchWord(word);
+            let subResults = dexieApi.searchWord(word,{deleted});
             let subIds = await subResults.primaryKeys()
             if (!ids) {
                 ids = subIds;
@@ -68,17 +71,20 @@ const dexieApi = {
         let q = dexieApi.db.recipes
         if (query && query.isShoppingList) {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
-        }
-        if (query && query.fulltext) {
+        } else if (query && query.fulltext) {
             if (query.fulltext.indexOf(' ')>-1) {
                 query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
                 q = await dexieApi.searchWords(
-                    query.fulltext.split(/\s+/)
-                )                
+                    query.fulltext.split(/\s+/),
+                    query // this object hands in deleted
+                )
             }
             else {
-                q = dexieApi.searchWord(query.fulltext);
+                q = dexieApi.searchWord(query.fulltext,query);
             }
+        } else if (query && query.deleted !== undefined) {
+            query.deleted = Number(query.deleted); // no booleans in dexie!
+            q = dexieApi.db.recipes.where('deleted').equals(query.deleted);
         }
         if (!q) {
             return {
@@ -89,21 +95,22 @@ const dexieApi = {
         let count
         if (q.alreadyCounted) {
             count = q.alreadyCounted
-        }
-        //else if (q.clone) {
-        try {
-            count = await q.clone().count()
-        }
-        //else {
-        catch (err) {
-            count = await q.count();
+        } else {
+            //else if (q.clone) {
+            try {
+                count = await q.clone().count()
+            }
+            //else {
+            catch (err) {
+                count = await q.count();
+            }
         }
         if (page) {q = q.offset(page)}
         if (limit) {q = q.limit(limit)}
         let result = await q.toArray();
         let previousPage = 0;
         if (page && result.length) {
-            previousPage = page - result.length
+            previousPage = page - (limit||result.length)
         }
         let last = (result.length + (page||0) >= count)
         return {
