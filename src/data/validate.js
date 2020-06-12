@@ -36,6 +36,11 @@ function validateRec (rec) {
     }
     rec.ingredients.map((i)=>crawlIngredient(i,rec.flatIngredients))
     rec.fullText = getFullText(rec)
+    if (!rec.deleted) {
+        rec.deleted = 0;
+    } else {
+        rec.deleted = 1;
+    }
 }
 
 function getFullText (rec) {
