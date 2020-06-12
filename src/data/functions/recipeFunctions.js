@@ -21,7 +21,7 @@ export default {
         console.log('Replace recipe',recipe.title,JSON.stringify(recipe.owner))
         let result = await replaceOne('recipes',
                                       {_id:recipe._id,
-                                       'owner.email':user.email},
+                                       'owner.email':user.account},
                                       recipe);
         return result;
     },
@@ -38,15 +38,15 @@ export default {
                 `getRecipe called without required parameter _id. Called with ${JSON.stringify(params)} instead.`
             );
         }
-        let recipe = await getOne('recipes',{_id, 'owner.email':user.email})
+        let recipe = await getOne('recipes',{_id, 'owner.email':user.account})
         if (recipe) {
             return recipe
         }
         else {
             // try grabbing one not for user/???
             //let recipe = await getOne('recipes',{_id})
-            //throw Error(`No recipe found for user ${user.email}, _id ${_id}: Found this though: ${recipe} -last result was ${getLastResult()}`);
-            throw Error(`No recipe found for user ${user.email}, _id ${_id}. Last DB result was ${getLastResult()}`);
+            //throw Error(`No recipe found for user ${user.account}, _id ${_id}: Found this though: ${recipe} -last result was ${getLastResult()}`);
+            throw Error(`No recipe found for user ${user.account}, _id ${_id}. Last DB result was ${getLastResult()}`);
         }
     },
 
@@ -61,7 +61,7 @@ export default {
                 console.log('Warning: we had another email query???');
                 console.log('Quashing it: it was',query);
         }
-        query['owner.email'] = user.email;
+        query['owner.email'] = user.account;
         if (!limit) {
             limit = 100;
         }
@@ -77,7 +77,7 @@ export default {
     async deleteRecipe (event, context, user, params) {
         require(['_id'],params)
         const {_id} = params
-        let count = await deleteOne('recipes',{_id:_id,'owner.email':user.email});
+        let count = await deleteOne('recipes',{_id:_id,'owner.email':user.account});
         if (count >= 1) {
             return count;
         }
