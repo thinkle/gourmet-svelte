@@ -63,6 +63,15 @@
  }
 
 
+ setContext(
+     'login',
+     {
+         doLogin,
+         doSignup,
+         doLogout,
+     }
+ );
+
  let extraItems = []
  let hide;
  setContext('toolbar',
