@@ -11,6 +11,24 @@ const mock = {
     token_type: "bearer",
     username: "Joe Schmoe",
 }
+
+
+// Ok -- this is a little complicated...
+// We have:
+// 1. Local user info, including access_token, username, email
+// 2. Remote user info, showing the token worked, including a bit more detail
+// 3. DB info, showing that we have stored user information, etc.
+//
+// We will store them like...
+//
+// user = {
+//   ...localUser,
+//   remoteUser : {
+//       dbUser : ...
+//       ...
+//    }
+// }
+
 function createUser() {
     const localUser = JSON.parse(localStorage.getItem('gotrue.user'))
 
@@ -29,22 +47,31 @@ function createUser() {
     const userStore = writable(u)
     const { subscribe, set, update } = userStore;
     
-    getDBUser();
+    getRemoteUser();
     
-    function updateDBUser (dbuser) {
+    function updateDBUser (dbUser) {
             userStore.update(
                 ($user)=>{
-                    $user.dbuser = dbuser;
+                    if (!$user.remoteUser) {
+                        console.log('WARNING: getting DB user but no remote user?',user);
+                        $user.remoteUser = {}
+                    }
+                    $user.remoteUser.dbUser = dbUser;
                     return $user;
                 }
             )
     }
 
-    async function getDBUser () {
+    async function getRemoteUser () {
         let $user = get(userStore);
         if ($user) {
-            let dbuser = await api.doFetch('getUser',$user);
-            updateDBUser(dbuser);
+            let remoteUser = await api.doFetch('echo',$user).user;
+            userStore.update(
+                ($user)=>{
+                    $user.remoteUser = remoteUser
+                    return $user;
+                }
+            );
         } else {
             console.log('No user to fetch...');
         }
@@ -58,7 +85,7 @@ function createUser() {
             api.doFetch('setFakeUser',get(userStore),u).then(
                 ()=>{
                     console.log('Told Remote to Faked user: ',user)
-                    getDBUser();
+                    getRemoteUser();
                 }
             ).catch(
                 (err)=>{
@@ -108,7 +135,7 @@ function createUser() {
             let dbuser = await api.doFetch('changeName',get(userStore),{name:newName})
             updateDBUser(dbuser)            
         },
-        getDBUser,
+        getRemoteUser,
         login(user) {
             const currentUser = {
                 username: user.user_metadata.full_name,
@@ -119,14 +146,15 @@ function createUser() {
                 token_type: user.token.token_type,
             }
             set(currentUser)
-            api.doFetch('getUser',currentUser).then(
+            api.doFetch('echo',currentUser).then(
                 (result)=>{
-                    currentUser.dbuser = result
+                    currentUser.remoteUser = result.user
                     set(currentUser);
                     if (netlifyIdentity.gotrue) {
                         netlifyIdentity.gotrue.currentUser().update({
+                            username : currentUser.name ,
                             data: {
-                                dbuser : currentUser.dbuser
+                                dbuser : currentUser.remoteUser.dbUser,
                             }
                         }).then(user => console.log('netlify user updated',user))
                     }
