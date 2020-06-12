@@ -1,4 +1,5 @@
 <script>
+ import '../../../node_modules/quill/dist/quill.snow.css';
  import { onMount } from "svelte";
  export let initialValue=''
  let value = initialValue;
@@ -9,9 +10,8 @@
  
  export let toolbarOptions = [
      [{ header: 1 }, { header: 2 }, "blockquote", "link", "image", "video"],
-     ["bold", "italic", "underline", "strike"],
-     [{ list: "ordered" }, { list: "unordered" }],
-     [{ align: [] }],
+     ["bold", "italic", "underline"],
+     [{ list: "ordered" }, { list: "bullet" }],
      ["clean"]
  ];
 
@@ -29,7 +29,7 @@
          dispatch('change',quill.root.innerHTML);
          value = quill.root.innerHTML;
      });
-
+     
  });
 
  $: {
@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-    <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"> -->
 </svelte:head>
 <div>
     <div class="editor-wrapper">
@@ -47,5 +47,5 @@
     </div>
 </div>
 <style>
-
+ 
 </style>
