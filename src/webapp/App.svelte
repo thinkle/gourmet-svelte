@@ -5,6 +5,7 @@
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';
  import MainView from './MainView.svelte';
+ import ManageDB from './ManageDB.svelte';
  import SingleRecipe from '../recDisplay/SingleRecipe.svelte';
  import Demo from './Demo.svelte';
  import Sidebar from '../extension/web/Sidebar.svelte';
@@ -19,12 +20,25 @@
  router('/',()=>{
      page = MainView;
      containerScrolls = false;
-     params={}}
+     params={
+     }
+ }
  );
  router('/admin',()=>{
      page = Admin;
      containerScrolls = true;
-     params={}}
+     params={
+     }
+ }
+ );
+ 
+ router('/manage',()=>{
+     console.log('manage!');
+     page = ManageDB;
+     containerScrolls = true;
+     params={
+     }
+ }
  );
  router('/rec/:id',(ctx)=>{
      page = SingleRecipe
@@ -45,40 +59,40 @@
      containerScrolls = false;
      params={}}
  );
- router('/shop',()=>{
-     page = ShoppingList;
-     params={
-     };
-     containerScrolls = false;
- }
- );
- router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
- router('/demo/',(ctx)=>{
-     page = Demo
-     params = {
-
+     router('/shop',()=>{
+         page = ShoppingList;
+         params={
+         };
+         containerScrolls = false;
      }
-     containerScrolls = true;
- });
+     );
+     router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
+     router('/demo/',(ctx)=>{
+         page = Demo
+         params = {
 
- router('/demo/:demo',(ctx)=>{
-     page = Demo
-     params = ctx.params
- });
- 
- router.start();
- $: {
- }
- 
- function detectKeyboardUser (event) {
-     if (event.keyCode==9) {
-         keyboardUser = true;
+         }
+         containerScrolls = true;
+     });
+
+     router('/demo/:demo',(ctx)=>{
+         page = Demo
+         params = ctx.params
+     });
+     
+     router.start();
+     $: {
      }
- }
- function detectMouseUser () {
-     keyboardUser = false;
- }
- 
+     
+     function detectKeyboardUser (event) {
+         if (event.keyCode==9) {
+             keyboardUser = true;
+         }
+     }
+     function detectMouseUser () {
+         keyboardUser = false;
+     }
+     
 </script>
 
 <div class:keyboardUser>
@@ -101,6 +115,8 @@
  .app {
      margin: auto;
      max-width: 1200px;
+     font-family: var(--uiFont);
+     font-size: 100%;
  }
 
  :global(body) {
