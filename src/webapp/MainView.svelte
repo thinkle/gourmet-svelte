@@ -22,7 +22,7 @@
 
  import {connected,
         localRecipes,
-        openLocalRecipes,
+        openLocalRecipes,recipePage,
         recipeActions} from '../stores/recipeStores.js';
  let opener;
  let syncingPromise
@@ -39,7 +39,10 @@
  let selectedRecipes = []
 
  function deleteSelected () {
-     console.log('FIX ME');
+     selectedRecipes.map(
+         // fix me when we get proper bulk operation...
+         recipeActions.deleteRecipe
+     )
  }
  function shopSelected () {
      selectedRecipes.map(shoppingList.addRecipe); // inefficient, but I don't think we'll care
@@ -164,6 +167,7 @@
 {/if}
 {#if DEV}
     <div>
+        Page<JsonDebug data={$recipePage}/>
         Stored<JsonDebug data={$storedRecipes}/>
         Local<JsonDebug data={$localRecipes}/>
     </div>
