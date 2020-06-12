@@ -45,15 +45,17 @@ const handler = async (event, context) => {
         user = fakeUser
     }
     console.log('!!!Current user = ',user);
-    if (userCache[user.email]) {
+    if (user && userCache[user.email]) {
         user.dbUser = userCache[user.email]
         user.usedCached = true;
-    } else {
+    } else if (user) {
         console.log('!!!Fetch DB user',user)
         console.log('getUser(',event,context,user,params,')')
         user.dbUser = await getUser(event,context,user,params);
     }
-    user.account = user.dbUser.linked || user.email // keys to the kingdom...
+    if (user) {
+        user.account = user.dbUser.linked || user.email // keys to the kingdom...
+    }
     let f = functions[params.mode]
     if (!f) {
         return {
