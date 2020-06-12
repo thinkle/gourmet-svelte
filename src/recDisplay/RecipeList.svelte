@@ -5,7 +5,7 @@
  import {recipesOnList} from '../stores/shoppingStores.js';
  import {flip} from 'svelte/animate'
  import {fade,slide} from 'svelte/transition'
- import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  //import {recipeData,recipeActions,connected} from '../stores/recipeData.js';
  import {connected,
         localRecipes,

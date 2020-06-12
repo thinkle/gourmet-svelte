@@ -3,8 +3,8 @@
 
 import localApi from './dexieApi.js';
 import {RecipeApi} from './remoteApi.js';
-import {user} from '../stores/user.js';
-import status from '../stores/status.js';
+import {user} from '../stores/userStore.js';
+import status from '../stores/statusStore.js';
 import {prepRecLocal} from '../data/validate.js';
 import {jsonConcisify} from '../utils/textUtils.js';
 

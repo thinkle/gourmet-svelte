@@ -5,7 +5,7 @@
  import SideBySide from './layout/SideBySide.svelte';
  import ipsum from '../common/mocks/ipsum.js';
 
- import status from '../stores/status.js';
+ import status from '../stores/statusStore.js';
 
  let sideBySideOptions = {
      left : {

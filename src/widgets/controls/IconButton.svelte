@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import Button from './Button.svelte';
  let b;
  export let invisible=false; // useful if we want to take up the normal space in our layout whether active or not

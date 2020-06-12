@@ -2,7 +2,7 @@
 
  import RemoteRecipeTester from './RemoteRecipe.demo.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
- import { user, redirectURL } from '../stores/user.js'
+ import { user, redirectURL } from '../stores/userStore.js'
  import remoteApi from '../data/remoteApi.js'
  import api from '../data/api.js';
 

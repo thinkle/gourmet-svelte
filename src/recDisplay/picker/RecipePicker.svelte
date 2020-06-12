@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
 
  import RecipeList from '../RecipeList.svelte';
  import {Modal,

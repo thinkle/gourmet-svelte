@@ -12,7 +12,7 @@
  export let hide
  
  import {shoppingList} from '../stores/shoppingStores.js';
- import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {getContext,onMount} from 'svelte';
  import {fade,slide} from 'svelte/transition';
  import {flip} from 'svelte/animate';

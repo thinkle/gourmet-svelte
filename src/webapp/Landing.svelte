@@ -7,7 +7,7 @@
         } from '../widgets/';
  import {setContext} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget';
- import { user, redirectURL } from '../stores/user.js';
+ import { user, redirectURL } from '../stores/userStore.js';
  import remoteApi from '../data/remoteApi.js';
  let adminMode = false;
  netlifyIdentity.init();

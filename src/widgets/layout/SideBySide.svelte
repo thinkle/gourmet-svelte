@@ -7,7 +7,7 @@
  export let maxWidthRight = undefined;
 
  import FullHeight from './FullHeight.svelte';
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte';
  import {Resizer} from '../';
  let stackMode = false;
@@ -90,7 +90,6 @@
  .sidebyside {
      display: flex;
      max-width: var(--max-width);
-     width: 100%;
      margin: auto;
      max-height: 100%;
      flex-grow: 1;

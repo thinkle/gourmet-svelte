@@ -7,7 +7,7 @@
  }
 
 
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import RecDef from '../../common/RecDef.js';
  import RecBlock from '../text/RecBlock.svelte';
  import {PlainInput,

@@ -1,10 +1,10 @@
 <script>
- import { user, redirectURL } from '../stores/user.js'
+ import { user, redirectURL } from '../stores/userStore.js'
  import remoteApi from '../data/remoteApi.js'
  var accessCheck
  $: accessCheck = remoteApi.doFetch('setup',$user,{action:'has_access'})
  let actions = ['setupIndexes','create_recipes','create_recipe_index','create_user_index','query_recipes','create_users']
-  let theAction;
+ let theAction;
  let theResult;
 
  function doAction () {

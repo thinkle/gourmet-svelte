@@ -5,7 +5,7 @@ import {getUser,
         addLinkedAccounts,
         acceptLinkedAccount,
         changeName,
-        userCache} from './users.js';
+        userCache} from './userFunctions.js';
 
 import recipeApi from './recipeFunctions.js';
 
@@ -23,7 +23,6 @@ const functions = {
 
     
 const handler = async (event, context) => {
-    console.log('Cache is',userCache);
     let params = event.queryStringParameters;
     let jsonBody = {}
     if (event.body) {
@@ -44,8 +43,8 @@ const handler = async (event, context) => {
     if (!user && event.headers.referer.indexOf('localhost')>-1) {
         user = fakeUser
     }
-    console.log('!!!Current user = ',user);
     if (user && userCache[user.email]) {
+        console.log('Got cached user',user.email)
         user.dbUser = userCache[user.email]
         user.usedCached = true;
     } else if (user) {
@@ -57,6 +56,7 @@ const handler = async (event, context) => {
         user.account = user.dbUser.linked || user.email // keys to the kingdom...
     }
     let f = functions[params.mode]
+    console.log('Request',params.mode,params.params)
     if (!f) {
         return {
             statusCode:400,

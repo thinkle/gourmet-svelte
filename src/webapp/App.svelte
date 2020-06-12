@@ -1,6 +1,6 @@
 <script>
- import {stamp} from '../stores/debug.js'
- import {registerBuild} from '../stores/debug.js'; registerBuild(Number("BUILD_MS"),'App',);
+ import {stamp} from '../stores/debugStore.js'
+ import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"),'App',);
  import router from 'page';
  import Landing from './Landing.svelte';
  import Admin from './Admin.svelte';

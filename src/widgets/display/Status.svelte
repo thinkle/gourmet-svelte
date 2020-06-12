@@ -1,6 +1,6 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"));
- import status,{states} from '../../stores/status.js';
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
+ import status,{states} from '../../stores/statusStore.js';
  import Progress from './Progress.svelte';
  import { fly } from 'svelte/transition';
  import {IconButton} from '../';

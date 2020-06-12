@@ -1,11 +1,13 @@
 <script>
  export let active=false;
+
 </script>
 <li class:active on:click tabindex="0">
     <slot/>
 </li>
 
 <style>
+ 
  li {
      list-decoration: none;
      border-bottom: 1px solid var(--light-underline);
@@ -14,6 +16,10 @@
      font-weight: 300;
      transition: all 300ms;
      display: flex;
+     /* max-width: 15em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap; */
  }
 
  li.active {

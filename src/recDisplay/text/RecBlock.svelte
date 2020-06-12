@@ -1,5 +1,5 @@
 <script>
- import {registerBuild} from '../../stores/debug.js'; registerBuild(Number("BUILD_MS"),'Ing',);
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"),'Ing',);
  export let value
  export let editable=true;
  export let forceEdit=true;

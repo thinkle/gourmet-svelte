@@ -1,7 +1,7 @@
 <script>
  import {jsonConcisify} from '../utils/textUtils.js';
  import {RecipeApi} from '../data/remoteApi.js';
- import { user, redirectURL } from '../stores/user.js';
+ import { user, redirectURL } from '../stores/userStore.js';
  import {testRecs} from "../common/mocks/recipes.js";
  import deepcopy from 'deepcopy';
  let remoteApi
