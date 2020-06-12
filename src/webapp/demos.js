@@ -4,6 +4,7 @@ import RemoteRecipe from "../data/RemoteRecipe.demo.svelte";
 import ShoppingList from "../shopDisplay/ShoppingList.demo.svelte";
 import ShoppingListItems from "../shopDisplay/ShoppingListItems.demo.svelte";
 import RecipeStores from "../stores/RecipeStores.demo.svelte";
+import User from "../webapp/User.demo.svelte";
 import Widgets from "../widgets/Widgets.demo.svelte";
 import Highlight from "../extension/parser/Highlight.demo.svelte";
 import RecipePicker from "../recDisplay/picker/RecipePicker.demo.svelte";
@@ -28,6 +29,7 @@ export default {
     ShoppingList,
     ShoppingListItems,
     RecipeStores,
+    User,
     Widgets,
     Highlight,
     RecipePicker,
