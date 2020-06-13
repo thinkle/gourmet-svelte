@@ -4,8 +4,8 @@
  
  $: {if (prop.array && !value) {
      value = []
- }}
- import {NumberUnitDisplay,TimeLink} from '../../widgets/';
+  }}
+        import {NumberUnitDisplay,TimeLink} from '../../widgets/';
 
  import RecDef from '../../common/RecDef.js';
  import RecipeText from '../text/RecipeText.svelte';
@@ -23,32 +23,43 @@
      return v && prop.toHtml && prop.toHtml(v) || v
  }
 </script>
-{#if prop.array}
-    {#each value as v,n}
-        <span class="arrayval" class:tag="{prop.displayAsTag}">
-            {#if propDisplay[prop.edit]}
-                <svelte:component
-                    this="{propDisplay[prop.edit]}"
-                    bind:value="{v}"
-                />
-            {:else}
-                <!-- generic display -->
-                {@html getDisplayVal(v)}
-            {/if}
-        </span>
-    {/each}
+
+{#if !value}
+    {#if prop.nullValueText}
+        <span>{prop.nullValueText}</span>
+    {/if}
 {:else}
-    {#if propDisplay[prop.edit]}
-        <svelte:component
-            this="{propDisplay[prop.edit]}"
-            bind:value="{value}"
-        />
+    {#if prop.array}
+        {#if Array.isArray(value)}
+            {#each value as v,n}
+                <span class="arrayval" class:tag="{prop.displayAsTag}">
+                    {#if propDisplay[prop.edit]}
+                        <svelte:component
+                            this="{propDisplay[prop.edit]}"
+                            bind:value="{v}"
+                        />
+                    {:else}
+                        <!-- generic display -->
+                        {@html getDisplayVal(v)}
+                    {/if}
+                </span>
+            {/each}
+        {:else}
+            Invalid property value: ${value}
+            {console.log('Invalid value: ',value)}
+        {/if}
     {:else}
-        <!-- generic display -->
-        {@html getDisplayVal(value)}
+        {#if propDisplay[prop.edit]}
+            <svelte:component
+                this="{propDisplay[prop.edit]}"
+                bind:value="{value}"
+            />
+        {:else}
+            <!-- generic display -->
+            {@html getDisplayVal(value)}
+        {/if}
     {/if}
 {/if}
-
 <style>
  .tag {
      background-color: var(--light-bg);
