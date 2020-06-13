@@ -126,6 +126,29 @@ export const recipeActions = {
         let localCopy = await localRecipes.open(rec.id);
         return localCopy;
     },
+
+    async getInfiniteRecipes ({query, fields, limit=15}) {
+        setStoreProp(actionState,'querying',{query,fields,limit});
+        let response = await api.getRecipes({query,fields,limit});
+        setStoredRecs(response.result);
+        activePage.set(response.result.map((r)=>r.id));
+        setStoreProp(actionState,'querying',false);
+        return {
+            count:response.count,
+            async more () {
+                setStoreProp(actionState,'querying',{query,fields,limit,page:response.nextPage});                
+                response = await api.getRecipes({query,fields,limit,page:response.nextPage})
+                setStoredRecs(response.result);
+                activePage.update(
+                    (page)=>{
+                        page = [...page,...response.result.map((i)=>i.id)];
+                        return page
+                    }
+                );
+                setStoreProp(actionState,'querying',false);
+            }
+        }
+    },
     
     async getRecipes ({query,fields,limit,page}={}) {
         setStoreProp(actionState,'querying',{query,fields,limit,page});
@@ -193,7 +216,7 @@ export const recipeActionState = {
 export function makeLocalRecipeStore () {
     const local = writable({});
     const localRecipes = {
-        open (id) {
+        open (id, recursive=false) {
             return new Promise((resolve,reject)=>{
                 if (isNaN(Number(id))) {
                     reject(`Open should be called with a numeric local ID, but got ${id}`);
@@ -203,13 +226,17 @@ export function makeLocalRecipeStore () {
                 let $storedRecipes = get(storedRecipes)
                 const storedRec = $storedRecipes[id]
                 if (!storedRec) {
-                    //reject('No stored recipe exists!');
-                    let result = storedRecipes.get(id).then(
-                        (recipe)=>{
-                            console.log('Fetched from stored, call self recursively now...');
-                            localRecipes.open(id).then(resolve).catch(reject);
-                        }
-                    );
+                    if (!recursive) {
+                        //reject('No stored recipe exists!');
+                        let result = storedRecipes.get(id).then(
+                            (recipe)=>{
+                                console.log('Fetched from stored, call self recursively now...');
+                                localRecipes.open(id,true).then(resolve).catch(reject);
+                            }
+                        );
+                    } else {
+                        reject(`Failed to load stored recipe ID ${id}`);
+                    }
                 }
                 else {
                     let localCopy = deepcopy(storedRec);
