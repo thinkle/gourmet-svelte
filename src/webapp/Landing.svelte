@@ -1,14 +1,19 @@
 <script>
  export let scrolls
- import {IconButton,
-        ModalLauncher,
-        FullScreen,
-        Bar,
-        } from '../widgets/';
+ import {
+     Button,
+     IconButton,
+     ModalLauncher,
+     Modal,
+     FullScreen,
+     Bar,
+ } from '../widgets/';
  import {setContext} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget';
  import { user, redirectURL } from '../stores/userStore.js';
  import remoteApi from '../data/remoteApi.js';
+ import User from '../account/User.svelte';
+ 
  let adminMode = false;
  netlifyIdentity.init();
 
@@ -118,13 +123,21 @@
  );
  console.log('set toolbar context');
 
-
+ let showUserSettings = false;
+ $: showUserSettings = $user && $user.remoteUser && $user.remoteUser.dbUser && $user.remoteUser.dbUser.newUser
 </script>
 <FullScreen {scrolls} header={false}>    
     <div slot="footer">
         <Bar>
             <nav slot="left">
-                {#if isLoggedIn}Hello, {username}{/if}
+                <span>
+                    {#if isLoggedIn}Hello, {username}{/if}
+                </span>
+                <ModalLauncher key="user" modalVisible="{showUserSettings}">
+                    <Button bare="true" on:click="{()=>showUserSettings=true}">
+                        Account Settings
+                    </Button>
+                </ModalLauncher>
                 <slot name="leftnav"/>
             </nav>
             <nav slot='center' class='brand'>Gourmet</nav>
@@ -173,6 +186,11 @@
         {/if}
     </div>
 </FullScreen>
+{#if showUserSettings}
+    <Modal key="user" onClose="{()=>showUserSettings=false}">
+        <User/>
+    </Modal>
+{/if}
 
 <style>
  .hide {
