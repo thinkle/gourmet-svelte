@@ -46,6 +46,11 @@ function createUser() {
     }
     const userStore = writable(u)
     const { subscribe, set, update } = userStore;
+    if (netlifyIdentity.gotrue && netlifyIdentity.gotrue.currentUser()) {
+        // refresh?
+        console.log('maybe refresh...');
+        netlifyIdentity.gotrue.currentUser().jwt()
+    }
     
     getRemoteUser();
     
@@ -84,7 +89,7 @@ function createUser() {
             set(u);
             api.doFetch('setFakeUser',get(userStore),u).then(
                 ()=>{
-                    console.log('Told Remote to Faked user: ',user)
+                    console.log('Told Remote to Faked user: ',u)
                     getRemoteUser();
                 }
             ).catch(
@@ -130,10 +135,12 @@ function createUser() {
             updateDBUser(result);
             return
         },
-
         async setName (newName) {
             let dbuser = await api.doFetch('changeName',get(userStore),{name:newName})
             updateDBUser(dbuser)            
+        },
+        async markNotNew (newName) {
+            await api.doFetch('markUserNotNew',get(userStore),{})
         },
         getRemoteUser,
         login(user) {
@@ -154,7 +161,7 @@ function createUser() {
                         netlifyIdentity.gotrue.currentUser().update({
                             username : currentUser.name ,
                             data: {
-                                dbuser : currentUser.remoteUser.dbUser,
+                                dbuser : result.user && result.user.remoteUser && result.user.remoteUser.dbUser,
                             }
                         }).then(user => console.log('netlify user updated',user))
                     }
