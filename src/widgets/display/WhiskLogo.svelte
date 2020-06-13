@@ -20,7 +20,7 @@
  }
 </script>
 {#if show}
-    <div on:click={restart}>
+    <div on:click={restart} style="{`width:${size}px;height;${size}px`}">
         <svg out:fade viewBox="0 0 300 300" width={size} height={size}>
             <path
                 in:draw={{delay:handleStart,duration}}
