@@ -1,6 +1,13 @@
 <script>
+
+
+
  export let onRecipeClick 
  export let onSelectionChange
+
+ import SvelteInfiniteScroll from 'svelte-infinite-scroll'
+ import scrollparent from 'scrollparent';
+ let scrollingElement
  
  import {recipesOnList} from '../stores/shoppingStores.js';
  import {flip} from 'svelte/animate'
@@ -28,6 +35,14 @@
  import RecipeSummary from './rec/RecipeSummary.svelte';
  import _ from 'lodash';
 
+ function getScrollingElement (node) {
+     scrollingElement = scrollparent(node);
+ }
+ let recipeGetter
+ function getMore () {
+     recipeGetter && recipeGetter.more();
+ }
+
  function getAll () {
      if ($connected) {
          console.log('Fetch those recipes...');
@@ -47,13 +62,16 @@
  let setInputValue = val => {searchInput = val};
  $: setInputValue(search); // In case the search is updated other than through the input.
  let limit = 15
- function getRecipes (page=0) {
-     recipeActions.getRecipes({
+ let lastSearch;
+ 
+async  function getRecipes (page=0) {
+     recipeGetter = await recipeActions.getInfiniteRecipes({
          fields:['title','categories','sources','images'],
          limit,
          query:{fulltext:search,deleted:0},
-         page,
-     });
+         //page,
+     })
+
  }
 
  let selected = {}
@@ -71,14 +89,15 @@
 
  $: $connected && getRecipes(0,search,limit)
 
+ //let alreadyFetched = []
  function validateRP (listOfIDs) {
      // this function should really go away
-     console.log('Updating recipePage...',listOfIDs);
+     //console.log('Updating recipePage...',listOfIDs,alreadyFetched);
+     //let ids = [...new Set([...alreadyFetched,...listOfIDs])]
+     //console.log('Page is',ids)
+     //alreadyFetched = [...ids]
      let ids = [...new Set(listOfIDs)]
      ids.filter((id)=>id) // remove null
-     if (JSON.stringify(ids) != JSON.stringify(listOfIDs)) {
-         console.log('weird, we changed',listOfIDs,'=>',ids);
-     }
      return ids
  }
 
@@ -90,21 +109,23 @@
         {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
     </span>
     <span class="count">
-        {#if $pageInfo.count}
-            Showing recipes
-            {$pageInfo.currentPage + 1}&ndash;{
-            Math.max($pageInfo.currentPage+$recipePage.length)}
-            {#if !$pageInfo.last}
-                of 
-                {$pageInfo.count}
-            {/if}
-        {:else}
-            {#if $recipeActionGeneralState.querying}
-                Looking
-            {:else if search}
-                No recipes
-            {/if}
-        {/if}
+        {#if recipeGetter}{recipeGetter.count} recipes{/if}
+        <!-- paginated interface -- probably we can delete it?
+             {#if $pageInfo.count}
+             Showing recipes
+             {$pageInfo.currentPage + 1}&ndash;{
+             Math.max($pageInfo.currentPage+$recipePage.length)}
+             {#if !$pageInfo.last}
+             of 
+             {$pageInfo.count}
+             {/if}
+             {:else}
+             {#if $recipeActionGeneralState.querying}
+             Looking
+             {:else if search}
+             No recipes
+             {/if}
+             {/if}  -->
     </span>
     <IconButton
         invisible="{!$pageInfo.currentPage}"
@@ -122,9 +143,16 @@
 </div>
 Shopping... {$recipesOnList.map((r)=>r.id)}
 <FullHeight scrolls={true}>
-    <table>
-        {#each validateRP($recipePage) as id (id)}            
-            <tr in:slide animate:flip class='summary'>
+    {#if scrollingElement}
+        <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={100} on:loadMore={getMore} />
+    {:else}
+        Still loading infinite scroll...
+    {/if}
+    <table use:getScrollingElement>
+        {#each validateRP($recipePage) as id (id)}
+            <!-- in:slide animate:flip  -->
+            <tr
+                class='summary'>
                 {#if $storedRecipes[id]}
                     <td class="checkbox">
                         {#if onSelectionChange}
@@ -180,6 +208,7 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
             </tr>
         {/each}
     </table>
+    
 </FullHeight>
 <style>
  table {
@@ -284,7 +313,7 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
      align-items: center;
      justify-content: center;
      text-align: center;
-     margin: auto;
+     /*margin: auto;*/
      flex-direction: column;
  }
  .changed {
