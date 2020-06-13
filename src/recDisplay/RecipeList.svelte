@@ -71,6 +71,17 @@
 
  $: $connected && getRecipes(0,search,limit)
 
+ function validateRP (listOfIDs) {
+     // this function should really go away
+     console.log('Updating recipePage...',listOfIDs);
+     let ids = [...new Set(listOfIDs)]
+     ids.filter((id)=>id) // remove null
+     if (JSON.stringify(ids) != JSON.stringify(listOfIDs)) {
+         console.log('weird, we changed',listOfIDs,'=>',ids);
+     }
+     return ids
+ }
+
 </script>
 
 <div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
@@ -112,7 +123,7 @@
 Shopping... {$recipesOnList.map((r)=>r.id)}
 <FullHeight scrolls={true}>
     <table>
-        {#each $recipePage as id (id)}            
+        {#each validateRP($recipePage) as id (id)}            
             <tr in:slide animate:flip class='summary'>
                 {#if $storedRecipes[id]}
                     <td class="checkbox">
