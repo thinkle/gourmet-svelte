@@ -100,12 +100,13 @@ export const setLinkedAcounts = cache(
     }
 );
 
-
+export const markUserNotNew = cache(async function (event, context, user, params) {
+    let result = updateOne('users',{_id:user.dbUser._id},{$set:{newUser:false}});
+    return result
+});
+                                
 export const changeName = cache(async function (event, context, user, params) {
-    let result = replaceOne('users',{_id:user.dbUser._id},{...user.dbUser,
-                                              name:params.name}
-                           );
-    userCache[user.email] = result;
+    let result = updateOne('users',{_id:user.dbUser._id},{$set:{name:params.name}});
     return result;
 });
 
@@ -113,3 +114,4 @@ async function update (query, user) {
     console.log('Update',query,user);
     return replaceOne('users',query,user)
 }
+
