@@ -5,6 +5,7 @@ import {getUser,
         addLinkedAccounts,
         acceptLinkedAccount,
         changeName,
+        markUserNotNew,
         userCache} from './userFunctions.js';
 
 import recipeApi from './recipeFunctions.js';
@@ -14,6 +15,7 @@ const functions = {
     echo,
     throwError,
     getUser,
+    markUserNotNew,
     changeName,
     addLinkedAccounts,
     setFakeUser,
@@ -79,7 +81,7 @@ const handler = async (event, context) => {
     }
     return {
         statusCode:200,
-        body:JSON.stringify(body)
+        body:JSON.stringify(body||'No return value')
     }
 }
 
