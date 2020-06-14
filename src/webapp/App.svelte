@@ -112,7 +112,7 @@
      font-size : var(--small);
      font-family: var(--brandFont);
  }
- .app {
+ div {
      margin: auto;
      max-width: 1200px;
      font-family: var(--uiFont);
