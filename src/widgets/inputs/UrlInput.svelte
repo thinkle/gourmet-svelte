@@ -19,9 +19,9 @@
 </script>
 <div>
     <label on:click={()=>tref.focus()}>Text:</label>
-    <FancyInput bind:this="{tref}" on:change={change} class="name" type="text" bind:value={value.name}/>
+    <FancyInput bind:this="{tref}" on:change={change} on:input="{change}" class="name" type="text" bind:value={value.name}/>
     <label on:click={()=>uref.focus()}>URL:</label>
-    <FancyInput bind:this={uref} on:change={change} class="url" type="text" bind:value={value.url}/>
+    <FancyInput bind:this={uref} on:change={change} on:input="{change}" class="url" type="text" bind:value={value.url}/>
 </div>
 <style>
  div {
