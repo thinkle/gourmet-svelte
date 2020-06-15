@@ -3,8 +3,6 @@
  let shouldRender = false;
  
  $: shouldRender = shouldRender || condition;
- $: console.log('condition', condition);
- $: console.log('shouldRender', shouldRender);
 </script>
 
 {#if shouldRender}
