@@ -50,7 +50,7 @@ function RecipeApi (user) {
         connect () {
             // eventually we should probably check if the user is logged in
             // and can access the MongoDB or something...
-            if (user) {
+            if (user && user.remoteUser && user.remoteUser.dbUser) {
                 return true;
             }
         },
