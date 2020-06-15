@@ -91,7 +91,7 @@ export const addLinkedAccounts = cache(async function (event,context,user,params
     return update({email:dbUser.email,_id:dbUser._id},dbUser);
 });
 
-export const setLinkedAcounts = cache(
+export const setLinkedAccounts = cache(
     async function (event,context,user,params) {
         let linkedAccounts = params.accounts;
         let dbUser = user.dbUser;
