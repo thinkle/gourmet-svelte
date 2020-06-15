@@ -26,7 +26,7 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
  import {recipeState,recipeActions} from '../../stores/recipeStores.js';
  import {shoppingList} from '../../stores/shoppingStores.js';
- import {onMount,setContext} from 'svelte'
+ import {onMount,setContext,getContext} from 'svelte'
  import {writable} from 'svelte/store'
  import { watchResize } from "svelte-watch-resize";
  // import deepcopy from 'deepcopy'; 
@@ -147,6 +147,8 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
  }
 
 
+ const {doLogin} = getContext('login')
+
 </script>
 
 {#if valid}
@@ -196,7 +198,8 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
                         </StatusIcon>
                     {:else if $recipeState[rec.id]}
                         <StatusIcon icon="cloud_off" tooltip="true">
-                            Saving to the cloud failed - perhaps you're offline?
+                            Saving to the cloud failed - perhaps you're offline or you need to
+                            <a on:click="{()=>doLogin()}">log in again</a>.
                             Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
                             Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
                             <IconButton icon="refresh" bare="true" small="true"
