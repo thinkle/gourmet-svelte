@@ -3,7 +3,7 @@
  import status,{states} from '../../stores/statusStore.js';
  import Progress from './Progress.svelte';
  import { fly } from 'svelte/transition';
- import {IconButton} from '../';
+ import {IconButton,Toaster} from '../';
  export let type;
 
  let items = []
@@ -32,45 +32,56 @@
          return `${item.status}`
      }
  }
- 
+
+ let toaster
+ $: items.length > 0 && toaster && toaster.popUp();
+ $: items.length == 0 && toaster && toaster.close();
+
 </script>
-<div>
-    
+{#if items.length > 0}
+    <IconButton icon="information" on:click="{toaster.popUp}">
+        Info
+    </IconButton>
+{/if}
+<Toaster bind:this="{toaster}" delay="{8000}">    
     {#each items as item}
-        <span transition:fly>
-            <div>{item.name}: {@html item.formatter && item.formatter(item) || format(item)}</div>
-            <div><Progress width="90%" amount={item.amount} total={item.total}/></div>
-            {#if item.status==states.COMPLETE}
-                <IconButton
-                    bare="{true}"
-                    small="{true}"
-                    on:click="{()=>status.removeStatus(item.id)}"
-                    icon="close"
+        <div class="item">
+            <div class="title">{item.name}: {@html item.formatter && item.formatter(item) || format(item)}</div>
+            <div class="prog"><Progress width="90%" amount={item.amount} total={item.total}/></div>
+            <div class="button" >
+                {#if item.status==states.COMPLETE}
+                    <IconButton
+                        bare="{true}"
+                        small="{true}"
+                        on:click="{()=>status.removeStatus(item.id)}"
+                        icon="done"
                     />
-            {/if}
-        </span>
+                {/if}
+            </div>
+        </div>
     {/each}
     
-</div>
+</Toaster>
 <style>
+ .item {
+     display: grid;
+     grid-template-areas :
+         "title button"
+         "prog button";
+     grid-template-columns: 1fr 24px;
+ }
+ .button {
+     grid-area: button;
+ }
+ .title {
+     grid-area: title;
+ }
+ .prog {
+     grid-area: prog;
+ }
  div {
-     background-color: #ff77;
      display: flex;
      min-width: 10em;
- }
- span {
-     display : inline-block;
-     padding: 5px;
-     border : 1px solid #333;
-     position: relative;
-     padding:22px;
-     width: 12em;
- }
- span button {
-     position: absolute;
-     top:2px;
-     right:2px;
-     
  }
 </style>
 
