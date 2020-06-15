@@ -34,23 +34,23 @@ const api = {
         }
         return recipe;
     },
-    async updateRecipe (recipe) {
-        recipe.last_modified = new Date().getTime();
+    async updateRecipe (recipe,updateTimestamp=true) {
+        if (updateTimestamp) {recipe.last_modified = new Date().getTime();}
         if (recipe._id) {
             try {
                 let remoteRec = await remoteApi.updateRecipe(recipe);
-                recipe.savedRemote = true;
+                recipe.savedRemote = 1;
                 recipe._id = remoteRec._id;
             }
             catch (err) {
-                recipe.savedRemote = false;
+                recipe.savedRemote = 0;
                 console.log('Error updating remote recipe:',recipe,err);
                 // Update status?
             }
         } else {
             try {
                 let remoteRec = await remoteApi.addRecipe(recipe);
-                recipe.savedRemote = true;
+                recipe.savedRemote = 1;
                 recipe._id = remoteRec._id;
             }
             catch (err) {
@@ -69,9 +69,30 @@ const api = {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
     async sync (test=false,{onPartialSync}) {
+        console.log('api.sync!');
         if (!localApi.db) {
             await localApi.connect();
         }
+        let unsynced = await localApi.getRecipes({query:{savedRemote:0}});;
+        if (unsynced.count) {
+            debugger;
+            let uploadStatus = status.createStatus('Syncing recipes to database');
+            status.start(uploadStatus)
+            // should do a bulk put in the future...
+            let count=0
+            for (let rec of unsynced.result) {
+                await api.updateRecipe(rec,false);
+                count += 1;
+                status.progress(uploadStatus,{
+                    name:'Uploading recipes',
+                    amount:count,total:unsynced.count
+                })
+            }
+            status.progress(uploadStatus,{name:'Upload done'});
+        }
+        
+
+        
         let statusId = status.createStatus('Syncing Recipes from database...',{type:'recipe'});
 
         let keepFetchingIDs = true;
@@ -79,6 +100,7 @@ const api = {
         let result = []
         
         while (keepFetchingIDs) {
+            debugger;
             status.start(statusId);
             let remoteResponse = await remoteApi.getRecipes({limit:1000,fields:['_ID','id','last_modified','owner'],page:idPage});
             let remoteRecs = remoteResponse.result;
@@ -106,14 +128,14 @@ const api = {
                     statusId,
                     {name:'Fetching more recent data from server...',
                      amount:remoteResponse.page+page,
-                     total:remoteResponse.count+recsToFetch.length
+                     total:remoteResponse.count+page,
                     }
                 );
                 let fullRecResponse = await remoteApi.getRecipes({
                     query:{_id:{$in:recsToFetch.map((r)=>r._id)}},
-                    limit:10, page, 
+                    limit:50, page, 
                 })
-                fullRecResponse.result.forEach((r)=>r.savedRemote=true); // mark all as saved :)
+                fullRecResponse.result.forEach((r)=>r.savedRemote=1); // mark all as saved :)
                 await localApi.updateRecipes(fullRecResponse.result);
                 if (onPartialSync) {
                     onPartialSync(fullRecResponse.result);
@@ -135,7 +157,7 @@ const api = {
             idPage = remoteResponse.page
         }
         status.complete(statusId,{name:`Done syncing recipes: fetched ${result.length} updated items.`,
-                                  amount:result.length.count,
+                                  amount:result.length,
                                   total:result.length})
         return {recs:result}
     },
