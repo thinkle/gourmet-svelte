@@ -75,7 +75,6 @@ export const storedRecipes = {
     subscribe : stored.subscribe,
     get : async function (id,mongoId) {
         let $stored = get(stored);
-        debugger;
         if ($stored[id]) {
             return $stored[id];
         } else if ($stored[mongoId]) {
