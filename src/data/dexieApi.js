@@ -72,8 +72,8 @@ const dexieApi = {
         if (query && query.isShoppingList) {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
         } else if (query && query.fulltext) {
+            query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
             if (query.fulltext.indexOf(' ')>-1) {
-                query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
                 q = await dexieApi.searchWords(
                     query.fulltext.split(/\s+/),
                     query // this object hands in deleted
