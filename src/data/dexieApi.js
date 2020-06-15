@@ -10,9 +10,9 @@ import stopword from 'stopword'
 const dexieApi = {
     async connect () {
         dexieApi.db = new Dexie('Recipes');
-        dexieApi.db.version(4)
+        dexieApi.db.version(5)
             .stores({
-                recipes:'++id,&_id,*words,*ings,isShoppingList,deleted'
+                recipes:'++id,&_id,*words,*ings,isShoppingList,deleted,savedRemote'
             });
         return true;
     },
@@ -90,6 +90,9 @@ const dexieApi = {
         } else if (query && query.deleted !== undefined) {
             query.deleted = Number(query.deleted); // no booleans in dexie!
             q = dexieApi.db.recipes.where('deleted').equals(query.deleted);
+        } else if (query && query.savedRemote!==undefined) {
+            console.log('Saved remote query!');
+            q = dexieApi.db.recipes.where('savedRemote').equals(query.savedRemote&&1||0)
         }
         if (!q) {
             return {
