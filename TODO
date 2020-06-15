@@ -77,15 +77,27 @@
 - Fix source on import (it's not always adding the website for some reason) (x)
 - Consider module reorganization before release... (x)(x)
 - Think through basic UI layout for mobile/app/etc. (x)
-
+- Figure out why we can't use keyed lists for the RecipeList - is our store giving us
+  pages with repeats? Why? (x)
+- Add "delete" functionality. (ok, I can't bring myself to add user-unfriendly delete... we'll go ahead
+  and implement a deleted property the right way --i.e. trash) (x)
+- Implement infinite scroll (x)
+- Make it so syncing doesn't bring 50 recipes into the recipe view (x)
 
 TODO:
-- Figure out why we can't use keyed lists for the RecipeList - is our store giving us
-  pages with repeats? Why?
-- Add "delete" functionality. (ok, I can't bring myself to add user-unfriendly delete... we'll go ahead
-  and implement a deleted property the right way --i.e. trash)
+
+- Sorting of recipes?
+
+- Fix syncing UI
+  -> Store time of last sync in localStorage
+  -> Automatically sync if we haven't synced yet...
+  -> Automatically offer to sync after given time period...
+  -> Offer way to sync manually as needed.
+
 - Fix RegExps for Firefox compatability
+
 - Save "purchased" state of shopping list items 
+- Troubleshoot issues w/ shopping list not seeming to sync correctly.
 
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
@@ -97,8 +109,5 @@ TODO:
 - Export to file
 
 
-
-
-
-
-  
+- Consider implementing new Request API to add error-checking and clearer code to requests.
+   -> mocked up in Request.js
