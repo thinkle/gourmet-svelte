@@ -1,7 +1,7 @@
 <script>
  import {fade,slide} from 'svelte/transition'
  import {connected} from '../stores/recipeStores.js';
- import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
+ import {shoppingList,recipesOnList,localShopRec} from '../stores/shoppingStores.js';
  import {
      Bar,
      Button,
@@ -31,8 +31,8 @@
  let showSubItems=true
  
  function addItem (item) {
-     item.shopItem = item.text;
-     shoppingList.addItem(titleCase(item));
+     item.shopItem = titleCase(item.text);
+     shoppingList.addItem(item);
      return true; // tells input to clear
  }
 
@@ -43,51 +43,51 @@
     {:else if !$shoppingList}
         Still loading... still no shopping list
     {:else}
-        <!-- Toolbar -->
-        {#if $shoppingList.length > 0}
-            <Bar>
-                <h2 slot="center">Shopping List</h2>
-                <div slot="right">
-                    <NavActions>
+        <!-- Toolbar -->        
+        <Bar>
+            <h2 slot="center">Shopping List</h2>
+            <div slot="right">
+                <NavActions>
+                    {#if $shoppingList.length > 0}
                         <Button toggle="true" toggled="{showSubItems}" on:click="{()=>showSubItems=!showSubItems}">Show details</Button>
-                        <IconButton toggle="true" toggled="{showAdd}" on:click="{()=>showAdd=!showAdd}" icon="add">Add Items</IconButton>
-                        {#if !saving}
-                            <Button width="5em" on:click="{()=>saving=shoppingList.save()}">
-                                Save
+                    {/if}
+                    <IconButton toggle="true" toggled="{showAdd}" on:click="{()=>showAdd=!showAdd}" icon="add">Add Items</IconButton>
+                    {#if !saving}
+                        <Button width="5em" on:click="{()=>saving=shoppingList.save()}">
+                            Save
+                        </Button>
+                    {:else}
+                        {#await saving}
+                            <Button width="5em" inactive="true">
+                                Saving...
                             </Button>
-                        {:else}
-                            {#await saving}
-                                <Button width="5em" inactive="true">
-                                    Saving...
-                                </Button>
                             {:then}
-                                <IconButton
-                                    icon="close"
-                                    on:click="{()=>saving=undefined}"
-                                >
-                                    All set!
-                                    {function () {saving=false}()}
-                                </IconButton>
-                            {:catch err}
-                                Something went wrong :(
-                                <IconButton
-                                    icon="close"
-                                    on:click="{()=>saving=undefined}"
-                                >
-                                    Try again later?
-                                </IconButton>
-                                Error: <JsonDebug data="{err}"/>
-                            {/await}
-                        {/if}
-                        <RecipePickerLauncher
-                            onSelected="{shoppingList.addRecipe}"  
-                        >
-                            <Button>Add Recipe to List</Button>
-                        </RecipePickerLauncher>
-                    </NavActions>
-                </div>
-            </Bar>
-        {/if}
+                            <IconButton
+                                icon="close"
+                                on:click="{()=>saving=undefined}"
+                            >
+                                All set!
+                                {function () {saving=false}()}
+                            </IconButton>
+                        {:catch err}
+                            Something went wrong :(
+                            <IconButton
+                                icon="close"
+                                on:click="{()=>saving=undefined}"
+                            >
+                                Try again later?
+                            </IconButton>
+                            Error: <JsonDebug data="{err}"/>
+                        {/await}
+                    {/if}
+                    <RecipePickerLauncher
+                        onSelected="{shoppingList.addRecipe}"  
+                    >
+                        <Button>Add Recipe to List</Button>
+                    </RecipePickerLauncher>
+                </NavActions>
+            </div>
+        </Bar>
         
         {#if showAdd}
             <table in:fade="{{duraton:300}}" out:fade="{{duration:300}}">
@@ -147,7 +147,8 @@
         <div>
             <ShoppingListItems showSubItems="{showSubItems}" items="{$shoppingList}"/>
         </div>
-        <JsonDebug data="{$shoppingList}"/>
+        Shopping List: <JsonDebug data="{$shoppingList}"/>
+        Shop Rec: <JsonDebug data="{$localShopRec}"/>
         </FullHeight>
     {/if}
 
