@@ -1,5 +1,5 @@
 <script>
- import {Tester,Bar,Button} from '../../widgets/';
+ import {Tester,Bar,Button,FullHeight,FullScreen} from '../../widgets/';
  import {testRecs} from '../../common/mocks/recipes.js'
  import Recipe from './Recipe.svelte';
  export let initialShow=true;
@@ -10,23 +10,25 @@
  }
 </script>
 
-<div> 
-    <Bar>
+<FullScreen scrolls="{false}">
+    <div class="slot" slot="header"><Bar>
         <div slot="center" >{change} changes...
         </div>
         <div slot="right">
             <Button on:click={()=>change=0}>Reset</Button>
         </div>
-    </Bar>
-    <Tester
+    </Bar></div>
+    <div class="slot" slot="main"><Tester
         name="Test Recipe"
         options="{Object.keys(testRecs)}"
-        let:option={recname}
-              initialShow="{initialShow}"
+        let:option="{recname}"
+        initialShow="{initialShow}"
     >
+
         <Recipe rec="{testRecs[recname]}"
                 onChange="{onChange}"
         >
         </Recipe>
     </Tester>
-</div>
+    </div>
+</FullScreen>
