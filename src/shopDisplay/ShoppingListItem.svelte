@@ -25,6 +25,7 @@
              if (arguments[0]) {
                  // i.e. changing item
                  itm.ingredient.text = arguments[0];
+                 itm.ingredient.shopItem = arguments[0];
                  shoppingList.updateItem(itm.ingredient);
              } else {
                  // i.e. removing item
