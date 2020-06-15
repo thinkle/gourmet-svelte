@@ -3,6 +3,7 @@
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
+ import {user} from '../stores/userStore.js';
  import {
      Bar,
      Button,
@@ -14,6 +15,7 @@
      NavActions,
      FullHeight,
      Status,
+     StatusIcon,
      Tabs,
      Tab,
      WhiskLogo,
@@ -49,6 +51,34 @@
  }
  function openSelected () {
      selectedRecipes.map((id)=>localRecipes.open(id).then(()=>opener.open(id)))
+ }
+
+ import {mostRecentRequest} from '../data/requests/';
+ $: {if ($connected && $user) {
+     syncIfNeeded()
+    }};
+
+ let syncing
+ let synced
+ async function syncIfNeeded (force=false) {
+     if (syncing) {return} // no double sync...
+     let lastSyncTime = Number(localStorage.getItem('lastSync'));
+     let now = new Date().getTime();
+     let timeSinceSync = now - lastSyncTime;
+     if (timeSinceSync > 1000 * 60 * 60 || force) {
+         // if we have synced in the last hour, don't bother
+         syncing = true
+         console.log('Auto-sync!');
+         syncingPromise = recipeActions.doSync(); // auto-sync
+         await syncingPromise;
+         console.log('COMPLETE!');
+         localStorage.setItem('lastSync',new Date().getTime());
+         syncing = false;
+         synced = true
+     } else {
+         console.log(`Last sync was only ${timeSinceSync/1000} seconds ago, no need to sync`);
+         return
+     }
  }
 
 </script>
@@ -87,79 +117,82 @@
                 {/if}
             </Tabs>
         </div>
-        <div slot="right">
-            <Button
-                on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
-                New Recipe
-            </Button>
-        </div>
     </Bar>
     
     <LazyIf condition="{page=='ShoppingList'}">
         <ShoppingList/>
     </LazyIf>
     <LazyIf condition="{page=='RecipeList'}">
-        {#if selectedRecipes.length > 0}
-            <Bar>
-                <div slot="right">
-                    Bulk Actions:
-                    <NavActions>
-                        <li>
-                            <IconButton icon="delete"
-                                        on:click={deleteSelected}
-                            >
-                                Delete
-                            </IconButton>
-                        </li>
-                        <li>
-                            <IconButton icon="shopping_cart"
-                                        on:click={shopSelected}
-                            >
-                                Add to Shopping List
-                            </IconButton>
-                        </li>
-                        <li>
-                            <IconButton icon="open"
-                                        on:click={openSelected}
-                            >
-                                Open
-                            </IconButton>
-                        </li>
-                    </NavActions>
-                </div>
-            </Bar>
-        {/if}
         <RecipeList
             onSelectionChange="{(ids)=>selectedRecipes=ids}"
             onRecipeClick="{
-                           (id)=>localRecipes.open(id).then(()=>opener.open(id))
-                           }"
-        />
+                               (id)=>localRecipes.open(id).then(()=>opener.open(id))
+                               }"
+        >
+            <div slot="right" class="slot">
+                <NavActions>
+                    <li>
+                        {#if !synced}
+                            <IconButton
+                                on:click="{()=>syncIfNeeded(true)}"
+                                icon="refresh"
+                                inline="true"
+                                busy="{syncing}"
+                            >Sync to Cloud
+                            </IconButton>
+                        {:else}
+                            <StatusIcon
+                                icon="cloud_done"
+                                tooltip="{true}"
+                            >
+                                Synced all recipes from the cloud to the browser
+                                at {new Date(Number(localStorage.getItem('lastSync'))).toLocaleString()}
+                            </StatusIcon>
+                        {/if}
+                    </li>
+                    <li>
+                        <Button
+                            on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
+                            New Recipe
+                        </Button>
+                    </li>
+                </NavActions>
+            </div>
+            <div class="slot" slot="selectedLeft">
+                Selected: {selectedRecipes}
+            </div>
+            <div class="slot" slot="selectedRight">
+                Bulk Actions:
+                <NavActions>
+                    <li>
+                        <IconButton icon="delete"
+                                    on:click={deleteSelected}
+                        >
+                            Delete
+                        </IconButton>
+                    </li>
+                    <li>
+                        <IconButton icon="shopping_cart"
+                                    on:click={shopSelected}
+                        >
+                            Add to Shopping List
+                        </IconButton>
+                    </li>
+                    <li>
+                        <IconButton icon="open"
+                                    on:click={openSelected}
+                        >
+                            Open
+                        </IconButton>
+                    </li>
+                </NavActions>
+            </div>
+        </RecipeList>
     </LazyIf>
     <OpenRecipes bind:this="{opener}"
                  hide="{page!=='OpenRecipes'}"
                  onOpen="{()=>page='OpenRecipes'}"
     />
-    <Bar>
-        <div slot="center">
-            <Status/>
-        </div>
-        <div slot="right">
-            <button on:click="{()=>syncingPromise=recipeActions.doSync()}">Sync with Server?</button>
-            <button on:click="{()=>syncingPromise=recipeActions.doSync(true)}">Small Sync</button>
-        </div>
-        <div slot="left">
-            {#if syncingPromise}
-                {#await syncingPromise}
-                    Syncing...
-                {:then json}
-                    Cool, done syncing! {JSON.stringify(json)}
-                {:catch error}
-                    Failed :( {console.log(error)} {error}
-                {/await}
-            {/if}
-        </div>
-    </Bar>
 {:else}
     <div>
         <WhiskLogo/>
