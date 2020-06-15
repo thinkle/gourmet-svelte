@@ -5,7 +5,7 @@ dexieApi.js implements the interface for storing recipes in IndexDB
 
 import {prepRecLocal} from '../data/validate.js';
 import Dexie from 'dexie';
-
+import stopword from 'stopword'
 
 const dexieApi = {
     async connect () {
@@ -46,6 +46,8 @@ const dexieApi = {
     },
 
     async searchWords (words, {deleted}={}) {
+        words = stopword.removeStopwords(words);
+        console.log('searchWords',words);
         let q = dexieApi.db.recipes
         var ids = undefined;
         for (let word of words) {
@@ -72,14 +74,17 @@ const dexieApi = {
         if (query && query.isShoppingList) {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
         } else if (query && query.fulltext) {
-            query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
+            // Note: we split words by \W when we full-text index
+            query.fulltext = query.fulltext.replace(/^\W+|\W+$/g,'')
             if (query.fulltext.indexOf(' ')>-1) {
+                console.log('Query is: ',query.fulltext.split(/\W+/))
                 q = await dexieApi.searchWords(
-                    query.fulltext.split(/\s+/),
+                    query.fulltext.split(/\W+/),
                     query // this object hands in deleted
                 )
             }
             else {
+                console.log('Query is: ',query.fulltext)
                 q = dexieApi.searchWord(query.fulltext,query);
             }
         } else if (query && query.deleted !== undefined) {
