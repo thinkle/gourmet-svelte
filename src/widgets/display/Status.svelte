@@ -39,9 +39,7 @@
 
 </script>
 {#if items.length > 0}
-    <IconButton icon="information" on:click="{toaster.popUp}">
-        Info
-    </IconButton>
+    <IconButton icon="info" on:click="{toaster.popUp}">{items.length}</IconButton>
 {/if}
 <Toaster bind:this="{toaster}" delay="{8000}">    
     {#each items as item}
