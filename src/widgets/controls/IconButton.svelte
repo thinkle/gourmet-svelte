@@ -13,6 +13,8 @@
  export let small=undefined;
  export let left=false;
  export let compact=false;
+ export let busy=false;
+ export let disabled=false;
  export let width=undefined;
  
  export function focus () {
@@ -34,6 +36,8 @@
 
 <Button
     {bare}
+    {busy}
+    {disabled}
     {inverse}
     {invisible}
     {toggle}

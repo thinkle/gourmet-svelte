@@ -6,6 +6,14 @@
  let clickCount = 0
  let bare
  let small=true
+ let busy=false
+
+ function doFakeTask () {
+     busy = busy = true;
+     setTimeout(()=>busy=false,
+                3000);
+ }
+ 
 </script>
 
 <Button {bare} {small} toggle="true" toggled="{bare}" on:click="{()=>bare=!bare}">Bare?</Button>
@@ -24,6 +32,9 @@
 <IconButton {bare} {small} left="true" icon="cloud" toggle="true" toggled="{active}" on:click="{()=>active=!active}">This is a lefty toggle IconButton</IconButton>
 <IconButton {bare} {small} icon="close" inverse="true" toggle="true" toggled="{active}" on:click="{()=>active=!active}">Inverse Toggle IconButton</IconButton>
 <IconButton {bare} {small} icon="cloud" inverse="true" on:click="{()=>active=!active}">Inverse IconButton</IconButton>
+
+<Button {bare} {small} on:click="{doFakeTask}" busy="{busy}">This {#if busy}is{:else}can be{/if} a busy button</Button>
+<Button {bare} {small} on:click="{doFakeTask}" disabled="{true}">This Button is Disabled</Button>
 
 <p>You have clicked {clickCount} times</p>
 <style>

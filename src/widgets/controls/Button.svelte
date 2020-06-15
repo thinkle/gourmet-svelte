@@ -1,14 +1,15 @@
 <script>
  export let invisible=false; // useful if we want to take up the normal space in our layout whether active or not
  export let inverse=false;
- export let bare=false
- export let toggle=false
- export let toggled=false
- export let rtl=false
+ export let bare=false;
+ export let busy=false;
+ export let toggle=false;
+ export let toggled=false;
+ export let rtl=false;
  export let width;
  export let fontSize=undefined;
  export let small=undefined;
- export let inactive=undefined;
+ export let disabled=undefined;
  export let compact=false; /* No padding, no margin */
  export function focus () {
      b.focus()
@@ -16,7 +17,7 @@
  let b;
 </script>
 <button
-    class:inactive
+    class:disabled
     class:compact
     class:rtl
     class:bare
@@ -24,6 +25,7 @@
     class:invisible
     class:toggle
     class:toggled
+    class:busy
     class:small
     style="{`--fontSize:${fontSize};--button-width:${width}`}"
     class:customSize={fontSize}
@@ -32,7 +34,9 @@
     on:blur
     on:keypress
     on:keyup
-    bind:this={b}>
+    bind:this={b}
+    disabled="{disabled||busy}"
+>
     {#if toggle}
         <span class:toggled></span>
     {/if}
@@ -143,9 +147,15 @@
  .compact span {
      margin: 0;
  }
- .inactive {
+ .disabled,
+ .busy,
+ .disabled:hover,
+ .busy:hover {
      color: var(--grey);
-     cursor: busy;
  }
+ .busy {
+     cursor: wait;
+ }
+
 
 </style>
