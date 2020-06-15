@@ -51,7 +51,7 @@ export default {
     error (id,error) {
         return this.updateStatus(id,states.PROGRESS,{error})
     },
-    complete (id,complete,props={}) {
+    complete (id,props={}) {
         return this.updateStatus(id,states.COMPLETE,props)
     },
 
