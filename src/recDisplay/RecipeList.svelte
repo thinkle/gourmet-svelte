@@ -1,9 +1,10 @@
 <script>
-
-
-
+ 
  export let onRecipeClick 
  export let onSelectionChange
+ export function reload () {
+     getRecipes();
+ }
 
  import SvelteInfiniteScroll from 'svelte-infinite-scroll'
  import scrollparent from 'scrollparent';
@@ -24,12 +25,14 @@
         recipePage,
         recipeState} from '../stores/recipeStores.js';
  import {
+     Bar,
      Checkbox,
      FullHeight,
      PlainInput,
      SearchProgress,
      StatusIcon,
      WhiskLogo,
+     JsonDebug,
      IconButton} from '../widgets/';
  import Recipe from './rec/Recipe.svelte'
  import RecipeSummary from './rec/RecipeSummary.svelte';
@@ -43,17 +46,6 @@
      recipeGetter && recipeGetter.more();
  }
 
- function getAll () {
-     if ($connected) {
-         console.log('Fetch those recipes...');
-         recipeActions.getRecipes({fields:['title','categories','sources','images'],
-                                  query:{deleted:0},
-                                  initial:true});
-     }
-     else {
-         console.log('No connection yet... holding off');
-     }
- }
  
  let search = '';
  let searchInput = '';
@@ -61,30 +53,43 @@
  $: updateSearchDebounced(searchInput);
  let setInputValue = val => {searchInput = val};
  $: setInputValue(search); // In case the search is updated other than through the input.
- let limit = 15
+ let limit = 30
  let lastSearch;
  
-async  function getRecipes (page=0) {
+ async  function getRecipes (page=0) {
      recipeGetter = await recipeActions.getInfiniteRecipes({
          fields:['title','categories','sources','images'],
          limit,
          query:{fulltext:search,deleted:0},
          //page,
-     })
+     });
+     // Note: if you call it recipeGetter.more() once below
+     // automatically, you'll trigger a terrible bug
+     
 
  }
 
  let selected = {}
-
+ let areSelected=false;
+ $: $recipePage && updateSelected();
  function updateSelected ( ) {
      let selectedIds = []
      for (let key in selected) {
          if (selected[key]) {
-             selectedIds.push(Number(key));
+             if ($recipePage.includes(Number(key))) {
+                 selectedIds.push(Number(key));
+             } else {
+                 delete selected[key]
+             }
          }
      }
      console.log('selection change!',selectedIds);
      onSelectionChange(selectedIds);
+     if (selectedIds.length) {
+         areSelected = true;
+     } else {
+         areSelected = false;
+     }
  }
 
  $: $connected && getRecipes(0,search,limit)
@@ -94,67 +99,99 @@ async  function getRecipes (page=0) {
      // this function should really go away
      //console.log('Updating recipePage...',listOfIDs,alreadyFetched);
      //let ids = [...new Set([...alreadyFetched,...listOfIDs])]
-     //console.log('Page is',ids)
      //alreadyFetched = [...ids]
      let ids = [...new Set(listOfIDs)]
      ids.filter((id)=>id) // remove null
+     console.log('Page is',ids)
      return ids
  }
 
+
+ let forceRerender = 1;
 </script>
 
-<div class="searchBar" class:searching={$recipeActionGeneralState.querying}>
-    Search: <PlainInput type="text" bind:value={searchInput}/>
-    <span width="30px">
-        {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
-    </span>
-    <span class="count">
-        {#if recipeGetter}{recipeGetter.count} recipes{/if}
-        <!-- paginated interface -- probably we can delete it?
-             {#if $pageInfo.count}
-             Showing recipes
-             {$pageInfo.currentPage + 1}&ndash;{
-             Math.max($pageInfo.currentPage+$recipePage.length)}
-             {#if !$pageInfo.last}
-             of 
-             {$pageInfo.count}
-             {/if}
-             {:else}
-             {#if $recipeActionGeneralState.querying}
-             Looking
-             {:else if search}
-             No recipes
-             {/if}
-             {/if}  -->
-    </span>
-    <IconButton
-        invisible="{!$pageInfo.currentPage}"
-        icon="navigate_before"
-        on:click="{
-                   getRecipes($pageInfo.prevPage)
-                   }"
-    />
-    <IconButton
-        invisible="{$pageInfo.last}"
-        icon="navigate_next" on:click="{()=>{
-                                       getRecipes($pageInfo.nextPage)
-                                       }}"
-    />
+<Bar growLeft="{true}"> 
+    <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
+        Search: <PlainInput type="text" bind:value={searchInput}/>
+        <span width="30px">
+            {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
+        </span>
+        <span class="count">
+            {#if recipeGetter}{recipeGetter.count} recipes{/if}
+            <!-- paginated interface -- probably we can delete it?
+                 {#if $pageInfo.count}
+                 Showing recipes
+                 {$pageInfo.currentPage + 1}&ndash;{
+                 Math.max($pageInfo.currentPage+$recipePage.length)}
+                 {#if !$pageInfo.last}
+                 of 
+                 {$pageInfo.count}
+                 {/if}
+                 {:else}
+                 {#if $recipeActionGeneralState.querying}
+                 Looking
+                 {:else if search}
+                 No recipes
+                 {/if}
+                 {/if}  -->
+        </span>
+    </div>
+    <div slot="right">
+        <slot name="right"/>
+    </div>
+</Bar>
+<div>
+    {#if areSelected}
+        <Bar>
+            <div class="slot" slot="left">
+                <slot name="selectedLeft"/>
+            </div>
+            <div class="slot"  slot="right">
+                <slot name="selectedRight"/>
+            </div>
+        </Bar>
+    {/if}
 </div>
-Shopping... {$recipesOnList.map((r)=>r.id)}
+
+    <!-- <IconButton
+         invisible="{!$pageInfo.currentPage}"
+         icon="navigate_before"
+         on:click="{
+         getRecipes($pageInfo.prevPage)
+         }"
+         />
+         <IconButton
+         invisible="{$pageInfo.last}"
+         icon="navigate_next" on:click="{()=>{
+                                        getRecipes($pageInfo.nextPage)
+                                        }}"
+         /> -->
+
+
+<!-- <div> -->
+     <!--     Shopping... {$recipesOnList.map((r)=>r.id)} -->
+<!-- <div>Results for {search}...</div> -->
+<!-- <button on:click={()=>forceRerender+=1}>Rerender</button> -->
+<!-- </div> -->
+
 <FullHeight scrolls={true}>
     {#if scrollingElement}
         <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={100} on:loadMore={getMore} />
     {:else}
         Still loading infinite scroll...
     {/if}
-    <table use:getScrollingElement>
-        {#each validateRP($recipePage) as id (id)}
-            <!-- in:slide animate:flip  -->
-            <tr
-                class='summary'>
-                {#if $storedRecipes[id]}
-                    <td class="checkbox">
+    
+    {#each [forceRerender] as rr (rr)}
+        
+        <table use:getScrollingElement>
+            <!-- <button on:click={getMore}>MORE~!</button> -->
+            <!-- <tr><td colspan=4>{$recipePage.join(' ')}</td></tr> -->
+            {#each $recipePage as id (id)}
+                <tr
+                    class='summary'>
+                    {#if $storedRecipes[id]}
+                        <td class="checkbox">
+                            <!-- {id}  -->
                         {#if onSelectionChange}
                             <Checkbox bind:checked="{selected[id]}" on:change="{updateSelected}"/>
                         {/if}
@@ -208,6 +245,8 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
             </tr>
         {/each}
     </table>
+    {/each}
+
     
 </FullHeight>
 <style>
@@ -283,13 +322,6 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
 
  }
  @media (min-width: 1100px) {
-     table {
-         width: 1000px;
-         margin-left: auto;
-         margin-right: auto;
-         border-collapse: separate;
-         border-spacing: 2em 5px;
-     }
      tr :global(td) {
          vertical-align: middle;
      }
@@ -304,6 +336,14 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
          width: 400px;
      }
 
+ }
+
+ table {
+     max-width: 1050px;
+     margin-left: auto;
+     margin-right: auto;
+     border-collapse: separate;
+     border-spacing: 5px 2rem;
  }
  
  .center {
@@ -322,6 +362,7 @@ Shopping... {$recipesOnList.map((r)=>r.id)}
  .searchBar {
      display: flex;
      align-items: center;
+     flex-grow: 4;
  }
  .count {
      font-size: var(--small);
