@@ -2,7 +2,39 @@ import {require} from '../../utils/requireParams.js';
 import {jsonConcisify} from '../../utils/textUtils.js';
 import {getLastResult,insertOne,insertMany,queryCollection,getOne,replaceOne,deleteOne} from './mongoConnect.js';
 import {prepRecRemote}  from '../validate.js';
+import {mostRecentRequest,
+       addRecipeRequest} from '../requests/index.js';
 
+export async function getMostRecent (user) {
+    let response = await queryCollection(
+        'recipes',
+        {'owner.email':user.account}, // query
+        {
+            fields : ['last_modified'],
+            sort:{last_modified:-1},
+            limit:1
+        } // options
+    );
+    let result = response.result
+    console.log('getMostRecent Got result:',result);
+    if (result) {
+        return result[0].last_modified
+    } else {
+        return 0
+    }
+}
+mostRecentRequest.setRequestHandler(getMostRecent);
+
+
+export async function addRecipe (user, params) {
+    let {recipe} = params
+    prepRecRemote(recipe,user);
+    //console.log('Add recipe',recipe.title,JSON.stringify(recipe.owner))
+    let result = await insertOne('recipes',
+                                 recipe,recipe);
+    return result;
+}
+addRecipeRequest.setRequestHandler(addRecipe);
 
 export default {
     async addRecipe (event, context, user, params) {
@@ -69,7 +101,9 @@ export default {
         let result = await queryCollection(
             'recipes',
             query,
-            {fields, limit, page}
+            {fields, limit, page,
+            sort:{last_modified:-1},
+            }
         );
         return result
     },
