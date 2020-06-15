@@ -38,12 +38,15 @@ function setStoredRec (rec) {
                 // We're keeping old data in case we've e.g. fetched new
                 // summary info from the DB for a list display but we already
                 // have full info fetched from another api call and we don't
-                // want to remote all that data for e.g. noting whether a
+                // want to remove all that data for e.g. noting whether a
                 // recipe has saved of not.
                 //
                 // I may regret this :)
                 ...data[rec.id], 
                 ...deepcopy(rec)
+            }
+            if (rec._id) {
+                data[rec._id] = rec;
             }
             return data;
         }
@@ -55,7 +58,11 @@ function setStoredRecs (recs) {
         (data)=>{
             recs.forEach(
                 (rec)=>{
+                    // possibly keep old data in case new data is partial
                     data[rec.id] = {...data[rec.id],...deepcopy(rec)}
+                    if (rec._id) {
+                        data[rec._id] = data[rec.id];
+                    }
                 }
             );
             return data
@@ -68,10 +75,15 @@ export const storedRecipes = {
     subscribe : stored.subscribe,
     get : async function (id,mongoId) {
         let $stored = get(stored);
+        debugger;
         if ($stored[id]) {
             return $stored[id];
+        } else if ($stored[mongoId]) {
+            return $stored[mongoId]
         } else {
-            return await recipeActions.getRecipe(id,mongoId);
+            let result =  await recipeActions.getRecipe(id,mongoId);            
+            console.log('Stored grabbed',result);
+            return result;
         }
     }
 }
@@ -90,11 +102,12 @@ export const recipePage = {
 
 export const recipeActions = {
 
-    async doSync (testing) {
-        await api.sync(testing,{onPartialSync:(recipes)=>{
-            recipeActions.getRecipes({limit:recipes.length});
-        }}); 
-        await recipeActions.getRecipes({limit:50});
+    async doSync ({testing=false,
+                   onPartialSync,
+                   onSync
+                  }={}) {
+        await api.sync(testing,{onPartialSync});
+        if (onSync) {onSync()} //await recipeActions.getRecipes({limit:50});
     },
 
     async createRecipe (r) {
@@ -128,23 +141,29 @@ export const recipeActions = {
     },
 
     async getInfiniteRecipes ({query, fields, limit=15}) {
+        console.log('Initial',query);
         setStoreProp(actionState,'querying',{query,fields,limit});
         let response = await api.getRecipes({query,fields,limit});
         setStoredRecs(response.result);
-        activePage.set(response.result.map((r)=>r.id));
+        console.log(get(activePage).length,'recipes in activePage before set')
+        activePage.set([...new Set(response.result.map((r)=>r.id))]);
+        console.log(get(activePage).length,'recipes in activePage after set')
         setStoreProp(actionState,'querying',false);
         return {
             count:response.count,
             async more () {
+                console.log('More',query);
                 setStoreProp(actionState,'querying',{query,fields,limit,page:response.nextPage});                
                 response = await api.getRecipes({query,fields,limit,page:response.nextPage})
                 setStoredRecs(response.result);
                 activePage.update(
                     (page)=>{
-                        page = [...page,...response.result.map((i)=>i.id)];
+                        page = [...new Set([...page,...response.result.map((i)=>i.id)])];
+                        console.log(page.length,'recipes in activePage after update')
                         return page
                     }
                 );
+                
                 setStoreProp(actionState,'querying',false);
             }
         }
@@ -218,20 +237,37 @@ export function makeLocalRecipeStore () {
     const localRecipes = {
         open (id, recursive=false) {
             return new Promise((resolve,reject)=>{
+                let mongoId
                 if (isNaN(Number(id))) {
-                    reject(`Open should be called with a numeric local ID, but got ${id}`);
+                    //reject(`Open should be called with a numeric local ID, but got ${id}`);
+                    console.log('Assuming id is mongoID?',id);
+                    mongoId = id;
+                    id = undefined;
                 }
-                let alreadyOpenCopy = get(localRecipes)[id]
+                let alreadyOpenCopy = id && get(localRecipes)[id]
                 if (alreadyOpenCopy) {resolve(alreadyOpenCopy)}
                 let $storedRecipes = get(storedRecipes)
                 const storedRec = $storedRecipes[id]
                 if (!storedRec) {
                     if (!recursive) {
-                        //reject('No stored recipe exists!');
-                        let result = storedRecipes.get(id).then(
-                            (recipe)=>{
-                                console.log('Fetched from stored, call self recursively now...');
-                                localRecipes.open(id,true).then(resolve).catch(reject);
+                        let result = storedRecipes.get(id,mongoId).then(
+                            (recipe)=>{                                
+                                if (recipe) {
+                                    console.log('Successfully fetched',recipe);
+                                    local.update(
+                                        ($localRecipes)=>{
+                                            $localRecipes[id] = deepcopy(recipe);
+                                            if (recipe._id) {
+                                                $localRecipes[recipe._id] = $localRecipes[id]
+                                            }
+                                            console.log('Resolve promise and update localrecs...');
+                                            resolve($localRecipes[id])
+                                            return $localRecipes;
+                                        }
+                                    );
+                                } else {
+                                    console.log('Unable to open recipe',id);
+                                }
                             }
                         );
                     } else {
@@ -244,6 +280,9 @@ export function makeLocalRecipeStore () {
                         local.update(
                             ($localRecipes)=>{
                                 $localRecipes[id] = localCopy
+                                if (localCopy._id) {
+                                    $localRecipes[localCopy._id] = localCopy;
+                                }
                                 return $localRecipes;
                             }
                         ); } catch (err) {
