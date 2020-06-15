@@ -1,5 +1,4 @@
 <script>
- 
  export let onRecipeClick 
  export let onSelectionChange
  export function reload () {
@@ -106,8 +105,7 @@
      return ids
  }
 
-
- let forceRerender = 1;
+ 
 </script>
 
 <Bar growLeft="{true}"> 
@@ -153,45 +151,39 @@
     {/if}
 </div>
 
-    <!-- <IconButton
-         invisible="{!$pageInfo.currentPage}"
-         icon="navigate_before"
-         on:click="{
-         getRecipes($pageInfo.prevPage)
-         }"
-         />
-         <IconButton
-         invisible="{$pageInfo.last}"
-         icon="navigate_next" on:click="{()=>{
-                                        getRecipes($pageInfo.nextPage)
-                                        }}"
-         /> -->
+<!-- <IconButton
+     invisible="{!$pageInfo.currentPage}"
+     icon="navigate_before"
+     on:click="{
+     getRecipes($pageInfo.prevPage)
+     }"
+     />
+     <IconButton
+     invisible="{$pageInfo.last}"
+     icon="navigate_next" on:click="{()=>{
+                                    getRecipes($pageInfo.nextPage)
+                                    }}"
+     /> -->
 
 
 <!-- <div> -->
-     <!--     Shopping... {$recipesOnList.map((r)=>r.id)} -->
+<!--     Shopping... {$recipesOnList.map((r)=>r.id)} -->
 <!-- <div>Results for {search}...</div> -->
-<!-- <button on:click={()=>forceRerender+=1}>Rerender</button> -->
 <!-- </div> -->
-
+{#if scrollingElement}
+    <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={100} on:loadMore={getMore} />
+{/if}
 <FullHeight scrolls={true}>
-    {#if scrollingElement}
-        <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={100} on:loadMore={getMore} />
-    {:else}
-        Still loading infinite scroll...
-    {/if}
-    
-    {#each [forceRerender] as rr (rr)}
-        
-        <table use:getScrollingElement>
-            <!-- <button on:click={getMore}>MORE~!</button> -->
-            <!-- <tr><td colspan=4>{$recipePage.join(' ')}</td></tr> -->
-            {#each $recipePage as id (id)}
-                <tr
-                    class='summary'>
-                    {#if $storedRecipes[id]}
-                        <td class="checkbox">
-                            <!-- {id}  -->
+
+    <table use:getScrollingElement>
+        <!-- <button on:click={getMore}>MORE~!</button> -->
+        <!-- <tr><td colspan=4>{$recipePage.join(' ')}</td></tr> -->
+        {#each $recipePage as id (id)}
+            <tr
+                class='summary'>
+                {#if $storedRecipes[id]}
+                    <td class="checkbox">
+                        <!-- {id}  -->
                         {#if onSelectionChange}
                             <Checkbox bind:checked="{selected[id]}" on:change="{updateSelected}"/>
                         {/if}
@@ -245,7 +237,6 @@
             </tr>
         {/each}
     </table>
-    {/each}
 
     
 </FullHeight>
