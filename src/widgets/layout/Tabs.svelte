@@ -59,6 +59,7 @@
  }
  .nowrap {
      overflow-x: scroll;
+     flex-shrink: 0;
  }
  .nowrap :global(*) {
      white-space : nowrap;
