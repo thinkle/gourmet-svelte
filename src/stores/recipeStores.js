@@ -303,7 +303,8 @@ export function makeLocalRecipeStore () {
     }
 
     const openLocalRecipes = derived(local,($local)=>{
-        return Object.keys($local)
+        return Object.keys($local).filter((id)=>!isNaN(Number(id))) // only local ids
+        //return Object.keys($local)
     }
                                     );
 
