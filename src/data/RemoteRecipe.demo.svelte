@@ -17,7 +17,7 @@
          name:'Add recipe',
          action:()=>{
              promise = remoteApi.addRecipe(
-                 deepcopy(testRecs.standard)
+                 {recipe:deepcopy(testRecs.standard)}
              );
          }
      },
