@@ -4,6 +4,7 @@
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
  import {user} from '../stores/userStore.js';
+ import status from '../stores/statusStore.js';
  import {
      Bar,
      Button,
@@ -81,6 +82,7 @@
      }
  }
 
+ let debug
 </script>
 
 
@@ -198,12 +200,22 @@
         <WhiskLogo/>
     </div>
 {/if}
+<Status/>
 {#if DEV}
-    <div>
-        Page<JsonDebug data={$recipePage}/>
-        Stored<JsonDebug data={$storedRecipes}/>
-        Local<JsonDebug data={$localRecipes}/>
-    </div>
+    <ModalLauncher modalVisible="{debug}">
+        <Button on:click="{()=>debug=!debug}">DEBUG</Button>
+    </ModalLauncher>
+    {#if debug}<Modal onClose="{()=>debug=false}">
+        <div>
+            Page<JsonDebug data={$recipePage}/>
+            Stored<JsonDebug data={$storedRecipes}/>
+            Local<JsonDebug data={$localRecipes}/>
+            Shopping<JsonDebug data="{$shoppingList}"/>
+            Status <JsonDebug data="{$shoppingList}"/>
+            Status <JsonDebug data="{$status}"/>
+        </div>
+    </Modal>
+    {/if}
 {/if}
 <style>
 </style>
