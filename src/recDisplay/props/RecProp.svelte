@@ -194,9 +194,10 @@
  .title {
      display: flex;
      flex-direction: row-reverse;
+     white-space: normal; /* Allow wrapping on title, even in navbar */
  }
  .editing.title {
-     flex-direction: row;
+     flex-direction: column;
  }
 
  .fullWidth {
