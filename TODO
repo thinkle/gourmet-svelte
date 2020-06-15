@@ -84,17 +84,16 @@
 - Implement infinite scroll (x)
 - Make it so syncing doesn't bring 50 recipes into the recipe view (x)
 
-TODO:
-
-- Sorting of recipes?
-
-- Fix syncing UI
-  -> Store time of last sync in localStorage
-  -> Automatically sync if we haven't synced yet...
-  -> Automatically offer to sync after given time period...
+- Fix syncing UI (x)
+  -> Store time of last sync in localStorage (x)
+  -> Automatically sync if we haven't synced yet... (x)
+  -> Automatically offer to sync after given time period... (x)
   -> Offer way to sync manually as needed. (x)
   -> Pretty up progress bars & "toaster" sync (x)
-  
+
+- Sorting of recipes - basic support (x)
+
+TODO:
 
 - Fix RegExps for Firefox compatability
 
