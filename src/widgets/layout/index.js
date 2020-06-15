@@ -9,3 +9,4 @@ export {default as NavActions} from './NavActions.svelte';
 //export {default as SideBySide} from './SideBySide.svelte'; // can't export directly - weird module bug
 export {default as Tabs} from './Tabs.svelte';
 export {default as Tab} from './Tab.svelte';
+export {default as Toaster} from './Toaster.svelte';
