@@ -92,7 +92,9 @@ TODO:
   -> Store time of last sync in localStorage
   -> Automatically sync if we haven't synced yet...
   -> Automatically offer to sync after given time period...
-  -> Offer way to sync manually as needed.
+  -> Offer way to sync manually as needed. (x)
+  -> Pretty up progress bars & "toaster" sync (x)
+  
 
 - Fix RegExps for Firefox compatability
 
