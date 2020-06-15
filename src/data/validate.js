@@ -134,7 +134,7 @@ export function prepRecsRemote (recs,user) {
 
 export function prepRecLocal (rec) {
     validateRec(rec); // step 1...
-    rec.words = rec.fullText.split(/\W+/).map((w)=>w.toLowerCase());
+    rec.words = rec.fullText.split(/\s+/).map((w)=>w.toLowerCase());
     delete rec.fullText; // we don't need to keep this.
     rec.words = stopword.removeStopwords(rec.words);
     rec.ings = []
