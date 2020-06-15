@@ -12,6 +12,7 @@ import Recipe from "../recDisplay/rec/Recipe.demo.svelte";
 import RecipeText from "../recDisplay/text/RecipeText.demo.svelte";
 import Button from "../widgets/controls/Button.demo.svelte";
 import Timer from "../widgets/controls/Timer.demo.svelte";
+import Status from "../widgets/display/Status.demo.svelte";
 import SVGs from "../widgets/display/SVGs.demo.svelte";
 import Checkbox from "../widgets/inputs/Checkbox.demo.svelte";
 import IngredientInput from "../widgets/inputs/IngredientInput.demo.svelte";
@@ -20,6 +21,7 @@ import FullScreen from "../widgets/layout/FullScreen.demo.svelte";
 import Menu from "../widgets/layout/Menu.demo.svelte";
 import Modal from "../widgets/layout/Modal.demo.svelte";
 import Tabs from "../widgets/layout/Tabs.demo.svelte";
+import Toaster from "../widgets/layout/Toaster.demo.svelte";
 
  
 export default {
@@ -37,6 +39,7 @@ export default {
     RecipeText,
     Button,
     Timer,
+    Status,
     SVGs,
     Checkbox,
     IngredientInput,
@@ -44,5 +47,6 @@ export default {
     FullScreen,
     Menu,
     Modal,
-    Tabs
+    Tabs,
+    Toaster
 } 
