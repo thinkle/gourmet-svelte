@@ -27,6 +27,7 @@
      Bar,
      Checkbox,
      FullHeight,
+     NavActions,
      PlainInput,
      SearchProgress,
      StatusIcon,
@@ -47,6 +48,7 @@
 
  
  let search = '';
+ let sort;
  let searchInput = '';
  let updateSearchDebounced = _.debounce(val => {search = val}, 250)
  $: updateSearchDebounced(searchInput);
@@ -60,6 +62,7 @@
          fields:['title','categories','sources','images'],
          limit,
          query:{fulltext:search,deleted:0},
+         sort,
          //page,
      });
      // Note: if you call it recipeGetter.more() once below
@@ -91,7 +94,7 @@
      }
  }
 
- $: $connected && getRecipes(0,search,limit)
+ $: $connected && getRecipes(0,search,limit,sort)
 
  //let alreadyFetched = []
  function validateRP (listOfIDs) {
@@ -114,6 +117,12 @@
         <span width="30px">
             {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
         </span>
+        <NavActions>
+            <li><IconButton icon="sort_by_alpha"
+                            on:click="{()=>sort='title'}"
+                /></li>
+            <li><IconButton icon="access_time" on:click="{()=>sort={prop:'last_modified',reverse:true}}" /></li>
+        </NavActions>
         <span class="count">
             {#if recipeGetter}{recipeGetter.count} recipes{/if}
             <!-- paginated interface -- probably we can delete it?
