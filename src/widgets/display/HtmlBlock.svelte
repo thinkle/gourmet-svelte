@@ -32,15 +32,12 @@
 
 
  function magic (node) {
-     console.log('magic got node',node);
      makeComponentsAndMountThem(node);
      return {
          update () {
-             console.log('magic updated!',node)
              makeComponentsAndMountThem(node)
          },
          destroy () {
-             console.log('magic destroyed',node);
              node.innerHTML = ''
          }
      }
@@ -58,13 +55,10 @@
      /* components.forEach(
 	(c)=>c.component.addToDOM(c.node)
       * ); */
-     //console.log("ADD TO ROOT",parsed,parsed.body.innerHTML)
      let toAppend = []
      for (let i=0; i<parsed.body.childNodes.length; i++) {
-         //console.log('append child node #',i)
          toAppend.push(parsed.body.childNodes[i]);
      }
-     //console.log('Must append',toAppend)
      for (let node of toAppend) {
          root.appendChild(node)
      }
