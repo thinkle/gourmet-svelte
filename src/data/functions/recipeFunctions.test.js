@@ -1,5 +1,11 @@
+import {registerHandlerObject} from '../requests/remoteRequest.js'
+const requestHandlers = {
+}
+registerHandlerObject(requestHandlers);
+
 import deepcopy from 'deepcopy';
-import recipeFunctions from './recipeFunctions.js';
+import recipeFunctions,{addRecipe,
+                        getMostRecent} from './recipeFunctions.js';
 import {testRecs} from '../../common/mocks/recipes.js';
 import user,{otherUser} from '../../common/mocks/user.js';
 import {setupDBwithRecs} from './setupMockDB.js'
@@ -12,7 +18,7 @@ console.log('Connecting to URL?',process.env.MONGO_URL)
 it(
     "add recipe returns new _ID. Get Recipe returns that recipe",
     async ()=> {
-        let recipe = await recipeFunctions.addRecipe(...bp,{
+        let recipe = await addRecipe(user,{
             recipe:deepcopy(testRecs.standard)
         });
         expect(recipe).toBeDefined();
@@ -28,8 +34,12 @@ it(
         expect(fetchedRec.title).toEqual(testRecs.standard.title);
         expect(fetchedRec.localid).toEqual(testRecs.standard.localid);
         expect(fetchedRec._id).toEqual(recipe._id);
+        let mostRecent = await getMostRecent(user);
+        console.log("GOT MOST RECENT",mostRecent)
+        expect(typeof mostRecent).toBe('number');
     }
 )
+
 
 it(
     'updateRecipe',
