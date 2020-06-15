@@ -1,10 +1,12 @@
 export default {
     id : 1,
     name : 'Joe Shmoe',
-    email : 'foo@bar.baz'
+    email : 'foo@bar.baz',
+    account:  'foo@bar.baz'
 }
 export const otherUser = {
     id : 2,
     name : 'Fred Shormgashborg',
-    email : 'fred@foo.bar'
+    email : 'fred@foo.bar',
+    account : 'fred@foo.bar'
 }
