@@ -13,7 +13,10 @@
 
 <h3>Share Account</h3>
 <div>
-    Share your account? Want to make sure your domestic partner can access all your recipes on thir device without having to sign in as you? You can let them access through their own email account by adding the email here. Note, your partner will have all the same control as you to edit items, etc., so please only share with someone you trust.
+    Want to make sure your domestic partner can access all your recipes on their device without having to sign in as you?
+    You can let them access through their own email account by adding the email here.
+    The account you share with will have all the same control as you over your recipe collection,
+    so please only share with someone you trust.
 </div>
 {#if $user.remoteUser.dbUser.linkedAccounts} <!-- If we share our account... -->
     <b>You currently share your account with:
@@ -23,17 +26,20 @@
                 {account}{#if n<$user.remoteUser.dbUser.linkedAccounts.length-1},{/if}
             </span>
         {/each}</b>
-        <Button on:click={()=>invites=$user.remoteUser.dbUser.linkedAccounts.slice()}>Edit permissions</Button>
+        <IconButton
+            icon="edit"
+            bare="true"
+            on:click={()=>invites=$user.remoteUser.dbUser.linkedAccounts.slice()}/>
         {#if invites}
             <!-- If we're editing invites -->
             <FormTask
                 promiseAction="{()=>user.setInvites(invites)}"
-                buttonName="Set"
+                buttonName=""
                 name="Remove Linked Account"
             >
                 {#each invites as invite,n (`${invite}+${n}`)}
                     <span>{invite}</span>
-                    <IconButton icon="remove" bare="true" small="true"
+                    <IconButton icon="person_remove" bare="true" small="true"
                                 on:click="{()=>invites=invites.filter((i)=>invite!=i)}"
                     />
                 {/each}
@@ -45,7 +51,7 @@
     isReady="{emailToShare}"
     name="Share Account"
     buttonName="Share"
-    icon="save"
+    icon="person_add"
 >
     <label>Email Address:</label>
     <input bind:value="{emailToShare}">
