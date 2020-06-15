@@ -96,6 +96,12 @@ export default {
         query['owner.email'] = user.account;
         if (!limit) {
             limit = 100;
+            if (fields && !fields.contains('text') && !fields.contains('ingredients')) {
+                limit = 1000;
+            }
+        }
+        if (!query['deleted']) {
+            query.deleted =  {$ne: 1} // null or 0 or false
         }
         //console.log('getRecipes got ',page,query,fields,limit)
         let result = await queryCollection(
