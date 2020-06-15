@@ -58,7 +58,7 @@
                         </Button>
                     {:else}
                         {#await saving}
-                            <Button width="5em" inactive="true">
+                            <Button width="5em" busy="{true}">
                                 Saving...
                             </Button>
                             {:then}
