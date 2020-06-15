@@ -80,7 +80,7 @@ const api = {
         
         while (keepFetchingIDs) {
             status.start(statusId);
-            let remoteResponse = await remoteApi.getRecipes({fields:['_ID','id','last_modified','owner'],page:idPage});
+            let remoteResponse = await remoteApi.getRecipes({limit:1000,fields:['_ID','id','last_modified','owner'],page:idPage});
             let remoteRecs = remoteResponse.result;
             status.progress(statusId,{name:'Fetching recipes from server',
                                       amount:remoteResponse.page,
