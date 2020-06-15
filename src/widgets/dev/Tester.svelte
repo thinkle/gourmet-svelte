@@ -9,7 +9,7 @@
 
  var option = initialOption||options&&options[0];
 </script>
-<div class="test">
+<div class="test slot">
     <div class="label">
         <span on:click={()=>hidden=!hidden}>{name}
         {#if hidden}(show)
@@ -24,7 +24,7 @@
         {/if}
         </div>
     </div>
-    <div class:hidden={hidden}>
+    <div class:hidden={hidden} class="slot">
         <slot option={option}></slot>
     </div>
 </div>
