@@ -157,8 +157,8 @@ import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
     <!-- <div class="top" use:watchResize="{handleResize}"> -->
 
-    <Bar large="true">
-        <div slot="left">
+    <Bar large="true" growLeft="{true}">
+        <div slot="left" class="slot">
             <h2>
 	        {#each RecDef.titleProps as prop}
                     <span>
