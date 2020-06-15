@@ -4,7 +4,7 @@
 **/
 
 import querystring from 'querystring'
-
+import {addRecipeRequest} from './requests/index.js';
 const baseURL = "/.netlify/functions/api?"
 
 //mode=echo&message=howdy"
@@ -55,11 +55,14 @@ function RecipeApi (user) {
             }
         },
         addRecipe (recipe) {
-            return doFetch(
-                'addRecipe',
-                user,
-                {recipe}
+            return addRecipeRequest.makeRequest(
+                {user,params:{recipe}}
             );
+            // return doFetch(
+            //     'addRecipe',
+            //     user,
+            //     {recipe}
+            // );
         },
         updateRecipe (recipe) {
             // Note: remote will insert if it's not already there (upsert: true)
