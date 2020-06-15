@@ -1,5 +1,5 @@
 <script>
- export let checked
+ export let checked=undefined
  export let size=24
  import { draw,fade } from 'svelte/transition';
  export let color="var(--light-fg)"
