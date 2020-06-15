@@ -1,4 +1,5 @@
-<script>
+//<script>
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte'
  export let value=""
  export let minFontSize = 11
@@ -37,13 +38,16 @@
          sel.removeAllRanges();
          sel.addRange(range);
      }
-     selection = {}; // empty selection out so we don't re-select later by mistake
+     selection = {
+     }; // empty selection out so we don't re-select later by mistake
  }
  
-$: if (value && ref) {adjustSize()}
-
-function adjustSize () {     
-     // adjust value...
+ $: if (value && ref) {
+     adjustSize()
+ }
+ 
+ function adjustSize () {     
+                       
      if (shrunkForText.length > value.length) {
          fontSize = undefined;
          oneLiner = true;
@@ -91,9 +95,9 @@ function adjustSize () {
 </script>
 
 {#if oneLiner && false}
-    <input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:keyup on:keydown bind:value={value} type="text">
+    <input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:input on:keyup on:keydown bind:value={value} type="text">
 {:else}
-    <p class="input" placeholder={placeholder} contenteditable="true" bind:textContent={value} on:change on:keyup on:keydown bind:this={ref}>
+    <p class="input" placeholder={placeholder} contenteditable="true" bind:textContent={value} on:input on:change on:keyup on:keydown bind:this={ref}>
         {value}
     </p>
     {/if}
