@@ -74,7 +74,6 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
 
 export const shoppingList = {
     getShoppingRecipeId () {
-        debugger;
         let $sr = get(storedShopRec)
         if (!$sr) {
             return undefined
@@ -226,7 +225,6 @@ export const shoppingList = {
                     );
                     ingredient.id = id;
                     $localShopRec.ingredients.push(ingredient);
-                    debugger;
                     resolve(id);
                     return $localShopRec;
                 }
