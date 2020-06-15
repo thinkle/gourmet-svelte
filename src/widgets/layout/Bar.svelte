@@ -34,14 +34,15 @@
 
  .bar {
      display: flex;
-     height: var(--bar-height);
+     flex-shrink: 0;
+     min-height: var(--bar-height);
      padding: 0.5rem 1rem;
      line-height: 1.5;
      align-items: center;
      white-space: nowrap;
  }
  .bar.large {
-     height: calc(var(--bar-height) * 2);
+     min-height: calc(var(--bar-height) * 2);
  }
 
  .bar > div > :global(div),
