@@ -139,10 +139,10 @@ export const recipeActions = {
         return localCopy;
     },
 
-    async getInfiniteRecipes ({query, fields, limit=15}) {
+    async getInfiniteRecipes ({query, fields, limit=15,sort}) {
         console.log('Initial',query);
         setStoreProp(actionState,'querying',{query,fields,limit});
-        let response = await api.getRecipes({query,fields,limit});
+        let response = await api.getRecipes({query,fields,limit,sort});
         setStoredRecs(response.result);
         console.log(get(activePage).length,'recipes in activePage before set')
         activePage.set([...new Set(response.result.map((r)=>r.id))]);
@@ -152,8 +152,8 @@ export const recipeActions = {
             count:response.count,
             async more () {
                 console.log('More',query);
-                setStoreProp(actionState,'querying',{query,fields,limit,page:response.nextPage});                
-                response = await api.getRecipes({query,fields,limit,page:response.nextPage})
+                setStoreProp(actionState,'querying',{query,fields,limit,sort,page:response.nextPage});                
+                response = await api.getRecipes({query,fields,limit,sort,page:response.nextPage})
                 setStoredRecs(response.result);
                 activePage.update(
                     (page)=>{
@@ -168,9 +168,9 @@ export const recipeActions = {
         }
     },
     
-    async getRecipes ({query,fields,limit,page}={}) {
-        setStoreProp(actionState,'querying',{query,fields,limit,page});
-        let response = await api.getRecipes({query,fields,limit,page});
+    async getRecipes ({query,fields,sort,limit,page}={}) {
+        setStoreProp(actionState,'querying',{query,fields,sort,limit,page});
+        let response = await api.getRecipes({query,fields,sort,limit,page});
         setStoredRecs(response.result);
         activePage.set(response.result.map((r)=>r.id));
         pageInfo.set({
