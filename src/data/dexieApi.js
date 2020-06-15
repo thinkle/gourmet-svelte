@@ -69,7 +69,7 @@ const dexieApi = {
         return q;
     },
 
-    async getRecipes({query,fields,limit,page}={}) {
+    async getRecipes({query,fields,limit,page,sort}={}) {
         let q = dexieApi.db.recipes
         if (query && query.isShoppingList) {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
@@ -113,6 +113,25 @@ const dexieApi = {
                 count = await q.count();
             }
         }
+        if (sort) {
+            // ok, we do our own pagination and sorting then...
+            // risky? perhaps?
+            let allTheResults = await q.toArray();
+            allTheResults.sort(
+                getSortFunction(sort)
+            );
+            if (page) {debugger}
+            let result = allTheResults.slice((page||0),(limit&&(page||0)+limit||undefined));
+            let last = (result.length + (page||0) >= count)
+            return {
+                result,
+                count : allTheResults.length,
+                prevPage : page - (limit||result.length),
+                nextPage : result.length + (page||0),
+                currentPage : page||0,
+                last
+            }
+        } 
         if (page) {q = q.offset(page)}
         if (limit) {q = q.limit(limit)}
         let result = await q.toArray();
@@ -146,6 +165,21 @@ const dexieApi = {
             id = id.id; // accept object too
         }
         return await dexieApi.db.recipes.delete(id);
+    }
+}
+
+
+function getSortFunction (sort) {
+    if (typeof sort == 'function') {
+        return sort
+    } else {
+        if (typeof sort == 'string') {
+            return (a,b)=>a[sort]>b[sort]&&1||b[sort]>a[sort]&&-1||0
+        } else if (sort.prop && sort.reverse) {
+            return (a,b)=>b[sort.prop]>a[sort.prop]&&1||a[sort.prop]>b[sort.prop]&&-1||0
+        } else if (sort.prop) {
+            return getSortFunction(sort.prop)
+        }
     }
 }
 
