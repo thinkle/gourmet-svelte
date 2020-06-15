@@ -1,4 +1,4 @@
-//<script>
+<script>
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte'
  export let value=""
