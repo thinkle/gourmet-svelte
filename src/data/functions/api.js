@@ -1,8 +1,14 @@
+import {registerHandlerObject} from '../requests/remoteRequest.js'
+const requestHandlers = {
+}
+registerHandlerObject(requestHandlers);
+
 import {DB} from './mongoConnect.js';
 import setupHandler from './setupDB.js';
 import {fakeUser,setFakeUser} from './netlifyDevUserMock.js';
 import {getUser,
         addLinkedAccounts,
+        setLinkedAccounts,
         acceptLinkedAccount,
         changeName,
         markUserNotNew,
@@ -15,6 +21,7 @@ const functions = {
     echo,
     throwError,
     getUser,
+    setLinkedAccounts,
     markUserNotNew,
     changeName,
     addLinkedAccounts,
@@ -51,37 +58,58 @@ const handler = async (event, context) => {
         user.usedCached = true;
     } else if (user) {
         console.log('!!!Fetch DB user',user)
-        console.log('getUser(',event,context,user,params,')')
+        //console.log('getUser(',event,context,user,params,')')
         user.dbUser = await getUser(event,context,user,params);
     }
     if (user) {
         user.account = user.dbUser.linked || user.email // keys to the kingdom...
     }
-    let f = functions[params.mode]
-    console.log('Request',params.mode,params.params)
-    if (!f) {
-        return {
-            statusCode:400,
-            body:JSON.stringify({error:`No function associated with requested mode ${params.mode}`}),
+    let body, error
+    // new way
+    if (requestHandlers[params.mode]) {
+        console.log('Using new fangled requestHandler for ',params.mode);
+        let handler = requestHandlers[params.mode]
+        try {
+            body = await handler(user,params);
+            console.log('Got response',body);
+        } catch (err) {
+            error = err;
+            console.log('Got error',error);
+        }
+    } else {
+        // old way -- once we transition to new system, we can delete this code
+        let f = functions[params.mode]
+        console.log('Request',params.mode,params.params)
+        if (!f) {
+            return {
+                statusCode:400,
+                body:JSON.stringify({error:`No function associated with requested mode ${params.mode}`}),
+            }
+        }
+        try {
+            body = await f(event,context,user,params)
+        } catch (err) {
+            error = err;
         }
     }
-    let body
-    try {
-        body = await f(event,context,user,params)
-    }
-    catch (err) {
+    if (body) {
+        console.log('Return response');
+        return {
+            statusCode:200,
+            body:JSON.stringify(body||'No return value')
+        }
+    } else { // error
+        if (!error) {
+            error = 'Function had no return value';
+        }
         return {
             statusCode:400,
-            body:JSON.stringify({error:err.toString(),
+            body:JSON.stringify({error: error.toString(),
                                  params : params,
                                  jsonRequst : jsonBody,
                                  user : user,
                                 })
         }
-    }
-    return {
-        statusCode:200,
-        body:JSON.stringify(body||'No return value')
     }
 }
 
