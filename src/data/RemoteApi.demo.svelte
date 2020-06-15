@@ -1,10 +1,11 @@
 <script>
-
+ import {mostRecentRequest} from './requests/index.js';
  import RemoteRecipeTester from './RemoteRecipe.demo.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/userStore.js'
  import remoteApi from '../data/remoteApi.js'
  import api from '../data/api.js';
+ import {Button,JsonDebug} from '../widgets/'
 
  let apiResponse
  netlifyIdentity.init();
@@ -101,64 +102,63 @@
  
 </script>
 
-    {#if isLoggedIn}
-        Howdy {username} (JSON.stringify({$user}))
-        <div>
-            <button on:click={() => doLogout()}>Log Out</button>
-        </div>
-        <button on:click={()=>setFakeUser()}>Set Fake User</button>
-        Name: <input bind:value={name}>
-        Email: <input bind:value={email}>
-    {:else}
-        Not Logged in...
-        <div>
-            <button on:click={() => doLogin() }>Log In</button>
-            <button on:click={() => doSignup() }>Sign Up</button>
-            <button on:click={()=>fakeLogin()}>Fake Log In</button>
-        </div>
-    {/if}
-    Account: <input bind:value="{account}">
-    <button on:click="{()=>{
-                      doApiTest(
-                          'addLinkedAccounts',
-                          {accounts:[account]}
-                      )
-                      }}">Add linked user</button>
-    <button on:click="{()=>{
-                      doApiTest(
-                          'acceptLinkedAccount',
-                          {account}
-                      )
-                      }}">Accept linked user</button>
-    <RemoteRecipeTester/>
-    <button on:click={testApi}>Test API</button> 
-    <button on:click="{setup}">Setup DB</button>
-    <button on:click="{throwError}">Throw Error</button>
-    <button on:click="{doBadModeRequest}">Bad Mode</button>
-    <hr>
-    <button on:click={
-                     ()=>doApiTest(
-                     'getRecipes',
-                     {
-                     fields:['owner','title','last_modified'],
-                     query: {
-                        'owner.email':'tmhinkle@gmail.com'
-                     },
-                     limit:500})}
-    >Get recipes with limited fields...</button>
-    <button on:click="{()=>doApiTest('getRecipes',{query:{'owner.email':'katharine.hinkle@gmail.com'},fields:['owner','title','last_modified'],limit:500})}">Get recipes with limited fields... (Katharine)</button>
-    <button on:click={()=>api.sync($user||{email:'tmhinkle@gmail.com'})}>api.sync($user)</button>
+{#if isLoggedIn}
+    Howdy {username} (<JsonDebug data={$user}/>)
     <div>
-        {#await apiResponse}
-            Fetching data from with access token {$user && $user.access_token}
-        {:then json}
-            Yippee got a response:
-            {JSON.stringify(json)}
-        {:catch error}
-            Bummer... error fetching text {error}
-            STATUS {error.status}
-            ERR {JSON.stringify(error.error)}
-            RESULT {JSON.stringify(error.result)}
-        {/await}
+        <Button on:click={() => doLogout()}>Log Out</Button>
     </div>
+    <Button on:click={()=>setFakeUser()}>Set Fake User</Button>
+    Name: <input bind:value={name}>
+    Email: <input bind:value={email}>
+{:else}
+    Not Logged in...
+    <div>
+        <Button on:click={() => doLogin() }>Log In</Button>
+        <Button on:click={() => doSignup() }>Sign Up</Button>
+        <Button on:click={()=>fakeLogin()}>Fake Log In</Button>
+    </div>
+{/if}
+Account: <input bind:value="{account}">
+<Button on:click="{()=>{
+                  doApiTest(
+                      'addLinkedAccounts',
+                      {accounts:[account]}
+                  )
+                  }}">Add linked user</Button>
+<Button on:click="{()=>{
+                  doApiTest(
+                      'acceptLinkedAccount',
+                      {account}
+                  )
+                  }}">Accept linked user</Button>
+<RemoteRecipeTester/>
+<Button on:click={testApi}>Test API</Button> 
+<Button on:click={()=>apiResponse = mostRecentRequest.makeRequest({user:$user})}>Get Most Recent</Button> 
+<Button on:click="{setup}">Setup DB</Button>
+<Button on:click="{throwError}">Throw Error</Button>
+<Button on:click="{doBadModeRequest}">Bad Mode</Button>
+<hr>
+<Button on:click={
+                 ()=>doApiTest(
+                 'getRecipes',
+                 {
+                 fields:['owner','title','last_modified'],
+                 query: {
+                 'owner.email':'tmhinkle@gmail.com'
+                 },
+                 limit:500})}
+>Get recipes with limited fields...</Button>
+<Button on:click="{()=>doApiTest('getRecipes',{query:{'owner.email':'katharine.hinkle@gmail.com'},fields:['owner','title','last_modified'],limit:500})}">Get recipes with limited fields... (Katharine)</Button>
+<Button on:click={()=>api.sync($user||{email:'tmhinkle@gmail.com'})}>api.sync($user)</Button>
+<div>
+    {#await apiResponse}
+        Fetching data from with access token {$user && $user.access_token}
+    {:then json}
+        Yippee got a response:
+        <JsonDebug data={json}/>
+    {:catch error}
+        Bummer... error fetching text
+        <JsonDebug data={error}/>
+    {/await}
+</div>
 
