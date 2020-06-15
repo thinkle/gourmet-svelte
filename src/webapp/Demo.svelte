@@ -7,6 +7,7 @@
      console.log('Demo is',demo);
      console.log('Demos are',demos);
  }
+ let toggled={}
 </script>
 <div>
     {#if demo}
@@ -20,8 +21,12 @@
         {/if}
     {:else}
         {#each Object.keys(demos) as name}
-            <h2>{name} <a href={`/demo/${name}`}>standalone</a></h2> 
-            <svelte:component this={demos[name]} initialShow={false} />
+            <h2>
+                <a on:click="{()=>toggled[name]=!toggled[name]}">{name}</a>
+                <a href={`/demo/${name}`}>standalone</a></h2>
+            {#if toggled[name]}
+                <svelte:component this={demos[name]} initialShow={false} />
+            {/if}
         {/each}
     {/if}
 </div>
