@@ -16,7 +16,7 @@
      NavActions,
      StatusIcon,
  }  from '../../widgets/';
-import SideBySide from '../../widgets/layout/SideBySide.svelte';
+ import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
  import IngredientList from '../ing/IngredientList.svelte';
  import RecProp from '../props/RecProp.svelte';
