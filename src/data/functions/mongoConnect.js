@@ -70,7 +70,7 @@ export async function deleteOne (collection, query) {
     return lastResult.deletedCount
 }
 
-export async function queryCollection (collection, query, {fields, limit=100,page=0}={}) {
+export async function queryCollection (collection, query, {fields, limit=100,page=0,sort}={}) {
     const {db,client} = await loadDB(DB)
     //console.log('query',collection,'for',query)
     if (Array.isArray(fields)) {
@@ -81,6 +81,10 @@ export async function queryCollection (collection, query, {fields, limit=100,pag
     //console.log(query,fields);
     let cursor = await db.collection(collection)
         .find(query);
+    if (sort) {
+        console.log('Sorting!',sort)
+        cursor = cursor.sort(sort);
+    }
     let count = await cursor.count()
     //console.log("COUNT",count,'limit',Number(limit))
     if (page) {
