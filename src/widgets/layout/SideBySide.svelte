@@ -22,7 +22,6 @@
 
 
  function handleResize () {
-     console.log('SBS HANDLE RESIZE');
      if (ref.clientWidth < Number(stackSidesAt)) {
          stackMode = true;
      }
