@@ -6,18 +6,18 @@ import deepcopy from 'deepcopy';
 const {localRecipes,recipeState,openLocalRecipes} = makeLocalRecipeStore();
 
 export let storedShopRec = writable() // holds stored copy of recipe
-let localShopRec = writable() // holds the shopping list recipe
+export let localShopRec = writable() // holds the shopping list recipe
 
 let sl = derived(
     [localShopRec,localRecipes],
-    async ([$localShopRec,$localRecipes],set) => {
+    ([$localShopRec,$localRecipes],set) => {
         console.log('Re-create derived shopping list store');
         if (!$localShopRec) {
             set([]);
         } else {
             //console.log('Crawling recipes for ingredients...',$localShopRec,new Date().getTime());
             let allItems = [];
-            await crawlIngredients($localShopRec.ingredients,{title:'Shopping List',isTheShoppingList:true,id:-1},$localRecipes,allItems,1,[$localShopRec.id]);
+            crawlIngredients($localShopRec.ingredients,{title:'Shopping List',isTheShoppingList:true,id:-1},$localRecipes,allItems,1,[$localShopRec.id]);
             set(allItems);
             //console.log('Set!',allItems.length,'items',new Date().getTime());
         }
@@ -51,7 +51,7 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
             let recipe = $localRecipes[ingredient.reference];
             if (!recipe) {
                 console.log('Fetch sub-rec...',ingredient.reference,ingredient.text);
-                recipe = await localRecipes.open(ingredient.reference);
+                localRecipes.open(ingredient.reference); // will trigger derived to run again...
             }
             if (recipe && recipe.ingredients) {
                 let recMultiplier
@@ -211,13 +211,22 @@ export const shoppingList = {
                         reject(`$localShopRec does not have an ingredient list defined? ${$localShopRec}`);
                     }
                     $localShopRec.ingredients.forEach(
-                        (i)=>{if (i.id>id) {id = i.id+1}}
+                        (i)=>{if (i.id>=id) {
+                            id = i.id+1
+                        }
+                             }
                     );
                     $localShopRec.ingredients.forEach(
-                        (i)=>{if (!i.id) {i.id = id+1; id+=1}}
+                        (i)=>{
+                            if (!i.id) {
+                                i.id = id+1;
+                                id+=1
+                            }
+                        }
                     );
                     ingredient.id = id;
                     $localShopRec.ingredients.push(ingredient);
+                    debugger;
                     resolve(id);
                     return $localShopRec;
                 }
@@ -244,7 +253,7 @@ export const shoppingList = {
                     let replaced
                     $localShopRec.ingredients = $localShopRec.ingredients.map(
                         (i)=>{
-                            if (i.id == shoppingItem.id) {
+                            if (i.id == shoppingItem.id && !replaced) {
                                 replaced = true;
                                 return shoppingItem;
                             }
