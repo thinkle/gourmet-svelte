@@ -33,7 +33,7 @@
 
 
  function handleChange (event) {
-     value = event.detail || event.target.value;
+     //value = event.detail || event.target.value;
      onChange && onChange(value)
  }
 
@@ -52,38 +52,41 @@
     <div   class="multiContainer">
         {#each value as subval,n}
             <IconButton bare="true" icon="remove"
-                        on:click={()=>{
-                                 value.splice(n,1)
-                                 value = value;
-                                 }}
+                        on:click="{()=>{
+                                  value.splice(n,1)
+                                  value = value;
+                                  }}"
             />
             <div>
                 {#if n==0}
                     <!-- focus target -->
                     <svelte:component
-                        bind:this={ref}
-                                  this="{propInput[prop.edit]}"
+                        bind:this="{ref}"
+                        this="{propInput[prop.edit]}"
                         on:change="{makeArrayHandler(n)}"
+                        on:input="{makeArrayHandler(n)}"
                         bind:value="{value[n]}"/>
                 {:else}
                     <svelte:component
                         this="{propInput[prop.edit]}"
                         on:change="{makeArrayHandler(n)}"
+                        on:input="{makeArrayHandler(n)}"
                         bind:value="{value[n]}"/>
                 {/if}
             </div>
         {/each}
         <IconButton bare="true" icon="add" class="icon"
-                    on:click={()=>value=[...value,{...prop.empty}]}
+                    on:click="{()=>value=[...value,{...prop.empty}]}"
         />
     </div>
 {:else}
     <svelte:component
-        this={propInput[prop.edit]}
-        options={prop.options}
-        on:change={handleChange}
-        bind:value={value}
-        bind:this={ref}
+        this="{propInput[prop.edit]}"
+        options="{prop.options}"
+        on:change="{handleChange}"
+        on:input="{handleChange}"
+        bind:value="{value}"
+        bind:this="{ref}"
     />
 {/if}
 
