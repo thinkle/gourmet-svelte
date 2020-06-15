@@ -4,6 +4,8 @@
  export let scrollLeft=undefined
  export let scrollRight=undefined
  export let scrollCenter=undefined
+ export let growLeft=undefined;
+ export let growRight=undefined
 
  function stopEvents (event) {
      event.stopPropagation();
@@ -14,18 +16,21 @@
 </script>
 
 <div class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}">
-    <div class="left" class:scroll="{scrollLeft}">
+    <div class="left" class:scroll="{scrollLeft}" class:grow="{growLeft}">
         <slot name="left"/>
     </div>
     <div class="center" class:scroll="{scrollCenter}">
         <slot name="center"/>
     </div>
-    <div class="right" class:scroll="{scrollRight}">
+    <div class="right" class:scroll="{scrollRight}" class:grow="{growRight}">
         <slot name="right"/>
     </div>
 </div>
 
 <style>
+ .grow {
+     flex-grow: 3
+ }
 
  .bar {
      display: flex;
