@@ -102,7 +102,7 @@
              </span> -->
         <svelte:component this={page} {...params}/>
     </Landing>
-    <div style="position: fixed; z-index: 99; bottom: 0; right: 0; font-size: 8pt;">{$stamp}</div>
+    <div style="position: fixed; z-index: 99; bottom: 2px; right: 250px; font-size: 8pt;">{$stamp}</div>
 </div>
 <svelte:window on:keyup={detectKeyboardUser} on:mousedown={detectMouseUser}/>
 
@@ -177,6 +177,8 @@
      outline-color: var(--focus-border);
      outline-style : auto;
  }
-
+ :global(.slot) {
+     display: contents;
+ }
  
 </style>
