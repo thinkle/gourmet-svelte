@@ -132,6 +132,7 @@
                                }"
         >
             <div slot="right" class="slot">
+                <Status/>
                 <NavActions>
                     <li>
                         {#if !synced}
@@ -200,7 +201,7 @@
         <WhiskLogo/>
     </div>
 {/if}
-<Status/>
+
 {#if DEV}
     <ModalLauncher modalVisible="{debug}">
         <Button on:click="{()=>debug=!debug}">DEBUG</Button>
