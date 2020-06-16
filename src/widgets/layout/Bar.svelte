@@ -6,16 +6,20 @@
  export let scrollCenter=undefined
  export let growLeft=undefined;
  export let growRight=undefined
-
+ export let maxWidth=undefined;
  function stopEvents (event) {
      event.stopPropagation();
  }
  
-
+ function getStyle () {
+     if (maxWidth) {
+         return 'max-width: '+maxWidth+'; margin: auto';
+     }
+ }
 
 </script>
 
-<div class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}">
+<div style="{getStyle(maxWidth)}" class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}">
     <div class="left" class:scroll="{scrollLeft}" class:grow="{growLeft}">
         <slot name="left"/>
     </div>
