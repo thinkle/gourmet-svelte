@@ -63,27 +63,20 @@
 </script>
 <tr class:ignored>
     <td>
-        {#if !ignored}
-            <!-- checked="{item.purchased}" -->
-            <Checkbox size="36"
-                      on:change="{setPurchased}"
-            />
-        {/if}
-    </td>
-    <td>
-        <table>
+        <table class="amounts">
             {#each item.amounts as amount,n}
                 <tr>
-                    {#if n}+{/if}<NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
+                    <td>{#if n}+{/if}</td><NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
                 </tr>
             {/each}
         </table>
     </td>
     <td>
         {#if !editingItem}
-            <div>
+            <div                     class="full">
                 <div
                     on:click="{()=>editingItem=true}"
+
                 >
                     {item.item}
                     <IconButton
@@ -91,6 +84,20 @@
                         icon="edit"
                         bare="true"/>
                 </div>
+                <small class="right" on:click="{()=>showSubItems=!showSubItems}">
+                    ({item.items.length}
+                    {#if item.items.length==1}
+                        item
+                    {:else}
+                        separate items
+                    {/if})
+                    {#if !showSubItems}
+                        <span class="origin" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
+                        </span>
+                    {/if}
+                </small>
+                
+
                 {#if !ignored}
                     <IconButton
                         small="true"
@@ -114,18 +121,6 @@
                             on:click={()=>onItemChanged()}/>
             </div>
         {/if}
-        <small on:click="{()=>showSubItems=!showSubItems}">
-            ({item.items.length}
-            {#if item.items.length==1}
-                item
-            {:else}
-                separate items
-            {/if})
-            {#if !showSubItems}
-                <span class="origin" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
-                </span>
-            {/if}
-        </small>
         
         {#if showSubItems}
             <div class="break" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
@@ -153,6 +148,14 @@
             </div>
         {/if}
     </td>
+    <td>
+        {#if !ignored}
+            <!-- checked="{item.purchased}" -->
+            <Checkbox size="36"
+                      on:change="{setPurchased}"
+            />
+        {/if}
+    </td>
 </tr>
 
 <style>
@@ -173,6 +176,12 @@
  small {
      font-size: var(--small);
  }
+ .right {
+     margin-left: auto;
+ }
+ .full {
+     width: 100%;
+ }
  i {
      font-style: italic;
  }
@@ -181,6 +190,7 @@
  }
  td {
      padding-right: 1em;
+     vertical-align: top;
  }
  td div {
      display: inline-flex;
@@ -192,5 +202,8 @@
  
  .ignored {
      font-style: italic;
+ }
+ .amounts {
+     margin-left: auto;
  }
 </style>
