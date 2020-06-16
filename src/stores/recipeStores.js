@@ -4,6 +4,7 @@
 import { readable,writable,get,derived } from 'svelte/store';
 import {tick} from 'svelte'
 import api from '../data/api.js';
+export {connectedRemote} from '../data/api.js';
 import deepcopy from 'deepcopy'
 import {diffRecs} from '../data/diff.js';
 const stored = writable({});
@@ -23,6 +24,7 @@ export const connected = readable(false,(set)=>{
         console.log('Error connecting:',err);
     });
 });
+
 function setStoreProp (store,p,v) {
     // set store prop to value...
     store.update((d)=>{
