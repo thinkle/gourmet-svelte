@@ -15,7 +15,7 @@
  import User from '../account/User.svelte';
  
  let adminMode = false;
- netlifyIdentity.init();
+
 
  $: isLoggedIn = !!$user;
  // || window.location.host.indexOf('localhost')>-1
@@ -27,10 +27,12 @@
  }
 
  function doLogin () {
+     netlifyIdentity.init();
      netlifyIdentity.open('login');
  }
 
  function doSignup () {
+     netlifyIdentity.init();
      netlifyIdentity.open('signup');
  }
 
@@ -124,7 +126,7 @@
  console.log('set toolbar context');
 
  let showUserSettings = false;
- $: showUserSettings = $user && $user.remoteUser && $user.remoteUser.dbUser && $user.remoteUser.dbUser.newUser
+ $: showUserSettings = ($user && $user.remoteUser && $user.remoteUser.dbUser && $user.remoteUser.dbUser.newUser)||showUserSettings
 </script>
 <FullScreen {scrolls} header={false}>    
     <div slot="footer">
