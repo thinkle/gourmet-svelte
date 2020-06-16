@@ -1,8 +1,7 @@
 import stopword from 'stopword'
 import {reToString} from './regExpUtil.js'
 import prepWords from './ingPrepWords.js';
-import {inTag} from './textUtils.js';
-
+import {inTag,titleCase} from './textUtils.js';
 
 export function mergeAmounts (a1, a2) {
     if (!a1 && a2) {return a2}
@@ -127,4 +126,17 @@ export function extractItems (text) {
     words = stopword.removeStopwords(words,
                                      [/chop(s|ped)?/i,/mince[sd]?/i])
     return words;
+}
+
+export function getShopItem (ingredient) {
+     if (ingredient.shopItem) {
+         return ingredient.shopItem
+     } else {
+         let words = extractItems(ingredient.text)
+         if (words.length > 0) {
+             return titleCase(words.join(' ')||'');
+         } else {
+             return titleCase(ingredient.text||'');
+         }
+     }
 }
