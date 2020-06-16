@@ -5,7 +5,7 @@ registerHandlerObject(requestHandlers);
 
 import {DB} from './mongoConnect.js';
 import setupHandler from './setupDB.js';
-import {fakeUser,setFakeUser} from './netlifyDevUserMock.js';
+import {getFakeUser,fakeUser,setFakeUser} from './netlifyDevUserMock.js';
 import {getUser,
         addLinkedAccounts,
         setLinkedAccounts,
@@ -32,6 +32,7 @@ const functions = {
 
     
 const handler = async (event, context) => {
+    console.log('Calling handler, we have cached users: ',userCache)
     let params = event.queryStringParameters;
     let jsonBody = {}
     if (event.body) {
@@ -50,7 +51,9 @@ const handler = async (event, context) => {
         user, // actual user info you can use for your serverless functions
     } = context.clientContext
     if (!user && event.headers.referer.indexOf('localhost')>-1) {
-        user = fakeUser
+        console.log('fakeUser:',fakeUser);
+        user = getFakeUser()
+        user.extraApiStuff = 'fakey fake fake stuff'
     }
     if (user && userCache[user.email]) {
         console.log('Got cached user',user.email)
@@ -59,9 +62,11 @@ const handler = async (event, context) => {
     } else if (user) {
         console.log('!!!Fetch DB user',user)
         //console.log('getUser(',event,context,user,params,')')
-        user.dbUser = await getUser(event,context,user,params);
+        // Note: this just gets the user...
+        await getUser(user);
+        userCache[user.email] = user.dbUser;
     }
-    if (user) {
+    if (user.dbUser) {
         user.account = user.dbUser.linked || user.email // keys to the kingdom...
     }
     let body, error
