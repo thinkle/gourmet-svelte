@@ -83,7 +83,10 @@
 
 
 <style>
- input {width: 4rem;}
+ input {
+     width: 3em;
+     text-align: right;
+ }
  span {position: relative;}
  div {
      width: 1rem;
@@ -93,8 +96,8 @@
      font-size: 0.3rem;
  }
  
- .buttonMode {
-     width: 5rem;
+ .buttonMode input {
+     padding-right: 2em;
  }
 
  :global(.minibuttons button.icon) {
