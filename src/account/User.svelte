@@ -69,7 +69,7 @@
         {/if}
     {:else}
         Hmm... we don't seem to have your user info.
-        <IconButton icon="reload" on:click="{user.getRemoteUser}">Refresh</IconButton>    
+        <FormTask icon="reload" promiseAction="{user.getRemoteUser}" inline="true"/>
         <Button on:click="{doLogout}">Logout</Button> <Button on:click="{doLogin}">Login</Button>
     {/if}
 
