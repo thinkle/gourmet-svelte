@@ -29,7 +29,7 @@
     class:small
     style="{`--fontSize:${fontSize};--button-width:${width}`}"
     class:customSize={fontSize}
-           on:click
+    on:click
     on:focus
     on:blur
     on:keypress
