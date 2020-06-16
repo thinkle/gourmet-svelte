@@ -9,6 +9,8 @@
  export let boxy=true;
  export let inline=false
  export let isReady
+
+ $: boxy = boxy && !inline
  
  import {IconButton,
         StatusIcon} from '../'
