@@ -3,6 +3,10 @@ import { writable, get } from 'svelte/store'
 import api from '../data/remoteApi.js';
 import netlifyIdentity from 'netlify-identity-widget'
 
+import {
+    getUserRequest
+} from '../data/requests/';
+
 const mock = {
     access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODg3MDE5NDcsInN1YiI6ImIxMzBjM2Q2LTM5NjctNGMyZi05YTA1LTViOWI2MDNlZmMzMCIsImVtYWlsIjoidG1oaW5rbGVAZ21haWwuY29tIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZ29vZ2xlIn0sInVzZXJfbWV0YWRhdGEiOnsiYXZhdGFyX3VybCI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hLS9BT2gxNEdoczRmektnUl9mWUlfUjRJdndPb21KTjRvZjdCVlNzdzI1cWRNeGh3cyIsImZ1bGxfbmFtZSI6IlRob21hcyBNaWxscyBIaW5rbGUifX0.PDEmiGRmC7qNQ_8M4VMFhTHkrQJk4m0X1-vA4XLW7EU",
     email: "tmhinkle+test@gmail.com",
@@ -77,8 +81,10 @@ function createUser() {
                     return $user;
                 }
             );
+            return remoteUser;
         } else {
             console.log('No user to fetch...');
+            throw Error('No user to fetch');
         }
     }
 
