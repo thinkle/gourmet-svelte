@@ -7,16 +7,28 @@ import {user} from '../stores/userStore.js';
 import status from '../stores/statusStore.js';
 import {prepRecLocal} from '../data/validate.js';
 import {jsonConcisify} from '../utils/textUtils.js';
+import {writable} from 'svelte/store'
 
 let remoteApi;
 
+export const connectedRemote = writable(false);
+
 user.subscribe(
     (u)=>{
-        remoteApi = RecipeApi(u);
+        if (u && u.remoteUser && u.remoteUser.dbUser) {
+            remoteApi = RecipeApi(u);
+            connectedRemote.set(true);
+        } else {
+            remoteApi = undefined;
+            connectedRemote.set(false);
+        }
     });
 
 const api = {
     ...localApi,
+
+    connectRemote : ()=>remoteApi&&true,
+    
     async addRecipe (recipe) {
         recipe.last_modified = new Date().getTime();
         let recid = await localApi.addRecipe(recipe)
@@ -75,7 +87,6 @@ const api = {
         }
         let unsynced = await localApi.getRecipes({query:{savedRemote:0}});;
         if (unsynced.count) {
-            debugger;
             let uploadStatus = status.createStatus('Syncing recipes to database');
             status.start(uploadStatus)
             // should do a bulk put in the future...
@@ -100,7 +111,7 @@ const api = {
         let result = []
         
         while (keepFetchingIDs) {
-            debugger;
+
             status.start(statusId);
             let remoteResponse = await remoteApi.getRecipes({limit:1000,fields:['_ID','id','last_modified','owner'],page:idPage});
             let remoteRecs = remoteResponse.result;
