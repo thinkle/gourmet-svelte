@@ -1,6 +1,7 @@
 import {insertOne,insertMany,queryCollection,getOne,updateOne,replaceOne} from './mongoConnect.js';
-
+import {getUserRequest} from '../requests/index.js';
 export const userCache = {
+    
 }
 
 const cache =  (f) => async (event,context,user,params)=>{
@@ -16,36 +17,47 @@ export async function add (user) {
     return insertOne('users',user)
 }
 
-export const getUser = cache(async function getUser (event,context,user) {
+
+
+export async function getUser (user) {
+    console.log('getUser!',user);
     if (!user.email) {
+        console.log('No email, return empty user');
         return {}
-    }
-    const query = {
-        email : user.email
-    }
-    let result = await getOne('users',query)
-    let invites = await checkForLinkInvites(user.email);
-    if (invites && invites.count) {
-        invites = invites.result
     } else {
-        invites = undefined;
+        const query = {
+            email : user.email
+        }
+        let result = await getOne('users',query)
+        let invites = await checkForLinkInvites(user.email);
+        if (invites && invites.count) {
+            invites = invites.result
+        } else {
+            invites = undefined;
+        }
+        if (result) {
+            console.log('Got result, use as dbUser',result)
+            if (invites) {result.invites = invites;}
+            userCache[user.email] = result;
+            user.dbUser = result;
+            console.log('Found user: ',user);
+            return user;
+        }
+        else {
+            console.log('No user exists, adding one...')
+            query.newUser = true;
+            result = await add(query);
+            if (invites) {result.invites = invites;}
+            userCache[user.email] = result;
+            user.dbUser = result;
+            return user;
+        }
     }
-    if (result) {
-        if (invites) {result.invites = invites;}
-        userCache[user.email] = result;
-        user.dbUser = result;
-        return result;
-    }
-    else {
-        console.log('No user exists, adding one...')
-        query.newUser = true;
-        result = await add(query);
-        if (invites) {result.invites = invites;}
-        userCache[user.email] = result;
-        user.dbUser = result;
-        return result;
-    }
-})
+}
+
+getUserRequest.setRequestHandler(getUser);
+
+
 
 async function checkForLinkInvites (email) {
     return queryCollection('users',{linkedAccounts:email})
