@@ -94,6 +94,9 @@
 - Sorting of recipes - basic support (x)
 
 TODO:
+- Fix Mark User Not New (?)
+- Fix Log-In and Auto-Sync process
+
 
 - Fix RegExps for Firefox compatability
 
