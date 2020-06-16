@@ -157,7 +157,7 @@
 
     <!-- <div class="top" use:watchResize="{handleResize}"> -->
 
-    <Bar large="true" growLeft="{true}">
+    <Bar large="true" growLeft="{true}" maxWidth="1250px">
         <div slot="left" class="slot">
             <h2>
 	        {#each RecDef.titleProps as prop}
@@ -173,7 +173,7 @@
                     </span>
                 {/each}        
             </h2>
-            <div class='multiplier' style="width:6em">
+            <div class='multiplier'>
                 &times;
                 <AmountInput
                     value="{$multiplier}"
@@ -264,8 +264,8 @@
     <!-- </div> --> <!-- End top section -->
     <!-- Main recipe  -->
     <SideBySide
-        leftWidth="{325}"
-        maxWidth="{1250}"
+        leftWidth="325px"
+        maxWidth="1250px"
         stackSidesAt="{550}"
         maxWidthRight='45rem' maxWidthLeft='45rem'
     >
