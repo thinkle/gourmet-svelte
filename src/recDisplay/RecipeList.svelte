@@ -253,20 +253,40 @@
  table {
      margin: auto; /* center  */
  }
+ /* Grid mode */
+ 
  table :global(td.title) {grid-area:title;}
  table :global(td.thumb) {grid-area:thumb;}
  table :global(td.categories) {grid-area:categories;}
  table :global(td.sources) {grid-area:sources;}
  table :global(td.times) {grid-area:times;}
  table :global(td.title) {grid-area:title;}
+ table :global(td.title) {
+     min-width: 329px;
+     max-width: 450px;
+ }
+ @media (max-width: 949px) {
+     table :global(td) {
+         border : none;
+     }
+     table tr {
+         border-bottom: 1px solid var(--light-underline);
+         padding-bottom: 1.5em;
+         padding-top: 1.5em;
+         justify-items: left;
+         justify-content: center;
+     }
+
+     table :global(td.categories),
+     table :global(td.sources) {
+         align-self: start;
+     }
+ }
  @media (max-width: 620px) {
      table tr {
-         margin-top: 1.5em;
-         margin-bottom: 1.5em;
          display : grid;
          align-items: center;
-         justify-items: left;
-         grid-template-columns: 28px auto 150px;
+         grid-template-columns: 28px 2fr 1fr;
          grid-template-areas:
              "checkbox   title      thumb"
              ".          categories thumb";
@@ -287,7 +307,7 @@
      }
 
  }
- @media (min-width: 621px) and (max-width: 850px) {
+ @media (min-width: 621px) and (max-width: 949px) {
      table {
          margin-left: 2em;
          margin-right: 2em;
@@ -300,10 +320,10 @@
          margin-top: 1em;
          margin-bottom: 1em;
          display : grid;
-         grid-template-columns: 28px auto 200px 150px;
+         grid-template-columns: 28px 1fr 1fr 150px;
          grid-template-areas:
-             "checkbox title      title      title   thumb"
-             ".        categories categories sources thumb";
+             "checkbox title      title   thumb"
+             ".        categories sources thumb";
      }
      tr :global(td) {
          display: none;
@@ -321,30 +341,39 @@
      }
 
  }
- @media (min-width: 1100px) {
-     tr :global(td) {
-         vertical-align: middle;
-     }
+ @media (min-width: 950) {
      tr :global(td.thumb) {
+         max-width: 150px;
          width: 150px;
      }
      tr :global(td.categories),
      tr :global(td.sources) {
+         max-width: 200px;
          width: 200px;
      }
      tr :global(td.title) {
+         max-width: 400px;
          width: 400px;
      }
 
  }
 
- table {
-     max-width: 1050px;
-     margin-left: auto;
-     margin-right: auto;
-     border-collapse: separate;
-     border-spacing: 5px 2rem;
+ @media (min-width: 950px) {
+     table {
+         max-width: 1250px;
+         margin-left: auto;
+         margin-right: auto;
+         /* border-collapse: separate;
+            border-spacing: 5px 2rem; */
+     }
+     table :global(td) {
+         border-bottom: 1px solid var(--light-underline);
+         padding-top: 1em;
+         padding-bottom: 1em;
+         vertical-align: middle;
+     }
  }
+
  
  .center {
      display: flex;
