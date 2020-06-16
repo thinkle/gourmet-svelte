@@ -8,10 +8,7 @@
 <label>
     <input type="checkbox" bind:checked="{checked}" on:checked on:change on:input/>
     <svg  xmlns="http://www.w3.org/2000/svg" height="{size}" viewBox="0 0 24 24" width="{size}"
-          style="{`
-                 position:relative;
-                 bottom:${-1 * size/3}px;
-                 `}">
+          style="">
         {#if checked}
             <path in:draw={{duration:1000}} out:fade="{{duration:400}}" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
                   style="{`stroke:${color};fill:${color};`}"
@@ -29,5 +26,12 @@
  }
  input {
      display: none;
+ }
+ svg {
+     vertical-align: middle;
+     /*
+     position:relative;
+     bottom:${-1 * size/3}px;
+     */
  }
 </style>
