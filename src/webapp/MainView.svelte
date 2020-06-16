@@ -24,6 +24,7 @@
  import OpenRecipes from '../recDisplay/OpenRecipes.svelte';
 
  import {connected,
+        connectedRemote,
         localRecipes,
         openLocalRecipes,recipePage,
         recipeActions} from '../stores/recipeStores.js';
@@ -55,7 +56,7 @@
  }
 
  import {mostRecentRequest} from '../data/requests/';
- $: {if ($connected && $user) {
+ $: {if ($connected && $connectedRemote && $user) {
      syncIfNeeded()
     }};
 
