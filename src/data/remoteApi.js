@@ -47,7 +47,7 @@ async function doFetch (mode, user, params) {
 function RecipeApi (user) {
     
     const api = {
-        connect () {
+        async connect () {
             // eventually we should probably check if the user is logged in
             // and can access the MongoDB or something...
             if (user && user.remoteUser && user.remoteUser.dbUser) {
