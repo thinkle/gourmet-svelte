@@ -35,7 +35,7 @@
 
 <FullHeight>
 <div use:watchResize={handleResize} bind:this={ref} class="sidebyside"
-     style="
+     style="{`
             --max-width:${maxWidth};
             --max-left:${maxWidthLeft};
             --max-right:${maxWidthRight};
