@@ -7,8 +7,7 @@
 
  import ShoppingListItem from './ShoppingListItem.svelte';
  
- import {extractItems} from '../utils/ingredientUtils.js';
- import {titleCase} from '../utils/textUtils.js';
+ import {getShopItem} from '../utils/ingredientUtils.js';
  import {addAmounts} from '../utils/unitAmounts.js';
 
  let byShopItem = {}
@@ -19,19 +18,6 @@
  let [send,receive] = crossfade({duration:300});
 
  $: items && organizeItems();
-
- function getShopItem (ingredient) {
-     if (ingredient.shopItem) {
-         return ingredient.shopItem
-     } else {
-         let words = extractItems(ingredient.text)
-         if (words.length > 0) {
-             return titleCase(words.join(' ')||'');
-         } else {
-             return titleCase(ingredient.text||'');
-         }
-     }
- }
 
 
  function summarizeAmount (items,shopItem) {
