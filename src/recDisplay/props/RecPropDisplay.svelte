@@ -1,6 +1,8 @@
 <script>
  export let prop;
  export let value;
+ export let clickable=undefined;
+ export let onClick=undefined;
  
  $: {if (prop.array && !value) {
      value = []
@@ -22,6 +24,19 @@
  function getDisplayVal (v) {
      return v && prop.toHtml && prop.toHtml(v) || v
  }
+
+ function handleClick (value) {
+     if (clickable && onClick) {
+         onClick({
+             value:value,
+             html:getDisplayVal(value),
+             text:getDisplayVal(value).replace(/<[^>]*>/g,'').replace(/^\s+|\s+$/g,''),
+             prop:prop,
+             target:prop.name
+         })
+     }
+ }
+ 
 </script>
 
 {#if !value}
@@ -32,7 +47,10 @@
     {#if prop.array}
         {#if Array.isArray(value)}
             {#each value as v,n}
-                <span class="arrayval" class:tag="{prop.displayAsTag}">
+                <span class="arrayval" class:tag="{prop.displayAsTag}"
+                      class:clickable
+                      on:click="{()=>handleClick(v)}"
+                >
                     {#if propDisplay[prop.edit]}
                         <svelte:component
                             this="{propDisplay[prop.edit]}"
@@ -56,7 +74,9 @@
             />
         {:else}
             <!-- generic display -->
-            {@html getDisplayVal(value)}
+            <span class:clickable on:click="{()=>handleClick(value)}">
+                {@html getDisplayVal(value)}
+            </span>
         {/if}
     {/if}
 {/if}
