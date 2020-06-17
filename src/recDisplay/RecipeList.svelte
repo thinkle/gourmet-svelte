@@ -113,20 +113,62 @@
      return ids
  }
 
- 
+ let sizes = ['xs','sm','md','lg']
+ let size = 'sm'
+ function zoomIn () {
+     let idx = sizes.indexOf(size)
+     if (sizes.length > idx + 1) {
+         size = sizes[idx+1]
+     }
+ }
+ function zoomOut () {
+     let idx = sizes.indexOf(size)
+     if (idx > 0) {
+         size = sizes[idx-1]
+     }
+ }
 </script>
 
 <Bar growLeft="{true}"> 
     <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
         Search: <PlainInput type="text" bind:value={searchInput}/>
+        <!-- Debug for when infinite scroll goes wonky  -->
+        <!-- <Button on:click={getMore}>M</Button> -->
         <span width="30px">
             {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
         </span>
         <NavActions>
-            <li><IconButton icon="sort_by_alpha"
-                            on:click="{()=>sort='title'}"
-                /></li>
-            <li><IconButton icon="access_time" on:click="{()=>sort={prop:'last_modified',reverse:true}}" /></li>
+            <li>
+                <IconButton
+                    icon="sort_by_alpha"
+                    toggle="{true}"
+                    toggled="{sort&&sort=='title'}"
+                    on:click="{()=>{if (sort=='title') {sort=undefined} else {sort='title'}}}"
+                />
+            </li>
+            <li>
+                <IconButton
+                    icon="access_time"
+                    toggle="{true}"
+                    toggled="{sort&&sort.prop=='last_modified'}"
+                    on:click="{()=>{if (sort && sort.prop=='last_modified') {
+                              sort = undefined
+                              } else {
+                                  sort={prop:'last_modified',reverse:true}
+                              }}}" />
+            </li>
+            <li>
+                <IconButton
+                    icon="zoom_in"
+                    on:click="{zoomIn}"
+                />
+            </li>
+            <li>
+                <IconButton
+                    icon="zoom_out"
+                    on:click="{zoomOut}"
+                />
+            </li>
         </NavActions>
         <span class="count">
             {#if recipeGetter}{recipeGetter.count} recipes{/if}
@@ -189,11 +231,16 @@
 {#if scrollingElement}
     <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={250} on:loadMore={getMore} />
 {/if}
+
+
 <FullHeight scrolls={true}>
     <div class="cards" use:getScrollingElement>
         {#each $recipePage as id (id)}
-            <div class="card" animate:flip="{{duration:300}}">
-                <RecCard size="sm" rec="{$storedRecipes[id]}"
+            <!-- Breaking things? -->
+            <!-- animate:flip="{{duration:300}}" -->
+            <div 
+                 class="card">
+                <RecCard size="{size}" rec="{$storedRecipes[id]}"
                          hideCheck={!onSelectionChange}
                          bind:checked="{selected[id]}"
                          on:change="{updateSelected}"
