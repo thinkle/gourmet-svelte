@@ -380,9 +380,9 @@ let testRecs = {
     "id":3,
     "sources":[],
         "yields":[]},
-    rec2 : {"title":"Here is my cool title",
+    noImageSimple : {"title":"This Recipe Has a Rather Lengthy Title and yet No Image",
             "times":[],
-            "categories":[{"name":"Dessert"}],
+                     "categories":[{"name":"Dessert"},{name:'American'},{name:'Surreal'}],
             "text":[{"header":"Instructions",
                      "body":"<p>Cook the beans just long enough to get some love. then add sugar. </p><p><br></p><p>To serve, sprinkle with cilantro as desired.</p>"}],
             "images":[],
@@ -414,9 +414,9 @@ let testRecs = {
                             "text":"handful cilantro",
                             "originalText":"1 handful cilantro"}],
             "id":5,
-            "sources":[],
+                     "sources":[{name:'Tom Hinkle',url:'http://www.tomhinkle.net'}],
             "yields":[],
-            "savedRemote":false}
+            "savedRemote":false},
 
 }
 
