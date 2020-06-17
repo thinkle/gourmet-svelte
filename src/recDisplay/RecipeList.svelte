@@ -25,6 +25,7 @@
         recipeState} from '../stores/recipeStores.js';
  import {
      Bar,
+     Button,
      Checkbox,
      FullHeight,
      NavActions,
@@ -36,6 +37,7 @@
      IconButton} from '../widgets/';
  import Recipe from './rec/Recipe.svelte'
  import RecipeSummary from './rec/RecipeSummary.svelte';
+ import RecCard from './rec/RecCard.svelte';
  import _ from 'lodash';
 
  function getScrollingElement (node) {
@@ -65,6 +67,9 @@
          sort,
          //page,
      });
+     if (scrollingElement) {
+         scrollingElement.scrollTop = 0;
+     }
      // Note: if you call it recipeGetter.more() once below
      // automatically, you'll trigger a terrible bug
      
@@ -147,8 +152,9 @@
         <slot name="right"/>
     </div>
 </Bar>
-<div>
-    {#if areSelected}
+
+{#if areSelected}
+    <div transition:slide>
         <Bar>
             <div class="slot" slot="left">
                 <slot name="selectedLeft"/>
@@ -157,8 +163,9 @@
                 <slot name="selectedRight"/>
             </div>
         </Bar>
-    {/if}
-</div>
+    </div>
+{/if}
+
 
 <!-- <IconButton
      invisible="{!$pageInfo.currentPage}"
@@ -180,76 +187,62 @@
 <!-- <div>Results for {search}...</div> -->
 <!-- </div> -->
 {#if scrollingElement}
-    <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={100} on:loadMore={getMore} />
+    <SvelteInfiniteScroll elementScroll="{scrollingElement}" threshold={250} on:loadMore={getMore} />
 {/if}
 <FullHeight scrolls={true}>
-
-    <table use:getScrollingElement>
-        <!-- <button on:click={getMore}>MORE~!</button> -->
-        <!-- <tr><td colspan=4>{$recipePage.join(' ')}</td></tr> -->
+    <div class="cards" use:getScrollingElement>
         {#each $recipePage as id (id)}
-            <tr
-                class='summary'>
-                {#if $storedRecipes[id]}
-                    <td class="checkbox">
-                        <!-- {id}  -->
-                        {#if onSelectionChange}
-                            <Checkbox bind:checked="{selected[id]}" on:change="{updateSelected}"/>
-                        {/if}
-                    </td>
-                    <RecipeSummary
-                        onClick={()=>{onRecipeClick(id)}}
-               recipe={$storedRecipes[id]}
-                    />
-                    <td class="icons">
+            <div class="card" animate:flip="{{duration:300}}">
+                <RecCard size="sm" rec="{$storedRecipes[id]}"
+                         hideCheck={!onSelectionChange}
+                         bind:checked="{selected[id]}"
+                         on:change="{updateSelected}"
+                >
+
+                    <div class="slot" slot="left">
                         {#if $localRecipes[id]}
                             <IconButton icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
                         {/if}
                         {#if $recipesOnList.find((r)=>r.id==id)}
                             <StatusIcon icon="shopping_cart"/>
                         {/if}
-                    </td>
-                {:else}
-                    Huh, page thinks we have recipe {id} but we don't
-                {/if}
-            </tr>
-        {:else}
-            <tr in:fade|local="{{delay:200,duration:300}}" out:fade|local="{{duration:300}}">
-                <td>
-                    <div class="center">
-                        <h2>
-                            {#if search}
-                                No results for "{search}"...
-                            {:else}
-                                No recipes yet? Maybe import some or create them!
-                            {/if}
-                        </h2>
-                        <div class="center"><WhiskLogo size="250" /></div>
-                        {#if $connected}
-                            <IconButton
-                                icon="add"
-                                on:click="{async ()=>onRecipeClick(await recipeActions.createRecipe().id)}">
-                                Create a Recipe?
-                            </IconButton>
-                        {:else}
-                            (We're still connecting...)
-                        {/if}
-                        <div>
-                            <a href="broken">
-                                Install the Chrome Plugin
-                                to import recipes from
-                                your favorite sites
-                            </a>
-                        </div>
                     </div>
-                </td>
-            </tr>
-        {/each}
-    </table>
+                    <div class="slot" slot="right">
+                        <Button on:click={()=>onRecipeClick(id)}>Open</Button>
+                    </div>
 
+                </RecCard>
+            </div>
+        {/each}
+        {#each [1,2,3] as i}
+            <div class="card filler">
+                <RecCard size="sm" rec="{{}}"
+                >
+                </RecCard>
+            </div>
+        {/each}
+    </div>
     
 </FullHeight>
 <style>
+ .card.filler {
+     visibility: hidden;
+ }
+ .cards {
+     display: flex;
+     flex-wrap: wrap;
+     place-content: space-around;
+ }
+ 
+ /* https://stackoverflow.com/questions/18744164/flex-box-align-last-row-to-grid */
+ .cards::after {
+     content: "";
+     flex: auto;
+ }
+
+ .card {
+     display: inline-block;
+ }
  table {
      margin: auto; /* center  */
  }
