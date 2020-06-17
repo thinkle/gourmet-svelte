@@ -43,6 +43,7 @@
                       .map(o=>o.name)
                       }"
             bind:value={nextValue}
+            placeholder="Category"
         />
         <IconButton
             icon="add"
