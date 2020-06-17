@@ -74,12 +74,12 @@ const dexieApi = {
         if (query && query.isShoppingList) {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
         } else if (query && query.fulltext) {
-            // Note: we split words by \W when we full-text index
-            query.fulltext = query.fulltext.replace(/^\W+|\W+$/g,'')
+            // Note: we split words by \s when we full-text index
+            //query.fulltext = query.fulltext.replace(/^\W+|\W+$/g,'')
             if (query.fulltext.indexOf(' ')>-1) {
-                console.log('Query is: ',query.fulltext.split(/\W+/))
+                console.log('Query is: ',query.fulltext.split(/\s+/))
                 q = await dexieApi.searchWords(
-                    query.fulltext.split(/\W+/),
+                    query.fulltext.split(/\s+/),
                     query // this object hands in deleted
                 )
             }
