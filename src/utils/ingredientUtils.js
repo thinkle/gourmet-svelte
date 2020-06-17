@@ -1,4 +1,4 @@
-import stopword from 'stopword'
+import stopword from 'stopword';
 import {reToString} from './regExpUtil.js'
 import prepWords from './ingPrepWords.js';
 import {inTag,titleCase} from './textUtils.js';
