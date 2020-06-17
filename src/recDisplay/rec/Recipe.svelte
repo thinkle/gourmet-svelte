@@ -9,6 +9,8 @@
  export let editable = true;
  export let minPropWidth = 150;
 
+
+
  import {
      Bar,
      AmountInput,
@@ -38,6 +40,41 @@
  $: {
      valid = isValid(rec);
  }
+
+
+
+ $: handleEditToggle(editMode)
+
+
+ function handleEditToggle (editMode) {
+     console.log('handle toggle',editMode)
+     for (let prop of RecDef.recProps) {
+         if (editMode) {
+             // check for empty props and populate them...
+             if (prop.array && prop.empty &&
+                 (!rec[prop.name] || rec[prop.name].length==0)
+             ) {
+                 rec[prop.name] = deepcopy(prop.empty)
+             }
+         } else {
+             // check for empty props and remove them...
+             if (prop.empty &&
+                 prop.array &&
+                 JSON.stringify(rec[prop.name]) == JSON.stringify(prop.empty)
+             ) {
+                 console.log('Remove empty prop:',prop.name)
+                 delete rec[prop.name]; // remove the prop...
+             } else if (rec[prop.name]) {
+                 console.log('Looks like a real value: ',prop.name,rec[prop.name],'!=',prop.empty);
+                 console.log('Empty:',JSON.stringify(prop.empty));
+                 console.log('Full?:',JSON.stringify(rec[prop.name]))
+             }
+         }
+     }
+     rec = rec;
+ }
+
+
 
  function triggerChange () {
      if (onChange) {
@@ -158,19 +195,17 @@
     <!-- <div class="top" use:watchResize="{handleResize}"> -->
 
     <Bar large="true" growLeft="{true}" maxWidth="1250px">
-        <div slot="left" class="slot">
+        <div slot="left" style="align-items: flex-end">
             <h2>
 	        {#each RecDef.titleProps as prop}
-                    <span>
-                        <RecProp
-                            onChange="{triggerChange}"
-                            showLabel="{false}"
-                            editable="{editable}"
-                            forceEdit="{editMode}"
-                            prop="{prop}"
-                            bind:value="{rec[prop.name]}"
-                        />
-                    </span>
+                    <RecProp
+                        onChange="{triggerChange}"
+                        showLabel="{false}"
+                        editable="{editable}"
+                        forceEdit="{editMode}"
+                        prop="{prop}"
+                        bind:value="{rec[prop.name]}"
+                    />
                 {/each}        
             </h2>
             <div class='multiplier'>
@@ -246,7 +281,7 @@
                         icon="save"
                         tooltip="Attempt to save?"
                         busy="{$recipeState[rec.id].updating}"
-                        on:click="{()=>recipeActions.updateRecipe(rec)}">
+                        on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
                         Save
                     </IconButton></li>
                 {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
@@ -264,7 +299,7 @@
     <!-- </div> --> <!-- End top section -->
     <!-- Main recipe  -->
     <SideBySide
-        leftWidth="325px"
+        leftWidth="325" 
         maxWidth="1250px"
         stackSidesAt="{550}"
         maxWidthRight='45rem' maxWidthLeft='45rem'
@@ -340,7 +375,6 @@
             </div> <!-- close topblock -->
 	</div> <!-- close right slot -->
     </SideBySide>
-
 {:else}
     {#if !rec}
         Loading recipe...
@@ -372,12 +406,14 @@
  div :global(h2,h3,h4,h5,h5,h6) {
      font-family: var(--recipeHeadFont);
  }
- /* h2 {
-    flex-grow: 2;
-    font-weight: bold;
-    text-align: center;
-    font-size: 2rem;
-    } */
+ .editContainer {
+     display: contents;
+ }
+ h2 {
+     flex-grow: 2;
+     font-weight: bold;
+     font-size: 1.5rem;
+ }
  .prop:first-child {
      margin-top: 0;
  }
