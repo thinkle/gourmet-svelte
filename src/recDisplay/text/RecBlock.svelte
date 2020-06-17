@@ -61,7 +61,9 @@
     <div class="top">
         {#if showLabel}
             {#if edit}
-                <PlainInput on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
+                <PlainInput
+                    placeholder="Heading (e.g. Instructions...)"
+                    on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
             {:else}
                 <h3>{value.header}</h3>
             {/if}
@@ -78,8 +80,9 @@
         {/if}
     </div>
     {#if edit}
-        <RichText initialValue={initialValue}
-                               on:change="{handleChange}"
+        <RichText initialValue="{initialValue}"
+                  placeholder="First, chop the onion in a fine dice…"
+                  on:change="{handleChange}"
         />
     {:else}
         <div>{@html displayValue}</div>
