@@ -47,42 +47,42 @@
  }
  
  function adjustSize () {     
-                       
-     if (shrunkForText.length > value.length) {
-         fontSize = undefined;
-         oneLiner = true;
-         justHadFocus = document.activeElement==ref
-         if (ref.tagName!='input') {
-             let range = window.getSelection().getRangeAt(0);
-             selection = {
-                 start:range.startOffset,
-                 end:range.endOffset,
-                 direction:'none',
-                 origin:'DIV'
-             }
-         }
-     }
-     if (ref.scrollWidth > ref.clientWidth) {
-         if (oneLiner && !fontSize || fontSize > minFontSize) {
-             fontSize = window.getComputedStyle(ref).getPropertyValue('font-size');
-             let percentageTarget = ref.clientWidth/ref.scrollWidth
-             fontSize = Number(fontSize.split('px')[0])
-             fontSize = Math.max(fontSize * percentageTarget,minFontSize);
-             shrunkForText = value;
-         }
-         else {
-             shrunkForText = value;
-             oneLiner = false;
-             justHadFocus = document.activeElement==ref
-             selection = {
-                 start:ref.selectionStart,
-                 end:ref.selectionEnd,
-                 direction:ref.selectionDirection,
-                 origin:'INPUT',
-             }
-         }
-     }
- }
+                        
+                        if (shrunkForText.length > value.length) {
+                            fontSize = undefined;
+                            oneLiner = true;
+                            justHadFocus = document.activeElement==ref
+                            if (ref.tagName!='input') {
+                                let range = window.getSelection().getRangeAt(0);
+                                selection = {
+                                    start:range.startOffset,
+                                    end:range.endOffset,
+                                    direction:'none',
+                                    origin:'DIV'
+                                }
+                            }
+                        }
+                        if (ref.scrollWidth > ref.clientWidth) {
+                            if (oneLiner && !fontSize || fontSize > minFontSize) {
+                                fontSize = window.getComputedStyle(ref).getPropertyValue('font-size');
+                                let percentageTarget = ref.clientWidth/ref.scrollWidth
+                                fontSize = Number(fontSize.split('px')[0])
+                                fontSize = Math.max(fontSize * percentageTarget,minFontSize);
+                                shrunkForText = value;
+                            }
+                            else {
+                                shrunkForText = value;
+                                oneLiner = false;
+                                justHadFocus = document.activeElement==ref
+                                selection = {
+                                    start:ref.selectionStart,
+                                    end:ref.selectionEnd,
+                                    direction:ref.selectionDirection,
+                                    origin:'INPUT',
+                                }
+                            }
+                        }
+                        }
 
  function getStyle () {
      if (fontSize) {
@@ -100,7 +100,7 @@
     <p class="input" placeholder={placeholder} contenteditable="true" bind:textContent={value} on:input on:change on:keyup on:keydown bind:this={ref}>
         {value}
     </p>
-    {/if}
+{/if}
 <style>
  input {
      width : 100%
@@ -116,8 +116,11 @@
      border-radius: var(--inputRadius);
  }
  .input:focus {
-    border-width: 3px;
+     border-width: 3px;
  }
- 
+ p.input[placeholder]:empty:before {
+     content: attr(placeholder);
+     color: #555; 
+ } 
  
 </style>
