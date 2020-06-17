@@ -35,7 +35,6 @@ var Metadata = {
     importProps : [
         {name:'title',
          label:'Title',
-         nullValueText:'Untitled'
         },
         {name:'ingredients',
          label:'Ingredient List',
@@ -112,6 +111,7 @@ var Metadata = {
     titleProps : [
         {name:'title',
          label:'Title',
+         nullValueText:'Untitled',
          edit:TXT,
          testValue:'A Very Fine Recipe Indeed',
          isTitle:true,
