@@ -105,13 +105,13 @@
 
         <div>
             {#if edit}
-                <div out:send in:receive>
+                <div class="editContainer" out:send in:receive>
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                     <RecPropEditor
-                        bind:this={ref}
-                                  bind:value={value}
-                        prop={prop}
-                                  onChange={handleChange}
+                        bind:this="{ref}"
+                        bind:value="{value}"
+                        prop="{prop}"
+                        onChange="{handleChange}"
                     />
                 </div>
             {:else}
@@ -145,6 +145,7 @@
  .block {
      display: block;
      font-family: var(--recipeFont);
+     flex-grow: 1;
  }
  .block.title {
      font-family: var(--recipeHeadFont);
@@ -202,5 +203,8 @@
 
  .fullWidth {
      clear: right;
+ }
+ div {
+     flex-grow: 1;
  }
 </style>
