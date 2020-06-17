@@ -53,7 +53,7 @@
     />    
     <td>
         <SmallLabel>Recipe</SmallLabel>
-        <input type="text" bind:value="{ing.text}">
+        <input style="width:100%;" type="text" bind:value="{ing.text}">
         <RecipePickerLauncher
             onSelected="{addRecipeReference}"
         >
