@@ -1,8 +1,8 @@
 <script>
- export let hideCheck = false;
  export let rec
- export let checked
- export let onClick
+ export let hideCheck = false;
+ export let checked=undefined
+ export let onClick=undefined
  $: thumb = rec.images && rec.images.length > 0 && rec.images[0];
  import RecDef from '../../common/RecDef.js';
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
@@ -43,7 +43,7 @@
     {/if}
     <div class="info" >
         {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
-            <div>
+            <div class="propBox">
                 <RecPropDisplay 
                     clickable="{true}"
                     onClick="{onClick}"
@@ -148,15 +148,21 @@
          font-size: $fs*0.8;
 
      }
-     
+
+     /* Overflow has pretty ellipses, but then scrolls awkwardly
+      on hover so we can see data if we really want to */
      .#{$name} .info :global(*) {
          max-width: $width - 2 * $pad;
          text-overflow: ellipsis;
+         white-space: nowrap;
      }
 
+     .#{$name} .info :global(*):hover {
+         white-space: break-spaces; 
+     }
+     
      .#{$name}.hasImage .info :global(*) {
          max-width: $width - $image - $pad;
-         text-overflow: ellipsis;
      }
 
      
@@ -204,9 +210,13 @@
      padding-right: $pad;
      padding-top : $smallpad;
      padding-bottom : $smallpad;
-     text-overflow: ellipsis;
-     overflow: scroll;
+     display: flex;
+     flex-direction: column;
      border-bottom: 1px solid var(--light-underline);
+ }
+ .propBox {
+     flex: 1;
+     overflow-y: scroll;
  }
 
  .title {
@@ -261,5 +271,4 @@
  }
 
 
- 
 </style>
