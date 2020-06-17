@@ -13,13 +13,15 @@
  
  function getStyle () {
      if (maxWidth) {
-         return 'max-width: '+maxWidth+'; margin: auto';
+         return 'width: min('+maxWidth+',calc(100vw - 2em)); margin: auto';
      }
  }
 
 </script>
 
-<div style="{getStyle(maxWidth)}" class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}">
+<div
+    style="{getStyle(maxWidth)}" class:scroll="{scrollAll}" class:large class="bar"  on:click="{stopEvents}"
+>
     <div class="left" class:scroll="{scrollLeft}" class:grow="{growLeft}">
         <slot name="left"/>
     </div>
@@ -49,7 +51,10 @@
      min-height: calc(var(--bar-height) * 2);
  }
 
- .bar > div > :global(div),
+ .bar > div > :global(div) {
+     display: flex;
+     flex-grow: 1;
+ }
  .bar > div {
      display: flex;
  }
