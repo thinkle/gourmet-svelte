@@ -7,9 +7,9 @@ import json from 'rollup-plugin-json';
 import replace from 'rollup-plugin-replace';
 import { terser } from 'rollup-plugin-terser';
 //import { scss, coffeescript, pug } from 'svelte-preprocess'
-// import { sass } from 'svelte-preprocess-sass';
+import { sass } from 'svelte-preprocess-sass';
 import css from "rollup-plugin-css-only";
-
+//import smelte from "smelte/rollup-plugin-smelte"; // 
 
 
 const production = !process.env.ROLLUP_WATCH;
@@ -35,6 +35,27 @@ export default [
                 BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : ()=>new Date().getTime(),
             }),
+/*            smelte({ 
+                purge: production,
+                output: "public/global.css", // it defaults to static/global.css which is probably what you expect in Sapper 
+                postcss: [], // Your PostCSS plugins
+                whitelist: [], // Array of classnames whitelisted from purging
+                whitelistPatterns: [], // Same as above, but list of regexes
+                tailwind: { 
+                    colors: { 
+                        primary: "#b027b0",
+                        secondary: "#009688",
+                        error: "#f44336",
+                        success: "#4caf50",
+                        alert: "#ff9800",
+                        blue: "#2196f3",
+                        dark: "#212121" 
+                    }, // Object of colors to generate a palette from, and then all the utility classes
+                    darkMode: true, 
+                }, 
+                // Any other props will be applied on top of default Smelte tailwind.config.js
+            }), */
+
             css({ output: "public/build/extra.css" }),
 	    svelte({
 	        // enable run-time checks when not in production
@@ -44,15 +65,15 @@ export default [
 	        css: css => {                    
 		    css.write('public/build/bundle.css');
 	        },
-                // preprocess: {
-                //     style: sass({}, { name: 'scss' }),
-                // },
+                preprocess: {
+                    style: sass({}, { name: 'scss' }),
+                },
                 
 	    }),
 
 	    // If you have external dependencies installed from
 	    // npm, you'll most likely need these plugins. In
-	    // some cases you'll need additional configuration 
+	    // some cases you'll need additional configuration 
 	    // consult the documentation for details:
 	    // https://github.com/rollup/plugins/tree/master/packages/commonjs
 	    resolve({
