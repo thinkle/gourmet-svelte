@@ -72,7 +72,7 @@
  let changedFromText
  function change () {
      if (!changedFromText) {
-         value.text = Times.getDescription(value.seconds)
+         value.text = value.seconds && Times.getDescription(value.seconds) || ''
      }
      dispatch('change',
               value)
@@ -161,22 +161,34 @@
 
 </script>
 <span>
-    {#if !minimal}<input type="text"  class="text" bind:value={value.name} on:change="{change}">{/if}
+    {#if !minimal}
+        <input placeholder="Label (Baking Time)…" type="text"  class="text" bind:value={value.name} on:change="{change}">{/if}
     <span class="container" class:minimal>
         <div class="hms" >
             <input style={getInputStyle()} width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
-                         step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
+                         placeholder="HH"
+                   step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
             >
             <span class="colon" >:</span>
-            <input style={getInputStyle()} bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
-                         step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
+            <input
+                placeholder="MM"
+                style={getInputStyle()} bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
+                             step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
             >    <span class="colon" >:</span>
-            <input style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
-                         step="{timer.unit < 60 && timer.unit || 15}"
+            <input
+                placeholder="SS"
+                style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
+                             step="{timer.unit < 60 && timer.unit || 15}"
             >
         </div>
         <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
-        {#if !minimal}<input class="text" on:change={changeText} type="text" bind:value={value.text}>{/if}
+        {#if !minimal}
+            <input
+                placeholder="(e.g. 1/2 hour)…"
+                class="text"
+                on:change="{changeText}"
+                type="text"
+                bind:value={value.text}>{/if}
     </span>
 </span>
 
