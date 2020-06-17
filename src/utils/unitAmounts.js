@@ -232,7 +232,6 @@ for (var key in UNIT_SYNONYMS) {
 //export const UNIT_REGEXP_STRING = '\\b(?<unit>'+UNIT_NAMES.join('|')+')\\b'
 UNIT_NAMES.sort()
 export const UNIT_REGEXP_STRING = '\\b('+UNIT_NAMES.map(reEscape).join('|')+'[.]?)(\\s|$)' // FF doesn't support named regexps :(
-console.log('Unit regexp = ',UNIT_REGEXP_STRING)
 export const UNIT_REGEXP = new RegExp(
     UNIT_REGEXP_STRING,'i'
 );
