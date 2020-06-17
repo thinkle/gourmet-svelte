@@ -90,11 +90,12 @@ const dexieApi = {
             }
         } else if (query && query.deleted !== undefined) {
             query.deleted = Number(query.deleted); // no booleans in dexie!
-            q = dexieApi.db.recipes.where('deleted').equals(query.deleted);
+            q = dexieApi.db.recipes.where('deleted').equals(query.deleted)
+                .and((o)=>!o.isShoppingList);
         } else if (query && query.savedRemote!==undefined) {
             console.log('Saved remote query!');
             q = dexieApi.db.recipes.where('savedRemote').equals(query.savedRemote&&1||0)
-        }
+        } 
         if (!q) {
             return {
                 result:[],
