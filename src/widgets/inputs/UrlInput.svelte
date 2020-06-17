@@ -19,15 +19,16 @@
 </script>
 <div>
     <label on:click={()=>tref.focus()}>Text:</label>
-    <FancyInput bind:this="{tref}" on:change={change} on:input="{change}" class="name" type="text" bind:value={value.name}/>
+    <FancyInput placeholder="e.g. The Best Cooking Blog Ever" bind:this="{tref}" on:change={change} on:input="{change}" class="name" type="text" bind:value={value.name}/>
     <label on:click={()=>uref.focus()}>URL:</label>
-    <FancyInput bind:this={uref} on:change={change} on:input="{change}" class="url" type="text" bind:value={value.url}/>
+    <FancyInput placeholder="e.g. http://www.cookiesaregreat.com/" bind:this={uref} on:change={change} on:input="{change}" class="url" type="text" bind:value={value.url}/>
 </div>
 <style>
  div {
      display: inline-grid;
      grid-template-columns: 3em auto;
      grid-column-gap: 3px;
+     width: 100%;
  }
  label {
      text-align: right;
