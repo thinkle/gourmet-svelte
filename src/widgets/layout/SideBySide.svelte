@@ -34,41 +34,42 @@
 </script>
 
 <FullHeight>
-<div use:watchResize={handleResize} bind:this={ref} class="sidebyside"
-     style="{`
-            --max-width:${maxWidth};
-            --max-left:${maxWidthLeft};
-            --max-right:${maxWidthRight};
-            `}"
-     class:stackMode
->
-    <div class="side l" style="{`width:${leftWidth}px`}">
-	<div class="head scrollHead">
-	    <slot name="leftHead">
-	    </slot>
-	</div>
-	<div class="scrollBox">
-	    <slot name="left"></slot>
-	</div>
-	
+    <div use:watchResize={handleResize} bind:this={ref} class="sidebyside"
+         style="{`
+                width: ${stackSidesAt+2}; 
+                --max-width:${maxWidth};
+                --max-left:${maxWidthLeft};
+                --max-right:${maxWidthRight};
+                `}"
+         class:stackMode
+    >
+        <div class="side l" style="{`width:${leftWidth}px`}">
+	    <div class="head scrollHead">
+	        <slot name="leftHead">
+	        </slot>
+	    </div>
+	    <div class="scrollBox">
+	        <slot name="left"></slot>
+	    </div>
+	    
+        </div>
+        {#if !stackMode}
+            <Resizer
+                onStart="{({x,y})=>initialLeftWidth=leftWidth}"
+                onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
+            />
+        {/if}
+        <div class="side r">
+	    <div class="head scrollHead">
+	        <slot name="rightHead">
+	        </slot>
+	    </div>
+	    <div class="scrollBox">
+	        <slot name="right"></slot>
+	    </div>
+	    
+        </div>
     </div>
-    {#if !stackMode}
-        <Resizer
-            onStart="{({x,y})=>initialLeftWidth=leftWidth}"
-            onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
-                    />
-    {/if}
-    <div class="side r">
-	<div class="head scrollHead">
-	    <slot name="rightHead">
-	    </slot>
-	</div>
-	<div class="scrollBox">
-	    <slot name="right"></slot>
-	</div>
-	
-    </div>
-</div>
 </FullHeight>
 
 <style>
@@ -88,7 +89,7 @@
  }
  .sidebyside {
      display: flex;
-     max-width: var(--max-width);
+     width: min(var(--max-width),100vw);
      margin: auto;
      max-height: 100%;
      flex-grow: 1;
@@ -105,6 +106,7 @@
  }
  .r {
      max-width: var(--max-right);
+     flex-grow: 1;
  }
  .stackMode .l,.stackMode .r {
      height: auto;
