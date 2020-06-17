@@ -8,6 +8,7 @@ import RecipeStores from "../stores/RecipeStores.demo.svelte";
 import Widgets from "../widgets/Widgets.demo.svelte";
 import Highlight from "../extension/parser/Highlight.demo.svelte";
 import RecipePicker from "../recDisplay/picker/RecipePicker.demo.svelte";
+import RecCard from "../recDisplay/rec/RecCard.demo.svelte";
 import Recipe from "../recDisplay/rec/Recipe.demo.svelte";
 import RecipeText from "../recDisplay/text/RecipeText.demo.svelte";
 import Button from "../widgets/controls/Button.demo.svelte";
@@ -35,6 +36,7 @@ export default {
     Widgets,
     Highlight,
     RecipePicker,
+    RecCard,
     Recipe,
     RecipeText,
     Button,
