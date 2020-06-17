@@ -62,12 +62,14 @@
                     <!-- focus target -->
                     <svelte:component
                         bind:this="{ref}"
+                        placeholder="Type {prop.label.toLowerCase()} here…"
                         this="{propInput[prop.edit]}"
                         on:change="{makeArrayHandler(n)}"
                         on:input="{makeArrayHandler(n)}"
                         bind:value="{value[n]}"/>
                 {:else}
                     <svelte:component
+                        placeholder="{`Type {prop.label.toLowerCase()} ${n+1} here…`}"
                         this="{propInput[prop.edit]}"
                         on:change="{makeArrayHandler(n)}"
                         on:input="{makeArrayHandler(n)}"
@@ -81,6 +83,7 @@
     </div>
 {:else}
     <svelte:component
+        placeholder="Type {prop.label.toLowerCase()} here…"
         this="{propInput[prop.edit]}"
         options="{prop.options}"
         on:change="{handleChange}"
@@ -91,10 +94,12 @@
 {/if}
 
 <style>
+ 
  .multiContainer {
      display: grid;
      grid-template-columns: 2em auto;
      row-gap: 5px;
+     width: 100%;
  }
 
  .multiContainer > button {
