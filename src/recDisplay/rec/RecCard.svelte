@@ -2,7 +2,7 @@
  export let hideCheck = false;
  export let rec
  export let checked
-
+ export let onClick
  $: thumb = rec.images && rec.images.length > 0 && rec.images[0];
  import RecDef from '../../common/RecDef.js';
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
@@ -19,7 +19,11 @@
     <div class="topbg"></div>
     <div class="bottombg"></div>
     <h2 class:withCheck="{!thumb && !hideCheck}">
-        <span>{rec.title}</span>
+        {#each RecDef.titleProps as titleProp}
+            <span
+                on:click="{()=>onClick({rec,title:rec[titleProp.name],target:'title'})}"
+            >{rec[titleProp.name]||titleProp.nullValueText}</span>
+        {/each}
         {#if !thumb && !hideCheck}
             <div class="floatingCheck">
                 <Checkbox bind:checked="{checked}" on:change color="white" />
@@ -39,7 +43,14 @@
     {/if}
     <div class="info" >
         {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
-            <div><RecPropDisplay prop={prop} value={rec[prop.name]}></RecPropDisplay></div>
+            <div>
+                <RecPropDisplay 
+                    clickable="{true}"
+                    onClick="{onClick}"
+                    prop="{prop}"
+                    value="{rec[prop.name]}"
+                />
+            </div>
         {/each}        
     </div>
     
