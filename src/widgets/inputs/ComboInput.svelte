@@ -6,6 +6,7 @@
  import {IconButton} from '../index.js';
  export let value;
  export let onSelect
+ export let placeholder
  
  let lastValue = '';
  export let options=[]
@@ -292,7 +293,7 @@
  
 </script>
 <span class='cmb'>
-    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value}/>
+    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value} {placeholder}>
     <IconButton class="icon" on:click={toggleMenu}
                        icon={showMenu&&focused&&"arrow_drop_up"||"arrow_drop_down"}
                 small={true}
