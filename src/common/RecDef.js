@@ -34,7 +34,9 @@ var EditTypes = [
 var Metadata = {
     importProps : [
         {name:'title',
-         label:'Title'},
+         label:'Title',
+         nullValueText:'Untitled'
+        },
         {name:'ingredients',
          label:'Ingredient List',
         },
@@ -65,6 +67,7 @@ var Metadata = {
         {name:'time',
          label:'Time',
          hasDetail:true,
+         nullValueText:'Timeless'
         },
         {name:'source',
          label:'Source'},
@@ -150,11 +153,12 @@ var Metadata = {
          testValue:[{name:'Dessert'}],
 	 toHtml:(v)=>v.name,
          array:true,
+         nullValueText:'Uncategorized'
 
         },
 	{name:'sources',
 	 label:'Source',
-         displayAsTag:true,
+
          summaryView:true,
          testValue:{url:'http://tomhinkle.net/',name:'Fake Source'},
 	 toHtml:(s)=>s&&s.url&&`<span><a target="_blank" href=${s.url}>${s.name||s.url.substr(0,30)}</a></span>`||s.name||'',
