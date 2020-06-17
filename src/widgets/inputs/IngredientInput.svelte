@@ -8,6 +8,7 @@
  export let onInput=undefined;
  export let shouldFocus=undefined;
  export let showAddButton=false;
+ export let placeholder="e.g. 1 cup sugar…"
  import {IconButton,NumberUnitDisplay,PlainInput} from '../index.js';
  import {getShopItem} from '../../utils/ingredientUtils.js';
  let originalValue;
@@ -173,7 +174,9 @@
 </script>
 
 <div on:focusin="{onFocus}" on:focusout="{onFocusOut}" class="contain" class:withButton="{showAddButton}">
-    <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input" >
+    <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input"
+         placeholder="{placeholder}"
+    >
     </div>
     {#if showAddButton}
         <IconButton bare={true} icon="add" on:click="{doSubmit}" />
@@ -250,4 +253,9 @@
      left : 0;
      font-size: var(--xsmall);
  }
+ div[placeholder]:empty:before {
+     content: attr(placeholder);
+     color: #555; 
+ } 
+
 </style>
