@@ -120,7 +120,6 @@ const dexieApi = {
             allTheResults.sort(
                 getSortFunction(sort)
             );
-            if (page) {debugger}
             let result = allTheResults.slice((page||0),(limit&&(page||0)+limit||undefined));
             let last = (result.length + (page||0) >= count)
             return {
