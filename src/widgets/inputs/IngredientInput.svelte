@@ -21,6 +21,7 @@
  export function focus () {
      console.log('Called focus!');
      ref.focus()
+     shouldFocus = false; // only do this once
  }
 
  import {parseAmount,formatAmount} from '../../utils/numbers.js';
