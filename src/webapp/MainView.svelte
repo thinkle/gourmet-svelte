@@ -163,7 +163,7 @@
                 </NavActions>
             </div>
             <div class="slot" slot="selectedLeft">
-                Selected: {selectedRecipes}
+                {selectedRecipes.length} Selected
             </div>
             <div class="slot" slot="selectedRight">
                 Bulk Actions:
