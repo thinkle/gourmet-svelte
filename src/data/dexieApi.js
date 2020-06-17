@@ -38,10 +38,11 @@ const dexieApi = {
         let q = dexieApi.db.recipes
         q = q.where('words').startsWith(
             word.toLowerCase()
-        ); 
+        );
         if (deleted!==undefined) {
             q = q.and((o)=>o.deleted==deleted);
         }
+        q = q.and((o)=>!o.isShoppingList);
         return q
     },
 
@@ -52,12 +53,12 @@ const dexieApi = {
         var ids = undefined;
         for (let word of words) {
             let subResults = dexieApi.searchWord(word,{deleted});
-            let subIds = await subResults.primaryKeys()
+            let subIds = await subResults.distinct().primaryKeys()
             if (!ids) {
                 ids = subIds;
             } else {
                 ids = ids.filter(
-                    (id)=>subIds.indexOf(id)>-1
+                    (id)=>subIds.includes(id)
                 );
                 if (ids.length == 0) {
                     return undefined
@@ -75,7 +76,7 @@ const dexieApi = {
             q = dexieApi.db.recipes.where('isShoppingList').equals(1)
         } else if (query && query.fulltext) {
             // Note: we split words by \s when we full-text index
-            //query.fulltext = query.fulltext.replace(/^\W+|\W+$/g,'')
+            query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
             if (query.fulltext.indexOf(' ')>-1) {
                 console.log('Query is: ',query.fulltext.split(/\s+/))
                 q = await dexieApi.searchWords(
@@ -130,7 +131,7 @@ const dexieApi = {
                 currentPage : page||0,
                 last
             }
-        } 
+        }
         if (page) {q = q.offset(page)}
         if (limit) {q = q.limit(limit)}
         let result = await q.toArray();
