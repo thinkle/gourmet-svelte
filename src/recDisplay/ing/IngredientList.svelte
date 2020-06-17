@@ -178,7 +178,14 @@
                             {#if editMode}
                                 <tr>
                                     <td colspan="4" class="new">
-                                        <IngredientInput showAddButton="true" onEnter={(newIng)=>addIngredient(i.ingredients,newIng)}/>                                    
+                                        <IngredientInput
+                                            placeholder="{
+                                                         i.ingredients.length==0 
+                                                         ? `First ingredient in ${i.text||'new group'}`
+                                                         : `Next ingredient in ${i.text||'untitled group'}`}"
+                                            showAddButton="true"
+                                            onEnter="{(newIng)=>addIngredient(i.ingredients,newIng)}"
+                                        />                                    
                                     </td>
                                 </tr>
                             {/if}
@@ -208,7 +215,13 @@
         {#if editMode}
             <tr>
                 <td colspan="4" class="new">
-                    <IngredientInput showAddButton="true" onEnter={(newIng)=>addIngredient(ingredients,newIng)}/>
+                    <IngredientInput
+                        showAddButton="true"
+                        placeholder="{
+                                       ingredients.length==0 ? 'e.g. 1 cup sugar' 
+                                       : 'Type next ingredient…'
+                                       }"
+                        onEnter="{(newIng)=>addIngredient(ingredients,newIng)}"/>
                 </td>
             </tr>
             <tr>
