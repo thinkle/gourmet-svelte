@@ -5,13 +5,13 @@ import {getInAConversion,getMultiplierConversion,
 it(
     'unit regex',
     ()=>{
-        let m = 'cups'.match(UNIT_REGEXP)
+        let m = '13 cups'.match(UNIT_REGEXP)
         expect(
             m
         ).toBeTruthy()
         console.log('Got match',m)
         expect(
-            m.groups[1]
+            m[1]
         ).toEqual('cups')
     }
 );
@@ -34,6 +34,23 @@ it(
                 }
             )
         );
+        expect(parseUnit('chopped lettuce, to serve')).toEqual(
+            expect.objectContaining(
+                {
+                    text : 'chopped lettuce, to serve'
+                }
+            )
+        );
+        expect(parseUnit('tsp. vanilla extract')).toEqual(
+            expect.objectContaining(
+                {
+                    text : 'vanilla extract',
+                    unit : 'tsp.'
+                }
+            )
+        );
+
+
     }
     
 );
@@ -74,7 +91,7 @@ it(
     }
 );
 
-fit(
+it(
     'add amounts',
     ()=>{
         let r = addAmounts([{amount:1,unit:'asdf'},{amount:2,unit:'asdf'}]);
@@ -115,3 +132,4 @@ fit(
 
     }
 );
+
