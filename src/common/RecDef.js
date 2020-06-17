@@ -149,7 +149,7 @@ var Metadata = {
          summaryView:true,
          displayAsTag:true,
          options:[{name:'Dessert'},{name:'Entree'},{name:'Salad'},{name:'Soup'}],
-         empty:[{name:''}],
+         empty:[],
          testValue:[{name:'Dessert'}],
 	 toHtml:(v)=>v.name,
          array:true,
