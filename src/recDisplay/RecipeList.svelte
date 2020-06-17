@@ -197,18 +197,31 @@
                          hideCheck={!onSelectionChange}
                          bind:checked="{selected[id]}"
                          on:change="{updateSelected}"
+                         onClick="{
+                           (clickInfo)=>{
+                              if (clickInfo.target=="title") {
+                                   onRecipeClick(id)
+                              } else if (clickInfo.text) {
+                                   if (search) {
+                                     search+=' '+clickInfo.text
+                                   } else {
+                                     search = clickInfo.text;
+                                   }
+                              }
+                           }
+                         }"
                 >
 
                     <div class="slot" slot="left">
                         {#if $localRecipes[id]}
-                            <IconButton icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
+                            <IconButton bare="{true}" icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
                         {/if}
                         {#if $recipesOnList.find((r)=>r.id==id)}
                             <StatusIcon icon="shopping_cart"/>
                         {/if}
                     </div>
                     <div class="slot" slot="right">
-                        <Button on:click={()=>onRecipeClick(id)}>Open</Button>
+                        <IconButton icon="open_in_full" bare="true" on:click={()=>onRecipeClick(id)}/>
                     </div>
 
                 </RecCard>
