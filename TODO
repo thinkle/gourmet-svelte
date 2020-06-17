@@ -92,10 +92,13 @@
   -> Pretty up progress bars & "toaster" sync (x)
 
 - Sorting of recipes - basic support (x)
+- Fix recipe display / width issues (x)
+- Fix up placeholders/empty state (x)
 
 TODO:
 - Fix Mark User Not New (?)
-- Fix Log-In and Auto-Sync process
+- Fix Log-In and Auto-Sync process (!!!)
+
 
 
 - Fix RegExps for Firefox compatability
