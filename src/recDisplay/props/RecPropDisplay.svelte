@@ -70,7 +70,10 @@
      border-color: var(--medium-underline);
      padding: 3px;
      display: inline-block;
-     margin-right: 5px;
 
+ }
+ 
+ .arrayval {
+     margin-right: 1em;
  }
 </style>
