@@ -122,7 +122,7 @@ const handler = async (event, context) => {
 function echo (event,context,user,params) {
     return {params,
             DB,
-            user:user||'no user logged in',
+            user:user,
             context,event}
 }
 
