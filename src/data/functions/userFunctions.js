@@ -113,12 +113,14 @@ export const setLinkedAccounts = cache(
 );
 
 export const markUserNotNew = cache(async function (event, context, user, params) {
-    let result = updateOne('users',{_id:user.dbUser._id},{$set:{newUser:false}});
+    console.log('markUserNotNew Upated!')
+    let result = await replaceOne('users',{_id:user.dbUser._id},{$set:{newUser:false}});
+    console.log('markUserNotNew Upated!',result)
     return result
 });
                                 
 export const changeName = cache(async function (event, context, user, params) {
-    let result = updateOne('users',{_id:user.dbUser._id},{$set:{name:params.name}});
+    let result = await replaceOne('users',{_id:user.dbUser._id},{$set:{name:params.name}});
     return result;
 });
 
