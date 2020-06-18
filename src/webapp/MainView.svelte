@@ -57,6 +57,7 @@
 
  import {mostRecentRequest} from '../data/requests/';
  $: {if ($connected && $connectedRemote && $user) {
+     console.log('We *are* connected: sync away!');
      syncIfNeeded()
     }};
 
