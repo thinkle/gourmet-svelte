@@ -149,12 +149,12 @@
                 {#if $user && $user.remoteUser && $user.dbUser}
                     Online & Signed Up!
                 {:else if $user && $user.remoteUser}
-                    On remotely <button on:click="{()=>user.getRemoteUser()}">refresh?</button>
+                    On remotely <IconButton on:click="{()=>user.getRemoteUser()}">R</IconButton>
                 {:else}
                     Not logged in remotely
-                    <button on:click="{checkForNetlifyToken()}">run netlify init()</button>
-                    <button on:click="{user.getRemoteUser()}">refresh?</button>
-                    <button on:click="{doLogin}">login again</button>
+                    <button on:click="{checkForNetlifyToken}">Check</button>
+                    <button on:click="{()=>user.getRemoteUser()}">Get Remote</button>
+                    <button on:click="{doLogin}">Re-Login</button>
                 {/if}
                 <ModalLauncher key="user" modalVisible="{showUserSettings}">
                     <Button bare="true" on:click="{()=>showUserSettings=true}">
