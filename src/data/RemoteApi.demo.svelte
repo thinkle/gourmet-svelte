@@ -131,6 +131,8 @@ Account: <input bind:value="{account}">
                       {account}
                   )
                   }}">Accept linked user</Button>
+<Button on:click="{()=>{apiResponse = user.markNotNew()
+                  }}">Mark Not New </Button>
 <RemoteRecipeTester/>
 <Button on:click={testApi}>Test API</Button> 
 <Button on:click={()=>apiResponse = mostRecentRequest.makeRequest({user:$user})}>Get Most Recent</Button> 
@@ -150,6 +152,7 @@ Account: <input bind:value="{account}">
 >Get recipes with limited fields...</Button>
 <Button on:click="{()=>doApiTest('getRecipes',{query:{'owner.email':'katharine.hinkle@gmail.com'},fields:['owner','title','last_modified'],limit:500})}">Get recipes with limited fields... (Katharine)</Button>
 <Button on:click={()=>api.sync($user||{email:'tmhinkle@gmail.com'})}>api.sync($user)</Button>
+
 <div>
     {#await apiResponse}
         Fetching data from with access token {$user && $user.access_token}
