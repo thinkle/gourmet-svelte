@@ -23,7 +23,6 @@
  // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
 
-
  function doLogout () {
      user.logout()
      netlifyIdentity.logout();
@@ -130,6 +129,14 @@
 
  let showUserSettings = false;
  $: showUserSettings = ($user && $user.remoteUser && $user.remoteUser.dbUser && $user.remoteUser.dbUser.newUser)||showUserSettings
+
+ $: $user && !$user.remoteUser && checkForNetlifyToken()
+ 
+ function checkForNetlifyToken () {
+     console.log('Check for token?')
+     netlifyIdentity.init();
+ }
+
 </script>
 <FullScreen {scrolls} header={false}>    
     <div slot="footer">
@@ -145,6 +152,7 @@
                     On remotely <button on:click="{()=>user.getRemoteUser()}">refresh?</button>
                 {:else}
                     Not logged in remotely
+                    <button on:click="{checkForNetlifyToken()}">run netlify init()</button>
                     <button on:click="{user.getRemoteUser()}">refresh?</button>
                     <button on:click="{doLogin}">login again</button>
                 {/if}
