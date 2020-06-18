@@ -139,10 +139,9 @@
                     User: {username}
                     <JsonDebug data="{$user}"/>
                 {/if}
-                {#if $user.remoteUser && $user.dbUser}
+                {#if $user && $user.remoteUser && $user.dbUser}
                     Online & Signed Up!
-                {/if}
-                {#if $user.remoteUser}
+                {:else if $user && $user.remoteUser}
                     On remotely <button on:click="{()=>user.getRemoteUser()}">refresh?</button>
                 {:else}
                     Not logged in remotely
