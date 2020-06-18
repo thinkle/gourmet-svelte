@@ -65,9 +65,9 @@ const handler = async (event, context) => {
         // Note: this just gets the user...
         await getUser(user);
         userCache[user.email] = user.dbUser;
-        if (user.dbUser) {
-            user.account = user.dbUser.linked || user.email // keys to the kingdom...
-        }
+    }
+    if (user && user.dbUser) {
+        user.account = user.dbUser.linked || user.email // keys to the kingdom...
     }
     let body, error
     // new way
