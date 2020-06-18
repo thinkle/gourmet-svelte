@@ -168,7 +168,7 @@ var Metadata = {
         },
 	{name:'times',
 	 label:'Time',
-         displayAsTag:true,
+         displayAsTag:false,
          array:true,
          testValue:{seconds:4250},
 	 toHtml:(s)=>`${s.name}: ${s.text||Units.secondsToTimeString(s.seconds)||''}`,
