@@ -29,7 +29,7 @@ async function doFetch (mode, user, params) {
     }
                             );
     if (result.status==200) {
-        return result.json(); // return the promise from text...
+        return await result.json(); // return the promise from text...
     } else if (result.status==400) {
         let e = await result.json()
          throw e;
