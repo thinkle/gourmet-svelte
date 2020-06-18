@@ -149,7 +149,7 @@
                 {#if $user && $user.remoteUser && $user.dbUser}
                     Online & Signed Up!
                 {:else if $user && $user.remoteUser}
-                    On remotely <IconButton on:click="{()=>user.getRemoteUser()}">R</IconButton>
+                    On remotely <Button on:click="{()=>user.getRemoteUser()}">R</Button>
                 {:else}
                     Not logged in remotely
                     <button on:click="{checkForNetlifyToken}">Check</button>
