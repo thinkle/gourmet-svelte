@@ -78,16 +78,21 @@ function createUser() {
     async function getRemoteUser () {
         let $user = get(userStore);
         if ($user) {
-            let remoteUser = await api.doFetch('echo',$user).user;
+            console.log('Fetching remote user for ',$user);
+            let remoteInfo = await api.doFetch('echo',$user);
+            console.log('Fetched echo response',remoteInfo);
+            let remoteUser = remoteInfo.user;
+            console.log('Fetched remote user',remoteUser);
             userStore.update(
                 ($user)=>{
+                    console.log('Updating store with user: ',remoteUser);
                     $user.remoteUser = remoteUser
                     return $user;
                 }
             );
             return remoteUser;
         } else {
-            console.log('No user to fetch...');
+            console.log('getRemoteUser: No user to fetch...');
             throw Error('No user to fetch');
         }
     }
