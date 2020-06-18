@@ -45,8 +45,8 @@
                         netlifyIdentity.close();
                         if ($redirectURL !== '') {
                             console.log('Got redirect: ',$redirectURL);
-                        } else {
                             location.reload();
+                        } else {
                         }
                         
  });
