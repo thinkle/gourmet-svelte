@@ -1,8 +1,10 @@
 <script>
+ import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  export let scrolls
  import {
      Button,
      IconButton,
+     JsonDebug,
      ModalLauncher,
      Modal,
      FullScreen,
@@ -20,6 +22,7 @@
  $: isLoggedIn = !!$user;
  // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
+
 
  function doLogout () {
      user.logout()
@@ -132,9 +135,20 @@
     <div slot="footer">
         <Bar>
             <nav slot="left">
-                <span>
-                    {#if isLoggedIn}Hello, {username}{/if}
-                </span>
+                {#if isLoggedIn}
+                    User: {username}
+                    <JsonDebug data="{$user}"/>
+                {/if}
+                {#if $user.remoteUser && $user.dbUser}
+                    Online & Signed Up!
+                {/if}
+                {#if $user.remoteUser}
+                    On remotely <button on:click="{()=>user.getRemoteUser()}">refresh?</button>
+                {:else}
+                    Not logged in remotely
+                    <button on:click="{user.getRemoteUser()}">refresh?</button>
+                    <button on:click="{doLogin}">login again</button>
+                {/if}
                 <ModalLauncher key="user" modalVisible="{showUserSettings}">
                     <Button bare="true" on:click="{()=>showUserSettings=true}">
                         Account Settings
