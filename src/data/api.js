@@ -8,21 +8,29 @@ import status from '../stores/statusStore.js';
 import {prepRecLocal} from '../data/validate.js';
 import {jsonConcisify} from '../utils/textUtils.js';
 import {writable} from 'svelte/store'
-
+import {getContext} from 'svelte';
 let remoteApi;
 
 export const connectedRemote = writable(false);
 
+const NO_DB = 0
+const NO_REMOTE = false;
+
 user.subscribe(
     (u)=>{
         if (u && u.remoteUser && u.remoteUser.dbUser) {
+            console.log('Got user and remote user - we are good to go');
             remoteApi = RecipeApi(u);
             connectedRemote.set(true);
         } else {
-            remoteApi = undefined;
-            connectedRemote.set(false);
+            console.log('Yikes - we are not even logged in remotely');
+            if (user.remoteUser && !user.remoteUser.dbUser) {
+                connectedRemote.set(NO_DB);
+            } else {
+                connectedRemote.set(NO_REMOTE);
+            }
         }
-    });
+    })
 
 const api = {
     ...localApi,
