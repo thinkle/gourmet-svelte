@@ -60,7 +60,14 @@ export async function updateOne (collection, query, values) {
     const {db,client} = await loadDB(DB)
     lastResult = await db.collection(collection)
         .updateOne(query,values);
-    return lastResult.ops[0];
+    if (lastResult.ops) {
+        return lastResult.ops[0];
+    } else {
+        console.log('Unsuccessful update: ',lastResult);
+        throw new Error(
+            `Unable to update item: ${collection} ${JSON.stringify(query)} ${JSON.stringify(values)}: Result ${JSON.stringify(lastResult)}`
+        );
+    }
 }
 
 export async function deleteOne (collection, query) {
@@ -78,7 +85,7 @@ export async function queryCollection (collection, query, {fields, limit=100,pag
         fields.forEach((f)=>_fields[f]=1)
         fields = _fields
     }
-    //console.log(query,fields);
+
     let cursor = await db.collection(collection)
         .find(query);
     if (sort) {
