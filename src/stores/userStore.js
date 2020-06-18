@@ -55,8 +55,12 @@ function createUser() {
         console.log('maybe refresh...');
         netlifyIdentity.gotrue.currentUser().jwt()
     }
-    
-    getRemoteUser();
+
+    if (u) {
+        getRemoteUser();
+    } else {
+        console.log('No user yet');
+    }
     
     function updateDBUser (dbUser) {
             userStore.update(
