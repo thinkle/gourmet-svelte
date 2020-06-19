@@ -1,6 +1,8 @@
 <script>
  export let onRecipeClick 
  export let onSelectionChange
+ export let showShop = true;
+ export let showEdit = true;
  export function reload () {
      getRecipes();
  }
@@ -234,11 +236,9 @@
 
 
 <FullHeight scrolls={true}>
-    <div class="cards" use:getScrollingElement>
+    <div class="cards" use:getScrollingElement>        
         {#each $recipePage as id (id)}
-            <!-- Breaking things? -->
-            <!-- animate:flip="{{duration:300}}" -->
-            <div 
+            <div animate:flip="{{duration:300}}"
                  class="card">
                 <RecCard size="{size}" rec="{$storedRecipes[id]}"
                          hideCheck={!onSelectionChange}
@@ -247,28 +247,36 @@
                          onClick="{
                            (clickInfo)=>{
                               if (clickInfo.target=="title") {
-                                   onRecipeClick(id)
-                              } else if (clickInfo.text) {
-                                   if (search) {
-                                     search+=' '+clickInfo.text
-                                   } else {
-                                     search = clickInfo.text;
-                                   }
-                              }
-                           }
+                         onRecipeClick(id)
+                         } else if (clickInfo.text) {
+                         if (search) {
+                         search+=' '+clickInfo.text
+                         } else {
+                         search = clickInfo.text;
+                         }
+                         }
+                         }
                          }"
                 >
 
                     <div class="slot" slot="left">
                         {#if $localRecipes[id]}
-                            <IconButton bare="{true}" icon="fullscreen" on:click={()=>{onRecipeClick(id)}}/>
+                            <StatusIcon icon="done"/>
                         {/if}
                         {#if $recipesOnList.find((r)=>r.id==id)}
                             <StatusIcon icon="shopping_cart"/>
                         {/if}
                     </div>
                     <div class="slot" slot="right">
-                        <IconButton icon="open_in_full" bare="true" on:click={()=>onRecipeClick(id)}/>
+                        {#if showShop}
+                            {#if !$recipesOnList.find((r)=>r.id==id)}
+                                <IconButton icon="add_shopping_cart" bare="true" on:click={()=>onRecipeClick(id,'shop')}/>
+                            {/if}
+                        {/if}
+                        {#if showEdit}
+                            <IconButton icon="edit" bare="true" on:click={()=>onRecipeClick(id,'edit')}/>
+                        {/if}
+                        <IconButton icon="read_more" bare="true" on:click={()=>onRecipeClick(id)}/>
                     </div>
 
                 </RecCard>
@@ -282,7 +290,7 @@
             </div>
         {/each}
     </div>
-    
+    {$recipePage.length} IDs: <JsonDebug data={$recipePage}/>
 </FullHeight>
 <style>
  .card.filler {
