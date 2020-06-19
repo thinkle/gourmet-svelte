@@ -8,6 +8,53 @@
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
  import {Button,Checkbox} from '../../widgets/'
  export let size="lg"
+ let color
+
+ const wordColors = [
+     // some whimsical ingredient matchers
+     {matcher:/eggplant|aubergine|gh?anou/i, color: {bg:'#614051',fg:'white'}},
+     {matcher:/chocolate/i, color: {bg:'#3F000F',fg:'#ffeeff'}},
+     {matcher:/\bsea\b|fish|salmon|crab|lobster/i, color : {bg: '#0077BE', fg:'white'}}, // - ocen blue
+     {matcher:/asparagus/i, color : {bg: '#87a96b', fg:'white'}},
+     {matcher:/spinach/i, color: {bg:'#455439',fg:'white'}},
+     {matcher:/apple/i, color: {bg:'#ff0800',fg:'white'}},
+     {matcher:/tomato/i, color: {bg:'#ff6347',fg:'white'}},
+     
+     // courses
+     {matcher:/cookie|bread/i, color:{bg:'#d8ad6a',fg:'#eeeeee'}}, // beige
+     {matcher:/dessert/i, color: {bg:'#FF3366',fg:'white'}}, // red/pink
+     {matcher:/salad/i, color: {bg:'#55ab55',fg:'white'}}, // green
+
+     // cuisines...
+     {matcher:/pasta|italy|italian/i, color: {bg:'#ce2b37',fg:'white'}},
+     {matcher:/india/i, color: {bg:'#FEB200',fg:'black'}}, // tumeric
+     {matcher:/thai/i, color: {bg:'#f94b1e',fg:'white'}}, // red/orange
+     {matcher:/china|chinese|asian/i, color: {bg:'#c51015',fg:'white'}}, // red/orange
+     {matcher:/french|france/i, color: {bg:'#456990',fg:'white'}}, // queen blue
+     {matcher:/mexic|spanish|spain/i, color: {bg:'#EB6424',fg:'white'}}, // persimmon
+
+     
+ ]
+
+ $: color = getColor(rec);
+
+ function getColor (recipe) {
+     for (let {matcher,color} of wordColors) {
+         if (recipe && recipe.title && recipe.title.match(matcher)) {
+             console.log('Matched title',recipe.title,matcher)
+             return color
+         } else if (recipe && recipe.categories && recipe.categories.find((c)=>c.name && c.name.match(matcher))) {
+             console.log('Matched category',recipe.categories,matcher)
+             return color;
+         }
+     }
+     // generic...
+     return {
+         bg: '#AFD2E9',
+         fg: '#121234'
+     }
+ }
+
 </script>
 <article
     class:xs="{size=='xs'}"
@@ -15,7 +62,7 @@
     class:md="{size=='md'}"
     class:lg="{size=='lg'}"
     class:xl="{size=='xl'}"
-    class:hasImage="{!!thumb}" style="{`--maxHeight:300px;--imageSize:250px`}">
+    class:hasImage="{!!thumb}" style="{color&&`--accent-bg: ${color.bg}; --accent-fg: ${color.fg};`}">
     <div class="topbg"></div>
     <div class="bottombg"></div>
     <h2 class:withCheck="{!thumb && !hideCheck}">
@@ -37,7 +84,7 @@
         </div>
         {#if !hideCheck}
         <div class="check">
-            <Checkbox bind:checked="{checked}" on:change color="white" />
+            <Checkbox bind:checked="{checked}" on:change color="{color.fg}" />
         </div>
         {/if}
     {/if}
@@ -56,9 +103,6 @@
     
     <div class="left">
         <slot name="left"/>
-    </div>
-    <div class="center">
-        <slot name="center"/>
     </div>
 
     <div class="right">
@@ -118,7 +162,7 @@
              "title title title"
              "title title title"
              "info  info  info"
-             "left center right";
+             "left right right";
          font-family: var(--recipeFont);
          width: $width;
          height: $size;
@@ -132,7 +176,7 @@
              "title title check"
              "title title image"
              "info  info  image"
-             "left center right";
+             "left right right";
      }
 
      .#{$name} h2 span {
@@ -170,7 +214,7 @@
  h2 {
      font-weight: bold;
      grid-area: title;
-     color: #fff;
+     color: var(--accent-fg);
      padding-left: $pad;
      padding-top: $pad;
      padding-bottom: $smallpad;
@@ -227,11 +271,6 @@
      align-self: center;
      justify-self: start;
      padding-left: $pad;
- }
- .center {
-     grid-area: center;
-     align-self: center;
-     justify-self: center;
  }
  .right {
      grid-area: right;
