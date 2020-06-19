@@ -14,7 +14,7 @@
      // some whimsical ingredient matchers
      {matcher:/eggplant|aubergine|gh?anou/i, color: {bg:'#614051',fg:'white'}},
      {matcher:/chocolate/i, color: {bg:'#3F000F',fg:'#ffeeff'}},
-     {matcher:/\bsea\b|fish|salmon|crab|lobster/i, color : {bg: '#0077BE', fg:'white'}}, // - ocen blue
+     {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE', fg:'white'}}, // - ocen blue
      {matcher:/asparagus/i, color : {bg: '#87a96b', fg:'white'}},
      {matcher:/spinach/i, color: {bg:'#455439',fg:'white'}},
      {matcher:/apple/i, color: {bg:'#ff0800',fg:'white'}},
@@ -41,10 +41,8 @@
  function getColor (recipe) {
      for (let {matcher,color} of wordColors) {
          if (recipe && recipe.title && recipe.title.match(matcher)) {
-             console.log('Matched title',recipe.title,matcher)
              return color
          } else if (recipe && recipe.categories && recipe.categories.find((c)=>c.name && c.name.match(matcher))) {
-             console.log('Matched category',recipe.categories,matcher)
              return color;
          }
      }
@@ -123,7 +121,7 @@
  );
 
  $fonts : (
-     xs : 15px,
+     xs : 14px,
      sm : 16px,
      md : 24px,
      lg : 36px,
