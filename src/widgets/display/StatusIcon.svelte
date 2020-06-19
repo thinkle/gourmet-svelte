@@ -8,7 +8,12 @@
  export let tooltipRight=true
  export let tooltipAbove=false
  export let tooltipUnder=true
-
+ if (tooltipLeft) {
+     tooltipRight = false;
+ }
+ if (tooltipAbove) {
+     tooltipUnder = false;
+ }
  let flyProps = {duration:350}
  if (tooltipLeft) {
      flyProps.x = -100;
@@ -64,10 +69,10 @@
      top: 3px;
  }
 
- .tooltipLeft {
+ .tooltipRight {
      left : 24px;
  }
- .tooltipRight {
+ .tooltipLeft {
      right : 24px;
  }
  .tooltipAbove {
