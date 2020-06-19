@@ -8,6 +8,7 @@
      ModalLauncher,
      Modal,
      FullScreen,
+     StatusIcon,
      Bar,
  } from '../widgets/';
  import {setContext} from 'svelte';
@@ -144,19 +145,22 @@
     <div slot="footer">
         <Bar>
             <nav slot="left">
-                {#if isLoggedIn}
-                    User: {username}
-                    <JsonDebug data="{$user}"/>
-                {/if}
-                {#if $user && $user.remoteUser && $user.dbUser}
-                    Online & Signed Up!
+                {#if $user && $user.remoteUser && $user.remoteUser.dbUser}
+                    <StatusIcon icon="done" tooltipAbove="true" tooltip={true}>
+                        Online & Signed Up!
+                    </StatusIcon>
                 {:else if $user && $user.remoteUser}
-                    On remotely <Button on:click="{()=>user.getRemoteUser()}">R</Button>
+                    <StatusIcon icon="offline_bolt" tooltipAbove="true" tooltip={true}>
+                        Logged in, but not linked to an account.
+                        <Button on:click="{()=>user.getRemoteUser()}">Try fetching user info.</Button>
+                    </StatusIcon>
                 {:else}
-                    Not logged in remotely
-                    <button on:click="{checkForNetlifyToken}">Check</button>
-                    <button on:click="{()=>user.getRemoteUser()}">Get Remote</button>
-                    <button on:click="{doLogin}">Re-Login</button>
+                    <StatusIcon icon="offline_bolt" tooltipAbove="true" tooltip={true}>
+                        Not logged in remotely
+                        <button on:click="{checkForNetlifyToken}">Check</button>
+                        <button on:click="{()=>user.getRemoteUser()}">Get Remote</button>
+                        <button on:click="{doLogin}">Re-Login</button>
+                    </StatusIcon>
                 {/if}
                 <ModalLauncher key="user" modalVisible="{showUserSettings}">
                     <Button bare="true" on:click="{()=>showUserSettings=true}">
