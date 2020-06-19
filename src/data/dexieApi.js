@@ -102,19 +102,6 @@ const dexieApi = {
                 count:0,
             }
         }
-        let count
-        if (q.alreadyCounted) {
-            count = q.alreadyCounted
-        } else {
-            //else if (q.clone) {
-            try {
-                count = await q.clone().count()
-            }
-            //else {
-            catch (err) {
-                count = await q.count();
-            }
-        }
         if (sort) {
             // ok, we do our own pagination and sorting then...
             // risky? perhaps?
@@ -131,6 +118,19 @@ const dexieApi = {
                 nextPage : result.length + (page||0),
                 currentPage : page||0,
                 last
+            }
+        }
+        let count
+        if (q.alreadyCounted) {
+            count = q.alreadyCounted
+        } else {
+            //else if (q.clone) {
+            try {
+                count = await q.clone().distinct().count()
+            }
+            //else {
+            catch (err) {
+                count = await q.count();
             }
         }
         if (page) {q = q.offset(page)}
