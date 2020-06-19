@@ -1,14 +1,17 @@
 <script>
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
-
+ export let editOnOpen=undefined;
  export let rec=undefined;
  export let onChange=undefined;;
  export let onOpenSubRec=undefined;
  export let showShopping = true;
  export let editMode = false;
  export let editable = true;
+ export let onEditToggle
  export let minPropWidth = 150;
-
+ export function setEditMode (val) {
+     editMode = val;
+ }
 
 
  import {
@@ -47,6 +50,9 @@
 
 
  function handleEditToggle (editMode) {
+     if (onEditToggle) {
+         onEditToggle(editMode);
+     }
      console.log('handle toggle',editMode)
      for (let prop of RecDef.recProps) {
          if (editMode) {
