@@ -53,6 +53,7 @@
      if (onEditToggle) {
          onEditToggle(editMode);
      }
+     if (!rec) {return}
      console.log('handle toggle',editMode)
      for (let prop of RecDef.recProps) {
          if (editMode) {
