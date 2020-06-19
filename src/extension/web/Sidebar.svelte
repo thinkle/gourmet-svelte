@@ -20,13 +20,15 @@
  let recipe;
 
  // our state
- let firstConnect = true;
+ let firstConnect;
+
  // promises
  let parsing;
  let selectionActive;
  let tb = getContext('toolbar');
  if (tb) tb.hideWhenLoggedIn()
  /*  let hello = 'I sure hope they say hello...' */
+
  onMount(
      ()=>{
          /* let helloListener = helloWorld.receive(
@@ -39,6 +41,12 @@
              (message,port)=>{
                  console.log('Got parsed message',message,port)
                  parsed = message;
+                 if (!firstConnect) {
+                     // add if statement to check if we have data...
+                     console.log('Autoparse!');
+                     autoparsePage();
+                 }
+                 firstConnect = true;
              }
          );
          let disconnectSelectionListener = sendSelectionToWeb.receive(
