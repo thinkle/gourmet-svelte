@@ -1,12 +1,17 @@
 <script>
- export function open (id) {
+ export function open (id, editMode=false) {
      hide = false;
      if (id!==undefined) {
          activeRecipeId = id;
+         editOnOpen[id] = editMode
+         if (editMode && recComponents[id]) {
+             // already have a component... force it into edit
+             recComponent[id].setEditMode(editMode);
+         }
      }
      if (onOpen) {
          console.log('Calling onOpen');
-         onOpen(id)}
+         onOpen(id,editMode)}
  }
  export let onOpen
  export let hide
@@ -35,6 +40,9 @@
 
  let activeRecipeId
 
+
+ let recComponents = {}
+ let editOnOpen = {}
 
  function openOne () {
      activeRecipeId = $openLocalRecipes[0]
@@ -88,18 +96,37 @@
     
     <FullHeight>
         <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
+        {#each Object.keys($localRecipes) as id (id)}
+            <LazyIf condition="{id==activeRecipeId}">
+                <Recipe
+                    bind:this="{recComponents[id]}"
+                    rec="{$localRecipes[id]}"
+                    {onOpenSubRec}
+                    onChange="{(rec)=>{
+                              console.log('OpenRecipes got change!',rec);
+                              $localRecipes[id]=rec;
+                              }}"
+                    onEditToggle="{(val)=>editOnOpen[id]=val}"
+                    editMode="{editOnOpen[id]}"
+                />
+            </LazyIf>
+        {/each}
+        <!-- 
         {#if $localRecipes[activeRecipeId]}
             <Recipe
+                bind:this="{recComponents[activeRecipeId]}"
                 rec="{$localRecipes[activeRecipeId]}"
                 {onOpenSubRec}
                 onChange="{(rec)=>{
                           console.log('OpenRecipes got change!',rec);
                           $localRecipes[rec.id]=rec;
                           }}"
+                onEditToggle="{(val)=>editOnOpen[activeRecipeId]=val}"
+                editMode="{editOnOpen[activeRecipeId]}"
             />
         {:else}
             {$openLocalRecipes.length>0 && openOne()}                    
-        {/if}
+        {/if} -->
         <!-- Are you sure you want to close modal... -->
         {#if showCloseModalFor!==undefined}
             <div class="modal" >
