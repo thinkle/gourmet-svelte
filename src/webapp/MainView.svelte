@@ -84,6 +84,15 @@
      }
  }
 
+ function onRecipeSelected (id, mode) {
+     if (mode=='shop') {
+         shoppingList.addRecipe(id);
+     } else {
+         localRecipes.open(id).then(()=>opener.open(id,mode=='edit'))
+     }
+ }
+
+
  let debug
 </script>
 
@@ -129,9 +138,7 @@
     <LazyIf condition="{page=='RecipeList'}">
         <RecipeList
             onSelectionChange="{(ids)=>selectedRecipes=ids}"
-            onRecipeClick="{
-                               (id)=>localRecipes.open(id).then(()=>opener.open(id))
-                               }"
+            onRecipeClick="{onRecipeSelected}"
         >
             <div slot="right" class="slot">
                 <Status/>
@@ -192,6 +199,7 @@
                     </li>
                 </NavActions>
             </div>
+
         </RecipeList>
     </LazyIf>
     <OpenRecipes bind:this="{opener}"
