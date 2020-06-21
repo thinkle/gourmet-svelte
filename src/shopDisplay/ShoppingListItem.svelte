@@ -64,7 +64,7 @@
 <tr class:ignored>
     <td>
         <table class="amounts">
-            {#each item.amounts as amount,n}
+            {#each item.amounts as amount,n (amount)}
                 <tr>
                     <td>{#if n}+{/if}</td><NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
                 </tr>
@@ -92,8 +92,10 @@
                         separate items
                     {/if})
                     {#if !showSubItems}
-                        <span class="origin" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
-                        </span>
+                        <span class="origin"
+                             in:receive|local="{{key:item.item+'display'}}" out:send|local="{{key:item.item+'display'}}"
+                             >
+                             </span>
                     {/if}
                 </small>
                 
@@ -123,29 +125,29 @@
         {/if}
         
         {#if showSubItems}
-            <div class="break" in:receive="{{key:item.item+'display'}}" out:send="{{key:item.item+'display'}}">
-                {#each item.items as subitem}
-                    <div in:receive={{key:subitem.ingredient}} out:send={{key:subitem.ingredient}}>
-                        <small>
-                            <!-- <Ingredient ing={subitem.ingredient} edit="{false}" /> -->
-                            <NumberUnitDisplay
-                                value="{subitem.ingredient.amount}"
-                                multiplyBy="{subitem.multiplier}"/>
-                            {subitem.ingredient.text}
-                            {#if titleCase(subitem.ingredient.text) !== item.item && item.items.length > 1}
-                                <Button on:click={()=>shoppingList.setShopItem(subitem,titleCase(subitem.ingredient.text))}>
-                                    Separate
-                                </Button>
-                            {/if}
-                            from
-                            <i>{subitem.source.title}</i>
-                            {#if subitem.multiplier}
-                                &times;{floatToFrac(subitem.multiplier)}
-                            {/if}
-                        </small>
-                    </div>
-                {/each}
-            </div>
+            <div class="break" in:receive|local="{{key:item.item+'display'}}" out:send|local="{{key:item.item+'display'}}">
+                {#each item.items as subitem,n (n)}
+                    <div in:receive|local={{key:subitem.ingredient}} out:send|local={{key:subitem.ingredient}}>
+                         <small>
+                             <!-- <Ingredient ing={subitem.ingredient} edit="{false}" /> -->
+                             <NumberUnitDisplay
+                                 value="{subitem.ingredient.amount}"
+                                 multiplyBy="{subitem.multiplier}"/>
+                             {subitem.ingredient.text}
+                             {#if titleCase(subitem.ingredient.text) !== item.item && item.items.length > 1}
+                                 <Button on:click={()=>shoppingList.setShopItem(subitem,titleCase(subitem.ingredient.text))}>
+                                     Separate
+                                 </Button>
+                             {/if}
+                             from
+                             <i>{subitem.source.title}</i>
+                             {#if subitem.multiplier}
+                                 &times;{floatToFrac(subitem.multiplier)}
+                             {/if}
+                         </small>
+                     </div>
+                 {/each}
+            </div> 
         {/if}
     </td>
     <td>
