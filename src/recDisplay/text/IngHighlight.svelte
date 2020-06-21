@@ -2,8 +2,12 @@
  import {scrollIntoView} from '../../utils/scrolling.js';
  export let target
  import {getContext} from 'svelte';
-
- let highlightedIngredient = getContext('highlightedIngredient')
+ import {writable} from 'svelte/store';
+ export let content=''
+ export let highlightedIngredientFromProps=undefined;
+ export let useStyle=false;
+ 
+ let highlightedIngredient = highlightedIngredientFromProps || getContext('highlightedIngredient')
 
  function toggleHighlight () {
      if ($highlightedIngredient.highlighted != target) {
@@ -47,6 +51,22 @@
      }
  }
 
+ function getStyle (hover,highlight) {
+     if (useStyle) {
+         if (hover) {
+             return `
+             background-color: #ffffdd;
+             color: #333;
+`
+         } else if (highlight) {
+             return `background-color: #ffffad;
+                 color: #333;
+                 
+                 `
+         }
+     }
+ }
+
 </script>
 
 <span
@@ -56,8 +76,10 @@
     on:mouseover="{hoverOn}"
     on:mouseleave="{hoverOff}"
     use:scroll="{$highlightedItem}"
+    style="{getStyle($highlightedIngredient.hover==target,$highlightedIngredient.highlighted==target)}"
 >
     <slot/>
+    {content}
 </span>
 
 <style>
