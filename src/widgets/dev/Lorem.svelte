@@ -16,3 +16,9 @@
 <div on:click="{changeIpsum}" style="{inline&&'display:inline'||''}">
     {@html text}
 </div>
+
+<style>
+ div {
+     display: contents;
+ }
+</style>
