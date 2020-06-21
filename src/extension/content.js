@@ -1,5 +1,8 @@
 import Parser from './parser/recipeParser.js';
 import tagger from './parser/tagger.js';
+import {highlight} from './highlighter.js';
+
+
 const parser = Parser(tagger);
 import {
     //hello,
