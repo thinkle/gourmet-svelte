@@ -80,3 +80,13 @@ export function inTag (idx, text) {
     }
     return false; // never saw a < or a >, so we were not in a tag.
 }
+
+export function htmlToSentences (html) {
+    for (let tag in ['li','p','div','blockquote','section','article']) {
+        html = html.replace(`</${tag}>`,'~.~ ') // weird period placeholder...
+    }
+    html = html.replace(/[.]?~[.]~/g,'') // end each block with one and only one period
+    // now strip everythign else
+    html = html.replace(/<[^>]+>/g,'');
+    return html
+}
