@@ -16,40 +16,46 @@
  setContext('multiplier',multiplier);
 
  function doPageHighlightMagic () {
-     backgroundSetIngredients.send(
-         recipe.ingredients
-     );
+     if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
+         backgroundSetIngredients.send(
+             recipe.ingredients
+         );
+     }
  }
+
+ $: doPageHighlightMagic(recipe)
 
  const ING = 0
  const TIME = 1
  let mode=ING
  
 </script>
-<Tabs sticky="{true}">
+<Tabs sticky="{true}" stickyTop="2.2em;">
     <Tab on:click="{()=>mode=ING}" active="{mode==ING}">Ingredients</Tab>
     <Tab on:click="{()=>mode=TIME}" active="{mode==TIME}">Times</Tab>
+    {#if mode==ING}
+    <div class='multiplier'>
+        &times;
+        <AmountInput
+            value="{$multiplier}"
+            on:change="{(e)=>$multiplier=e.detail}"
+            showPlusMinusButtons="{true}"
+        />
+    </div>
+    {/if}
 </Tabs>
 {#if mode==TIME}
-    <h3>Times</h3>
     <TimeSummary rec="{recipe}"/>
 {/if}
 {#if mode==ING}
-    <nav>
-        <h3>Ingredients</h3>
-        <Button on:click="{doPageHighlightMagic}">Highlight</Button>
-        <div class='multiplier'>
-            &times;
-            <AmountInput
-                value="{$multiplier}"
-                on:change="{(e)=>$multiplier=e.detail}"
-                showPlusMinusButtons="{true}"
-            />
-        </div>
-    </nav>
     <IngredientList editabe="{false}" ingredients="{recipe.ingredients}"/>
 {/if}
 <style>
+ .multiplier {
+     /* Align to the bottom like a tab + to the right */
+     align-self: flex-end;
+     margin-left: auto; 
+ }
  nav {
      display: flex;
      flex-direction: row;
