@@ -55,7 +55,7 @@ it(
         expect(
             times.parseTimes('3 hours 2 minutes AND THEN 1 minute')
         ).toEqual(
-            `<duration context='3 hours 2 minutes AND THEN 1 minute' seconds=${3*60*60+2*60}>3 hours 2 minutes</duration> AND THEN <duration context='AND THEN 1 minute' seconds=60>1 minute</duration>`
+            `<duration timestring='3 hours 2 minutes AND THEN 1 minute' seconds=${3*60*60+2*60}>3 hours 2 minutes</duration> AND THEN <duration timestring='AND THEN 1 minute' seconds=60>1 minute</duration>`
         );
         expect(
             times.parseTimes('3 hours, 2 minutes AND THEN 1 minute and 1 second')
@@ -65,7 +65,7 @@ it(
         expect(
             times.parseTimes('1 hour\ncat\n1 minute')
         ).toEqual(
-            `<duration context='1 hour\ncat\n1 minute' seconds=${60*60}>1 hour</duration>\ncat\n<duration context='cat\n1 minute' seconds=60>1 minute</duration>`
+            `<duration timestring='1 hour\ncat\n1 minute' seconds=${60*60}>1 hour</duration>\ncat\n<duration timestring='cat\n1 minute' seconds=60>1 minute</duration>`
         );
     }
 );
@@ -90,3 +90,28 @@ it(
         console.log('Got result!',result);
 
     })
+
+it(
+    'Extract times',
+    ()=>{
+        let result = times.extractTimes('Hello world. Bake for 30 minutes. Then stir for 10 seconds. Then eat for at least 2 hours.');
+        console.log('Got result',result);
+        expect(result.length).toEqual(3);
+        expect(result[0].seconds).toEqual(30*60)
+        expect(result[1].seconds).toEqual(10)
+        expect(result[2].seconds).toEqual(60*60*2)
+        expect(result[0].text).toEqual('30 minutes')
+        expect(result[0].sentence).toEqual('Bake for 30 minutes.');
+    }
+);
+
+it(
+    'Extract multiple times in a sentence',
+    ()=>{
+        let result = times.extractTimes('You should bake it 45 minutes and then let it cool for 10 minutes on the counter.');
+        expect(result.length).toEqual(2);
+        expect(result[0].seconds).toEqual(45*60);
+        console.log('result:',result)
+    }
+);
+       
