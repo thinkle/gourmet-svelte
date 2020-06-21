@@ -29,6 +29,8 @@ const channels = {
 
 
 function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
+    this.name = name;
+    this.type = type;
     if (!channels[type]) {
         console.log('Unrecognized channel type',type,'not one of',Object.keys(channels));
         throw Error(`Unknown Channel type: ${type}`)
@@ -45,7 +47,13 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
     this.send = function (request, tab) {
         if (chatty) {console.log('Channel',name,type,'send request',request,tab,'... first validating...')}
         if (type=='content') {
-            validate(tab,{id:1})
+            try {
+                validate(tab,{id:1})
+            } catch (err) {
+                console.log('Invalid tab in channel',this)
+                throw err;
+            }
+            
         }
         try {
             validate(request,requestDef);
@@ -54,6 +62,7 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
             err.context = this;
             console.log(`send (${type},${name} called with invalid request`,request);
             console.log('Expected request to match: ',requestDef);
+            console.log('Channel:',this)
             throw err;
         }
         if (chatty) {console.log('Sending valid request',request);}
@@ -93,7 +102,7 @@ function Channel ({name, type, requestDef={}, responseDef={}, chatty=false}) {
                 }
                 catch (err) {
                     err.receiveCallback = receiveCallback;
-                    console.log('Callback ',receiveCallback,'produced invalid response',response);
+                    console.log('Callback ',receiveCallback,'produced invalid response',response,'channel',this);
                     throw err;
                 }
                 if (chatty) {console.log('Sending valid response',response);}
