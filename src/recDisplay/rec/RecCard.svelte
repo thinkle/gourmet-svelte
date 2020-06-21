@@ -6,7 +6,7 @@
  $: thumb = rec.images && rec.images.length > 0 && rec.images[0];
  import RecDef from '../../common/RecDef.js';
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
- import {Button,Checkbox} from '../../widgets/'
+ import {Button,Checkbox,OneLiner} from '../../widgets/'
  export let size="lg"
  let color
 
@@ -89,12 +89,14 @@
     <div class="info" >
         {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
             <div class="propBox">
+                <OneLiner bg="var(--light-bg)" fg="var(--light-fg)">
                 <RecPropDisplay 
                     clickable="{true}"
                     onClick="{onClick}"
                     prop="{prop}"
                     value="{rec[prop.name]}"
                 />
+                </OneLiner>
             </div>
         {/each}        
     </div>
@@ -154,7 +156,7 @@
      
      article.#{$name} {
          display: inline-grid;
-         grid-template-columns: auto auto auto;
+         grid-template-columns: 1fr 1fr 1fr;
          grid-template-rows: 36px $body/2 $body/2 36px;
          grid-template-areas:
              "title title title"
@@ -169,7 +171,7 @@
 
      article.hasImage.#{$name} {
          grid-template-rows: 36px $body/2 $body/2 36px;
-         grid-template-columns: auto auto $body;
+         grid-template-columns: 1fr 1fr $body;
          grid-template-areas:
              "title title check"
              "title title image"
@@ -193,7 +195,7 @@
 
      /* Overflow has pretty ellipses, but then scrolls awkwardly
       on hover so we can see data if we really want to */
-     .#{$name} .info :global(*) {
+     /*.#{$name} .info :global(*) {
          max-width: $width - 2 * $pad;
          text-overflow: ellipsis;
          white-space: nowrap;
@@ -202,7 +204,7 @@
      .#{$name} .info :global(*):hover {
          white-space: break-spaces; 
      }
-     
+     */
      .#{$name}.hasImage .info :global(*) {
          max-width: $width - $image - $pad;
      }
@@ -257,9 +259,12 @@
      border-bottom: 1px solid var(--light-underline);
  }
  .propBox {
-     flex: 1;
-     overflow-y: scroll;
+     flex: 1
  }
+ /* .propBox {
+    flex: 1;
+    overflow-y: scroll;
+    } */
 
  .title {
      grid-area: title;
