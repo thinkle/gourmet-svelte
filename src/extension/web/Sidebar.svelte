@@ -8,12 +8,14 @@
         } from '../../widgets/';
 
  import Views from './SidebarRecipeViews.svelte';
- import {onMount,getContext} from 'svelte';
+ import {onMount,setContext,getContext} from 'svelte';
+ import {writable} from 'svelte/store';
  import {backgroundParsePage,backgroundClearAll} from '../messaging/parsing.js';
 
  import {parseData} from '../../importer/importer.js';
  import {helloWorld,sendParsedToWeb,sendSelectionToWeb} from '../messaging/webMessages.js';
-
+ import {sendHighlightToWeb,
+        backgroundHighlightIng} from '../messaging/highlighterMessages.js';
 
  // our data...
  let parsed;
@@ -26,8 +28,28 @@
  let parsing;
  let selectionActive;
  let tb = getContext('toolbar');
+ let highlightedIngredient = writable({active:[]});
+ let justSetHighlightedIngredient
+ setContext('highlightedIngredient',highlightedIngredient);
  if (tb) tb.hideWhenLoggedIn()
  /*  let hello = 'I sure hope they say hello...' */
+
+ highlightedIngredient.subscribe(
+     ($hi)=>{
+         console.log('Sidebar sees highlight update',$hi,justSetHighlightedIngredient);
+         if (!justSetHighlightedIngredient) {
+             // ingredient highlight set from sidebar... send
+             // to extension...
+             console.log('Sending to BG')
+             backgroundHighlightIng.send(
+                 $hi
+             );
+         } else {
+             console.log('No need to send, we just got this from BG')
+             justSetHighlightedIngredient = false;
+         }
+     }
+ );
 
  onMount(
      ()=>{
@@ -37,6 +59,13 @@
           *         hello = message;
           *     }
           * ); */
+         let disconnectHighlightListener = sendHighlightToWeb.receive(
+             (message,port)=>{
+                 console.log('Cool, got message',message,port,'set just set=>true');
+                 justSetHighlightedIngredient = true;
+                 $highlightedIngredient = message;
+             }
+         );
          let disconnectParseListener = sendParsedToWeb.receive(
              (message,port)=>{
                  console.log('Got parsed message',message,port)
@@ -58,6 +87,7 @@
          return ()=>{
              disconnectSelectionListener();
              disconnectParseListener();
+             disconnectHighlightListener();
          }
      }
  );
@@ -91,7 +121,7 @@
 
     {#if parsing}
         {#await parsing}
-            Seeing what we can read automagically...
+            Scanning page for recipe...
             <WhiskLogo size="200" />
         {:then data}
             Done parsing, let me read this thing...
@@ -104,14 +134,10 @@
     {/if}
     {#if !alreadyAutoTagged}
         <IconButton icon="spy" on:click={autoparsePage}>Read Recipe</IconButton>
-    {:else}
-        <p>Apparently, we couldn't tag the recipe :(</p>
     {/if}
     {#if tagMode}
-        Tag that baby up!
         <Tagger {selectionActive} parsed={parsed}/>
     {:else}
-        View that thing!
         <Views recipe={recipe}/>
         <JsonDebug data="{recipe}"/>
     {/if}
