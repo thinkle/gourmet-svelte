@@ -1,7 +1,7 @@
 import { get } from 'svelte/store'
 import {floatToFrac,numMatchString,parseAmount} from './numbers.js';
 import {reToString} from './regExpUtil.js';
-import {getSurroundingSentence} from './textUtils.js';
+import {getSurroundingSentence,htmlToSentences} from './textUtils.js';
 
 let M = 60;
 let H = 60*60;
@@ -134,6 +134,27 @@ export function getSecondsFromString (s) {
     return total
 }
 
+export function extractTimes (s) {
+    s = htmlToSentences(s)
+    const results = []
+    let lastMatchOffset = -1;
+    const matches = s.matchAll(fancyTimeMatcher);
+    for (const match of matches) {
+        console.log('Got match',match[0],'@',match.index);
+        let offset = match.index;
+        let seconds = getSecondsFromString(match[0]);
+        if (seconds) {
+            results.push({
+                text:match[0].replace(/^[\s,.:-]+|[\s,.:-]+$/g,''),
+                seconds,
+                sentence:getSurroundingSentence(s,offset,lastMatchOffset)
+            });
+            lastMatchOffset = offset + match[0].length - 1;
+        }
+    }
+    return results
+}
+
 export function parseTimes (s, includeSentence) {
     let lastMatchOffset = -1
     return s.replace(
@@ -178,6 +199,7 @@ export default {
     getTimeUnit,
     getSecondsFromString,
     parseTimes,
+    extractTimes,
     
     getTimeLabel (s) {
         if (s < 0) {
