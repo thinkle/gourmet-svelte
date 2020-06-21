@@ -8,6 +8,10 @@
  import {flip} from 'svelte/animate';
  import Tab from './Tab.svelte';
 
+ if (sticky && !stickyTop) {
+     stickyTop = 0
+ }
+
  if (!data && handleActive) {
      console.log("Tabs.svelte WARNING: You passed Tabs handleActive but not any data. Tabs can't manage  slots if you're using it in slots mode.");
  }
