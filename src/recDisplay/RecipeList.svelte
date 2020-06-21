@@ -1,6 +1,6 @@
 <script>
  export let onRecipeClick 
- export let onSelectionChange
+ export let onSelectionChange=undefined;
  export let showShop = true;
  export let showEdit = true;
  export function reload () {
@@ -82,6 +82,7 @@
  let areSelected=false;
  $: $recipePage && updateSelected();
  function updateSelected ( ) {
+     if (!onSelectionChange) {return}
      let selectedIds = []
      for (let key in selected) {
          if (selected[key]) {
