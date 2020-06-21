@@ -1,6 +1,6 @@
 import {highlightedIngredientsCB, sendHighlightToWeb, backgroundHighlightIng,
         contentSetIngredients,backgroundSetIngredients,
-       } from './messaging/ingredientHighlighter.js';
+       } from './messaging/highlighterMessages.js';
 
 // Go between between web and content...
 export function initHighlighterBackground () {
