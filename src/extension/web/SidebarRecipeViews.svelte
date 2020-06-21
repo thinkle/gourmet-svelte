@@ -2,12 +2,13 @@
  export let recipe
  
  import Recipe from '../../recDisplay/rec/Recipe.svelte'
+ import SidebarSummary from './SidebarSummary.svelte';
  import {recipeActions,connected,storedRecipes} from '../../stores/recipeStores.js';
  import {IconButton,
-         Tabs,
-         Tab} from '../../widgets/';
+        Tabs,
+        Tab} from '../../widgets/';
 
- let mode = 'full'
+ let mode = 'summary'
 
  // promise
  let saving;
@@ -18,15 +19,15 @@
 
 </script>
 <Tabs sticky="{true}" top="2.2em">
-    <Tab active="{mode=='full'}" on:click="{()=>{mode='full'}}">Whole Recipe</Tab>
     <Tab active="{mode=='summary'}" on:click="{()=>{mode='summary'}}">Summary</Tab>
+    <Tab active="{mode=='full'}" on:click="{()=>{mode='full'}}">Whole Recipe</Tab>
     <Tab active="{mode=='save'}" on:click="{()=>{mode='save'}}"><span class="important">Save</span></Tab>
 </Tabs>
-{#if mode=='full'}
+{#if mode=='full' && recipe}
     <Recipe editable={false} rec={recipe} showShopping="{false}" />
-{:else if mode=='summary'}
-    <p>Sorry, this view will be awesome, but I haven't written it yet.</p>
-{:else}
+{:else if mode=='summary' && recipe}
+    <SidebarSummary recipe="{recipe}"/>
+{:else if recipe}
     Once you have saved your recipe, you can view and edit it to your heart's content.
     If you would rather make changes <em>here</em>, enter the tagging view.
     {#if $connected}<IconButton icon="save" on:click={doSaveRecipe}>Save Recipe to Collection</IconButton>{/if}
@@ -40,6 +41,8 @@
             Unable to create recipe {error}
         {/await}
     {/if}
+{:else}
+    No recipe?
 {/if}
 <style>
  .important {
