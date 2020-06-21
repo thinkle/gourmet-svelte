@@ -1,5 +1,5 @@
 <script>
- import {IconButton,Timer} from '../';
+ import {IconButton,Timer,OneLiner} from '../';
  import Moveable from 'svelte-moveable';
  import times from '../../utils/times.js';
  export let seconds=60
@@ -36,14 +36,11 @@
      node.remove();
  }
 </script>
-<div bind:this={ref}>
-    <label>{label}{#if label}:{/if}
-        <span class:active href="#showTimer" on:click={toggleTimer}>
-            <slot>
-                {timestring||times.getDescription(seconds)}
-            </slot>
-        </span>
-    </label>
+
+<label>
+    <OneLiner>{label}{#if label}:{/if}</OneLiner>
+</label>
+<div bind:this={ref} on:click="{(e)=>e.preventDefault()}">
     {#if show}
         <div class:hidden={timerHidden} class="timerBox" bind:this={timerBox}
                           on:mouseover={()=>active=true}
@@ -59,7 +56,7 @@
                                         duration={seconds}
                        onComplete={()=>{timerHidden=false}}
                 />
-                <label>{timestring||times.getDescription(seconds)}</label>
+                <label><OneLiner>{timestring||times.getDescription(seconds)}</OneLiner></label>
             </div>
         </div>
         {#if !timerHidden}
@@ -69,19 +66,26 @@
                 scrollable="{true}"
                 draggable="{draggable}"
                 on:drag="{(arg) => {
-                        const {target,beforeTranslate} = arg.detail;
-                        frame.translate = beforeTranslate;
-                        target.style.transform = `translate(${beforeTranslate[0]}px, ${beforeTranslate[1]}px)`;
-                        }}"
+                         const {target,beforeTranslate} = arg.detail;
+                         frame.translate = beforeTranslate;
+                         target.style.transform = `translate(${beforeTranslate[0]}px, ${beforeTranslate[1]}px)`;
+                         }}"
                 on:dragStart="{
                         ({ detail: { set } }) => {
-                           set(frame.translate)
-                           }
+                        set(frame.translate)
+                        }
                         }"
             />
         {/if}
     {/if}
 </div>
+<span class:active href="#showTimer" on:click={toggleTimer}>
+    <slot>
+        {timestring||times.getDescription(seconds)}
+    </slot>
+</span>
+
+    
 
 <style>
  .timerBox .content {
@@ -124,4 +128,5 @@
  :global(.moveable-line) {
      background-color: transparent !important;
  }
+
 </style>
