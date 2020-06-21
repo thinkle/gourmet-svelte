@@ -1,6 +1,10 @@
+
+
 import Metadata from '../common/RecDef.js';
 import {listen} from './parser/backgroundParser.js';
 import {launchTab} from './SidebarCommunication.js';
+import {initHighlighterBackground} from './highlighterBackground.js';
+initHighlighterBackground()
 //import {listenForConnections} from './messaging/polling.js';
 import ContextMenus from './ContextMenus.js';
 console.log('Extension last built at BUILD_TIME')
