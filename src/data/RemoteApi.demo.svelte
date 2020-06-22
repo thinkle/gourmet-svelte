@@ -8,7 +8,7 @@
  import {Button,JsonDebug} from '../widgets/'
 
  let apiResponse
- netlifyIdentity.init();
+ //netlifyIdentity.init();
 
  $: isLoggedIn = !!$user
  $: username = $user !== null ? $user.username : ' there!'
