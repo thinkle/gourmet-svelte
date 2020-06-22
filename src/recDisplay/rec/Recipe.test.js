@@ -4,7 +4,7 @@ import { testRecs } from '../../common/mocks/recipes.js'
 import deepcopy from 'deepcopy';
 
 it('Recipe renders', () => {
-    const {getByText,getById} = render(RecipeDemo);
+    render(RecipeDemo);
     
     //render(Recipe)
   // //  const increment = getByText('increment')
