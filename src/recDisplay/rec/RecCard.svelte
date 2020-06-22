@@ -193,18 +193,6 @@
 
      }
 
-     /* Overflow has pretty ellipses, but then scrolls awkwardly
-      on hover so we can see data if we really want to */
-     /*.#{$name} .info :global(*) {
-         max-width: $width - 2 * $pad;
-         text-overflow: ellipsis;
-         white-space: nowrap;
-     }
-
-     .#{$name} .info :global(*):hover {
-         white-space: break-spaces; 
-     }
-     */
      .#{$name}.hasImage .info :global(*) {
          max-width: $width - $image - $pad;
      }
@@ -249,6 +237,7 @@
 
 
  .info {
+     min-width: 1px; /* https://css-tricks.com/preventing-a-grid-blowout/ */
      grid-area: info;
      padding-left: $pad;
      padding-right: $pad;
@@ -268,6 +257,7 @@
 
  .title {
      grid-area: title;
+     min-width: 1px;
  }
  .left {
      grid-area: left;
