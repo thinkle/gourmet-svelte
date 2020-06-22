@@ -16,7 +16,7 @@
  }
 </script>
 
-<Tester name="Ingredient Input" initialShow={initialShow}>
+
     <label on:click={()=>ii.focus()}>Ing:</label>
     <p>Set from text: </p>
     <IngredientInput bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
@@ -26,5 +26,14 @@
     <p>Set from ingredient, with onChange call only (no onInput or we screw up typing)</p>
     <IngredientInput ing={ing} onChange={(val)=>ing=val} />
     <p>Ing={JSON.stringify(ing)}</p>
-</Tester>
+    <hr>
+    <div>
+        <h2>Constrained width...</h2>
+        <div style="width: 170px">
+            <IngredientInput bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
+        </div>
+    </div>
+
+
+
 
