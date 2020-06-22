@@ -305,10 +305,10 @@ function addSourceIfMissing (recipe, context) {
 
 
 function extractUrlFromText (text) {
-    let liberalUrlMatcher = /(?<url>[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*))/;
+    let liberalUrlMatcher = /([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*))/;
     let m = text.match(liberalUrlMatcher);
     if (m) {
-        let url = m.groups.url
+        let url = m[0]
         text = text.replace(liberalUrlMatcher,'')
         text = text.replace(/^\s*(\W+\s*)+/,'')
         text = text.replace(/\s*(\W+\s*)+$/,'')
