@@ -29,13 +29,13 @@
      netlifyIdentity.logout();
  }
 
- function doLogin () {
-     netlifyIdentity.init();
+async function doLogin () {
+     await netlifyIdentity.init();
      netlifyIdentity.open('login');
  }
 
- function doSignup () {
-     netlifyIdentity.init();
+async function doSignup () {
+     await netlifyIdentity.init();
      netlifyIdentity.open('signup');
  }
 
@@ -162,11 +162,13 @@
                         <button on:click="{doLogin}">Re-Login</button>
                     </StatusIcon>
                 {/if}
-                <ModalLauncher key="user" modalVisible="{showUserSettings}">
-                    <Button bare="true" on:click="{()=>showUserSettings=true}">
-                        Account Settings
-                    </Button>
-                </ModalLauncher>
+                {#if $user}
+                    <ModalLauncher key="user" modalVisible="{showUserSettings}">
+                        <Button bare="true" on:click="{()=>showUserSettings=true}">
+                            Account Settings
+                        </Button>
+                    </ModalLauncher>
+                {/if}
                 <slot name="leftnav"/>
             </nav>
             <nav slot='center' class='brand'>Gourmet</nav>
