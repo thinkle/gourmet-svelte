@@ -125,8 +125,8 @@
  $fonts : (
      xs : 14px,
      sm : 16px,
-     md : 24px,
-     lg : 36px,
+     md : 22px,
+     lg : 28px,
      xl : 38px,
  );
 
@@ -180,16 +180,16 @@
      }
 
      .#{$name} h2 span {
-         font-size: $fs;
+         font-size: $fs*1.3;
          display: -webkit-box;
-         -webkit-line-clamp: 4;
+         -webkit-line-clamp: 3;
          -webkit-box-orient: vertical;
          overflow: hidden;
          text-overflow: ellipsis;
      }
 
      .#{$name} .info :global(span) {
-         font-size: $fs*0.8;
+         font-size: $fs;
 
      }
 
