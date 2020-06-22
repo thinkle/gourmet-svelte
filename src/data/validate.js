@@ -116,7 +116,7 @@ export function prepRecRemote (r,user) {
     function crawlIngsForIds (ii) {
         ii.forEach(
             (i) => {
-                if (i.reference) {
+                if (i.reference && !i.referenceExists) {
                     i.reference = makeId(i.reference,user);
                 }
             }
