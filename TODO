@@ -95,13 +95,14 @@
 - Fix recipe display / width issues (x)
 - Fix up placeholders/empty state (x)
 
+- Build extension recipe highlighting magic (x)
+- Fix RegExps for Firefox compatability (x)
+
 TODO:
 - Fix Mark User Not New (?)
-- Fix Log-In and Auto-Sync process (!!!)
+- Fix Log-In and Auto-Sync process (?)
 
-
-
-- Fix RegExps for Firefox compatability
+- Build smart auto-complete for category and source fields.
 
 - Save "purchased" state of shopping list items 
 - Troubleshoot issues w/ shopping list not seeming to sync correctly.
@@ -109,7 +110,8 @@ TODO:
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
   up. (speaking of - we broke recipe editing state updates again
-  somehow???) 
+  somehow???)  (YES -- just broke sidebar w/ a recipe change by accident. Worth
+  automated testing of these components with empty state / bad data / good data)
   
 - Improve magic ingredient editor code (change on the fly?)
 - Sync from local to cloud...
@@ -118,3 +120,5 @@ TODO:
 
 - Consider implementing new Request API to add error-checking and clearer code to requests.
    -> mocked up in Request.js
+
+- Consider moving more work to webworkers? e.g. recipe parsing?
