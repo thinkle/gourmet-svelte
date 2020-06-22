@@ -56,8 +56,12 @@
                         identityReady = true;
                         if (onInitAction) {
                             onInitAction();
+                            console.log('and a 2');
+                            onInitAction();
+                            console.log('and a 3');
+                            setTimeout(()=>onInitAction(),10);
                         }
-                    });
+ });
 
  netlifyIdentity.on('login',
                     u => {
