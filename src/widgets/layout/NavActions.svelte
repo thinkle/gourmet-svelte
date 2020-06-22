@@ -23,6 +23,7 @@
      list-style :none;
      margin-right: 3px;
      margin-left: 3px;
+     display: flex;
  }
  
  @media (max-width: 768px) {
