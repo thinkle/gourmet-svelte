@@ -105,6 +105,7 @@
   that recipe remotely if it's not already saved (3) change local IDs
   to remote IDs (4) save remotely (5) update local copy w/ new IDs (x)
 
+- Improve magic ingredient editor code (change on the fly?) (x)
 
 TODO:
 - Fix Mark User Not New (?)
@@ -120,11 +121,9 @@ TODO:
   up. (speaking of - we broke recipe editing state updates again
   somehow???)  (YES -- just broke sidebar w/ a recipe change by accident. Worth
   automated testing of these components with empty state / bad data / good data)
-  
-- Improve magic ingredient editor code (change on the fly?)
-- Sync from local to cloud...
-- Export to file
 
+- Sync from local to cloud... (partially done)
+- Export to file
 
 - Consider implementing new Request API to add error-checking and clearer code to requests.
    -> mocked up in Request.js
