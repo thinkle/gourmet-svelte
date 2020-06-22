@@ -2,8 +2,8 @@
  export let items
  import {flip} from 'svelte/animate';
  import {JsonDebug,
-         Button,
-         IconButton} from '../widgets/';
+        Button,
+        IconButton} from '../widgets/';
 
  import ShoppingListItem from './ShoppingListItem.svelte';
  
@@ -14,6 +14,7 @@
  let uniqueItems = []
 
  import {crossfade} from 'svelte/transition';
+ import {onMount} from 'svelte'
 
  let [send,receive] = crossfade({duration:300});
 
@@ -81,12 +82,34 @@
  $: shoppingItems = uniqueItems.filter((i)=>!i.ignore);
  $: ignoredItems = uniqueItems.filter((i)=>i.ignore);
  
+ 
+ let animating
+
+ onMount(
+     ()=>{
+         let t = setTimeout(()=>animating=true,2500);
+         return ()=>{
+             clearTimeout(t)
+         }
+     }
+ );
+ 
+ function maybeFlip (node, { from, to }, params) {
+     if (animating) {return flip(node,{from,to},params)}
+     else {
+         return {
+	     delay: 0,
+	     duration: 0,
+	     css: (t, u) => ''
+         };
+     }
+ }
 
 </script>
 
 <table>
     {#each shoppingItems as item (item.item)}
-        <tbody animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}">
+        <tbody animate:maybeFlip in:receive|local="{{key:item.item}}" out:send|local="{{key:item.item}}">
             <ShoppingListItem {showSubItems} {item}/>
         </tbody>
     {:else}
@@ -103,7 +126,7 @@
             </td>
         </tr>
         {#each ignoredItems as item (item.item)}
-            <tbody class="ignore" animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}">
+            <tbody class="ignore" animate:flip in:receive="{{key:item.item}}" out:send="{{key:item.item}}"> 
                 <ShoppingListItem ignored={true} {showSubItems} {item}/>
             </tbody>
         {/each}
