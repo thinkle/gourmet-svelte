@@ -1,5 +1,5 @@
 import {floatToFrac, fracToFloat, rangeMatcher, rangeMatcherString, numberMatcher, numMatchString,
-        increment, decrement, parseAmount,
+        increment, decrement, parseAmount, firstRangeGroup, secondRangeGroup
        } from './numbers.js'
 
 it(
@@ -26,30 +26,39 @@ it(
 it(
     'Range matchers',
     ()=>{
-        //console.log('Testing range matcher:',rangeMatcher.toString().substr(0,500),'...')
-        console.log('That was big!')
-        //console.log(rangeMatcher)
         let m = '4 - 6'.match(rangeMatcher);
         expect(m).toBeTruthy()
-        expect(m.groups.first).toEqual('4')
-        expect(m.groups.second).toEqual('6')
+        //expect(m.groups.first).toEqual('4')
+        expect(m[firstRangeGroup]).toEqual('4')
+        //expect(m.groups.second).toEqual('6')
+        expect(m[secondRangeGroup]).toEqual('6')
         m = '1 to 2'.match(rangeMatcher);
         expect(m).toBeTruthy()
-        expect(m.groups.first).toEqual('1')
-        expect(m.groups.second).toEqual('2')
+        //expect(m.groups.first).toEqual('1')
+        expect(m[firstRangeGroup]).toEqual('1')
+        //expect(m.groups.second).toEqual('2')
+        expect(m[secondRangeGroup]).toEqual('2')
         m = '1 1/2 to 3'.match(rangeMatcher);
         expect(m).toBeTruthy()
-        expect(m.groups.first).toEqual('1 1/2')
-        expect(m.groups.second).toEqual('3')
+        //expect(m.groups.first).toEqual('1 1/2')
+        expect(m[firstRangeGroup]).toEqual('1 1/2')
+        //expect(m.groups.second).toEqual('3')
+        expect(m[secondRangeGroup]).toEqual('3')
         m = 'three to four'.match(rangeMatcher);
         expect(m).toBeTruthy()
-        expect(m.groups.first).toEqual('three')
-        expect(m.groups.second).toEqual('four')
+        //expect(m.groups.first).toEqual('three')
+        expect(m[firstRangeGroup]).toEqual('three')
+        //expect(m.groups.second).toEqual('four')
+        expect(m[secondRangeGroup]).toEqual('four')
         m = 'twelve to seventeen'.match(rangeMatcher);
         expect(m).toBeTruthy()
-        expect(m.groups.first).toEqual('twelve')
-        expect(m.groups.second).toEqual('seventeen')
-
+        //expect(m.groups.first).toEqual('twelve')
+        expect(m[firstRangeGroup]).toEqual('twelve')
+        //expect(m.groups.second).toEqual('seventeen')
+        expect(m[secondRangeGroup]).toEqual('seventeen')
+        m = '3 1/2–4 1/2'.match(rangeMatcher); // NBSP
+        expect(m[firstRangeGroup]).toEqual('3 1/2')
+        expect(m[secondRangeGroup]).toEqual('4 1/2')
     }
 );
 
