@@ -253,7 +253,7 @@
         {/if}
     </table>
 </div>
-{#if (!recursive)}
+{#if (!recursive && false)} <!-- Turn off width-determination -- not using it anyway -->
     <div class="invisible">
         <svelte:self
             bind:this={invisibleCopy}
