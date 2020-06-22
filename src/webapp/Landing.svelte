@@ -34,7 +34,10 @@
 
  async function doLogin () {
      if (!identityReady) {
-         onInitAction = ()=>netlifyIdentity.open('login')
+         onInitAction = ()=>{
+             netlifyIdentity.open();
+             netlifyIdentity.open('login');
+         }
          netlifyIdentity.init();
      } else {
          netlifyIdentity.open('login');
