@@ -98,6 +98,14 @@
 - Build extension recipe highlighting magic (x)
 - Fix RegExps for Firefox compatability (x)
 
+- Shopping lists don't transfer properly between browsers since they
+  use local IDs atm. The "right" fix is probably to automatically fix
+  all recipe references when saving remotely, which means when we save
+  an item with a remote recipe, we (1) check for remote ID (2) save
+  that recipe remotely if it's not already saved (3) change local IDs
+  to remote IDs (4) save remotely (5) update local copy w/ new IDs (x)
+
+
 TODO:
 - Fix Mark User Not New (?)
 - Fix Log-In and Auto-Sync process (?)
@@ -122,3 +130,4 @@ TODO:
    -> mocked up in Request.js
 
 - Consider moving more work to webworkers? e.g. recipe parsing?
+- Fix sorting in firefox?
