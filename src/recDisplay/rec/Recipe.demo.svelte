@@ -8,6 +8,7 @@
      console.log('Recipe change',v)
      change+=1
  }
+ let recname = 'standard' // hard-coded into Recipe.test.js
 </script>
 
 <FullScreen scrolls="{false}">
