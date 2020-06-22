@@ -10,3 +10,7 @@ export function reEscape (s) {
         .replace(/[*]/g,'[*]')
         .replace(/[.]/g,'[.]');
 }
+
+export function countGroupsInRegexp (s) {
+    return ' '.match(new RegExp(s+'||\\s')).length
+}
