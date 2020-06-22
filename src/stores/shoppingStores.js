@@ -10,14 +10,13 @@ export let localShopRec = writable() // holds the shopping list recipe
 
 let sl = derived(
     [localShopRec,localRecipes],
-    ([$localShopRec,$localRecipes],set) => {
-        console.log('Re-create derived shopping list store');
+    async ([$localShopRec,$localRecipes],set) => {
         if (!$localShopRec) {
             set([]);
         } else {
             //console.log('Crawling recipes for ingredients...',$localShopRec,new Date().getTime());
             let allItems = [];
-            crawlIngredients($localShopRec.ingredients,{title:'Shopping List',isTheShoppingList:true,id:-1},$localRecipes,allItems,1,[$localShopRec.id]);
+            await crawlIngredients($localShopRec.ingredients,{title:'Shopping List',isTheShoppingList:true,id:-1},$localRecipes,allItems,1,[$localShopRec.id]);
             set(allItems);
             //console.log('Set!',allItems.length,'items',new Date().getTime());
         }
@@ -44,13 +43,10 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
             await crawlIngredients(ingredient.ingredients,source,$localRecipes,items,multiplier,parentRecs);
         } else if (ingredient.reference) {
             if (parentRecs.includes(ingredient.reference)) {
-                console.log('Avoiding recursive crawl on',ingredient.reference);
                 return
             }
-            //console.log('Lookup recipe for ',ingredient.reference);
             let recipe = $localRecipes[ingredient.reference];
             if (!recipe) {
-                console.log('Fetch sub-rec...',ingredient.reference,ingredient.text);
                 localRecipes.open(ingredient.reference); // will trigger derived to run again...
             }
             if (recipe && recipe.ingredients) {
@@ -59,9 +55,6 @@ async function crawlIngredients (ingredientList,source,$localRecipes,items,multi
                     recMultiplier = ingredient.amount.amount
                 }
                 crawlIngredients(recipe.ingredients,recipe,$localRecipes,items,recMultiplier,[...parentRecs,recipe.id]);
-            }
-            else {
-                //console.log('WARNING: DID NOT FIND LINKED RECIPE FOR ITEM',ingredient,'from',source);
             }
         } else {
             items.push({source,
@@ -89,20 +82,16 @@ export const shoppingList = {
         );
         //let count = 0; let result;
         if (count) {
-            console.log('using stored SL, search results:',result,count);
             r = result[0];
         } else {
-            console.log('Creating SL anew');
             // If it doesn't exist, create one...
             r = await recipeActions.createRecipe(
                 {title:'Shopping List',
                  ingredients:[],
                  isShoppingList:1}
             )
-            console.log('Created',r);
         }
         // make local copy...
-        console.log('Storing',r);
         storedShopRec.update(()=>r);
         localShopRec.update(()=>deepcopy(r));
     },
@@ -175,7 +164,6 @@ export const shoppingList = {
     },
 
     setShopItem (item, shopItem, shopIgnore) {
-        console.log('setShopItem',item,shopItem,shopIgnore);
         if (!item.source) {
             throw new Error('item must have source to change shopitem');
         }
