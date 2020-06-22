@@ -7,7 +7,7 @@ import {user} from '../stores/userStore.js';
 import status from '../stores/statusStore.js';
 import {prepRecLocal} from '../data/validate.js';
 import {jsonConcisify} from '../utils/textUtils.js';
-import {writable} from 'svelte/store'
+import {writable,get} from 'svelte/store'
 import {getContext} from 'svelte';
 let remoteApi;
 
@@ -32,6 +32,56 @@ user.subscribe(
         }
     })
 
+function crawlForReferences (inglist) {
+    let refs = []
+    for (let i of inglist) {
+        if (i.reference) {refs.push(i)}
+        if (i.ingredients) {
+            refs = [...refs,...crawlForReferences(i.ingredients)];
+        }
+    }
+    return refs;
+}
+
+export function isLocalID (id) {
+    if (isNaN(Number(id))) {
+        // mongo IDs are strings
+        return false
+    } else {
+        // IndexedDB IDs are Numbers
+        return true;
+    }
+}
+
+async function checkForReferences (recipe) {
+    if (!get(connectedRemote)) {
+        console.log("Not connected = don't bother trying to get remote IDs");
+    }
+    let references = crawlForReferences(recipe.ingredients);
+    console.log('Found ',references.length,'references',references);
+    for (let ing of references) {
+        if (isLocalID(ing.reference)) {
+            let targetRec = await localApi.getRecipe(ing.reference);
+            if (targetRec._id) {
+                //console.log('Changing to remote ID',ing.reference,'=>',targetRec._id);
+                ing.reference = targetRec._id;
+                ing.referenceExists = true;
+            } else {
+                //console.log('Trying to save linked recipe...');
+                let targetRec = await api.updateRecipe(targetRec,false); // don't update timestamp
+                if (targetRec._id) {
+                    //console.log('Successfully got new ID...',targetRec._id);
+                    ing.reference = targetRec._id
+                    ing.referenceExists = true;
+                } else {
+                    console.log("Unable to save linked recipe remotely - maybe we're syncing several new recipes at once?");
+                    console.log(ing.reference,ing);
+                }
+            }
+        }
+    }
+}
+
 const api = {
     ...localApi,
 
@@ -41,6 +91,7 @@ const api = {
         recipe.last_modified = new Date().getTime();
         let recid = await localApi.addRecipe(recipe)
         recipe.id = recid;
+        await checkForReferences(recipe)
         try {
             let remoteRec = await remoteApi.addRecipe(recipe);
             remoteRec.savedRemote = true;
@@ -56,6 +107,7 @@ const api = {
     },
     async updateRecipe (recipe,updateTimestamp=true) {
         if (updateTimestamp) {recipe.last_modified = new Date().getTime();}
+        await checkForReferences(recipe)
         if (recipe._id) {
             try {
                 let remoteRec = await remoteApi.updateRecipe(recipe);
