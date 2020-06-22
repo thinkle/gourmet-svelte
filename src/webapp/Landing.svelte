@@ -24,20 +24,39 @@
  // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
 
+ let identityReady = false;
+ let onInitAction;
+
  function doLogout () {
      user.logout()
      netlifyIdentity.logout();
  }
 
-async function doLogin () {
-     await netlifyIdentity.init();
-     netlifyIdentity.open('login');
+ async function doLogin () {
+     if (!identityReady) {
+         onInitAction = ()=>netlifyIdentity.open('login')
+         netlifyIdentity.init();
+     } else {
+         onInitAction = ()=>netlifyIdentity.open('login')
+     }
  }
 
-async function doSignup () {
-     await netlifyIdentity.init();
-     netlifyIdentity.open('signup');
+ async function doSignup () {
+     if (!identityReady) {
+         onInitAction = ()=>netlifyIdentity.open('signup')
+         netlifyIdentity.init();
+     } else {
+         onInitAction = ()=>netlifyIdentity.open('signup')
+     }
  }
+
+ netlifyIdentity.on('init',
+                    ()=>{
+                        console.log('Identity ready!')
+                        if (onInitAction) {
+                            onInitAction();
+                        }
+                    });
 
  netlifyIdentity.on('login',
                     u => {
