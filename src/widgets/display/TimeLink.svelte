@@ -38,7 +38,7 @@
 </script>
 
 <label>
-    {#if label}<OneLiner>{label.replace(/[.;:?,!]$/,'')}:</OneLiner>{/if}
+    {#if label}{label.replace(/[.;:?,!]$/,'')}{/if}
 </label>
 <div bind:this={ref} on:click="{(e)=>e.preventDefault()}">
     {#if show}
