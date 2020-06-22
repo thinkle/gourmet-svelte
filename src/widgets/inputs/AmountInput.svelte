@@ -1,10 +1,12 @@
 <script>
+ export let value;
+ export let showPlusMinusButtons=false
+ export let ariaLabel='amount'
+
  import {floatToFrac,fracToFloat,increment,decrement} from '../../utils/numbers.js';
  import {IconButton} from '../index.js';
  const DOWNCODES = [40,189]
  const UPCODES = [38,187]
- export let value;
- export let showPlusMinusButtons=false
  let useUnicode = true;
  let displayValue;
  $: displayValue = floatToFrac(value,{unicodeFractions:useUnicode});
@@ -69,6 +71,7 @@
 </script>
 <span class:buttonMode={showPlusMinusButtons}>
     <input
+        aria-label="{ariaLabel}"
         on:blur={()=>useUnicode=true}
                 on:focus={()=>useUnicode=false}
         on:keyup="{oninput}" bind:value={displayValue} width=2 on:keydown={onkey} on:change={onchange} >
