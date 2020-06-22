@@ -24,9 +24,18 @@
  // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
 
-  onMount(
-     ()=>netlifyIdentity.init()
-  );
+ let netlifyStarted = false
+
+ onMount(
+     ()=>{
+         console.log('Landing onMount!')
+         if (!netlifyStarted) {
+             console.log('Netlify init!')
+             //debugger;
+             //netlifyIdentity.init()
+         }
+     }
+ );
 
  function doLogout () {
      user.logout()
@@ -39,7 +48,7 @@
 
  async function doSignup () {
      netlifyIdentity.open('signup');
-  }
+ }
 
 
  netlifyIdentity.on('login',
@@ -52,8 +61,16 @@
                             location.reload();
                         } else {
                         }
-                        
  });
+ netlifyIdentity.on('init',
+                    u=>{
+                        console.log('Init done!',u)
+                        debugger;                        
+                        if (u) {user.login(u);}
+                        netlifyIdentity.close();
+                        netlifyStarted = true;
+ })
+ 
  
  netlifyIdentity.on('init', user => console.log('init', user));
  netlifyIdentity.on('login', user => console.log('login', user));
@@ -140,7 +157,7 @@
  
  function checkForNetlifyToken () {
      console.log('Check for token?')
-     netlifyIdentity.init();
+     if (!netlifyStarted) {netlifyIdentity.init();}
  }
 
 </script>
