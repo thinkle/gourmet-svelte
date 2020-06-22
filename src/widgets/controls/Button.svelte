@@ -6,7 +6,7 @@
  export let toggle=false;
  export let toggled=false;
  export let rtl=false;
- export let width;
+ export let width=undefined;
  export let fontSize=undefined;
  export let small=undefined;
  export let disabled=undefined;
