@@ -53,6 +53,7 @@
  netlifyIdentity.on('init',
                     ()=>{
                         console.log('Identity ready!')
+                        identityReady = true;
                         if (onInitAction) {
                             onInitAction();
                         }
