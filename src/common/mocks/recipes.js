@@ -16,6 +16,7 @@ let testRecs = {
                     "text": "Samosas",
                     "ingredients": [
                         {
+                            // built into test - do not change!
                             "text": "diced and peeled potato",
                             "amount": {
                                 "amount": 3,
