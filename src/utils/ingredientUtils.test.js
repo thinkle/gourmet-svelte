@@ -16,7 +16,7 @@ it(
         expect(extractItems('the MINCED GARLIC')).toEqual(['GARLIC']);
         expect(extractItems('the chopped garlic')).toEqual(['garlic']);
         expect(extractItems('the chopped garlic mustard')).toEqual(['garlic','mustard']);        
-        expect(extractItems('peppers, chopped finely and stems discarded')).toEqual(['peppers','stems']);
+        expect(extractItems('peppers, chopped finely and stems discarded')).toEqual(['peppers']);
     }
 );
 
