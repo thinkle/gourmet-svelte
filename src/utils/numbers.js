@@ -13,6 +13,7 @@
 //     }
 // });
 import Amounts from './unitAmounts.js'; 
+import {countGroupsInRegexp} from './regExpUtil.js';
 
 var NUMBER_WORDS = [
     {matcher:/\b(one|a)\b/i,
@@ -250,37 +251,16 @@ var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`
 var fracMatchString = `(${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}|\\d[/⁄]\\d)`
 numMatchString = `${numMatchString}(\\s+${fracMatchString})?`
 var numberMatcher = new RegExp(numMatchString,'i');
-var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})` // FF doesn't support named groups :(
-//var rangeMatcherString = `(${numMatchString})(\\s*(to|or|-|:|–|—|―)\\s*)(${numMatchString})`
-
+//var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})` // FF doesn't support named groups :(
+var rangeMatcherString = `(${numMatchString})(\\s*(to|or|-|:|–|—|―)\\s*)(${numMatchString})`
 var rangeMatcher = new RegExp(rangeMatcherString,'i')
-var groupsInNumMatcher = ' '.match(new RegExp(numMatchString+'|\\s')).length
-var groupsInRangeMatcher = ' '.match(new RegExp(rangeMatcherString+'|\\s')).length
-//var firstRangeGroup = 1
-//var secondRangeGroup = 1 + groupsInNumMatcher + 1 + 1 + 1  // container group for first number + all the number groups for that number + range group + 1 + 1
-function incrementOld (value) {
-     var nextOne = false;
-     if (value < 1) {
-         for (let f of fractions) {
-             if (value < f) {
-                 return f
-             }
-         }
-         return 1 // up to one if nothing else
-     }
-     else if (value < 10) {
-         return value + 1;
-     }
-     else if (value < 50) {
-         return round(value,5) + 5;
-     }
-     else if (value < 200) {
-         return round(value,10) + 10;
-     }
-     else {
-         return round(value,50) + 50;
-     }
- }
+
+const groupsInRangeExpression = 2
+var groupsInNumMatcher = countGroupsInRegexp(numMatchString)
+//const groupsInRangeMatcher = countGroupsInRegexp(rangeMatcherString)
+export const firstRangeGroup = 1 // 0 is the whole thing, 1 is next...
+// container group for first number + all the number groups for that number + range group + 1 + 1
+export const secondRangeGroup = firstRangeGroup + groupsInNumMatcher + groupsInRangeExpression
 
  function roundDown (v, n) {
      return Math.floor(v/n)*n
@@ -375,10 +355,14 @@ function parseAmount (s) {
     let match
     // If our rangeMatch is first in the string, use it...
     if (rangeMatch && (!numberMatch || rangeMatch.index <= numberMatch.index)) {
-        amount.rangeAmount = fracToFloat(rangeMatch.groups.first);
-        amount.amount = fracToFloat(rangeMatch.groups.second);
-        amount.textAmount = rangeMatch.groups.second
-        amount.textRangeAmount = rangeMatch.groups.first
+        // amount.rangeAmount = fracToFloat(rangeMatch.groups.first);
+        // amount.amount = fracToFloat(rangeMatch.groups.second);        
+        // amount.textAmount = rangeMatch.groups.second
+        // amount.textRangeAmount = rangeMatch.groups.first
+        amount.textRangeAmount = rangeMatch[firstRangeGroup]
+        amount.textAmount = rangeMatch[secondRangeGroup]
+        amount.rangeAmount = fracToFloat(amount.textRangeAmount)
+        amount.amount = fracToFloat(amount.textAmount)
         match = rangeMatch
     } else if (numberBeforeUnitMatch) {
         // maybe we should just use the first number -- but let's try a
