@@ -11,12 +11,12 @@
      StatusIcon,
      Bar,
  } from '../widgets/';
- import {setContext} from 'svelte';
+ import {setContext,onMount} from 'svelte';
  import netlifyIdentity from 'netlify-identity-widget';
  import { user, redirectURL } from '../stores/userStore.js';
  import remoteApi from '../data/remoteApi.js';
  import User from '../account/User.svelte';
- 
+
  let adminMode = false;
 
 
@@ -24,8 +24,9 @@
  // || window.location.host.indexOf('localhost')>-1
  $: username = $user !== null ? $user.username : ' there!'
 
- let identityReady = false;
- let onInitAction;
+  onMount(
+     ()=>netlifyIdentity.init()
+  );
 
  function doLogout () {
      user.logout()
@@ -33,38 +34,13 @@
  }
 
  async function doLogin () {
-     if (!identityReady) {
-         onInitAction = ()=>{
-             netlifyIdentity.open();
-             netlifyIdentity.open('login');
-         }
-         netlifyIdentity.init();
-     } else {
-         netlifyIdentity.open('login');
-     }
+     netlifyIdentity.open('login');
  }
 
  async function doSignup () {
-     if (!identityReady) {
-         onInitAction = ()=>netlifyIdentity.open('signup')
-         netlifyIdentity.init();
-     } else {
-         netlifyIdentity.open('signup');
-     }
- }
+     netlifyIdentity.open('signup');
+  }
 
- netlifyIdentity.on('init',
-                    ()=>{
-                        console.log('Identity ready!')
-                        identityReady = true;
-                        if (onInitAction) {
-                            onInitAction();
-                            console.log('and a 2');
-                            onInitAction();
-                            console.log('and a 3');
-                            setTimeout(()=>onInitAction(),10);
-                        }
- });
 
  netlifyIdentity.on('login',
                     u => {
