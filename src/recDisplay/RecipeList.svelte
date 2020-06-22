@@ -285,7 +285,7 @@
         {/each}
         {#each [1,2,3] as i}
             <div class="card filler">
-                <RecCard size="sm" rec="{{}}"
+                <RecCard size="{size}" rec="{{}}"
                 >
                 </RecCard>
             </div>
