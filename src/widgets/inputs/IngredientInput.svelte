@@ -174,18 +174,21 @@
 </script>
 
 <div on:focusin="{onFocus}" on:focusout="{onFocusOut}" class="contain" class:withButton="{showAddButton}">
+    {#if parsed && parsed.amount && ref && showFeedback}
+    <div class="anchor">
+        <div class="input realtime-feedback">
+            {@html getMarkup(ref.innerText,parsed,text)}
+            <!-- <br>Shopping Item: <input on:change={updateShopItem} value={parsed['shopItem']||getShopItem(parsed)}> -->
+        </div>
+    </div>
+    {/if}
+
     <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input"
          placeholder="{placeholder}"
     >
     </div>
     {#if showAddButton}
         <IconButton bare={true} icon="add" on:click="{doSubmit}" />
-    {/if}
-    {#if parsed && parsed.amount && ref && showFeedback}
-        <div class="input realtime-feedback">
-            {@html getMarkup(ref.innerText,parsed,text)}
-            <!-- <br>Shopping Item: <input on:change={updateShopItem} value={parsed['shopItem']||getShopItem(parsed)}> -->
-        </div>
     {/if}
     <!-- 
          <div class:showFeedback="{showFeedback && parsed}" class="realtime-feedback">
@@ -196,14 +199,17 @@
 <style>
  .realtime-feedback {
      background-color: var(--white);
-     color: var(--black);
+     color: var(--grey);
      position: absolute;
-     bottom : 2em;
+     bottom : 3px;
      left: 0;
-     opacity: 0.8;
+     opacity: 1;
      font-size: var(--xsmall);
+     padding-top: var(--xsmall);
  }
- .contain {
+ .anchor {
+     height:0px;
+     width:100%;
      position: relative;
  }
  .realtime-feedback {
@@ -249,7 +255,7 @@
      background-color: white;
      content : 'unit';
      position: absolute;
-     top : calc(-1.2 * var(--xsmall));
+     top : calc(-1.2 * var(--xsmall));     
      left : 0;
      font-size: var(--xsmall);
  }
