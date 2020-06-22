@@ -7,7 +7,7 @@
  export let showShopping = true;
  export let editMode = false;
  export let editable = true;
- export let onEditToggle
+ export let onEditToggle = undefined
  export let minPropWidth = 150;
  export function setEditMode (val) {
      editMode = val;
@@ -54,7 +54,6 @@
          onEditToggle(editMode);
      }
      if (!rec) {return}
-     console.log('handle toggle',editMode)
      for (let prop of RecDef.recProps) {
          if (editMode) {
              // check for empty props and populate them...
@@ -69,13 +68,8 @@
                  prop.array &&
                  JSON.stringify(rec[prop.name]) == JSON.stringify(prop.empty)
              ) {
-                 console.log('Remove empty prop:',prop.name)
                  delete rec[prop.name]; // remove the prop...
-             } else if (rec[prop.name]) {
-                 console.log('Looks like a real value: ',prop.name,rec[prop.name],'!=',prop.empty);
-                 console.log('Empty:',JSON.stringify(prop.empty));
-                 console.log('Full?:',JSON.stringify(rec[prop.name]))
-             }
+             } 
          }
      }
      rec = rec;
@@ -226,6 +220,7 @@
             <div class='multiplier'>
                 &times;
                 <AmountInput
+                    ariaLabel="multiply by"
                     value="{$multiplier}"
                     on:change="{(e)=>$multiplier=e.detail}"
                     showPlusMinusButtons="{true}"
