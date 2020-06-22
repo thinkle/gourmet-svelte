@@ -191,7 +191,15 @@
  }
 
 
- const {doLogin} = getContext('login')
+ let loginContext = getContext('login')
+ let doLogin
+ if (loginContext) {
+     let {doLogin} = loginContext;
+ } else {
+     doLogin = ()=>window.alert('No login context')
+ }
+
+     
 
 </script>
 
