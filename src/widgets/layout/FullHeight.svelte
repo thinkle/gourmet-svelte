@@ -1,5 +1,5 @@
 <script>
- export let scrolls;
+ export let scrolls=false;
 </script>
 <!-- Flex container may or may not scroll -->
 <section class:scrolls>
