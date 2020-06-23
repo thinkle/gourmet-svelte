@@ -18,14 +18,12 @@
 
  let originalValue;
 
- console.log('ing:',ing)
  export function getValue () {return parsed}
  export function clear () {
      text=''
      ing=undefined;
  }
  export function focus () {
-     console.log('Called focus!');
      ref.focus()
      shouldFocus = false; // only do this once
  }
@@ -101,7 +99,6 @@
 
  function doSubmit () {
      if (onEnter) {
-         console.log('Fire on enter!');
          let result = onEnter(parsed);
          if (result) {
              clear()
@@ -123,18 +120,15 @@
  function markupAndChange () {
      markup()
      if (onChange) {
-         console.log('Ingredient Input: Fire change!');
          onChange(parsed);}
  }
 
  function onFocus  () {
-     console.log('focus!')
      showFeedback = true;
      ref.innerHTML = ref.innerText
  }
 
  function onFocusOut () {
-     console.log('focus out!')
      ref.innerHTML = getMarkup()
      showFeedback = false;
  }
