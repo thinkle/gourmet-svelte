@@ -16,6 +16,17 @@
  export let busy=false;
  export let disabled=false;
  export let width=undefined;
+ export let ariaLabel=undefined;
+
+ const autoLabel = {
+     'close' : 'close',
+     'delete' : 'delete',
+     
+ }
+
+ if (!ariaLabel) {
+     ariaLabel = autoLabel[icon] || icon && icon.replace('_',' ');
+ }
  
  export function focus () {
      b.focus()
@@ -45,6 +56,7 @@
     {small}
     {compact}
     {width}
+    {ariaLabel}
     rtl="{left}"
     on:click
     on:focus
