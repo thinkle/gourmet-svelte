@@ -9,8 +9,13 @@
  export let shouldFocus=undefined;
  export let showAddButton=false;
  export let placeholder="e.g. 1 cup sugar…"
+ export let multipliable=true;
+
+
+ 
  import {IconButton,NumberUnitDisplay,PlainInput} from '../index.js';
  import {getShopItem} from '../../utils/ingredientUtils.js';
+
  let originalValue;
 
  console.log('ing:',ing)
@@ -25,11 +30,11 @@
      shouldFocus = false; // only do this once
  }
 
- import {parseAmount,formatAmount} from '../../utils/numbers.js';
+ import {floatToFrac,formatAmount,parseAmount} from '../../utils/numbers.js';
  import {parseUnit} from '../../utils/unitAmounts.js';
  let parsed;
  let ref
- import {onMount, tick} from 'svelte';
+ import {onMount, tick, getContext} from 'svelte';
  //import rangy from 'rangy'
  // rangy.init();
  let fireInputOnNextParse
@@ -148,7 +153,7 @@
  function markup () {
      // mark up text based on parsed...
      if (parsed.amount) {         
-              html = getMarkup();
+                  html = getMarkup();
                         }     
  }
 
@@ -170,23 +175,30 @@
  function updateShopItem (event) {
      shopItem = event.target.value
  }
+
+ let multiplier = getContext('multiplier');
  
 </script>
 
 <div on:focusin="{onFocus}" on:focusout="{onFocusOut}" class="contain" class:withButton="{showAddButton}">
     {#if parsed && parsed.amount && ref && showFeedback}
-    <div class="anchor">
-        <div class="input realtime-feedback">
-            {@html getMarkup(ref.innerText,parsed,text)}
-            <!-- <br>Shopping Item: <input on:change={updateShopItem} value={parsed['shopItem']||getShopItem(parsed)}> -->
+        <div class="anchor">
+            <div class="input realtime-feedback">
+                {@html getMarkup(ref.innerText,parsed,text)}
+                <!-- <br>Shopping Item: <input on:change={updateShopItem} value={parsed['shopItem']||getShopItem(parsed)}> -->
+            </div>
         </div>
-    </div>
     {/if}
 
     <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input"
          placeholder="{placeholder}"
     >
     </div>
+    {#if multipliable && multiplier && $multiplier!=1}
+        <span class="multiplied">
+            (&times;{floatToFrac($multiplier)}={formatAmount(parsed.amount,{multiplier:$multiplier})})
+        </span>
+    {/if}
     {#if showAddButton}
         <IconButton bare={true} icon="add" on:click="{doSubmit}" />
     {/if}
@@ -263,5 +275,10 @@
      content: attr(placeholder);
      color: #555; 
  } 
-
+ .multiplied {
+     display: inline-block;
+     padding-left: calc(var(--xsmall)*4);
+     font-size: var(--xsmall);
+     color: var(--grey);
+ }
 </style>
