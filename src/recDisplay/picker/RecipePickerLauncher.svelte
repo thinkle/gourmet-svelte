@@ -44,3 +44,8 @@
         onClose="{onCloseInternal}"/>
 {/if}
 
+<style>
+ div {
+     display: flex;
+ }
+</style>
