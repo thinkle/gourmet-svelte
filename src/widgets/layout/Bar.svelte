@@ -74,4 +74,16 @@
      overflow-x: scroll;
  }
 
+ .right :global(button) {
+     margin-left: 4px;
+ }
+ .left :global(button) {
+     margin-right: 4px;
+ }
+ .center :global(button) {
+     margin-left: 2px;
+     margin-right: 2px;
+ }
+
+
 </style>
