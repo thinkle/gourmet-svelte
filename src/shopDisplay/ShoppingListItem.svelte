@@ -175,6 +175,9 @@
      padding-top: 10px;
      padding-bottom: 10px;
  }
+ td td {
+     padding: 0; /* Not on nested ones though */
+ }
  small {
      font-size: var(--small);
  }
