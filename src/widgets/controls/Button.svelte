@@ -11,6 +11,7 @@
  export let small=undefined;
  export let disabled=undefined;
  export let compact=false; /* No padding, no margin */
+ export let ariaLabel=undefined;
  export function focus () {
      b.focus()
  }
@@ -34,8 +35,9 @@
     on:blur
     on:keypress
     on:keyup
-    bind:this={b}
+    bind:this="{b}"
     disabled="{disabled||busy}"
+    aria-label="{ariaLabel}"
 >
     {#if toggle}
         <span class:toggled></span>
