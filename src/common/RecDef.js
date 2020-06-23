@@ -164,6 +164,7 @@ var Metadata = {
 	 toHtml:(s)=>s&&s.url&&`<span><a target="_blank" href=${s.url}>${s.name||s.url.substr(0,30)}</a></span>`||s.name||'',
          empty:[{name:'',url:''}],
          array:true,
+         minEditWidth: 400,
          edit:LNK,
         },
 	{name:'times',
