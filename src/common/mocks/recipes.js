@@ -204,6 +204,7 @@ let testRecs = {
         title : "",
         times : [],
         categories : [],
+        sources: [],
         text : [{'header':'Instructions',body:''}],
         images : [],
         ingredients : [],
