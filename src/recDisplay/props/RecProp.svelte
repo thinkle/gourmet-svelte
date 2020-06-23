@@ -70,13 +70,13 @@
 </script>
 
 {#if (edit || hasValue(value))}
-    <div class="block" class:title={prop.isTitle} class:fullWidth={fullWidth}
-         on:dblclick="{turnEditOn}"
-    >
     <div
-        class:hideLabel="{prop.hideLabel}"
-        class:block="{prop.edit==modes.RCH}"
+        style="{`--available-width: ${floatWidth}px; --min-edit-width: ${prop.minEditWidth}`}"
+        class="block"
         class:title="{prop.isTitle}"
+        class:fullWidth="{fullWidth}"
+        on:dblclick="{turnEditOn}"
+        class:hideLabel="{prop.hideLabel}"
         class:editing="{edit}"
     >
         {#if (showLabel && (!prop.hideLabel)) || edit}
@@ -124,8 +124,6 @@
                 </div>
             {/if}            
         </div>
-    </div>
-
 </div>
 {/if}
 
@@ -147,6 +145,7 @@
      font-family: var(--recipeFont);
      flex-grow: 1;
  }
+
  .block.title {
      font-family: var(--recipeHeadFont);
  }
@@ -181,9 +180,6 @@
  div:hover .editbutton {
      visibility: visible;
  }
- .block {
-     /*      display: inline-block; */
- }
  .small {
      font-size: var(--small);
  }
@@ -201,8 +197,13 @@
      flex-direction: column;
  }
 
- .fullWidth {
+ .block.editing {
+     width : var(--available-width);
+ }
+
+ .fullWidth.block.editing {
      clear: right;
+     width: 100%;
  }
  div {
      flex-grow: 1;
