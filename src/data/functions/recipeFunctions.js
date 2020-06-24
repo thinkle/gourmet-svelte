@@ -1,6 +1,7 @@
+import deepcopy from 'deepcopy';
 import {require} from '../../utils/requireParams.js';
 import {jsonConcisify} from '../../utils/textUtils.js';
-import {getLastResult,insertOne,insertMany,queryCollection,getOne,replaceOne,deleteOne} from './mongoConnect.js';
+import {loadDB,DB,getLastResult,insertOne,insertMany,queryCollection,getOne,replaceOne,deleteOne,updateOne} from './mongoConnect.js';
 import {prepRecRemote}  from '../validate.js';
 import {mostRecentRequest,
        addRecipeRequest} from '../requests/index.js';
@@ -49,12 +50,93 @@ export default {
     async updateRecipe (event,context,user,params) {
         require(['recipe._id'],params)
         let {recipe} = params;
+        recipe = deepcopy(recipe);
+        let lastSave = recipe.last_remote_save
+        if (lastSave) {delete recipe.last_remote_save}
         prepRecRemote(recipe,user);
-        console.log('Replace recipe',recipe.title,JSON.stringify(recipe.owner))
-        let result = await replaceOne('recipes',
-                                      {_id:recipe._id,
-                                       'owner.email':user.account},
-                                      recipe);
+        // let result = await replaceOne('recipes',
+        //                               {_id:recipe._id,
+        //                                'owner.email':user.account},
+        //                               recipe);
+        let result = await updateOne(
+            'recipes',
+            {_id:recipe._id,'owner.email':user.account},
+            [{$replaceWith : //recipe
+              {$cond : {
+                  // If we are updating the last saved document...
+                  if : {
+                      $or : [
+                          {$not : "$$CURRENT.last_remote_save"},
+                          {$eq : [
+                              lastSave, "$$CURRENT.last_remote_save"
+                          ]}
+                      ]
+                  },
+                  // then just copy it
+                  then : {...recipe,merged:false},
+                  // Otherwise we try to "merge" - ugh
+                  else : {
+                      // Otherwise the requester had a stale document, so let's merge...
+                      $mergeObjects :
+                      [
+                          "$$CURRENT", // baseline is "current" for any props we don't have in recipe...
+                          { 
+                              ...recipe, // then we add recipe
+                              ingTexts: {$map:{
+                                  input:recipe.ingredients,
+                                  "in":"$$this.text"}
+                                                              },
+                              merged: true, // plus a flag that we've merged
+                              // now we merge all the array fields
+                              categories:{
+                                  $setUnion : [
+                                      "$$CURRENT.categories",
+                                      recipe.categories
+                                  ]
+                              },
+                              sources : {
+                                  $setUnion : [
+                                      "$$CURRENT.sources",
+                                      recipe.sources,
+                                  ]
+                              },
+                              sources : {
+                                  $setUnion : [
+                                      "$$CURRENT.images",
+                                      recipe.images,
+                                  ]
+                              },
+                              // And to preserve the order of ingredients is a PITA...
+                              ingredients:{
+                                  $map : {
+                                      input : makeIngredientsExpression({
+                                          newIngs:recipe.ingredients,
+                                          oldIngs:"$$CURRENT.ingredients"
+                                      }),
+                                      "in" : {
+                                          $cond : {
+                                              if : "$$this.ingredients",
+                                              then : {$mergeObjects : [
+                                                  "$$this",
+                                                  {ingredients : makeIngredientsExpression(
+                                                      {newIngs:"$$this.ingredients",
+                                                       oldIngs:makeFindMatchingIngListExpression("$$this.text","$$CURRENT.ingredients")}
+                                                  )}
+                                              ]},
+                                              else : "$$this"
+                                          }
+                                      }
+                                  }
+                              },
+                          }
+                      ] // end merge recipes
+                  } // end else
+              }} // end conditional
+             }, // end $replaceWith
+             {
+                 $set : {last_remote_save:"$$NOW"}
+             },
+            ]);
         return result;
     },
 
@@ -125,6 +207,81 @@ export default {
             throw Error(
                 `No recipe found to delete. Request ${jsonConcisify(params)}. Result: ${getLastResult()}`
             )
+        }
+    }
+}
+
+
+function makeFindMatchingIngListExpression (targetText, list) {
+    return {
+        $let : {
+            vars : {
+                matchingItems : {
+                    $filter : {
+                        input : list,
+                        cond : {
+                            $and : [
+                                "$$this.ingredients",
+                                {$eq : [
+                                    "$$this.text",
+                                    targetText
+                                ]}
+                            ]
+                        }
+                    }
+                }
+            },
+            "in" : {
+                $cond : {
+                    if : "$$matchingItems",
+                    then : {
+                        $let : {
+                            vars : {
+                                ing : {$arrayElemAt : ["$$matchingItems",0]}
+                            },
+                            "in" : "$$ing.ingredients"
+                        }
+                    },
+                    else : [],
+                }
+            }
+        }
+    }
+}
+
+// Helper functions to prevent me from losing my mind with too many levels of indentation
+function makeIngredientsExpression ({newIngs, oldIngs}) {
+    return {
+        $cond : {
+            if : {
+                $and : [
+                    newIngs,
+                    oldIngs
+                ]
+            },
+            then : {
+                $concatArrays : [
+                    newIngs,
+                    {$filter : {
+                        input: oldIngs,
+                        cond : {
+                            $eq : [
+                                -1,
+                                {$indexOfArray : [
+                                    {$map:{
+                                        input:newIngs,
+                                        "in":"$$this.text"}
+                                    },
+                                    "$$this.text"
+                                ]}
+                            ]
+                        }
+                    }}
+                ]
+            },
+            else : {
+                $or : [newIngs,oldIngs]
+            }
         }
     }
 }
