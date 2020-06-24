@@ -54,12 +54,36 @@ it(
         );
         recipe.title += ' test change'
         let modifiedRecipe = await recipeFunctions.updateRecipe(...bp,
-                                                              {recipe});
+                                                                {recipe});
+        let oldCopy = deepcopy(modifiedRecipe);
         expect(modifiedRecipe._id).toEqual(recipe._id);
         expect(modifiedRecipe.title).toEqual(testRecs.standard.title+' test change');
         expect(modifiedRecipe.ingredients.length).toBeGreaterThan(
             testRecs.standard.ingredients.length
         );
+        let first_save_time = modifiedRecipe.last_remote_save;
+        modifiedRecipe.title += 'AGAIN!';
+        modifiedRecipe.categories.push({name:'Other Category'});
+        let modified2 = await recipeFunctions.updateRecipe(...bp,{recipe:modifiedRecipe});
+        console.log('M1:',first_save_time,'M2:',modified2.last_remote_save)
+        expect(modified2.last_remote_save).not.toEqual(first_save_time);
+        expect(modified2.merged).toBeFalsy()
+        // Now let's merge one...
+        oldCopy.ingredients.push({text:'Some new thing!',amount:{amount:2,unit:'TBS'}});
+        oldCopy.ingredients[0].ingredients.push({text:'Foof',amount:{amount:7,unit:'whippersnaps'}});
+        oldCopy.categories.push({name:'new catgry!'});
+        let modified3 = await recipeFunctions.updateRecipe(...bp,{recipe:oldCopy});
+        //console.log('ok... ingredients are',JSON.stringify(modified3.ingredients));
+        expect(modified3.merged).toBeTruthy();
+        expect(modified3.ingredients.length).toEqual(modified2.ingredients.length+1)
+        expect(modified3.ingredients[0].ingredients.length).toEqual(modified2.ingredients[0].ingredients.length+1)
+        expect(modified3.categories.length).toEqual(modified2.categories.length+1)
+        modified3.ingredients = [] // delete everything!
+        let modified4 = await recipeFunctions.updateRecipe(...bp,{recipe:modified3});
+        expect(modified4.merged).toBeFalsy();
+        expect(modified4.ingredients.length).toEqual(0)
+        expect(modified4.categories.length).toEqual(modified3.categories.length); // no change there..
+        
     }
 );
 
