@@ -4,7 +4,10 @@
 **/
 
 import querystring from 'querystring'
-import {addRecipeRequest} from './requests/index.js';
+import {addRecipeRequest,
+        getRecipeRequest,
+        getRecipesRequest,
+        updateRecipeRequest} from './requests/index.js';
 const baseURL = "/.netlify/functions/api?"
 
 //mode=echo&message=howdy"
@@ -64,35 +67,34 @@ function RecipeApi (user) {
             //     {recipe}
             // );
         },
+        addToRecipe (recipe) {
+            return updateRecipeRequest.makeRequest(
+                {user,params:{recipe,forceMerge:true}}
+            );
+        },
         updateRecipe (recipe) {
             // Note: remote will insert if it's not already there (upsert: true)
-            return doFetch(
-                'updateRecipe',
-                user,
-                {recipe}
+            return updateRecipeRequest.makeRequest(
+                {user,params:{recipe}}
             );
+            // return doFetch(
+            //     'updateRecipe',
+            //     user,
+            //     {recipe}
+            // );
             //console.log('Update got result',result);
             //return result;
         },
-        updateRecipes (recipes) {
-            return doFetch(
-                'updateRecipe',
-                'fixme'
-            );
-        },
         getRecipe (_id) {
-            return doFetch(
-                'getRecipe',
-                user,
-                {_id:_id}
+            return getRecipeRequest.makeRequest(
+                {user,
+                 params:{_id}}
             );
         },
         getRecipes ({query,fields,limit,page}={}) {
-            let args = {query,fields,limit,page};
-            return doFetch(
-                'getRecipes',
-                user,
-                args
+            let params = {query,fields,limit,page};
+            return getRecipesRequest.makeRequest(
+                {user,params}
             );
         },
 
