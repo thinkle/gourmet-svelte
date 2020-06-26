@@ -4,7 +4,7 @@
  export let ariaLabel='amount'
 
  import {floatToFrac,fracToFloat,increment,decrement} from '../../utils/numbers.js';
- import {IconButton} from '../index.js';
+ import {IconButton,Underline} from '../index.js';
  const DOWNCODES = [40,189]
  const UPCODES = [38,187]
  let useUnicode = true;
@@ -70,6 +70,7 @@
 
 </script>
 <span class:buttonMode={showPlusMinusButtons}>
+    <Underline grow={false}>
     <input
         aria-label="{ariaLabel}"
         on:blur={()=>useUnicode=true}
@@ -77,11 +78,26 @@
         on:keyup="{oninput}" bind:value={displayValue} width=2 on:keydown={onkey} on:change={onchange} >
     {#if showPlusMinusButtons}
         <div class="minibuttons">
-            <IconButton compact="{true}" fontSize="0.8rem" on:click={doIncrement} bare={true} icon="keyboard_arrow_up"></IconButton>
+            <IconButton
+                bare="{true}"
+                compact="{true}"
+                fontSize="0.8rem"
+                icon="keyboard_arrow_up"
+                ariaLabel="{`Increase ${ariaLabel}`}"
+                on:click="{doIncrement}"
+            />
             <br>
-            <IconButton compact="{true}" fontSize="0.8rem" on:click={doDecrement} bare={true} icon="keyboard_arrow_down"></IconButton>
+            <IconButton 
+                bare="{true}"
+                compact="{true}" 
+                fontSize="0.8rem" 
+                icon="keyboard_arrow_down" 
+                ariaLabel="{`Decrease ${ariaLabel}`}"
+                on:click="{doDecrement}"
+            />
         </div>
     {/if}
+    </Underline>
 </span>
 
 

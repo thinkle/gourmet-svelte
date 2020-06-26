@@ -1,6 +1,7 @@
 <script>
  import { createEventDispatcher, setContext, getContext } from 'svelte';
  import RangeInput from './RangeInput.svelte';
+ import Underline from './Underline.svelte';
  import {SmallLabel} from '../index.js';
  import {formatAmount,floatToFrac} from '../../utils/numbers.js';
  export let mode='inline'
@@ -34,14 +35,14 @@
  function onNumberChange (e) {
      delete value.rangeAmount // don't put it back...
      value = {...value,
-              ...e.detail}
-     change();
+             ...e.detail}
+         change();
  }
 
 </script>
 <div>
     <SmallLabel on:click={()=>nref.focus()}>Number:</SmallLabel> 
-    <RangeInput bind:this={nref} on:change={onNumberChange} class="url" type="number" bind:value={amountValue}/>
+    <RangeInput bind:this={nref} on:change={onNumberChange}  bind:value={amountValue}/>
     <i>
         {#if multipliable && $multiplier!=1}
             (&times;{floatToFrac($multiplier)}={formatAmount(value,{multiplier:$multiplier})})
@@ -50,7 +51,7 @@
 </div>
 <div>
     <SmallLabel on:click={()=>uref.focus()}>Unit:</SmallLabel> 
-    <input bind:this={uref} on:change={change} class="name" type="text" bind:value={value.unit}>
+    <Underline><input bind:this={uref} on:change={change} class="name" type="text" bind:value={value.unit}></Underline>
 </div>
 
 <style>

@@ -16,6 +16,13 @@
  ];
 
  let quill
+
+ function setContents (html) {
+     if (!quill) return
+     const delta = quill.clipboard.convert(html);
+     quill.setContents(delta);
+ }
+ 
  onMount(async () => {
      quill = new Quill(editor, {
          modules: {
@@ -23,8 +30,7 @@
          },
          theme: "snow",
          placeholder: "Type text here..."
-     });
-     quill.pasteHTML(value);
+     });     
      quill.on('text-change', function(delta) {
          dispatch('change',quill.root.innerHTML);
          value = quill.root.innerHTML;
@@ -33,7 +39,7 @@
  });
 
  $: {
-     quill && quill.pasteHTML(initialValue);
+     quill && setContents(initialValue)
  }
 
 </script>
@@ -41,16 +47,16 @@
 <svelte:head>
     <!-- <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"> -->
 </svelte:head>
-<div>
-    <div class="editor-wrapper">
-        <div bind:this={editor} />
-    </div>
+
+<div class="editor-wrapper">
+    <div bind:this={editor} />
 </div>
+
 <style>
- div div div :global([contenteditable]) {
+ div div :global([contenteditable]) {
      border: none;
  }
- div div div {
+ div div {
      min-height: 15em;
      border: 1px solid #ccc;
  }
@@ -65,6 +71,30 @@
  div :global(h1),div :global(h2),div :global(h3),div :global(h4),div :global(h5),div :global(h6) {
      margin-bottom: 3px;
      border-bottom: 1px solid var(--light-underline);
+ }
+ .editor-wrapper {
+     border: 2px solid var(--light-underline);
+ }
+ .editor-wrapper:focus-within {
+     border: 2px solid var(--accent-bg);
+     transition: all 300ms;
+ }
+ :global(.ql-toolbar) {
+     border: 10px solid green;
+ }
+ .editor-wrapper :global(.ql-toolbar) {
+     opacity: 0;
+     visibility: hidden;
+     transition: opacity 300ms;
+     /* overflow: hidden;
+        box-sizing: border-box;
+        max-height: 0;
+        padding : 0;
+        transition: max-height 300ms; */
+ }
+ .editor-wrapper:focus-within :global(.ql-toolbar) {
+     opacity: 1;
+     visibility: visible;
  }
 
 </style>

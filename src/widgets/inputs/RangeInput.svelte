@@ -2,7 +2,7 @@
  export let value
  export let showPlusMinusButtons=false
 
- import {IconButton} from '../index.js';
+ import {IconButton,Underline} from '../index.js';
  import {formatAmount,increment,decrement,parseAmount} from '../../utils/numbers.js';
  let UPCODES = [38,187]
  let DOWNCODES = [40]
@@ -93,6 +93,7 @@
  
 </script>
 
+<Underline grow="{false}">
 <span class:buttonMode={showPlusMinusButtons}>
     <input
         on:blur={()=>inFocus=false}
@@ -111,6 +112,7 @@
         </div>
     {/if}
 </span>
+</Underline>
 
 
 <style>
@@ -133,9 +135,9 @@
  .buttonMode input {
      padding: 3px;
      padding-right: 1rem;
-     border-top: var(--inputBorder);
-     border-left: var(--inputBorder);
-     border-right: var(--inputBorder);
+     /* border-top: var(--inputBorder);
+        border-left: var(--inputBorder);
+        border-right: var(--inputBorder); */
  }
 
  .minibuttons :global(button.icon) {

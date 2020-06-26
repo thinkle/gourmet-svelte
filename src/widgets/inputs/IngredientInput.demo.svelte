@@ -16,7 +16,6 @@
  }
 </script>
 
-
     <label on:click={()=>ii.focus()}>Ing:</label>
     <p>Set from text: </p>
     <IngredientInput bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
@@ -31,8 +30,38 @@
         <h2>Constrained width...</h2>
         <div style="width: 170px">
             <IngredientInput bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
+            <br>
+            <IngredientInput showAddButton={true} bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
         </div>
     </div>
+
+    <b> In a table</b>
+    <table>
+        <tr>
+            <td>Row</td><td>Row</td>
+        </tr>
+
+        <tr>
+            <td>
+                <IngredientInput bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
+            </td>
+            <td>
+                Some other content
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <IngredientInput showAddButton="{true}" bind:this={ii} text={text} onEnter={(val)=>{v=val;ii.clear()}} onInput={(val)=>changedV=val} />
+            </td>
+            <td>
+                Some other content
+            </td>
+        </tr>
+
+        <tr>
+            <td>Row</td><td>your boat</td>
+        </tr>
+    </table>
 
 
 

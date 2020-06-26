@@ -3,7 +3,7 @@
  import { fly,slide,fade } from 'svelte/transition';
  import { flip } from 'svelte/animate';
  import { quintOut } from 'svelte/easing';
- import {IconButton} from '../index.js';
+ import {IconButton,Underline} from '../index.js';
  export let value;
  export let onSelect
  export let placeholder
@@ -14,8 +14,6 @@
  let matches=[]
  let lastKey = undefined
  let doMagic
- const TAB = 9;
- const RET = 13;
  let currentMatch = -1;
  let haveMatches
  let justMatched = false;
@@ -106,41 +104,58 @@
  }
  
 
+ async function setValueAfterTick (value) {
+     await tick();
+     doSelect(value);
+     showMenu = false;
+     currentMatch = -1;
+     updateMatches();
+ }
+
+ const TAB = 9;
+ const RET = 13;
+ const SPACE = 32;
+ function onKeyUp (event) {
+     updateMatches();
+ }
  function onKeydown (event) {
      console.log('onKeydown...',mode==TYPING&&'Typing mode'||'Menu mode');
      // RETURN means select, regardless of mode...
-     if (event.keyCode==13) {
+     if (event.keyCode==RET) {
          event.preventDefault();
          if (showMenu && currentMatch > -1 && matches.length > currentMatch) {
              value = matches[currentMatch]
          }
-         setTimeout(
-             ()=>{
-                 doSelect(value)
-                 console.log('set show menu to false!');
-                 showMenu = false;
-                 currentMatch = -1;
-                 updateMatches(); setTimeout(updateMatches,50)
-             },10); // one tick...
+         setValueAfterTick(value)
+         event.preventDefault();
          return 
      }
-     console.log('update matches...');
-     updateMatches(); setTimeout(updateMatches,50)
+     // SPACEBAR with menu up selects... OR TAB with menu + only one match
+     if (event.keyCode==SPACE ||
+         (event.keyCode==TAB && mode==TYPING && matches.length==1)
+     ) {
+         if (showMenu && currentMatch > -1 && matches.length > currentMatch) {
+             value = matches[currentMatch]
+             setValueAfterTick(value);
+             event.preventDefault();
+             return;
+         }
+     }
      if (mode==MENU) {
          // in menu mode... toggle up and down the whole menu...
-         if (event.keyCode==9 && event.shiftKey || event.keyCode==38) {
+         if (event.keyCode==TAB && event.shiftKey || event.keyCode==38) {
              // up
              currentMatch -= 1;
              event.preventDefault()
          }
-         else if (event.keyCode==9 || event.keyCode==40) {
+         else if (event.keyCode==TAB || event.keyCode==40) {
              //down
              showMenu = true;
              event.preventDefault()
              currentMatch += 1;
          }
          if (currentMatch >= menu.length || currentMatch < 0 || event.keyCode==27) {
-             console.log('switch back to typing... :(')
+
              showMenu = false;
              currentMatch = -1
              mode = TYPING
@@ -152,13 +167,11 @@
              showMenu = true;
              mode = MENU
              event.preventDefault();
-             console.log("Typing arrow... set match to 0")
              currentMatch = 0;
          }
-         else if (event.target.value && event.keyCode==9 && event.shiftKey) {
+         else if (event.target.value && event.keyCode==TAB && event.shiftKey) {
              if (!showMenu) {return}
              currentMatch -= 1;
-             console.log("Typing shift tab... set match ",currentMatch)
              if (currentMatch > -1) {
                  event.preventDefault()
              }
@@ -170,10 +183,9 @@
               * } */
              else {
                  showMenu = false;
-                 console.log('Typing and shift-tab but no matches... -- allow default')
              }
          }
-         else if (event.keyCode==9) {
+         else if (event.keyCode==TAB) {
              if (!showMenu) {return}
              // regular tab...
              currentMatch += 1;
@@ -219,88 +231,28 @@
      }
  }
 
- function onKeydownOld (event) {
-     //value = event.target.value;
-     updateMatches();
-     setTimeout(updateMatches,5) // update in a sec...
-     if (event.keyCode==13) {
-         if (currentMatch !== undefined) {
-             value = matches[currentMatch]
-             haveMatches = false;             
-             lastValue = event.target.value;
-         }
-         event.preventDefault();
-         doSelect(value);
-     }
-     else if (event.keyCode==27) {
-         // ESCAPE
-         showMenu = false;
-         justMatched = true;
-     }
-     else if (event.keyCode==9) {
-         // TAB
-         if (showMenu) {
-             console.log('Already have matches: add one to current');
-             if (isNaN(currentMatch)) {
-                 currentMatch = 0;
-             }
-             if (event.shiftKey) {
-                 currentMatch -= 1;
-             }
-             else {
-                 currentMatch += 1;
-             }
-             if (currentMatch >= matches.length) {
-                 showMenu = false;
-             }
-             if (currentMatch < 0) {
-                 showMenu = false;
-             }
-             if (showMenu) {
-                 console.log('prevent default')
-                 event.preventDefault();
-             }
-         }
-     }
-     else {
-         
-         console.log('key',event.keyCode)
-         lastKey = event.keyCode
-         if (value != lastValue) {
-             justMatched = false;
-             if (matches.length) {
-                 currentMatch = 0;
-             }
-             else {
-                 currentMatch = -1
-             }
-             lastValue = value;
-         }
-         if (!value) {
-             console.log('No value, no menu');
-             showMenu = false;
-         }
-     }
- }
-
-
  let focused
  let inputRef
- 
+ let inputHeight
  function checkFocus () {
      focused = (inputRef==document.activeElement) 
  }
  
 </script>
-<span class='cmb'>
-    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} bind:value={value} {placeholder}>
+{#if showMenu}
+    <div class="screen" on:click="{()=>showMenu=false}">
+    </div>
+{/if}
+<Underline grow="{false}">
+<span class='cmb' style="{`--inputHeight:${inputHeight}px`}" bind:clientHeight="{inputHeight}">
+    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} on:keyup="{onKeyUp}" bind:value={value} {placeholder}>
     <IconButton class="icon" on:click={toggleMenu}
                        icon={showMenu&&focused&&"arrow_drop_up"||"arrow_drop_down"}
                 small={true}
                 bare={true}
     />
     {#if showMenu}
-        <ul transition:slide>            
+        <ul class="menu" transition:slide>            
             {#each matches as match,i (match)}
                 <li key={match} class:current={currentMatch==i}
                     on:click={()=>doSelect(match)}
@@ -319,6 +271,7 @@
         </ul>
     {/if}
 </span>
+</Underline>
 <style>
  .cmb {
      position: relative;
@@ -338,12 +291,24 @@
      padding: 8px;
      border-top: 1px solid #ccc;
  }
+ .screen {
+     z-index: 10;
+     background-color: transparent;
+     pointer-events: none;
+     position: fixed;
+     width: 100vw;
+     height: 100vh;
+     top: 0;
+     left: 0;
+ }
  ul {
      padding-left: 0px;
      width: 100%;
      position: absolute;
-     top : 17px;
+     top : var(--inputHeight);
      background-color: white;
      z-index: 999;
  }
+
+ 
 </style>

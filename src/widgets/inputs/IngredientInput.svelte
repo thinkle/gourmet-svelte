@@ -11,9 +11,7 @@
  export let placeholder="e.g. 1 cup sugar…"
  export let multipliable=true;
 
-
- 
- import {IconButton,NumberUnitDisplay,PlainInput} from '../index.js';
+ import {IconButton,NumberUnitDisplay,PlainInput,Underline} from '../index.js';
  import {getShopItem} from '../../utils/ingredientUtils.js';
 
  let originalValue;
@@ -174,8 +172,8 @@
  
 </script>
 
-<div on:focusin="{onFocus}" on:focusout="{onFocusOut}" class="contain" class:withButton="{showAddButton}">
-    {#if parsed && parsed.amount && ref && showFeedback}
+<div on:focusin="{onFocus}" on:focusout="{onFocusOut}" class="vbox">
+    {#if parsed && parsed.amount && (parsed.amount.amount||parsed.amount.unit) && ref && showFeedback}
         <div class="anchor">
             <div class="input realtime-feedback">
                 {@html getMarkup(ref.innerText,parsed,text)}
@@ -183,24 +181,22 @@
             </div>
         </div>
     {/if}
-
-    <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input"
-         placeholder="{placeholder}"
-    >
+    <div class="contains" class:withButton="{showAddButton}">
+        <Underline>
+            <div on:blur={markupAndChange}  on:input="{onInputEvent}" bind:this={ref} on:keyup={onKeyup} on:keypress={onKeypress} bind:textContent={text} bind:innerHTML={html} contenteditable="true" class="input"
+                 placeholder="{placeholder}"
+            >
+            </div>
+        </Underline>
+        {#if showAddButton}
+            <IconButton bare={true} icon="add" on:click="{doSubmit}" />
+        {/if}
     </div>
-    {#if multipliable && multiplier && $multiplier!=1}
+    {#if multipliable && multiplier && $multiplier!=1 && parsed && parsed.amount}
         <span class="multiplied">
             (&times;{floatToFrac($multiplier)}={formatAmount(parsed.amount,{multiplier:$multiplier})})
         </span>
     {/if}
-    {#if showAddButton}
-        <IconButton bare={true} icon="add" on:click="{doSubmit}" />
-    {/if}
-    <!-- 
-         <div class:showFeedback="{showFeedback && parsed}" class="realtime-feedback">
-         <NumberUnitDisplay value={parsed.amount}/> <span>{parsed.text}</span>
-         <br>Shopping Item: <input on:change={updateShopItem} value={getShopItem(parsed)}>
-         </div> -->
 </div>
 <style>
  .realtime-feedback {

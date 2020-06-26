@@ -1,5 +1,6 @@
 <script>
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
+ import Underline from './Underline.svelte';
  import {onMount} from 'svelte'
  export let value=""
  export let minFontSize = 11
@@ -47,44 +48,44 @@
  }
  
  function adjustSize () {     
-                        
-                        if (shrunkForText.length > value.length) {
-                            fontSize = undefined;
-                            oneLiner = true;
-                            justHadFocus = document.activeElement==ref
-                            if (ref.tagName!='input') {
-                                let range = window.getSelection().getRangeAt(0);
-                                selection = {
-                                    start:range.startOffset,
-                                    end:range.endOffset,
-                                    direction:'none',
-                                    origin:'DIV'
-                                }
-                            }
-                        }
-                        if (ref.scrollWidth > ref.clientWidth) {
-                            if (oneLiner && !fontSize || fontSize > minFontSize) {
-                                fontSize = window.getComputedStyle(ref).getPropertyValue('font-size');
-                                let percentageTarget = ref.clientWidth/ref.scrollWidth
-                                fontSize = Number(fontSize.split('px')[0])
-                                fontSize = Math.max(fontSize * percentageTarget,minFontSize);
-                                shrunkForText = value;
-                            }
-                            else {
-                                shrunkForText = value;
-                                oneLiner = false;
-                                justHadFocus = document.activeElement==ref
-                                selection = {
-                                    start:ref.selectionStart,
-                                    end:ref.selectionEnd,
-                                    direction:ref.selectionDirection,
-                                    origin:'INPUT',
-                                }
-                            }
-                        }
-                        }
+     
+     if (shrunkForText.length > value.length) {
+         fontSize = undefined;
+         oneLiner = true;
+         justHadFocus = document.activeElement==ref
+         if (ref.tagName!='input') {
+             let range = window.getSelection().getRangeAt(0);
+             selection = {
+                 start:range.startOffset,
+                 end:range.endOffset,
+                 direction:'none',
+                 origin:'DIV'
+             }
+         }
+     }
+     if (ref.scrollWidth > ref.clientWidth) {
+         if (oneLiner && !fontSize || fontSize > minFontSize) {
+             fontSize = window.getComputedStyle(ref).getPropertyValue('font-size');
+             let percentageTarget = ref.clientWidth/ref.scrollWidth
+             fontSize = Number(fontSize.split('px')[0])
+             fontSize = Math.max(fontSize * percentageTarget,minFontSize);
+             shrunkForText = value;
+         }
+         else {
+             shrunkForText = value;
+             oneLiner = false;
+             justHadFocus = document.activeElement==ref
+             selection = {
+                 start:ref.selectionStart,
+                 end:ref.selectionEnd,
+                 direction:ref.selectionDirection,
+                 origin:'INPUT',
+             }
+         }
+     }
+ }
 
- function getStyle () {
+function getStyle () {
      if (fontSize) {
          return `font-size: ${fontSize}px`
      }
@@ -93,14 +94,15 @@
  onMount(adjustSize)
  $: shouldFocus && ref && focus()
 </script>
-
+<Underline>
 {#if oneLiner && false}
-    <input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:input on:keyup on:keydown bind:value={value} type="text">
+    <span class="inputwrap"><input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:input on:keyup on:keydown bind:value={value} type="text"></span>
 {:else}
     <p class="input" placeholder={placeholder} contenteditable="true" bind:textContent={value} on:input on:change on:keyup on:keydown bind:this={ref}>
         {value}
     </p>
 {/if}
+</Underline>
 <style>
  input {
      width : 100%
@@ -109,18 +111,52 @@
      width : 100%;
      margin: 0;
      flex-grow: 1;
-     border: var(--inputBorder);
-     border-right: none;
-     border-left: none;
-     border-top: none;
-     border-radius: var(--inputRadius);
+     /* border: var(--inputBorder);
+        border-right: none;
+        border-left: none;
+        border-top: none;
+        border-radius: var(--inputRadius); */
+     min-height: 1em; /* Needed to occupy vertical space when empty in firefox */
+     position: relative;
  }
- .input:focus {
-     border-width: 3px;
- }
+ /* .input::after,
+    .inputwrap:after {
+    content: " ";
+    display: block;
+    width: 0;
+    height: 2px;
+    position: absolute;
+    bottom: 0;
+    background-color: var(--light-underline);
+    }
+    .input:focus,input {
+    border: transparent;
+    transition: all 300s;
+    }
+    .inputwrap:focus-within::after {
+    content: " ";
+    display: block;
+    width: 100%;
+    height: 2px;
+    position: absolute;
+    bottom: 0;
+    transition: all 300ms;
+    background-color: var(--accent-bg);
+    }
+    .input:focus::after {
+    content: " ";
+    display: block;
+    width: 100%;
+    height: 2px;
+    position: absolute;
+    bottom: 0;
+    transition: all 300ms;
+    background-color: var(--accent-bg);
+    } */
+
  p.input[placeholder]:empty:before {
      content: attr(placeholder);
-     color: #555; 
+     color: #555;     
  } 
  
 </style>

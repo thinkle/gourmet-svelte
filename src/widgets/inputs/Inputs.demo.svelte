@@ -3,7 +3,7 @@
  import {writable} from 'svelte/store'
  export let initialShow
  import ipsum from '../../common/mocks/ipsum.js';
- import {Tester} from '../index.js';
+ import {Tester,Lorem} from '../index.js';
  import AmountInput from './AmountInput.svelte';
  import RangeInput from './RangeInput.svelte';
  import FancyInput from './PlainInput.svelte';
@@ -40,6 +40,7 @@
  setContext('multiplier',multiplier)
 
 </script>
+<article>
 <Tester name="Input Tests" initialShow="{initialShow}" >
     <Tester name="NumberUnitInput"  initialShow="{initialShow}">
         <br>Multiply by: <AmountInput bind:value={$multiplier} showPlusMinusButtons={true}/>
@@ -92,5 +93,14 @@
         <MultiComboInput bind:value={testArrayString} options={['Apple','Almond','Anchovies','Bread','Banana','Grapes','Fruit','Sugar','Fruitcake','Dumplings']}/>
         Result: {testStringVal}
     </Tester>
-
+    <h4>Filler</h4>
+    <Lorem graphs="{7}"/>
 </Tester>
+</article>
+
+<style>
+ article {
+     max-width: 650px;
+     margin: auto;
+ }
+</style>

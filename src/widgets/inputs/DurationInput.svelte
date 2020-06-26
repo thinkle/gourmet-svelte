@@ -1,16 +1,19 @@
 <script>
- import {onMount} from 'svelte';
- import Timer from '../../utils/timerDrawer.js';
- import Times from '../../utils/times.js';
- import {getAngle,deg} from '../../utils/trigHelper.js'
  export let value
  export let timerSize=50
  export let minimal=false;
-
- let fref
  export function focus () {
      fref.focus()
  }
+
+
+ import {onMount} from 'svelte';
+ import Timer from '../../utils/timerDrawer.js';
+ import Times from '../../utils/times.js';
+ import {Underline} from '../';
+ import {getAngle,deg} from '../../utils/trigHelper.js'
+
+ let fref
 
  import { createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
@@ -160,15 +163,19 @@
  }
 
 </script>
-<span>
+<span class='outer'>
     {#if !minimal}
-        <input placeholder="Label (Baking Time)…" type="text"  class="text" bind:value={value.name} on:change="{change}">{/if}
-    <span class="container" class:minimal>
-        <div class="hms" >
+        <Underline grow="{false}">
+            <input placeholder="Label (Baking Time)…" type="text"  class="text" bind:value={value.name} on:change="{change}">
+        </Underline>
+    {/if}
+        <span class="container" class:minimal>
+            <Underline>
+            <div class="hms" >
             <input style={getInputStyle()} width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
                          placeholder="HH"
                    step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
-            >
+                       >
             <span class="colon" >:</span>
             <input
                 placeholder="MM"
@@ -180,15 +187,19 @@
                 style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
                              step="{timer.unit < 60 && timer.unit || 15}"
             >
-        </div>
-        <canvas on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
+            </div>
+            </Underline>
+            <canvas tabindex=1 on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
         {#if !minimal}
-            <input
-                placeholder="(e.g. 1/2 hour)…"
-                class="text"
-                on:change="{changeText}"
-                type="text"
-                bind:value={value.text}>{/if}
+            <Underline>
+                <input
+                    placeholder="(e.g. 1/2 hour)…"
+                    class="text"
+                    on:change="{changeText}"
+                    type="text"
+                    bind:value={value.text}>
+            </Underline>
+        {/if}
     </span>
 </span>
 
@@ -230,5 +241,13 @@
  .colon {
      font-weight: bold;
      font-size: 2em;
+ }
+ .outer canvas {
+     opacity: 0;
+     transition: opacity 300ms;
+ }
+
+ .outer:focus-within canvas {
+     opacity: 1
  }
 </style>
