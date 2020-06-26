@@ -9,4 +9,6 @@ export {default as NumberUnitInput} from './NumberUnitInput.svelte';
 export {default as PlainInput} from './PlainInput.svelte';
 export {default as RangeInput} from './RangeInput.svelte';
 //export {default as RichText} from './RichText.svelte';  // weird bug w/ import in re-exported module
+export {default as Underline} from './Underline.svelte';
 export {default as UrlInput} from './UrlInput.svelte';
+
