@@ -152,6 +152,12 @@ export function prepRecLocal (rec) {
         });
     rec.ings = stopword.removeStopwords(rec.words);
     delete rec.flatIngredients // not keeping this either
+    if (rec.categories) {
+        rec.categoryNames = rec.categories.map((c)=>c.name);
+    }
+    if (rec.sources) {
+        rec.sourceNames = rec.sources.map((s)=>s.name);
+    }
     return rec;
 }
 
