@@ -12,6 +12,7 @@
  export let disabled=undefined;
  export let compact=false; /* No padding, no margin */
  export let ariaLabel=undefined;
+
  export function focus () {
      b.focus()
  }
