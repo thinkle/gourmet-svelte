@@ -105,14 +105,36 @@ const api = {
         }
         return recipe;
     },
+    // This is for "patching" -- current use case is just for shopping lists where we likely
+    // have changed the recipe on the backend and our "edits" usually just mean we're adding
+    // something.
+    async addToRecipe (recipe) {
+        await checkForReferences(recipe)
+        //try {
+        let updatedRec = await remoteApi.addToRecipe(recipe)
+    //} catch (err) {
+      //      console.log('Well crap... not yet implemented...');
+            //localApi.addToRecipe(recipe); // not a thing :(            
+        //}
+        updatedRec.savedRemote = true;
+        await localApi.updateRecipe(updatedRec);
+        return updatedRec
+    },
     async updateRecipe (recipe,updateTimestamp=true) {
+        let origRec = recipe;
         if (updateTimestamp) {recipe.last_modified = new Date().getTime();}
         await checkForReferences(recipe)
         if (recipe._id) {
             try {
-                let remoteRec = await remoteApi.updateRecipe(recipe);
+                recipe = await remoteApi.updateRecipe(recipe);
                 recipe.savedRemote = 1;
-                recipe._id = remoteRec._id;
+                //recipe._id = remoteRec._id;
+                console.log('successfully saved remote')
+                if (recipe.merged) {
+                    console.log('Damn, we merged');
+                    console.log('Original',origRec);
+                    console.log('Merged:',recipe);
+                }
             }
             catch (err) {
                 recipe.savedRemote = 0;
@@ -121,9 +143,8 @@ const api = {
             }
         } else {
             try {
-                let remoteRec = await remoteApi.addRecipe(recipe);
+                recipe = await remoteApi.addRecipe(recipe);
                 recipe.savedRemote = 1;
-                recipe._id = remoteRec._id;
             }
             catch (err) {
                 console.log('Error adding remote recipe',recipe,err)
