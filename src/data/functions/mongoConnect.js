@@ -58,16 +58,34 @@ export async function replaceOne (collection, query, document) {
 
 export async function updateOne (collection, query, values) {
     const {db,client} = await loadDB(DB)
-    lastResult = await db.collection(collection)
-        .updateOne(query,values);
-    if (lastResult.ops) {
-        return lastResult.ops[0];
-    } else {
-        console.log('Unsuccessful update: ',lastResult);
-        throw new Error(
-            `Unable to update item: ${collection} ${JSON.stringify(query)} ${JSON.stringify(values)}: Result ${JSON.stringify(lastResult)}`
-        );
-    }
+    //return await new Promise((resolve,reject)=>{
+    let result = await db.collection(collection)
+        .findOneAndUpdate(query,
+                          values,
+                          {
+                              returnOriginal:false,
+                              upsert:true
+                          },
+                          // (err,doc)=>{
+                          //     if (err) {
+                          //         reject(err)
+                          //     } else {
+                              //         console.log('findOneAndUpdate says',doc)
+                          //         resolve(doc.value)
+                              //     }
+                          // }
+                         );
+    return result.value
+//});
+    // if (lastResult.result.ok) {
+    //     //return lastResult.ops[0];
+    //     return db.collection(collection).find()
+    // } else {
+    //     console.log('Unsuccessful update: ',lastResult);
+    //     throw new Error(
+    //         `Unable to update item: ${collection} ${JSON.stringify(query)} ${JSON.stringify(values)}: Result ${JSON.stringify(lastResult)}`
+    //     );
+    // }
 }
 
 export async function deleteOne (collection, query) {
