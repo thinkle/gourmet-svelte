@@ -7,6 +7,11 @@ const {localRecipes,recipeState,openLocalRecipes} = makeLocalRecipeStore();
 
 export let storedShopRec = writable() // holds stored copy of recipe
 export let localShopRec = writable() // holds the shopping list recipe
+let shopRecMongoId
+
+localShopRec.subscribe(
+    (v)=>shopRecMongoId=v&&v._id
+);
 
 let sl = derived(
     [localShopRec,localRecipes],
@@ -133,6 +138,14 @@ export const shoppingList = {
                 return $localShopRec;
             }
         );
+        let updatedShopRec = await api.addToRecipe(
+            {
+                _id:shopRecMongoId,
+                ingredients:[ingredient]
+            }
+        );
+        storedShopRec.set(updatedShopRec);
+        localShopRec.set(updatedShopRec);
     },
     /**
        Remove recipe from shopping list
@@ -214,6 +227,16 @@ export const shoppingList = {
                     ingredient.id = id;
                     $localShopRec.ingredients.push(ingredient);
                     resolve(id);
+                    // Now push to remote...
+                    api.addToRecipe(
+                        {_id:shopRecMongoId,
+                         ingredients:[ingredient]}
+                    ).then(
+                        (rec)=>{
+                            storedShopRec.set(rec);
+                            localShopRec.set(rec);
+                        }
+                    );
                     return $localShopRec;
                 }
             );
@@ -258,8 +281,11 @@ export const shoppingList = {
 
     async save () {
         // FIX ME
+        console.log('Shopping list save!');
         let result = await api.updateRecipe(get(localShopRec))
+        console.log('Got result!',result);
         storedShopRec.update(()=>result);
+        localShopRec.update(()=>deepcopy(result))
         // Now update our local recipes as well...
         let $recipeState = get(recipeState)
         let $localRecipes = get(localRecipes)
