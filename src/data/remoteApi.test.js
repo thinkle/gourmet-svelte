@@ -47,13 +47,13 @@ it('Add rec, get _id, retrieve by _id',
        expect(recipe._id).toBeDefined();
        expect(recipe.owner).toBeDefined();
        expect(recipe.owner.email).toEqual(user.email)
-       console.log('Fetched recipe:',jsonConcisify(recipe));
+       //console.log('Fetched recipe:',jsonConcisify(recipe));
        expect(recipe.title).toEqual(testRecs.standard.title);
        expect(recipe.ingredients.length).toEqual(testRecs.standard.ingredients.length);
        let response = await api.getRecipes({limit:2});
        expect(response.count).toEqual(1);
        console.log('We have recipes:',jsonConcisify(response));
-       console.log('Now fetch again?',recipe._id,response.result[0]._id)
+       //console.log('Now fetch again?',recipe._id,response.result[0]._id)
        /**
           WTF: For reasons I don't understand, this fetch/retrieve
           business FAILS when passed through the API. To fix it, I had
@@ -119,7 +119,13 @@ it('Update recipe',async () => {
     r._id = rec._id
     let r2 = await api.updateRecipe(r);
     expect(r2.id).toEqual(r.id);
+    expect(r2.last_remote_save).toBeDefined()
+    console.log('Last save = ',r2.title,r2.last_remote_save)
+    expect(r2.title).not.toEqual(testRecs.standard.title);
     let rfresh = await api.getRecipe(r._id);
     expect(rfresh.title).not.toEqual(testRecs.standard.title);
+    console.log('Fresh = ',rfresh.title,rfresh.last_remote_save)
+    expect(rfresh.last_remote_save).toBeDefined()
     expect(rfresh.title.substr(0,7)).toEqual('Updated');
+
 });
