@@ -48,3 +48,13 @@ it('Update recipe',async () => {
     expect(rfresh.title).not.toEqual(testRecs.standard.title);
     expect(rfresh.title.substr(0,7)).toEqual('Updated');
 });
+
+it('Get unique categories',async ()=>{
+    await api.connect();
+    await api.addRecipe({...testRecs.oldstandard});
+    await api.addRecipe({...testRecs.rec1});
+    console.log('We now have recipes:',await api.getRecipes());
+    let result = await api.getCategories();
+    console.log('Got cats',result);
+    expect(result).toBeDefined()
+});
