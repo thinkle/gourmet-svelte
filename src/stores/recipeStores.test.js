@@ -11,7 +11,7 @@ import {mockLambdaFunction} from '../data/functions/mockFunction.js';
 import {setupEmptyDB,setupDBwithRecs} from '../data/functions/setupMockDB.js'
 import deepcopy from 'deepcopy';
 import {jsonConcisify} from '../utils/textUtils.js';
-import {user} from './user.js';
+import {user} from './userStore.js';
 import {connected,localRecipes,openLocalRecipes,storedRecipes,recipePage,recipeActions,recipeState,recipeActionState,recipeActionGeneralState} from './recipeStores.js';
         
 import { tick } from "svelte";
