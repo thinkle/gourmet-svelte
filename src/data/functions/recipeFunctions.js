@@ -3,8 +3,13 @@ import {require} from '../../utils/requireParams.js';
 import {jsonConcisify} from '../../utils/textUtils.js';
 import {loadDB,DB,getLastResult,insertOne,insertMany,queryCollection,getOne,replaceOne,deleteOne,updateOne} from './mongoConnect.js';
 import {prepRecRemote}  from '../validate.js';
-import {mostRecentRequest,
-       addRecipeRequest} from '../requests/index.js';
+import {addRecipeRequest,
+        deleteRecipeRequest,
+        mostRecentRequest,
+        updateRecipeRequest,
+        getRecipeRequest,
+        getRecipesRequest
+        } from '../requests/index.js';
 
 export async function getMostRecent (user) {
     let response = await queryCollection(
@@ -37,121 +42,108 @@ export async function addRecipe (user, params) {
 }
 addRecipeRequest.setRequestHandler(addRecipe);
 
-export default {
-    async addRecipe (event, context, user, params) {
-        let {recipe} = params
-        prepRecRemote(recipe,user);
-        console.log('Add recipe',recipe.title,JSON.stringify(recipe.owner))
-        let result = await insertOne('recipes',
-                                 recipe,recipe);
-        return result;
-    },
-
-    async updateRecipe (event,context,user,params) {
-        require(['recipe._id'],params)
-        let {recipe} = params;
-        recipe = deepcopy(recipe);
-        let lastSave = recipe.last_remote_save
-        if (lastSave) {delete recipe.last_remote_save}
-        prepRecRemote(recipe,user);
-        // let result = await replaceOne('recipes',
-        //                               {_id:recipe._id,
-        //                                'owner.email':user.account},
-        //                               recipe);
-        let result = await updateOne(
-            'recipes',
-            {_id:recipe._id,'owner.email':user.account},
-            [{$replaceWith : //recipe
-              {$cond : {
-                  // If we are updating the last saved document...
-                  if : {
-                      $or : [
-                          {$not : "$$CURRENT.last_remote_save"},
-                          {$eq : [
-                              lastSave, "$$CURRENT.last_remote_save"
-                          ]}
-                      ]
-                  },
-                  // then just copy it
-                  then : {...recipe,merged:false},
-                  // Otherwise we try to "merge" - ugh
-                  else : {
-                      // Otherwise the requester had a stale document, so let's merge...
-                      $mergeObjects :
-                      [
-                          "$$CURRENT", // baseline is "current" for any props we don't have in recipe...
-                          { 
-                              ...recipe, // then we add recipe
-                              ingTexts: {$map:{
-                                  input:recipe.ingredients,
-                                  "in":"$$this.text"}
-                                                              },
-                              merged: true, // plus a flag that we've merged
-                              // now we merge all the array fields
-                              categories:{
-                                  $setUnion : [
-                                      "$$CURRENT.categories",
-                                      recipe.categories
-                                  ]
-                              },
-                              sources : {
-                                  $setUnion : [
-                                      "$$CURRENT.sources",
-                                      recipe.sources,
-                                  ]
-                              },
-                              sources : {
-                                  $setUnion : [
-                                      "$$CURRENT.images",
-                                      recipe.images,
-                                  ]
-                              },
-                              // And to preserve the order of ingredients is a PITA...
-                              ingredients:{
-                                  $map : {
-                                      input : makeIngredientsExpression({
-                                          newIngs:recipe.ingredients,
-                                          oldIngs:"$$CURRENT.ingredients"
-                                      }),
-                                      "in" : {
-                                          $cond : {
-                                              if : "$$this.ingredients",
-                                              then : {$mergeObjects : [
-                                                  "$$this",
-                                                  {ingredients : makeIngredientsExpression(
-                                                      {newIngs:"$$this.ingredients",
-                                                       oldIngs:makeFindMatchingIngListExpression("$$this.text","$$CURRENT.ingredients")}
-                                                  )}
-                                              ]},
-                                              else : "$$this"
-                                          }
+export async function updateRecipe (user, params) {
+    let {recipe,forceMerge} = params;    
+    recipe = deepcopy(recipe);
+    let lastSave = recipe.last_remote_save
+    if (lastSave) {delete recipe.last_remote_save}
+    prepRecRemote(recipe,user);
+    // let result = await replaceOne('recipes',
+    //                               {_id:recipe._id,
+    //                                'owner.email':user.account},
+    //                               recipe);
+    let result = await updateOne(
+        'recipes',
+        {_id:recipe._id,'owner.email':user.account},
+        [{$replaceWith : //recipe
+          {$cond : {
+              // If we are updating the last saved document...
+              if : {
+                  $and : [
+                      // we are last saved...
+                      {$eq : [
+                          {$toString:lastSave}, {$toString:"$$CURRENT.last_remote_save"}
+                      ]},
+                      {$not : forceMerge},
+                  ]
+              },
+              //]}
+              // then just copy it
+              then : {...recipe,merged:false},
+              // Otherwise we try to "merge" - ugh
+              else : {
+                  // Otherwise the requester had a stale document, so let's merge...
+                  $mergeObjects :
+                  [
+                      "$$CURRENT", // baseline is "current" for any props we don't have in recipe...
+                      { 
+                          ...recipe, // then we add recipe
+                          ingTexts: {$map:{
+                              input:recipe.ingredients,
+                              "in":"$$this.text"}
+                                    },
+                          merged: true, // plus a flag that we've merged
+                          // now we merge all the array fields
+                          categories:{
+                              $setUnion : [
+                                  "$$CURRENT.categories",
+                                  {$cond:[recipe.categories,recipe.categories,[]]}
+                              ]
+                          },
+                          sources : {
+                              $setUnion : [
+                                  "$$CURRENT.sources",
+                                  {$cond:[recipe.sources,recipe.sources,[]]}
+                              ]
+                          },
+                          images : {
+                              $setUnion : [
+                                  "$$CURRENT.images",
+                                  {$cond:[recipe.images,recipe.images,[]]}
+                              ]
+                          },
+                          // And to preserve the order of ingredients is a PITA...
+                          ingredients:{
+                              $map : {
+                                  input : makeIngredientsExpression({
+                                      newIngs:recipe.ingredients,
+                                      oldIngs:"$$CURRENT.ingredients"
+                                  }),
+                                  "in" : {
+                                      $cond : {
+                                          if : "$$this.ingredients",
+                                          then : {$mergeObjects : [
+                                              "$$this",
+                                              {ingredients : makeIngredientsExpression(
+                                                  {newIngs:"$$this.ingredients",
+                                                   oldIngs:makeFindMatchingIngListExpression("$$this.text","$$CURRENT.ingredients")}
+                                              )}
+                                          ]},
+                                          else : "$$this"
                                       }
                                   }
-                              },
-                          }
-                      ] // end merge recipes
-                  } // end else
-              }} // end conditional
-             }, // end $replaceWith
-             {
-                 $set : {last_remote_save:"$$NOW"}
-             },
-            ]);
-        return result;
-    },
+                              }
+                          },
+                          
+                      },
+                      {
+                          previousServerSaveTime:"$$CURRENT.last_remote_save",
+                          previousLocalServerSaveTime:lastSave,
+                      },
+                  ] // end merge recipes
+              } // end else
+          }} // end conditional
+         }, // end $replaceWith
+         {
+             $set : {last_remote_save:"$$NOW"}
+         },
+        ]);
+    return result;
+}
+updateRecipeRequest.setRequestHandler(updateRecipe);
 
-    async updateRecipes (event,context,user,params) {
-        let {recipes} = params
-    },
-    
-    async getRecipe (event,context,user,params) {
-        require(['_id'],params)
+export async function getRecipe (user,params) {
         let {_id} = params;
-        if (!_id) {
-            throw new Error(
-                `getRecipe called without required parameter _id. Called with ${JSON.stringify(params)} instead.`
-            );
-        }
         let recipe = await getOne('recipes',{_id, 'owner.email':user.account})
         if (recipe) {
             return recipe
@@ -162,10 +154,11 @@ export default {
             //throw Error(`No recipe found for user ${user.account}, _id ${_id}: Found this though: ${recipe} -last result was ${getLastResult()}`);
             throw Error(`No recipe found for user ${user.account}, _id ${_id}. Last DB result was ${getLastResult()}`);
         }
-    },
+}
 
-    async getRecipes (event,context,user,params) {
-        //console.log('getRecipes got params: ',JSON.stringify(params));
+getRecipeRequest.setRequestHandler(getRecipe)
+
+export async function getRecipes (user,params) {
         let {page,query,fields,limit} = params;
         // Enforce user only searches own recipes!
         if (!query) {
@@ -194,23 +187,24 @@ export default {
             }
         );
         return result
-    },
-
-    async deleteRecipe (event, context, user, params) {
-        require(['_id'],params)
-        const {_id} = params
-        let count = await deleteOne('recipes',{_id:_id,'owner.email':user.account});
-        if (count >= 1) {
-            return count;
-        }
-        else {
-            throw Error(
-                `No recipe found to delete. Request ${jsonConcisify(params)}. Result: ${getLastResult()}`
-            )
-        }
-    }
 }
 
+getRecipesRequest.setRequestHandler(getRecipes)
+
+export async function deleteRecipe (user, params) {
+    require(['_id'],params)
+    const {_id} = params
+    let count = await deleteOne('recipes',{_id:_id,'owner.email':user.account});
+    if (count >= 1) {
+        return count;
+    }
+    else {
+        throw Error(
+            `No recipe found to delete. Request ${jsonConcisify(params)}. Result: ${getLastResult()}`
+        )
+    }
+}
+deleteRecipeRequest.setRequestHandler(deleteRecipe);
 
 function makeFindMatchingIngListExpression (targetText, list) {
     return {
@@ -285,3 +279,5 @@ function makeIngredientsExpression ({newIngs, oldIngs}) {
         }
     }
 }
+
+export default 'loaded'
