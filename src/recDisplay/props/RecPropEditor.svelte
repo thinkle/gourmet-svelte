@@ -17,7 +17,7 @@
          CategoryInput,
         NumberUnitInput,
         IconButton} from '../../widgets/';
-
+import {lookupStores} from '../../stores/recipeStores.js';
 
  let modes = RecDef.EditModes
 
@@ -47,11 +47,13 @@
 
  let ref;
 
+ let optionStore = lookupStores[prop.name]
+
 </script>
 {#if prop.array && prop.edit!==modes.MCMB}
     <div   class="multiContainer">
         {#each value as subval,n}
-            <IconButton bare="true" icon="remove"
+            <IconButton bare="{true}" small="{true}" icon="remove"
                         on:click="{()=>{
                                   value.splice(n,1)
                                   value = value;
@@ -77,15 +79,16 @@
                 {/if}
             </div>
         {/each}
-        <IconButton bare="true" icon="add" class="icon"
+        <span></span> <!-- Placeholder in grid -->
+        <IconButton bare="{true}" icon="add" class="icon" small="{true}"
                     on:click="{()=>value=[...value,{...prop.empty}]}"
-        />
+        >Add {prop.label}</IconButton>
     </div>
 {:else}
     <svelte:component
         placeholder="Type {prop.label.toLowerCase()} here…"
         this="{propInput[prop.edit]}"
-        options="{prop.options}"
+        options="{[...prop.options||[], ...(optionStore && $optionStore||[])]}"
         on:change="{handleChange}"
         on:input="{handleChange}"
         bind:value="{value}"
