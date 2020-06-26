@@ -106,12 +106,35 @@
   to remote IDs (4) save remotely (5) update local copy w/ new IDs (x)
 
 - Improve magic ingredient editor code (change on the fly?) (x)
+- Build smart auto-complete for category (and source?) fields (x)
+
 
 TODO:
 - Fix Mark User Not New (?)
 - Fix Log-In and Auto-Sync process (?)
+- Fix ShoppingList syncing - we actually are very likely to be adding recipes from other tabs
+  etc. in a standard workflow so I've got to figure this out...
+  > Plan:
+    - Front-end needs to know when it last synced...
+    - Backend needs to know...
+      -> If the front-end was starting from the same version that's on the backend, replace when we update
+      -> If the front-end was starting from a different version than is on the backend, merge when we update
+      -> This means the backend must... update a "version" each time we commit
+      -> Can we just use last_modified?
+         Currently: last_modified is updated on clientside before push (or not if we're saving without a real difference)
+         -> We also have a savedRemote which is a boolean -- maybe that becomes a timestamp? 
+         -> Simpler, given current DB, is to add a new property "last_remote_save" that we add on MongoDB side. (x)
+  > Think through "add to shopping list" button
+    - EITHER
+      -> Fetch fresh shopping list before added if we haven't made local changes
+    - OR
+      -> Consider implementing back-end first shopping list updates
+    -> Consider making all the shopping list changes save right away.
 
-- Build smart auto-complete for category and source fields.
+
+- Make image editable
+
+- Tweak layout on mobile.
 
 - Save "purchased" state of shopping list items 
 - Troubleshoot issues w/ shopping list not seeming to sync correctly.
@@ -121,8 +144,13 @@ TODO:
   up. (speaking of - we broke recipe editing state updates again
   somehow???)  (YES -- just broke sidebar w/ a recipe change by accident. Worth
   automated testing of these components with empty state / bad data / good data)
+  -> Note: I've built a framework for testing the recipe widget simply enough
+  -> Testing save/edit buttons involves either having or mocking state and store
+     which is rather a pain...
 
-- Sync from local to cloud... (partially done)
+
+
+- Test Syncing from local to cloud... 
 - Export to file
 
 - Consider implementing new Request API to add error-checking and clearer code to requests.
