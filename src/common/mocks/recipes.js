@@ -3,7 +3,7 @@ let testRecs = {
             "title": "Baked Potato and Cauliflower \"Samosas\" with Tamarind Mint Chutney",
             "text": [
                 {
-                    "body": "<ol><li>In a large saucepan, place potatoes in highly salted water. Boil until tender, drain from water, and place into a large mixing bowl. Mash, retaining some texture. Bring a smaller pot of salted water to boil, and boil cauliflower until tender. Drain and add to potatoes.</li><li>In a small skillet, saute onion in olive oil until tender. Add to bowl, along with remaining ingredients. Combine all ingredients well.</li><li>Place a generous spoonful on the end of a wonton wrapper, and roll up like an eggroll, sealing the end with a touch of water.</li><li>Place on oiled baking sheet and continue with remaining filling and wrappers. Place into a 425 degree oven, and bake 30 minutes, turning every so often, until samosas are nicely browned. Remove from oven and cool slightly before serving.</li></ol><p>Place all ingredients in a food processor and process until finely minced. Allow to chill in the refrigerator for an hour or two for flavors to meld together.</p>",
+                    "body": "<ol><li>In a large saucepan, place potatoes in highly salted water. Boil until tender, drain from water, and place into a large mixing bowl. Mash, retaining some texture. Bring a smaller pot of salted water to boil, and boil cauliflower until tender. Drain and add to potatoes.</li><li>A deliberately short item.</li><li>In a small skillet, saute onion in olive oil until tender. Add to bowl, along with remaining ingredients. Combine all ingredients well.</li><li>Place a generous spoonful on the end of a wonton wrapper, and roll up like an eggroll, sealing the end with a touch of water.</li><li>Place on oiled baking sheet and continue with remaining filling and wrappers. Place into a 425 degree oven, and bake 30 minutes, turning every so often, until samosas are nicely browned. Remove from oven and cool slightly before serving.</li></ol><p>Place all ingredients in a food processor and process until finely minced. Allow to chill in the refrigerator for an hour or two for flavors to meld together.</p>",
                     "header": "Instructions"
                 },
                 {
@@ -201,13 +201,8 @@ let testRecs = {
         },
 
     empty : {
-        title : "",
-        times : [],
-        categories : [],
-        sources: [],
-        text : [{'header':'Instructions',body:''}],
-        images : [],
         ingredients : [],
+        images : []
     },
     oldstandard :         {
             "title": "Asparagus Custard Tart",
