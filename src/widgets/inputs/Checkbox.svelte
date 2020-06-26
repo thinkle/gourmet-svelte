@@ -3,11 +3,22 @@
  export let size=24
  import { draw,fade } from 'svelte/transition';
  export let color="var(--light-fg)"
+ function handleKeypress (event) {
+     
+     if (
+         // SPACE
+         event.keyCode==32 ||
+         // RETURN 
+         event.keyCode==13) {
+         checked = !checked;
+         event.preventDefault();
+     }
+ }
 </script>
 
-<label>
+<label on:keydown={handleKeypress} tabindex="0">
     <input type="checkbox" bind:checked="{checked}" on:checked on:change on:input/>
-    <svg  xmlns="http://www.w3.org/2000/svg" height="{size}" viewBox="0 0 24 24" width="{size}"
+    <svg xmlns="http://www.w3.org/2000/svg" height="{size}" viewBox="0 0 24 24" width="{size}"
           style="">
         {#if checked}
             <path in:draw={{duration:1000}} out:fade="{{duration:400}}" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
