@@ -7,13 +7,16 @@
  export let growLeft=undefined;
  export let growRight=undefined
  export let maxWidth=undefined;
+ export let style=''
  function stopEvents (event) {
      event.stopPropagation();
  }
  
  function getStyle () {
      if (maxWidth) {
-         return 'width: min('+maxWidth+',calc(100vw - 2em)); margin: auto';
+         return `width: min(${maxWidth},calc(100vw - 2em)); margin: auto; ${style};`;
+     } else {
+         return style;
      }
  }
 
