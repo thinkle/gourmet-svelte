@@ -6,6 +6,7 @@
  export let showLabel=true;
  import RecDef from '../../common/RecDef.js';
  import {PlainInput} from '../../widgets/';
+ import RecipeTextStyle from './RecipeTextStyle.svelte';
  import RichText from '../../widgets/inputs/RichText.svelte';
  import {getContext} from 'svelte'
  import { createEventDispatcher } from 'svelte';
@@ -80,10 +81,12 @@
         {/if}
     </div>
     {#if edit}
-        <RichText initialValue="{initialValue}"
-                  placeholder="First, chop the onion in a fine dice…"
-                  on:change="{handleChange}"
-        />
+        <RecipeTextStyle>
+            <RichText initialValue="{initialValue}"
+                      placeholder="First, chop the onion in a fine dice…"
+                      on:change="{handleChange}"
+            />
+        </RecipeTextStyle>
     {:else}
         <div>{@html displayValue}</div>
     {/if}
