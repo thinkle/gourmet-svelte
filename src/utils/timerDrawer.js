@@ -18,18 +18,25 @@ function Timer ({ctx,timerSize,
                  secondHand=false
                 }={}) {
 
-    let timeColor = activeTimeColor;
-    
     return {
+
+        activeTimeColor,
+        pauseTimeColor,
+        overtimeColor,
+        bgColor,
+        textColor,
         timerSize,
+        clockColor,
+        secondHandColor,
         ctx,
+        isPaused:false,
 
         pause () {
-            timeColor = pauseTimeColor;
+            this.isPaused = true;
         },
 
         resume () {
-            timeColor = activeTimeColor;
+            this.isPaused = false;
         },
 
         draw (s) {
@@ -48,7 +55,7 @@ function Timer ({ctx,timerSize,
             let cx = this.timerSize/2;
             let cy = this.timerSize/2;
             this.ctx.lineWidth = 2;
-            this.ctx.strokeStyle = secondHandColor;
+            this.ctx.strokeStyle = this.secondHandColor;
             this.ctx.beginPath();
             this.ctx.moveTo(cx,cy);
             const seconds = s % 60;
@@ -61,10 +68,10 @@ function Timer ({ctx,timerSize,
             let cx = this.timerSize/2
             let cy = this.timerSize/2
             this.ctx.textAlign = 'center';
-            this.ctx.fillStyle = textColor
+            this.ctx.fillStyle = this.textColor
             var fontSize = this.timerSize/4
             if (s < 0) {
-                this.ctx.fillStyle = overtimeColor;
+                this.ctx.fillStyle = this.overtimeColor;
                 fontSize = this.timerSize/4; // make room for "-"
             }
             this.ctx.font = `${fontSize}px ${font}`
@@ -88,7 +95,7 @@ function Timer ({ctx,timerSize,
 
         drawButton (angle1, angle2, buttonBottom, buttonTop) {
             let ctx = this.ctx;            
-            ctx.fillStyle = clockColor;
+            ctx.fillStyle = this.clockColor;
             ctx.beginPath();
             this.drawWedge(angle1,angle2,buttonTop); ctx.fill();
             ctx.fillStyle = 'white';
@@ -104,10 +111,10 @@ function Timer ({ctx,timerSize,
             let cx = this.timerSize/2;
             let cy = this.timerSize/2;
             let ctx = this.ctx;
-            ctx.strokeStyle = clockColor
+            ctx.strokeStyle = this.clockColor
             ctx.beginPath();
             ctx.lineWidth = 1;
-            ctx.fillStyle = clockColor;
+            ctx.fillStyle = this.clockColor;
             // top thing
             this.drawButton(-80,-100,0.9,1);
             // Timer arm things
@@ -116,10 +123,10 @@ function Timer ({ctx,timerSize,
             ctx.beginPath();
             // Circle
             ctx.arc(cx,cy,outerCircle*(this.timerSize/2),0,Math.PI*2);
-            ctx.fillStyle = bgColor
+            ctx.fillStyle = this.bgColor
             ctx.fill()
-            ctx.fillStyle = clockColor
-            ctx.strokeStyle = clockColor
+            ctx.fillStyle = this.clockColor
+            ctx.strokeStyle = this.clockColor
             ctx.stroke();
             ctx.beginPath();
             let bigMark = true;
@@ -167,9 +174,9 @@ function Timer ({ctx,timerSize,
             let arcPercentage = s / this.circleSize;
             ctx.beginPath();
             ctx.lineWidth = 3
-            ctx.strokeStyle = timeColor
+            ctx.strokeStyle = this.isPaused && this.pauseTimeColor || this.activeTimeColor
             if (s < 0) {
-                ctx.strokeStyle = overtimeColor
+                ctx.strokeStyle = this.overtimeColor
             }
             let end = this.top+(Math.PI*2*arcPercentage)
             ctx.arc(cx,cy,0.8*(this.timerSize/2),
