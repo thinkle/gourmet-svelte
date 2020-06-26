@@ -7,7 +7,8 @@
      MenuItem,
      SmallLabel,
      NumberUnitInput,
-     IngredientInput} from '../../widgets/';
+     IngredientInput,
+     Underline} from '../../widgets/';
 
  import RecipePickerLauncher from '../picker/RecipePickerLauncher.svelte';
  import {storedRecipes} from '../../stores/recipeStores.js';
@@ -53,7 +54,7 @@
     />    
     <td>
         <SmallLabel>Recipe</SmallLabel>
-        <input style="width:100%;" type="text" bind:value="{ing.text}">
+        <Underline><input style="width:100%;" type="text" bind:value="{ing.text}"></Underline>
         <RecipePickerLauncher
             onSelected="{addRecipeReference}"
         >
