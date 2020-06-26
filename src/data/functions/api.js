@@ -1,4 +1,5 @@
 import {registerHandlerObject} from '../requests/remoteRequest.js'
+import loadIt from './recipeFunctions.js';
 const requestHandlers = {
 }
 registerHandlerObject(requestHandlers);
@@ -14,8 +15,6 @@ import {getUser,
         markUserNotNew,
         userCache} from './userFunctions.js';
 
-import recipeApi from './recipeFunctions.js';
-
 const functions = {
     setup : setupHandler,
     echo,
@@ -27,7 +26,7 @@ const functions = {
     addLinkedAccounts,
     setFakeUser,
     acceptLinkedAccount,
-    ...recipeApi
+    //...recipeApi
 }
 
     
@@ -76,15 +75,15 @@ const handler = async (event, context) => {
         let handler = requestHandlers[params.mode]
         try {
             body = await handler(user,params);
-            console.log('Got response',body);
+            //console.log('Got response',body);
         } catch (err) {
             error = err;
-            console.log('Got error',error);
+            //console.log('Got error',error);
         }
     } else {
         // old way -- once we transition to new system, we can delete this code
         let f = functions[params.mode]
-        console.log('Request',params.mode,params.params)
+        //console.log('Request',params.mode,params.params)
         if (!f) {
             return {
                 statusCode:400,
@@ -98,7 +97,7 @@ const handler = async (event, context) => {
         }
     }
     if (body) {
-        console.log('Return response');
+        //console.log('Return response');
         return {
             statusCode:200,
             body:JSON.stringify(body||'No return value')
@@ -131,6 +130,6 @@ function throwError () {
     duck.boo.bar += 7;
 }
 
-console.log('hello world');
+//console.log('hello world');
 
 exports.handler = handler;
