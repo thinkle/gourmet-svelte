@@ -8,50 +8,10 @@
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
  import {Button,Checkbox,OneLiner} from '../../widgets/'
  export let size="lg"
- let color
-
- const wordColors = [
-     // some whimsical ingredient matchers
-     {matcher:/eggplant|aubergine|gh?anou/i, color: {bg:'#614051',fg:'white'}},
-     {matcher:/chocolate/i, color: {bg:'#3F000F',fg:'#ffeeff'}},
-     {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE', fg:'white'}}, // - ocen blue
-     {matcher:/asparagus/i, color : {bg: '#87a96b', fg:'white'}},
-     {matcher:/spinach/i, color: {bg:'#455439',fg:'white'}},
-     {matcher:/apple/i, color: {bg:'#ff0800',fg:'white'}},
-     {matcher:/tomato/i, color: {bg:'#ff6347',fg:'white'}},
-     
-     // courses
-     {matcher:/cookie|bread/i, color:{bg:'#d8ad6a',fg:'#eeeeee'}}, // beige
-     {matcher:/dessert/i, color: {bg:'#FF3366',fg:'white'}}, // red/pink
-     {matcher:/salad/i, color: {bg:'#55ab55',fg:'white'}}, // green
-
-     // cuisines...
-     {matcher:/pasta|italy|italian/i, color: {bg:'#ce2b37',fg:'white'}},
-     {matcher:/india/i, color: {bg:'#FEB200',fg:'black'}}, // tumeric
-     {matcher:/thai/i, color: {bg:'#f94b1e',fg:'white'}}, // red/orange
-     {matcher:/china|chinese|asian/i, color: {bg:'#c51015',fg:'white'}}, // red/orange
-     {matcher:/french|france/i, color: {bg:'#456990',fg:'white'}}, // queen blue
-     {matcher:/mexic|spanish|spain/i, color: {bg:'#EB6424',fg:'white'}}, // persimmon
-
-     
- ]
+ import {getColor} from './colors.js';
 
  $: color = getColor(rec);
 
- function getColor (recipe) {
-     for (let {matcher,color} of wordColors) {
-         if (recipe && recipe.title && recipe.title.match(matcher)) {
-             return color
-         } else if (recipe && recipe.categories && recipe.categories.find((c)=>c.name && c.name.match(matcher))) {
-             return color;
-         }
-     }
-     // generic...
-     return {
-         bg: '#AFD2E9',
-         fg: '#121234'
-     }
- }
 
 </script>
 <article
@@ -81,21 +41,21 @@
             <!-- Forget the thumbnails for now -->
         </div>
         {#if !hideCheck}
-        <div class="check">
-            <Checkbox bind:checked="{checked}" on:change color="{color.fg}" />
-        </div>
+            <div class="check">
+                <Checkbox bind:checked="{checked}" on:change color="{color.fg}" />
+            </div>
         {/if}
     {/if}
     <div class="info" >
         {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
             <div class="propBox">
                 <OneLiner bg="var(--light-bg)" fg="var(--light-fg)">
-                <RecPropDisplay 
-                    clickable="{true}"
-                    onClick="{onClick}"
-                    prop="{prop}"
-                    value="{rec[prop.name]}"
-                />
+                    <RecPropDisplay 
+                        clickable="{true}"
+                        onClick="{onClick}"
+                        prop="{prop}"
+                        value="{rec[prop.name]}"
+                    />
                 </OneLiner>
             </div>
         {/each}        
