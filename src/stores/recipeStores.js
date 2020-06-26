@@ -25,6 +25,7 @@ export const connected = readable(false,(set)=>{
     });
 });
 
+
 function setStoreProp (store,p,v) {
     // set store prop to value...
     store.update((d)=>{
@@ -316,24 +317,29 @@ export function makeLocalRecipeStore () {
             let recState = {}
             for (let key in $local) {
                 recState[key] = {} //...$state[key])}
-                let diff = diffRecs($local[key],$stored[key]);
-                if (diff) {
-                    // if (!recState[key].edited) {
-                    //     let o1 = $local[key];
-                    //     let o2 = $stored[key];
-                    //     console.log(o1,'differs from',o2);
-                    // }
-                    recState.changes = diff;
-                    console.log('Recs differ! Changed:',diff);
-                    recState[key].edited = true;
+                if (!$stored[key]) {
+                    recState[key].savedRemote = undefined;
+                    recState[key].last_modified = undefined;
+                } else {
+                    let diff = diffRecs($local[key],$stored[key]);
+                    if (diff) {
+                        // if (!recState[key].edited) {
+                        //     let o1 = $local[key];
+                        //     let o2 = $stored[key];
+                        //     console.log(o1,'differs from',o2);
+                        // }
+                        recState.changes = diff;
+                        console.log('Recs differ! Changed:',diff);
+                        recState[key].edited = true;
+                    }
+                    else {
+                        recState[key].edited = false;
+                    }
+                    if ($stored[key] && $stored[key].savedRemote) {
+                        recState[key].savedRemote = true
+                    }
+                    recState[key].last_modified = $stored[key].last_modified
                 }
-                else {
-                    recState[key].edited = false;
-                }
-                if ($stored[key].savedRemote) {
-                    recState[key].savedRemote = true
-                }
-                recState[key].last_modified = $stored[key].last_modified
             }
             return recState;
         }
@@ -346,5 +352,21 @@ export function makeLocalRecipeStore () {
     }
     
 }
+
+export const categoryNames = writable([],(set)=>{
+    api.getCategories().then((categories)=>{
+        set(categories.map((cname)=>({name:cname})));
+    });
+    return ()=>{
+        console.log('no more subscribers to cats');
+    }
+});
+
+
+export const lookupStores = {
+    categories : categoryNames,
+}
+
+
 const {localRecipes,openLocalRecipes,recipeState} = makeLocalRecipeStore();
 export {localRecipes,openLocalRecipes,recipeState}
