@@ -56,7 +56,7 @@
                                         duration={seconds}
                        onComplete={()=>{timerHidden=false}}
                 />
-                <label><OneLiner>{timestring||times.getDescription(seconds)}</OneLiner></label>
+                <label><OneLiner>{@html timestring||times.getDescription(seconds)}</OneLiner></label>
             </div>
         </div>
         {#if !timerHidden}
@@ -102,6 +102,9 @@
      flex-direction: column;
      border: 1px solid #77f;
      box-shadow: 2px 2px #aaa;
+ }
+ .timerBox label {
+     max-width: 200px;
  }
  .timerBox .top {
      display: flex;
