@@ -175,6 +175,7 @@ var Metadata = {
 	 toHtml:(s)=>`${s.name}: ${s.text||Units.secondsToTimeString(s.seconds)||''}`,
          empty:[{name:'',seconds:0}],
          edit:DUR,
+         minEditWidth: 415,
         },
         {name:'text',
          label:'Text',
