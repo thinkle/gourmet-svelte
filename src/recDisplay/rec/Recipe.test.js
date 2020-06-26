@@ -30,21 +30,38 @@ function _getByContainingText (getByText) {
 }
 
 
-it('Recipe renders and ingredients multiply', async () => {
-    const {getByText,
-           getByLabelText,
-           getAllByText,
-           container,
-           component} = render(RecipeDemo);
-    const getByContainingText = _getByContainingText(getByText);
-    let titleElement = getByText(standard.title)
-    let categoryElement = getByText(standard.categories[0].name)
-    // We have 3 cups diced and peeled potato
-    // hard-coded search here
-    let potatoes = getByContainingText('3 cups diced and peeled potato')
-    let multiplier = getByLabelText('multiply by')
-    await userEvent.type(multiplier,'{backspace}2');
-    //await tick();
-    //expect(multiplier.textContent).toMatch(/2/)
-    expect(potatoes.textContent).toMatch(/6/)
-})
+describe(
+    'Recipe tests',
+    ()=>{
+
+        it('Recipe renders', ()=>{
+            let r = render(RecipeDemo);
+            let titleElement = r.getByText(standard.title)
+            let categoryElement = r.getByText(standard.categories[0].name)
+        })
+        
+
+        it('ingredients multiply', async () => {
+            const {getByText,getByLabelText} = render(RecipeDemo);
+            const getByContainingText = _getByContainingText(getByText)
+            // We have 3 cups diced and peeled potato
+            // hard-coded search here
+            let potatoes = getByContainingText('3 cups diced and peeled potato')
+            let multiplier = getByLabelText('multiply by')
+            await userEvent.type(multiplier,'{backspace}2');
+            //await tick();
+            //expect(multiplier.textContent).toMatch(/2/)
+            expect(potatoes.textContent).toMatch(/6/)
+        });
+
+        it('edit mode works', async () => {
+            const {getByText,getByLabelText,container} = render(RecipeDemo);
+            const getByContainingText = _getByContainingText(getByText)
+            let editButton = getByText('Edit Recipe');
+            await userEvent.click(editButton);
+            console.log('Now it looks like:',container);
+
+        })
+        
+    }
+);
