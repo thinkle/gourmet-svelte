@@ -141,7 +141,7 @@
      --note-fg : #333333;
      --note-light-bg : #ffffdd;
      --note-light-fg: #333;
-     --accent-bg: #46092b;
+     --accent-bg: #46092b; 
      --accent-fg: #facfde;
      /* Typography */
      --recipeFont : Lora, Ubuntu, Cantarell, serif;
@@ -154,20 +154,21 @@
      /* Sizes */
      --bar-height: 30px;
      /* Inputs and Buttons */
-     --inputBorder : 1px solid #aaa;
+     --inputBorderColor : #aaa;
+     --inputBorder : 1px solid var(--inputBorderColor);
      --focusedInputBorder : 3px solid #777;
      --inputRadius : 3px;
      --inputPadding: 5px;
  }
  :global(input,textarea,[contenteditable]) {
-     border : var(--inputBorder);
-     padding: var(--inputPadding);
-     border-left: none;
-     border-top: none;
-     border-right: none;
+     /* border : var(--inputBorder);
+        padding: var(--inputPadding);
+        border-left: none;
+        border-top: none;
+        border-right: none; */
  }
  :global(input:focus,textarea:focus,[contenteditable]:focus) {
-     border-width: 3px
+     /* border-width: 3px */
  }
  
  :global(:focus) {
@@ -180,5 +181,7 @@
  :global(.slot) {
      display: contents;
  }
- 
+ :global(*) {
+     box-sizing: border-box;
+ }
 </style>
