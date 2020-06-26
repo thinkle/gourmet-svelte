@@ -74,8 +74,7 @@
 
 <style>
  .head > :global(*) {
-     font-size: 70%;	
-     border-bottom: 5px solid var(--grey);
+     border-bottom: 1px solid var(--grey);
      margin: 0;
      padding-bottom: 3px;
  }
