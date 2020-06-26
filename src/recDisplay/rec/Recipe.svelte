@@ -13,6 +13,9 @@
      editMode = val;
  }
 
+ import {getColor} from './colors.js';
+ let color;
+ $: color = getColor(rec);
 
  import {
      Bar,
@@ -39,7 +42,7 @@
 
  $: { if (rec && !rec.title && editable) {editMode=true}}
 
-                           let valid = false;
+            let valid = false;
  $: {
      valid = isValid(rec);
  }
@@ -193,17 +196,19 @@
      doLogin = ()=>window.alert('No login context')
  }
 
-     
+ 
 
 </script>
 
 {#if valid}
-    
+    <div class='recipe-wrap'
+         style="{(color&&`--accent-bg: ${color.bg}; --accent-fg: ${color.fg};`||'')}">
         <!-- Above the side-by-side view... -->
 
     <!-- <div class="top" use:watchResize="{handleResize}"> -->
 
-    <Bar large="true" growLeft="{true}" maxWidth="1250px">
+    <Bar large="true" growLeft="{true}" maxWidth="1250px"
+         style="border-bottom: 2px solid var(--accent-bg);">
         <div slot="left" style="align-items: flex-end">
             <h2>
 	        {#each RecDef.titleProps as prop}
@@ -217,15 +222,6 @@
                     />
                 {/each}        
             </h2>
-            <div class='multiplier'>
-                &times;
-                <AmountInput
-                    ariaLabel="multiply by"
-                    value="{$multiplier}"
-                    on:change="{(e)=>$multiplier=e.detail}"
-                    showPlusMinusButtons="{true}"
-                />
-            </div>
         </div>
         <div slot="right">
             <div class="status">
@@ -262,47 +258,47 @@
                 {/if}
             </div>
             <NavActions>
-            {#if showShopping}
-                <li><IconButton
-                    icon="shopping_cart"
-                    on:click="{async ()=>{
-                              await shoppingList.addRecipe(rec.id,$multiplier);
-                              shoppingList.save();
-                              }}">
-                    Add to List
-                </IconButton></li>
-            {/if}
-            {#if editable}
-                <li><IconButton
-                    icon="edit"
-                    toggle="{true}"
-                    toggled="{editMode}"
-                    on:click="{()=>editMode=!editMode}">
-                    Edit{#if editMode}ing{/if}
-                    Recipe
-                </IconButton></li>
-                {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
-                    <li><IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
-                                busy="{$recipeState[rec.id].updating}"
-                    >
-                        Revert Changes
-                    </IconButton></li>
+                {#if showShopping}
                     <li><IconButton
-                        icon="save"
-                        tooltip="Attempt to save?"
-                        busy="{$recipeState[rec.id].updating}"
-                        on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
-                        Save
-                    </IconButton></li>
-                {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
-                    <li><IconButton
-                        busy="{$recipeState[rec.id].updating}"
-                        icon="cloud_upload"
-                        on:click="{()=>recipeActions.updateRecipe(rec)}">
-                        Save to Cloud
+                            icon="shopping_cart"
+                            on:click="{async ()=>{
+                                      await shoppingList.addRecipe(rec.id,$multiplier);
+                                      shoppingList.save();
+                                      }}">
+                        Add to List
                     </IconButton></li>
                 {/if}
-            {/if}
+                {#if editable}
+                    <li><IconButton
+                            icon="edit"
+                            toggle="{true}"
+                            toggled="{editMode}"
+                            on:click="{()=>editMode=!editMode}">
+                        Edit{#if editMode}ing{/if}
+                        Recipe
+                    </IconButton></li>
+                    {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
+                        <li><IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
+                                        busy="{$recipeState[rec.id].updating}"
+                            >
+                            Revert Changes
+                        </IconButton></li>
+                        <li><IconButton
+                                icon="save"
+                                tooltip="Attempt to save?"
+                                busy="{$recipeState[rec.id].updating}"
+                                on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
+                            Save
+                        </IconButton></li>
+                    {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
+                        <li><IconButton
+                                busy="{$recipeState[rec.id].updating}"
+                                icon="cloud_upload"
+                                on:click="{()=>recipeActions.updateRecipe(rec)}">
+                            Save to Cloud
+                        </IconButton></li>
+                    {/if}
+                {/if}
             </NavActions>
         </div>
     </Bar>
@@ -314,24 +310,35 @@
         stackSidesAt="{550}"
         maxWidthRight='45rem' maxWidthLeft='45rem'
     >
-	<h3 slot="leftHead"> 
-	    Ingredients
+	<div class="inghead" slot="leftHead"> 
+	    <h3>Ingredients</h3>
             {#if !editMode && editable}
                 {#if ingeditmode}
                     <IconButton
                         small="{true}"
                         bare="true"
                         on:click="{()=>ingeditmode=false }"
+                        ariaLabel="Finish editing ingredients"
                         icon="done"/>
                 {:else}
                     <IconButton
                         small="{true}"
                         bare="true"
+                        ariaLabel="Edit ingredients"
                         on:click="{()=>ingeditmode=true }"
                         icon="edit" />
                 {/if}
             {/if}
-	</h3>
+            <div class='multiplier'>
+                &times;
+                <AmountInput
+                    ariaLabel="multiply by"
+                    value="{$multiplier}"
+                    on:change="{(e)=>$multiplier=e.detail}"
+                    showPlusMinusButtons="{true}"
+                />
+            </div>
+	</div>
 	<div slot="left" on:dblclick="{()=>ingeditmode=true}">
 	    <IngredientList
                 {editable}
@@ -385,6 +392,7 @@
             </div> <!-- close topblock -->
 	</div> <!-- close right slot -->
     </SideBySide>
+    </div>
 {:else}
     {#if !rec}
         Loading recipe...
@@ -450,5 +458,28 @@
      margin: auto;
      display: flex;
      flex-direction: column;
+ }
+ @media (max-width: 599px) {
+     h2 {
+         max-width: calc(100vw - 60px);
+         text-overflow: ellipsis;
+         overflow: hidden;
+         white-space: nowrap;
+     }
+     h2:hover :global('.title') {
+         max-width: calc(100vw - 210px);
+         text-overflow: ellipsis;
+         overflow: initial;
+         white-space: normal;
+     }
+
+ }
+
+ .inghead {
+     display: flex;
+     flex-direction: row;
+ }
+ .recipe-wrap {
+     display: contents;
  }
 </style>
