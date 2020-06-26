@@ -12,6 +12,13 @@
  $: timeLeft = duration * 1000;
  
  let timer = Timer({timerSize:size,secondHand:true});
+ 
+ $: timer && canv && setComputedColors()
+ function setComputedColors () {
+     timer.activeTimeColor = getComputedStyle(canv).getPropertyValue('--accent-bg');
+     timer.pauseTimeColor =  getComputedStyle(canv).getPropertyValue('--accent-fg');
+ }
+
  let canv;
  let endTime;
  let now;
@@ -92,7 +99,7 @@
      else { // paused
           timer.draw(remaining/1000)
           }
-     now = new Date().getTime();
+         now = new Date().getTime();
      if (endTime) {
          timeLeft = endTime - now;
      }

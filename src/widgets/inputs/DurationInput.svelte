@@ -22,6 +22,15 @@
  let mousedown = false
 
  let timer = Timer({timerSize});
+ $: timer && canv && setComputedColors()
+ function setComputedColors () {
+
+     timer.activeTimeColor = getComputedStyle(canv).getPropertyValue('--accent-bg');
+     timer.pauseTimeColor =  getComputedStyle(canv).getPropertyValue('--accent-fg');
+     console.log('Set computed colors!',timer.activeTimeColor,timer.pauseTimeColor);
+     drawTimer();
+ }
+
 
  $: cx= timerSize/2;
  $: cy = timerSize/2;
@@ -36,7 +45,7 @@
  let startVal = undefined
  let curVal
  let mouseChangeStart = false;
- onMount(drawTimer)
+ /*  onMount(drawTimer) */
 
  function onmousemove (event) {
      if (event.which==1) {
@@ -169,27 +178,27 @@
             <input placeholder="Label (Baking Time)…" type="text"  class="text" bind:value={value.name} on:change="{change}">
         </Underline>
     {/if}
-        <span class="container" class:minimal>
-            <Underline>
+    <span class="container" class:minimal>
+        <Underline>
             <div class="hms" >
-            <input style={getInputStyle()} width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
-                         placeholder="HH"
-                   step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
-                       >
-            <span class="colon" >:</span>
-            <input
-                placeholder="MM"
-                style={getInputStyle()} bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
-                             step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
-            >    <span class="colon" >:</span>
-            <input
-                placeholder="SS"
-                style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
-                             step="{timer.unit < 60 && timer.unit || 15}"
-            >
+                <input style={getInputStyle()} width="2" on:change={changeHours} type="number" value={Times.getHMS(value.seconds).hours}
+                             placeholder="HH"
+                       step="{timer.unit < (60*60) && 1 || timer.unit/(60*60)}"
+                >
+                <span class="colon" >:</span>
+                <input
+                    placeholder="MM"
+                    style={getInputStyle()} bind:this={fref} width="2" on:change={changeMinutes} type="number" value={Times.getHMS(value.seconds).minutes.toString(10).padStart(2,'0')}
+                                 step="{timer.unit < 60 && 1 || timer.unit > 60 && 15 || timer.unit/60}"
+                >    <span class="colon" >:</span>
+                <input
+                    placeholder="SS"
+                    style={getInputStyle()} width="2" on:change={changeSeconds} type="number" value={Times.getHMS(value.seconds).seconds.toString(10).padStart(2,'0')}
+                                 step="{timer.unit < 60 && timer.unit || 15}"
+                >
             </div>
-            </Underline>
-            <canvas tabindex=1 on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
+        </Underline>
+        <canvas tabindex=0 on:mousemove={onmousemove}  width={timerSize} height={timerSize} bind:this={canv}></canvas>
         {#if !minimal}
             <Underline>
                 <input
