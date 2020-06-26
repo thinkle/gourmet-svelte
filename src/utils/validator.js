@@ -18,8 +18,8 @@ function validate (obj, expected) {
     }
     else if (expected===null) {
         if (obj) {
-            settings.isChatty && console.log('Expected null (or at least falsey) value, but got',typeof obj);
-            let e = new Error(`Expect null but got ${typeof obj}`);
+            settings.isChatty && console.log('Expected null (or at least falsey) value, but got',typeof obj,obj);
+            let e = new Error(`Expect null but got ${typeof obj} ${obj}`);
             e.expected = expected
             e.actual = obj;
             throw e;
@@ -27,8 +27,8 @@ function validate (obj, expected) {
     }
     else {
         if (typeof obj !== typeof expected) {
-            settings.isChatty && console.log('Expected',typeof expected,'but got',typeof obj);
-            let e = new Error(`Expect ${typeof expected} but got ${typeof obj}`);
+            settings.isChatty && console.log('Expected',typeof expected,'but got',typeof obj,obj);
+            let e = new Error(`Expect ${typeof expected} but got ${typeof obj} ${obj}`);
             e.expected = expected
             e.actual = obj;
             throw e;
@@ -55,7 +55,7 @@ function validate (obj, expected) {
                 }
                 catch (err) {
                     settings.isChatty && console.log('Error in prop',prop,err);
-                    let e = new Error(`Error in property ${prop}`);
+                    let e = new Error(`Error in property ${prop}: ${err}`);
                     e.expectedObject = expected;
                     e.actualObject = obj;
                     e.error = err;
@@ -69,7 +69,8 @@ function validate (obj, expected) {
 function Validator (name,f) {
     const v =  function (v) {
         if (!f(v)) {
-            throw Error('Invalid value:',v,'according to validator',name)
+            console.log('Invalid value:',v,'according to validator',name)
+            throw Error(`Invalid value: ${JSON.stringify(v)} according to validator ${name}`)
         }
     }
     v.__isValidator = true
@@ -87,6 +88,30 @@ export function is (obj) {
     return Validator(
         `is ${JSON.stringify(obj)}`,
         (v)=>v===obj
+    );
+}
+
+export function optional (obj) {
+    return Validator(
+        `(optional) ${JSON.stringify(obj)}`,
+        (v)=>{
+            if (v===undefined) {return true}
+            else {
+                try {
+                    validate(v,obj)
+                } catch (err) {                    
+                    return false;
+                }
+                return true;
+            }
+        }
+    );
+}
+
+export function each (obj) {
+    return Validator(
+        `each ${JSON.stringify(obj)}`,
+        (v)=>v.map((v)=>validate(v,obj))
     );
 }
 
