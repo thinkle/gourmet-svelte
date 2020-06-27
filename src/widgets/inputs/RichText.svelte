@@ -44,10 +44,6 @@
 
 </script>
 
-<svelte:head>
-    <!-- <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet"> -->
-</svelte:head>
-
 <div class="editor-wrapper">
     <div bind:this={editor} />
 </div>
@@ -86,15 +82,17 @@
      opacity: 0;
      visibility: hidden;
      transition: opacity 300ms;
-     /* overflow: hidden;
-        box-sizing: border-box;
-        max-height: 0;
-        padding : 0;
-        transition: max-height 300ms; */
+     overflow: hidden;
+     box-sizing: border-box;
+     max-height: 0;
+     padding : 0;
+     transition: max-height 300ms;
  }
  .editor-wrapper:focus-within :global(.ql-toolbar) {
      opacity: 1;
      visibility: visible;
+     max-height: 60px;
+     padding: 8px; /* Hard-coded copied from ql-snow... */
  }
 
 </style>
