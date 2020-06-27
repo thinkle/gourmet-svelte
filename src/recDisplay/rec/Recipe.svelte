@@ -353,16 +353,16 @@
 	<div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
             <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
                 <div class="props" >
-                    
-                    <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
-                         style="{`--max-image-width:${maxImageWidth}px`}"
-                    >
-                        {#each rec.images as image}
-                            <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
-                            <img alt="{image.alt||rec.title}" src="{image.url}"/>
-                        {/each}
-                    </div> <!-- close images -->
-
+                    {#if false}
+                        <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
+                             style="{`--max-image-width:${maxImageWidth}px`}"
+                        >
+                            {#each rec.images as image}
+                                <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
+                                <img alt="{image.alt||rec.title}" src="{image.url}"/>
+                            {/each}
+                        </div> <!-- close images -->
+                    {/if}
                     {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
                         <div class="prop">                                
                             <RecProp
