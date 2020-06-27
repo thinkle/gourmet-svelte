@@ -19,6 +19,7 @@ import OneLiner from "../widgets/display/OneLiner.demo.svelte";
 import Status from "../widgets/display/Status.demo.svelte";
 import SVGs from "../widgets/display/SVGs.demo.svelte";
 import Checkbox from "../widgets/inputs/Checkbox.demo.svelte";
+import Image from "../widgets/inputs/Image.demo.svelte";
 import IngredientInput from "../widgets/inputs/IngredientInput.demo.svelte";
 import Inputs from "../widgets/inputs/Inputs.demo.svelte";
 import FullScreen from "../widgets/layout/FullScreen.demo.svelte";
@@ -50,6 +51,7 @@ export default {
     Status,
     SVGs,
     Checkbox,
+    Image,
     IngredientInput,
     Inputs,
     FullScreen,
