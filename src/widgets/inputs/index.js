@@ -3,6 +3,7 @@ export {default as CategoryInput} from './CategoryInput.svelte';
 export {default as ComboInput} from './ComboInput.svelte';
 export {default as Checkbox} from './Checkbox.svelte';
 export {default as DurationInput} from './DurationInput.svelte';
+export {default as ImageEntry} from './ImageEntry.svelte';
 export {default as IngredientInput} from './IngredientInput.svelte';
 export {default as MultiComboInput} from './MultiComboInput.svelte';
 export {default as NumberUnitInput} from './NumberUnitInput.svelte';
