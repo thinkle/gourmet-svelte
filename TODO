@@ -108,10 +108,6 @@
 - Improve magic ingredient editor code (change on the fly?) (x)
 - Build smart auto-complete for category (and source?) fields (x)
 
-
-TODO:
-- Fix Mark User Not New (?)
-- Fix Log-In and Auto-Sync process (?)
 - Fix ShoppingList syncing - we actually are very likely to be adding recipes from other tabs
   etc. in a standard workflow so I've got to figure this out...
   > Plan:
@@ -128,11 +124,14 @@ TODO:
     - EITHER
       -> Fetch fresh shopping list before added if we haven't made local changes
     - OR
-      -> Consider implementing back-end first shopping list updates
-    -> Consider making all the shopping list changes save right away.
+      -> Consider implementing back-end first shopping list updates (x)
+    -> Consider making all the shopping list changes save right away. (x)
+- Make image editable (x)
 
 
-- Make image editable
+TODO:
+- Fix Mark User Not New (?)
+- Fix Log-In and Auto-Sync process (?)
 
 - Tweak layout on mobile.
 
