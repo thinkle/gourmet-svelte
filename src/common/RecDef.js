@@ -9,17 +9,17 @@ For each property type, we have:
 
 import Units from '../utils/units.js';
 
-var TXT = 'text';
-var RCH = 'richText';
-var NUM = 'number';
-var CMB = 'combo';
-var MCMB = 'multicombo';
-var IMG = 'img';
-var DUR = 'duration';
-var LNK = 'link';
-var NUMUNIT = 'numunit';
+const TXT = 'text';
+const RCH = 'richText';
+const NUM = 'number';
+const CMB = 'combo';
+const MCMB = 'multicombo';
+const IMG = 'img';
+const DUR = 'duration';
+const LNK = 'link';
+const NUMUNIT = 'numunit';
 
-var EditTypes = [
+const EditTypes = [
     CMB,
     TXT,
     RCH,
@@ -31,7 +31,7 @@ var EditTypes = [
     NUMUNIT,
     ]
 
-var Metadata = {
+const Metadata = {
     importProps : [
         {name:'title',
          label:'Title',
@@ -124,6 +124,15 @@ var Metadata = {
         {name:'_id',purpose:'mongoDB'}
     ],
     recProps : [
+        {name:'images',
+         label:'Image',
+         edit:IMG,
+         hideLabel:true,
+         array:true,
+         empty:[{}],
+         testValue:[{url:''}],
+         toHtml:(i)=>`<img src="${i.url}">`
+        },
         {name:'yields',
 	 label:'Yield',
          edit:NUMUNIT,
@@ -193,9 +202,9 @@ var Metadata = {
 };
 
 // Make a handy lookup...
-var byProp = {};
-for (var key in Metadata) {
-    var props = Metadata[key]
+const byProp = {};
+for (let key in Metadata) {
+    const props = Metadata[key]
     props.forEach(
         (p)=>{
             p.propType = key;
