@@ -96,4 +96,10 @@
  .arrayval {
      margin-right: 1em;
  }
+
+ span :global(img) {
+     display: block;
+     max-width: calc(100% - 2em);
+     margin: auto;
+ }
 </style>
