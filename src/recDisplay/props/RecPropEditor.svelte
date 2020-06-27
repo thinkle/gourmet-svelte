@@ -11,11 +11,12 @@
  import RecDef from '../../common/RecDef.js';
  import RecBlock from '../text/RecBlock.svelte';
  import {PlainInput,
-         DurationInput,
-         UrlInput,
-         ComboInput,
-         CategoryInput,
+        DurationInput,
+        UrlInput,
+        ComboInput,
+        CategoryInput,
         NumberUnitInput,
+        ImageEntry,
         IconButton} from '../../widgets/';
 import {lookupStores} from '../../stores/recipeStores.js';
 
@@ -29,6 +30,7 @@ import {lookupStores} from '../../stores/recipeStores.js';
      [modes.MCMB] : CategoryInput,
      [modes.LNK] : UrlInput,
      [modes.NUMUNIT] : NumberUnitInput,
+     [modes.IMG] : ImageEntry
  }
 
 
