@@ -126,11 +126,11 @@
  :root {
      /* Colors */
      --white : #fefffa;
-     --black : #223540;
-     --link : #0033a0;
+     --black : #111131;
+     --link : #001160;
      --grey : #727272;
-     --light-bg : #fbf6ff;
-     --light-fg : #111122;
+     --light-bg : #eef8fa;
+     --light-fg : #322742;
      --medium-bg: #dadaff;
      --medium-fg: #343434;
      --focus-border: #2222df;
@@ -139,7 +139,7 @@
      --heavy-underline : #222;
      --note-bg : #ffffad;
      --note-fg : #333333;
-     --note-light-bg : #ffffdd;
+     --note-light-bg : #ffffdf;
      --note-light-fg: #333;
      --accent-bg: #46092b; 
      --accent-fg: #facfde;
@@ -183,5 +183,12 @@
  }
  :global(*) {
      box-sizing: border-box;
+ }
+ :global(a) {
+     color: var(--link);
+     text-decoration: none;
+ }
+ :global(a:hover) {
+     text-decoration: underline;
  }
 </style>
