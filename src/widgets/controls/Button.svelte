@@ -40,12 +40,33 @@
     disabled="{disabled||busy}"
     aria-label="{ariaLabel}"
 >
+    <b class:toggled="{!toggled}"><slot name="unselected"/></b>
     {#if toggle}
         <span class:toggled></span>
     {/if}
-    <slot/>
+    <b class:toggled="{toggled}"><slot/></b>
 </button>
 <style>
+ b { display: contents; font-weight: normal }
+
+ .toggle b {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-weight: normal;
+ }
+
+ .toggle b.toggled {
+     font-weight: bold;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+ .toggle b:first-child {
+     margin-right: 5px;
+ }
+ 
  .inverse {
      background-color: var(--light-fg);
      color: var(--light-bg);
@@ -55,12 +76,15 @@
      display: inline-flex;
      justify-content: center;
      align-items: center;
-     border-radius: 10px;
-     border-width: 1px;
-     border-style: solid;
      padding: 5px;
      transition: all 300ms;
      width: var(--button-width);
+     border-radius: 10px;
+     border-width: 1px;
+     border-style: solid;
+     border-color: var(--light-underline);
+     background-color: var(--white);
+     color: var(--black);
  }
  
  button.customSize {
@@ -77,12 +101,21 @@
  }
 
  button:hover {
-     color: var(--light-fg);
-     background: var(--light-bg) radial-gradient(circle, transparent 1%, var(--light-bg) 1%) center/15000%;
+     color: var(--black-fg);
+     background: var(--white) radial-gradient(circle, transparent 1%, var(--white) 1%) center/15000%;
+     border-color: var(--heavy-underline);
  }
+ button:active {
+     background-color: var(--medium-bg);
+     color: var(--medium-fg);
+     background-size: 100%;
+     transition: background 0s;
+ }
+
+
  .inverse:hover {
      color: var(--light-bg);
-     background: var(--light-fg) radial-gradient(circle, transparent 1%, var(--light-fg) 1%) center/15000%;
+     background: var(--black-fg) radial-gradient(circle, transparent 1%, var(--light-fg) 1%) center/15000%;
  }
  .inverse:active {
      background-color: var(--medium-fg);
@@ -91,12 +124,6 @@
      transition: background 0s;
  }
 
- button:active {
-     background-color: var(--medium-bg);
-     color: var(--medium-fg);
-     background-size: 100%;
-     transition: background 0s;
- }
  .invisible {
      visibility: hidden;
  }
@@ -159,6 +186,5 @@
  .busy {
      cursor: wait;
  }
-
 
 </style>
