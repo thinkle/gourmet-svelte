@@ -1,12 +1,12 @@
 <script>
  export let url;
- export let value;
+ export let value={};
  export let maxSize=1200;
  
  import { tick,createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
 
- import {IconButton,Underline} from '../'
+ import {Button,IconButton,Underline} from '../'
  
  let fullUrl
  let existingImage
@@ -99,35 +99,49 @@
          }
      }
  }
- 
+ let fileInput
 </script>
 <div bind:clientWidth={elementWidth} class="ruler"></div>
 <div class="image" style="{url && `width:${renderWidth}px;height:${renderHeight}px;background-size:contain;background-image:url(${url});`}" class:hasImage="{url}">
     <div class="inputs">
-        <label>
-            {#if url}
-                Replace Image
+        <div class="row">
+            <label>
+                {#if url}
+                    Replace Image
+                {:else}
+                    Add Image
+                {/if}
+            </label>
+            {#if fileMode}
+                <label class="file-input-wrap">
+                    <input
+                        bind:this="{fileInput}"
+                        accept="image/*"
+                        type="file"
+                        on:change="{updateUrl}"
+                    >
+                    <IconButton icon="image" on:click="{()=>fileInput.click()}">Upload</IconButton>
+                </label>
             {:else}
-                Add Image
+                URL: <Underline grow="{true}"><input style="width:100%;background:transparent;" type="text" bind:value="{url}"/></Underline>
             {/if}
-        </label>
-        {#if fileMode}
-            <input
-                accept="image/*"
-                type="file"
-                on:change="{updateUrl}"
-            >
-        {:else}
-            URL: <Underline grow="{true}"><input style="width:100%;background:transparent;" type="text" bind:value="{url}"/></Underline>
-        {/if}
-        <span class="right">
-            <IconButton
-                icon="attach_file"
-                toggle="{true}"
-                toggled="{fileMode}"
-                on:click="{()=>fileMode=!fileMode}"/>
-        </span>
+            <span class="right">
+                <IconButton
+                    icon="attach_file"
+                    toggle="{true}"
+                    toggled="{fileMode}"
+                    on:click="{()=>fileMode=!fileMode}"/>
+            </span>
+        </div>
+        <div class="row">
+            <Button bare="{true}" toggle="true" toggled="{value.float}" on:click="{()=>value.float=!value.float}">
+                <span slot="unselected">Center Image</span>
+                <span>Float Image</span>
+            </Button>
+            <!-- <Button toggle="true" toggled="{!value.float}" on:click="{()=>value.float=!value.float}"></Button> -->
+        </div>
     </div>
+    
 </div>
 {#if url}
     <img style="{`max-width:${maxSize}px;max-height:${maxSize}px`}" on:load={onExistingLoaded} class="fq" bind:this={existingImage} src={url}>
@@ -153,8 +167,10 @@
  }
 
  .inputs {
-     display: flex;
      flex-grow: 1;
+ }
+ .inputs .row {
+     display: flex;
  }
 
  .hasImage .inputs {
@@ -174,4 +190,8 @@
      visibility: hidden;
      position: absolute;
  }
+ .file-input-wrap input {
+     display: none;
+ }
+ 
 </style>
