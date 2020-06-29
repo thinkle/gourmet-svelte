@@ -103,7 +103,7 @@
 
 <style>
  input {
-     width: 3em;
+     width: 4em;
      text-align: right;
  }
  span {position: relative;}
