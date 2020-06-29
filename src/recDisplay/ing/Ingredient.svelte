@@ -76,47 +76,46 @@
         class:hover="{$highlightedIngredient&&ing.text==$highlightedIngredient.hover}"
         use:scroll="{$highlightedItem}"
     >
-            {#if edit}
-                <IngredientEditor
-                    {onChange}
-                    {onMove}
-                    {onEnter}
-                    {onDelete}
-                    {shouldFocus}
-                    {groups}
-                    {parent}
-                    {position}
-                    bind:ing="{ing}"
-                    
-                />
-            {:else if ing.reference} <!-- Recipes as ingredients (embedded...) -->
-                <NumberUnitDisplay
+        {#if edit}
+            <IngredientEditor
+                 {onChange}
+                 {onMove}
+                 {onEnter}
+                 {onDelete}
+                 {shouldFocus}
+                 {groups}
+                 {parent}
+                 {position}
+                 bind:ing="{ing}"
+                 /> 
+        {:else if ing.reference} <!-- Recipes as ingredients (embedded...) -->
+            <NumberUnitDisplay
                     mode="table"
                     value="{ing.amount}"
-                />
-                <td
-                    class="link"
-                >
-                    <a target="_blank" href="/rec/{ing.reference}"
-                       on:click="{handleReferenceClick}"
-                    >{ing.text}</a>
-                </td>
-            {:else} <!-- Standard Ingredient -->
-                <NumberUnitDisplay  mode="table" value={ing.amount}/>
-	        <td
-                    on:click="{()=>toggleHighlight(ing)}"
-                    on:mouseover="{()=>hoverOn(ing)}"
-                    on:mouseleave="{()=>hoverOff(ing)}"
-                >
-                    <span class='item'>{@html highlightItem(ing)}</span>
-                </td>
-            {/if}
-        </tr>
-    {:else}
-        <tr>
-            Error: null ingredient
-        </tr>
-    {/if}
+            />
+            <td
+                class="link"
+            >
+                <a target="_blank" href="/rec/{ing.reference}"
+                   on:click="{handleReferenceClick}"
+                >{ing.text}</a>
+            </td>
+        {:else} <!-- Standard Ingredient -->
+            <NumberUnitDisplay  mode="table" value={ing.amount}/>
+	         <td
+                 on:click="{()=>toggleHighlight(ing)}"
+                 on:mouseover="{()=>hoverOn(ing)}"
+                 on:mouseleave="{()=>hoverOff(ing)}"
+                 >
+                 <span class='item'>{@html highlightItem(ing)}</span>
+                 </td>
+        {/if}
+    </tr>
+{:else}
+    <tr>
+        Error: null ingredient
+    </tr>
+{/if}
 
 <style>
  
