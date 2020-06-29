@@ -9,8 +9,62 @@
  ];
  let active=1
  let tabs = ['one','two','three']
- 
+ let nested=1
+ let nestedData = [
+     [1,2,3],
+     [4,5,6],
+     [7,8,9]
+ ]
+ let count = 9;
 </script>
+<p>nested tabs</p>
+
+<Tabs>
+    {#each nestedData as page,n}
+        <Tab active="{active==n}" on:click="{()=>active = n}">Page #{n}</Tab>
+    {/each}
+</Tabs>
+
+{#each nestedData as page,n}
+    {#if n==active}
+        <Bar>
+            <div class="slot" slot="left">
+                <Tabs>
+                    {#each page as item,n}
+                        <Tab active="{nested==n}" on:click="{()=>nested = n}">{page} {n}: {item}</Tab>
+                    {/each}
+                </Tabs>
+            </div>
+        </Bar>
+        {#each page as subpage,nn}
+            {#if nested==nn}
+                <div>
+                    Sub page: {n}.{nn}: {page}
+                    <button on:click="{()=>{
+                                      nestedData[n]=[...nestedData[n],count+1];
+                                      count += 1;
+                                      nested = nestedData[n].length - 1
+                                      n
+                                      }}">
+                        Create new tab on this page
+                    </button>
+                    <button on:click="{()=>{
+                                      nestedData[n+1]=[...nestedData[n+1],count+1];
+                                      count += 1;
+                                      active = n+1;
+                                      nested = nestedData[n+1].length - 1
+                                      }}">
+                        Create new tab on next page
+                    </button>
+                </div>
+            {/if}
+        {/each}
+    {/if}
+{/each}
+    
+
+
+
 <p>Demo with Slots</p>
 <Tabs>
     <Tab active="{active==0}" on:click="{()=>active = 0}">The active one</Tab>
@@ -41,8 +95,8 @@ Tabs w data that are STICKY!
 <Bar>
     <div slot="left" >
         <Tabs>
-            {#each tabs as tab}
-                <Tab>
+            {#each tabs as tab,n}
+                <Tab active="{active==n}" on:click="{()=>active=n}">
                     {tab}<lorem chars="8"/>
                 </Tab>
             {/each}
