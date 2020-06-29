@@ -1,6 +1,6 @@
 <script>
  export let condition;
- let shouldRender = false;
+ export let shouldRender = true;
  
  $: shouldRender = shouldRender || condition;
 </script>
