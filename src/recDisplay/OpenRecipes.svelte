@@ -35,6 +35,7 @@
      Modal,
      ModalLauncher}  from '../widgets/';
  import {openLocalRecipes,localRecipes,recipeState,recipeActions} from '../stores/recipeStores.js';
+ import {getStyle} from './rec/colors.js';
  function getTabTitle (id) {
      return $localRecipes[id].title && $localRecipes[id].title.substr(0,30) || 'Untitled'; // fixme
  }
@@ -81,9 +82,12 @@
     <Tabs sticky={true} nowrap={true}>
         {#each $openLocalRecipes as id (id)}
             <div
-                animate:flip="{{delay:100,duration:250,easing:quintOut}}">
+                animate:flip="{{delay:100,duration:250,easing:quintOut}}"
+                style="{getStyle($localRecipes[id])}"
+            >
                 <Tab
-                    active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}">
+                    active="{activeRecipeId==id}" on:click="{()=>activeRecipeId=id}"
+                >
                     <span class="tabtitle">{$localRecipes[id].title||'Untitled'}</span>
                     <div class='close'>
                         <IconButton bare="{true}" small="{true}" on:click="{()=>{shoppingList.addRecipe(id)}}" icon='shopping_cart'/>
