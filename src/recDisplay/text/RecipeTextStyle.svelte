@@ -17,7 +17,8 @@
 
  div :global(h1),div :global(h2),div :global(h3),div :global(h4),div :global(h5),div :global(h6) {
      margin-bottom: 3px;
-     border-bottom: 1px solid var(--light-underline);
+     font-weight: bold;
+     text-decoration: underline;
  }
  div :global(ol) {
      list-style: none;
