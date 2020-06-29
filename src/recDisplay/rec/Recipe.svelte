@@ -454,9 +454,6 @@
  /* .props {
     display: inline-block;
     } */
- div :global(h2,h3,h4,h5,h5,h6) {
-     font-family: var(--recipeHeadFont);
- }
  .editContainer {
      display: contents;
  }
