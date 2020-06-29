@@ -3,6 +3,7 @@
  export let hideCheck = false;
  export let checked=undefined
  export let onClick=undefined
+ export let nocolor=false
  $: thumb = rec.images && rec.images.length > 0 && rec.images[0];
  import RecDef from '../../common/RecDef.js';
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
@@ -10,7 +11,7 @@
  export let size="lg"
  import {getColor} from './colors.js';
 
- $: color = getColor(rec);
+ $: color = !nocolor && getColor(rec);
 
 
 </script>
