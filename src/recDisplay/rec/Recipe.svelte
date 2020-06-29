@@ -16,11 +16,15 @@
  import {getColor} from './colors.js';
  let color;
  $: color = getColor(rec);
-
+ 
  import {
      Bar,
+     Button,
      AmountInput,
      IconButton,
+     JsonDebug,
+     Modal,
+     ModalLauncher,
      NavActions,
      StatusIcon,
  }  from '../../widgets/';
@@ -89,7 +93,7 @@
  $: if (rec && rightBlock && imageBlock) {handleResize()}
  
  var ingeditmode = false;
- 
+ $: ingredientsAreEditable = ingeditmode || editMode
  
  // Store business...
  let multiplier = writable(1);
@@ -133,10 +137,6 @@
      }
  }
 
- // Delete me
- let recipeChanges = writable(0);
- setContext('recipeChanges',recipeChanges);
- // end delete me
  let imageBlock;
  let imageBlockWidth;
  let rightBlock;
@@ -182,7 +182,7 @@
     than crashing outright... */
  function isValid (rec) {
      if (!rec) {return false}
-     if (!rec.images || !Array.isArray(rec.images)) { return false }
+     //if (!rec.images || !Array.isArray(rec.images)) { return false }
      if (!rec.ingredients || !Array.isArray(rec.ingredients)) { return false }
      return true;
  }
@@ -197,7 +197,7 @@
  }
 
  
-
+ let debug
 </script>
 
 {#if valid}
@@ -205,193 +205,195 @@
          style="{(color&&`--accent-bg: ${color.bg}; --accent-fg: ${color.fg};`||'')}">
         <!-- Above the side-by-side view... -->
 
-    <!-- <div class="top" use:watchResize="{handleResize}"> -->
+        <!-- <div class="top" use:watchResize="{handleResize}"> -->
 
-    <Bar large="true" growLeft="{true}" maxWidth="1250px"
-         style="border-bottom: 2px solid var(--accent-bg);">
-        <div slot="left" style="align-items: flex-end">
-            <h2>
-	        {#each RecDef.titleProps as prop}
-                    <RecProp
-                        onChange="{triggerChange}"
-                        showLabel="{false}"
-                        editable="{editable}"
-                        forceEdit="{editMode}"
-                        prop="{prop}"
-                        bind:value="{rec[prop.name]}"
-                    />
-                {/each}        
-            </h2>
-        </div>
-        <div slot="right">
-            <div class="status">
-                <i class='material-icons'>
-                    offline_pin
-                </i>
-                {#if rec}
-                    {#if rec.savedRemote}
-                        <StatusIcon icon="cloud_done" tooltip="true">
-                            Saved to browser and in the cloud.
-                            Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
-                            <IconButton icon="refresh" bare="true" small="true"
-                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
-                            />
-                        </StatusIcon>
-                    {:else if $recipeState[rec.id]}
-                        <StatusIcon icon="cloud_off" tooltip="true">
-                            Saving to the cloud failed - perhaps you're offline or you need to
-                            <a on:click="{()=>doLogin()}">log in again</a>.
-                            Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
-                            Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
-                            <IconButton icon="refresh" bare="true" small="true"
-                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
-                            />
-                        </StatusIcon>
+        <Bar large="true" growLeft="{true}" maxWidth="1250px"
+             style="border-bottom: 2px solid var(--accent-bg);">
+            <div slot="left" style="align-items: flex-end">
+                <h2>
+	            {#each RecDef.titleProps as prop}
+                        <RecProp
+                            onChange="{triggerChange}"
+                            showLabel="{false}"
+                            editable="{editable}"
+                            edit="{editMode}"
+                            prop="{prop}"
+                            bind:value="{rec[prop.name]}"
+                        />
+                    {/each}        
+                </h2>
+            </div>
+            <div slot="right">
+                <div class="status">
+                    <i class='material-icons'>
+                        offline_pin
+                    </i>
+                    {#if rec}
+                        {#if rec.savedRemote}
+                            <StatusIcon icon="cloud_done" tooltip="true">
+                                Saved to browser and in the cloud.
+                                Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                                <IconButton icon="refresh" bare="true" small="true"
+                                            on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                                />
+                            </StatusIcon>
+                        {:else if $recipeState[rec.id]}
+                            <StatusIcon icon="cloud_off" tooltip="true">
+                                Saving to the cloud failed - perhaps you're offline or you need to
+                                <a on:click="{()=>doLogin()}">log in again</a>.
+                                Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
+                                Saved locally at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
+                                <IconButton icon="refresh" bare="true" small="true"
+                                            on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                                />
+                            </StatusIcon>
+                        {:else}
+                            <StatusIcon icon="info" tooltip="true" >
+                                Huh, no state information found for this recipe at all. Are you testing or is this a bug?
+                                <IconButton icon="refresh" bare="true" small="true"
+                                            on:click="{()=>recipeActions.getRecipe(rec.id)}"
+                                />
+                            </StatusIcon>
+                        {/if}
+                    {/if}
+                </div>
+                <NavActions>
+                    {#if showShopping}
+                        <li><IconButton
+                                icon="shopping_cart"
+                                on:click="{async ()=>{
+                                          await shoppingList.addRecipe(rec.id,$multiplier);
+                                          shoppingList.save();
+                                          }}">
+                            Add to List
+                        </IconButton></li>
+                    {/if}
+                    {#if editable}
+                        <li><IconButton
+                                icon="edit"
+                                toggle="{true}"
+                                toggled="{editMode}"
+                                on:click="{()=>editMode=!editMode}">
+                            Edit{#if editMode}ing{/if}
+                            Recipe
+                        </IconButton></li>
+                        {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
+                            <li><IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
+                                            busy="{$recipeState[rec.id].updating}"
+                                >
+                                Revert Changes
+                            </IconButton></li>
+                            <li><IconButton
+                                    icon="save"
+                                    tooltip="Attempt to save?"
+                                    busy="{$recipeState[rec.id].updating}"
+                                    on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
+                                Save
+                            </IconButton></li>
+                        {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
+                            <li><IconButton
+                                    busy="{$recipeState[rec.id].updating}"
+                                    icon="cloud_upload"
+                                    on:click="{()=>recipeActions.updateRecipe(rec)}">
+                                Save to Cloud
+                            </IconButton></li>
+                        {/if}
+                    {/if}
+                </NavActions>
+            </div>
+        </Bar>
+        <!-- </div> --> <!-- End top section -->
+        <!-- Main recipe  -->
+        <SideBySide
+            leftWidth="325" 
+            maxWidth="1250px"
+            stackSidesAt="{550}"
+            maxWidthRight='45rem' maxWidthLeft='45rem'
+        >
+	    <div class="inghead" slot="leftHead"> 
+	        <h3>Ingredients</h3>
+                {#if !editMode && editable}
+                    {#if ingeditmode}
+                        <IconButton
+                            small="{true}"
+                            bare="true"
+                            on:click="{()=>ingeditmode=false }"
+                            ariaLabel="Finish editing ingredients"
+                            icon="done"/>
                     {:else}
-                        <StatusIcon icon="info" tooltip="true" >
-                            Huh, no state information found for this recipe at all. Are you testing or is this a bug?
-                            <IconButton icon="refresh" bare="true" small="true"
-                                        on:click="{()=>recipeActions.getRecipe(rec.id)}"
-                            />
-                        </StatusIcon>
+                        <IconButton
+                            small="{true}"
+                            bare="true"
+                            ariaLabel="Edit ingredients"
+                            on:click="{()=>ingeditmode=true }"
+                            icon="edit" />
                     {/if}
                 {/if}
-            </div>
-            <NavActions>
-                {#if showShopping}
-                    <li><IconButton
-                            icon="shopping_cart"
-                            on:click="{async ()=>{
-                                      await shoppingList.addRecipe(rec.id,$multiplier);
-                                      shoppingList.save();
-                                      }}">
-                        Add to List
-                    </IconButton></li>
-                {/if}
-                {#if editable}
-                    <li><IconButton
-                            icon="edit"
-                            toggle="{true}"
-                            toggled="{editMode}"
-                            on:click="{()=>editMode=!editMode}">
-                        Edit{#if editMode}ing{/if}
-                        Recipe
-                    </IconButton></li>
-                    {#if $recipeState[rec.id] && ($recipeState[rec.id].edited)}
-                        <li><IconButton icon="undo" on:click="{()=>recipeActions.revertRecipe(rec.id)}"
-                                        busy="{$recipeState[rec.id].updating}"
+                <div class='multiplier'>
+                    &times;
+                    <AmountInput
+                        ariaLabel="multiply by"
+                        value="{$multiplier}"
+                        on:change="{(e)=>$multiplier=e.detail}"
+                        showPlusMinusButtons="{true}"
+                    />
+                </div>
+	    </div>
+	    <div slot="left" on:dblclick="{()=>ingeditmode=true}">
+	        <IngredientList
+                    {editable}
+                    {onOpenSubRec}
+                    onChange="{triggerChange}"
+                    editMode="{ingredientsAreEditable}"
+                    bind:ingredients="{rec.ingredients}"
+                >
+	        </IngredientList>
+	    </div>		
+	    
+	    <div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
+                <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
+                    <div class="props" >
+                        {#if false}
+                            <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
+                                 style="{`--max-image-width:${maxImageWidth}px`}"
                             >
-                            Revert Changes
-                        </IconButton></li>
-                        <li><IconButton
-                                icon="save"
-                                tooltip="Attempt to save?"
-                                busy="{$recipeState[rec.id].updating}"
-                                on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
-                            Save
-                        </IconButton></li>
-                    {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
-                        <li><IconButton
-                                busy="{$recipeState[rec.id].updating}"
-                                icon="cloud_upload"
-                                on:click="{()=>recipeActions.updateRecipe(rec)}">
-                            Save to Cloud
-                        </IconButton></li>
-                    {/if}
-                {/if}
-            </NavActions>
-        </div>
-    </Bar>
-    <!-- </div> --> <!-- End top section -->
-    <!-- Main recipe  -->
-    <SideBySide
-        leftWidth="325" 
-        maxWidth="1250px"
-        stackSidesAt="{550}"
-        maxWidthRight='45rem' maxWidthLeft='45rem'
-    >
-	<div class="inghead" slot="leftHead"> 
-	    <h3>Ingredients</h3>
-            {#if !editMode && editable}
-                {#if ingeditmode}
-                    <IconButton
-                        small="{true}"
-                        bare="true"
-                        on:click="{()=>ingeditmode=false }"
-                        ariaLabel="Finish editing ingredients"
-                        icon="done"/>
-                {:else}
-                    <IconButton
-                        small="{true}"
-                        bare="true"
-                        ariaLabel="Edit ingredients"
-                        on:click="{()=>ingeditmode=true }"
-                        icon="edit" />
-                {/if}
-            {/if}
-            <div class='multiplier'>
-                &times;
-                <AmountInput
-                    ariaLabel="multiply by"
-                    value="{$multiplier}"
-                    on:change="{(e)=>$multiplier=e.detail}"
-                    showPlusMinusButtons="{true}"
-                />
-            </div>
-	</div>
-	<div slot="left" on:dblclick="{()=>ingeditmode=true}">
-	    <IngredientList
-                {editable}
-                {onOpenSubRec}
-                onChange="{triggerChange}"
-                editMode="{editMode||ingeditmode}"
-                bind:ingredients="{rec.ingredients}"
-            >
-	    </IngredientList>
-	</div>		
-	
-	<div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
-            <div class="topblock" style="{`--widthLeftOfImage:${widthLeftOfImage}px`}">
-                <div class="props" >
-                    {#if false}
-                        <div class="images" class:centered="{imageCentered}" use:resizeOnUpdate bind:this="{imageBlock}"
-                             style="{`--max-image-width:${maxImageWidth}px`}"
-                        >
-                            {#each rec.images as image}
-                                <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
-                                <img alt="{image.alt||rec.title}" src="{image.url}"/>
-                            {/each}
-                        </div> <!-- close images -->
-                    {/if}
-                    {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
-                        <div class="prop">                                
-                            <RecProp
-                                floatWidth="{widthLeftOfImage}"
-                                onChange="{triggerChange}"
-                                editable="{editable}"
-                                forceEdit="{editMode}"
-                                prop="{prop}"
-                                bind:value="{rec[prop.name]}"/>   
-                        </div>
-                        <!-- Close flowing props  -->
-                    {/each}
-                    <!-- block props  -->
-                    {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
-                        <div class="prop bottomProp">
-                            <RecProp
-                                floatWidth="{widthLeftOfImage}"
-                                onChange="{triggerChange}"
-                                editable="{editable}"
-                                forceEdit="{editMode}"
-                                prop="{prop}" bind:value="{rec[prop.name]}"/>
-                        </div>
-                    {/each}
-                    <!-- end block props -->
+                                {#each rec.images as image}
+                                    <!-- Small: <img alt="{image.alt||rec.title}" src="{image.thumbnailUrl}"/> -->
+                                    <img alt="{image.alt||rec.title}" src="{image.url}"/>
+                                {/each}
+                            </div> <!-- close images -->
+                        {/if}
 
-                </div> <!-- close props -->
-            </div> <!-- close topblock -->
-	</div> <!-- close right slot -->
-    </SideBySide>
+                        {#each RecDef.recProps.filter((p)=>!p.bottom) as prop}
+                            <div class="prop">                                
+                                <RecProp
+                                    floatWidth="{widthLeftOfImage}"
+                                    onChange="{triggerChange}"
+                                    editable="{editable}"
+                                    edit="{editMode}"
+                                    prop="{prop}"
+                                    bind:value="{rec[prop.name]}"/>   
+                            </div>
+                            <!-- Close flowing props  -->
+                        {/each}
+
+                        <!-- block props  -->
+                        {#each RecDef.recProps.filter((p)=>p.bottom) as prop}
+                            <div class="prop bottomProp">
+                                <RecProp
+                                    floatWidth="{widthLeftOfImage}"
+                                    onChange="{triggerChange}"
+                                    editable="{editable}"
+                                    edit="{editMode}"
+                                    prop="{prop}" bind:value="{rec[prop.name]}"/>
+                            </div>
+                        {/each}
+                        <!-- end block props -->
+
+                    </div> <!-- close props -->
+                </div> <!-- close topblock -->
+	    </div> <!-- close right slot -->
+        </SideBySide>
     </div>
 {:else}
     {#if !rec}
@@ -400,6 +402,37 @@
         Invalid Recipe: {JSON.stringify(rec)}.
     {/if}
 {/if}
+
+{#if DEV}
+
+    <ModalLauncher modalVisible="{debug}">
+        <Button on:click="{()=>debug=!debug}">DEBUG</Button>
+    </ModalLauncher>
+    {#if debug}<Modal onClose="{()=>debug=false}">
+        <div>
+            <li>editable {editable}</li>
+            <li>editMode {editMode}</li>
+            <li>editOnOpen {editOnOpen}</li>
+            <li>ingredientsAreEditable {ingredientsAreEditable}</li>
+            <li>ingeditmode {ingeditmode}</li>
+            <li>multiplier {$multiplier}</li>
+            <li>edit {editMode}</li>
+            <li>imageBlock {imageBlock}</li>
+            <li>imageBlockWidth {imageBlockWidth}</li>
+            <li>rightBlock {rightBlock}</li>
+            <li>widthLeftOfImage {widthLeftOfImage}</li>= ''
+            <li>imageCentered {imageCentered}</li>
+            <li>maxImageWidth {maxImageWidth}</li>
+            <li>rightBlockWidth {rightBlockWidth}</li>
+            <br>rec <JsonDebug data={rec}/>
+            RecipeState <JsonDebug data="{$recipeState}"/>
+            IngredientList <JsonDebug data="{$ingredientList}"/>
+            highlightedIngredient <JsonDebug data="{$highlightedIngredient}"/>
+        </div>
+    </Modal>
+    {/if}
+{/if}
+
 
 <style>
  .small {
