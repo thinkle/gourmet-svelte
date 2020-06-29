@@ -1,17 +1,22 @@
 <script>
  export let grow=true;
+ export let flexgrow=false;
+
 </script>
 
-<span class:grow>
+<span class:grow class:flexgrow>
     <slot/>
 </span>
 
 <style>
 
- .grow {
-     width: 100%;
+ .flexgrow {
      flex-grow: 1;
  }
+ 
+ .grow {
+     width: 100%;
+  }
 
  span {
      display: inline-block;
