@@ -21,8 +21,13 @@
  function addValue () {
      console.log('Add value!',nextValue);
      if (nextValue) {
-         value = [...value, {name:nextValue}];
-         console.log('did it?');
+         if (value.map((v)=>v.name).includes(nextValue)) {
+             return;
+             // ignore dup
+         } else {
+             value = [...value, {name:nextValue}];
+             console.log('did it?');
+         }
      }
      nextValue = ''
      dispatch('change',value)
