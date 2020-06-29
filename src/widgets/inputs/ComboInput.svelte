@@ -244,33 +244,33 @@
     </div>
 {/if}
 <Underline grow="{false}">
-<span class='cmb' style="{`--inputHeight:${inputHeight}px`}" bind:clientHeight="{inputHeight}">
-    <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} on:keyup="{onKeyUp}" bind:value={value} {placeholder}>
-    <IconButton class="icon" on:click={toggleMenu}
-                       icon={showMenu&&focused&&"arrow_drop_up"||"arrow_drop_down"}
-                small={true}
-                bare={true}
-    />
-    {#if showMenu}
-        <ul class="menu" transition:slide>            
-            {#each matches as match,i (match)}
-                <li key={match} class:current={currentMatch==i}
-                    on:click={()=>doSelect(match)}
-                    transition:fly
-		    animate:flip={{delay: 250, duration: 250, easing: quintOut}}>{@html highlight(match,value)}</li>
-            {/each}
-            {#if showAll}
-                {#each options as option}
-                    {#if matches.indexOf(option)==-1}
-                        <li transition:fly
-                            on:click={()=>doSelect(option)}
-                                     class:match="{value.indexOf(option)>-1}">{option}</li>
-                    {/if}
+    <span class='cmb' style="{`--inputHeight:${inputHeight}px`}" bind:clientHeight="{inputHeight}">
+        <input on:blur="{checkFocus}" on:focus="{checkFocus}" bind:this={inputRef} on:keydown={onKeydown} on:keyup="{onKeyUp}" bind:value={value} {placeholder}>
+        <IconButton class="icon" on:click={toggleMenu}
+                           icon={showMenu&&focused&&"arrow_drop_up"||"arrow_drop_down"}
+                    small={true}
+                           bare={true}
+        />
+        {#if showMenu}
+            <ul class="menu" transition:slide>            
+                {#each matches as match,i (match)}
+                    <li key={match} class:current={currentMatch==i}
+                        on:click={()=>doSelect(match)}
+                            transition:fly
+		        animate:flip={{delay: 250, duration: 250, easing: quintOut}}>{@html highlight(match,value)}</li>
                 {/each}
-            {/if}
-        </ul>
-    {/if}
-</span>
+                {#if showAll}
+                    {#each options as option}
+                        {#if matches.indexOf(option)==-1}
+                            <li transition:fly
+                                on:click={()=>doSelect(option)}
+                                         class:match="{value.indexOf(option)>-1}">{option}</li>
+                        {/if}
+                    {/each}
+                {/if}
+            </ul>
+        {/if}
+    </span>
 </Underline>
 <style>
  .cmb {
@@ -278,18 +278,20 @@
      display: inline-flex;
  }
  .current,li:active {
-     background-color: yellow;
+     background-color: var(--accent-fg);
+     color: var(--accent-bg);
      font-weight: bold;
  }
  li:hover {
-     background-color: #ffff88;
+     background-color: var(--accent-fg);
+     color: var(--accent-bg);
      font-weight: bold;
  }
 
  li {
      transition: all 300ms;
      padding: 8px;
-     border-top: 1px solid #ccc;
+     border-top: 1px solid var(--light-underline);
  }
  .screen {
      z-index: 10;
