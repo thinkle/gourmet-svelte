@@ -127,17 +127,8 @@
       -> Consider implementing back-end first shopping list updates (x)
     -> Consider making all the shopping list changes save right away. (x)
 - Make image editable (x)
-
-
-TODO:
-- Fix Mark User Not New (?)
-- Fix Log-In and Auto-Sync process (?)
-
-- Tweak layout on mobile.
-
-- Save "purchased" state of shopping list items 
-- Troubleshoot issues w/ shopping list not seeming to sync correctly.
-
+- Consider implementing new Request API to add error-checking and clearer code to requests. (x)
+   -> mocked up in Request.js (x)
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
   up. (speaking of - we broke recipe editing state updates again
@@ -149,11 +140,23 @@ TODO:
 
 
 
-- Test Syncing from local to cloud... 
-- Export to file
+TODO:
+- Fix Mark User Not New (?)
+- Fix Log-In and Auto-Sync process (?)
+- Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
+- Tweak layout on mobile.
+- Save "purchased" state of shopping list items 
 
-- Consider implementing new Request API to add error-checking and clearer code to requests.
-   -> mocked up in Request.js
+
+
+
+- Test Syncing from local to cloud... 
+- Export to file functionality (back-up)
+- Import from file functionality (maybe?)
+- Publish chrome extension
+- Publish version 1
+- Set-up dev branch in github and get a dev and a main URL working
+
 
 - Consider moving more work to webworkers? e.g. recipe parsing?
 - Fix sorting in firefox?
