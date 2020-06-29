@@ -1,9 +1,10 @@
 <script>
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  export let value
  export let prop
  export let floatWidth=undefined
  export let editable=false;
- export let forceEdit=false;
+ export let edit=false;
  export let showLabel=true;
  export let onChange;
  export let smallLabel=true;
@@ -36,26 +37,26 @@
 
 
 
- var edit;
- var editOn = false;
-
- $: edit = editOn || forceEdit;
- 
+ var editInternal;
+ $: setInternalState(edit)
+ function setInternalState (state) {
+     editInternal = state;
+ }
  
  function turnEditOn () {
-     console.log('Edit on - was ',editOn)
-     editOn = true
+     console.log('Edit on - was ',editInternal)
+     editInternal = true
  }
  function turnEditOff () {
-     console.log('Edit OFf - was ',editOn)
-     editOn = false;
+     console.log('Edit OFf - was ',editInternal)
+     editInternal = false;
  }
  function handleChange (v) {
      console.log('Rec Prop has a change!');
      onChange && onChange(value);
  }
 
- $: fullWidth = edit && prop.minEditWidth >= floatWidth
+ $: fullWidth = editInternal && prop.minEditWidth >= floatWidth
 
  function hasValue () {
      if (prop.array && value.length > 0) {
@@ -69,20 +70,21 @@
 
 </script>
 
-{#if (edit || hasValue(value))}
+{#if (editInternal || hasValue(value))}
     <div
         style="{`--available-width: ${floatWidth}px; --min-edit-width: ${prop.minEditWidth}`}"
+        class:float={!editInternal && (value&&value.float||value&&value[0]&&value[0].float)}
         class="block"
         class:title="{prop.isTitle}"
         class:fullWidth="{fullWidth}"
         on:dblclick="{turnEditOn}"
         class:hideLabel="{prop.hideLabel}"
-        class:editing="{edit}"
+        class:editing="{editInternal}"
     >
-        {#if (showLabel && (!prop.hideLabel)) || edit}
+        {#if (showLabel && (!prop.hideLabel)) || editInternal}
             <div class="top" >
                 <label class:small={smallLabel} on:click={()=>ref.focus()}>{prop.label}</label>
-                {#if editable && !edit}
+                {#if editable && !editInternal}
                     <span class="editbutton" >
                         <IconButton
                             small="{smallLabel}"
@@ -93,7 +95,7 @@
                         />
                     </span>
                 {/if}
-                {#if edit && !forceEdit}
+                {#if editInternal && !edit}
                     <IconButton small="{smallLabel}"
                                 icon="done"
                                 bare="true"
@@ -101,9 +103,9 @@
                                 on:click={turnEditOff}/>
                 {/if}
             </div>
-        {:else if editable && !forceEdit}
+        {:else if editable && !edit}
             <div class='floatingEditButton'>
-                {#if editable && !edit}
+                {#if editable && !editInternal}
                     <span class="editbutton" >
                         <IconButton
                             bare="true"
@@ -113,7 +115,7 @@
                         />
                     </span>
                 {/if}
-                {#if edit && !forceEdit}
+                {#if editInternal && !edit}
                     <IconButton
                         icon="done"
                         bare="true"
@@ -125,7 +127,7 @@
 
 
         <div>
-            {#if edit}
+            {#if editInternal}
                 <div class="editContainer" out:send in:receive>
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                     <RecPropEditor
@@ -136,7 +138,8 @@
                     />
                 </div>
             {:else}
-                <div in:receive>
+                <div in:receive
+                >
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                 <RecPropDisplay
                     value={value}
@@ -250,4 +253,8 @@
  div {
      flex-grow: 1;
  }
+ .float {
+     float: right;
+ }
+
 </style>
