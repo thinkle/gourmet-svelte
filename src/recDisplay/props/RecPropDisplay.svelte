@@ -82,14 +82,20 @@
 {/if}
 <style>
  .tag {
-     background-color: var(--light-bg);
-     color: var(--light-fg);
+     /* color: var(--light-fg); */
+     /* border-color: var(--medium-underline); */
+     /*      background-color: var(--light-bg); */
      border-radius: 5px;
      border-width: 1px;
      border-style: solid;
-     border-color: var(--medium-underline);
+     background-color: var(--accent-fg);
+     border-color: var(--accent-bg);
+     color: var(--accent-bg);
      padding: 3px;
      display: inline-block;
+     font-size: 0.8rem;
+     font-weight: bold;
+     text-align: center;
 
  }
  
