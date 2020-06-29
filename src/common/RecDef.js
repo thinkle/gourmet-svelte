@@ -129,7 +129,7 @@ const Metadata = {
          edit:IMG,
          hideLabel:true,
          array:true,
-         empty:[{}],
+         empty:[],
          testValue:[{url:''}],
          toHtml:(i)=>`<img src="${i.url}">`
         },
