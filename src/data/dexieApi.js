@@ -23,6 +23,38 @@ const dexieApi = {
         );
     },
 
+    async addToRecipe (recipeChanges) {
+        const query = {}
+        if (recipeChanges.id) {
+            query.id = recipeChanges.id;
+        } else if (recipeChanges._id) {
+            query._id = recipeChanges._id;
+        } else {
+            throw `NO ID to find recipe by: ${JSON.stringify(recipeChanges)}`
+        }
+        let orig = await dexieApi.db.recipes.get(
+            query
+        );
+        // All we actually need for our current APP is the ingredients.
+        for (let prop in recipeChanges) {
+            if (!['id','_id','ingredients'].includes(prop)) {
+                console.log('warning: local addToRecipe only supports ingredients');
+            }
+        }
+        // Very low tech ingredient merge for now... - no grouping etc. since we're just being used
+        // for shopping lists at the moment...
+        let ingredients = [...orig.ingredients,recipeChanges.ingredients];
+        let result = await dexieApi.db.recipes.update(
+            query,
+            {ingredients}
+        );
+        if (result==1) {
+            return await dexieApi.db.recipes.get(query);
+        } else {
+            throw `Update failed: key not found? ${JSON.stringify(query)}`
+        }
+    },
+
     getRecipe (recid, {mongoId}={}) {
         if (mongoId) {
             console.log('Fetch mongo...',mongoId);
