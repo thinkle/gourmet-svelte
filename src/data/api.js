@@ -108,16 +108,16 @@ const api = {
     // This is for "patching" -- current use case is just for shopping lists where we likely
     // have changed the recipe on the backend and our "edits" usually just mean we're adding
     // something.
-    async addToRecipe (recipe) {
-        await checkForReferences(recipe)
-        //try {
-        let updatedRec = await remoteApi.addToRecipe(recipe)
-    //} catch (err) {
-      //      console.log('Well crap... not yet implemented...');
-            //localApi.addToRecipe(recipe); // not a thing :(            
-        //}
-        updatedRec.savedRemote = true;
-        await localApi.updateRecipe(updatedRec);
+    async addToRecipe (changes) {
+        await checkForReferences(changes)
+        let updatedRec
+        try {
+            updatedRec = await remoteApi.addToRecipe(changes)
+            updatedRec.savedRemote = true;
+            await localApi.updateRecipe(updatedRec);
+        } catch (err) {
+            updatedRec = localApi.addToRecipe(changes); // only works for simple adding ingredients to list
+        }
         return updatedRec
     },
     async updateRecipe (recipe,updateTimestamp=true) {
