@@ -62,9 +62,11 @@
     <div class="top">
         {#if showLabel}
             {#if edit}
+                <span class="head">
                 <PlainInput
                     placeholder="Heading (e.g. Instructions...)"
                     on:change="{()=>dispatch('change',value)}" bind:value={value.header}/>
+                </span>
             {:else}
                 <h3>{value.header}</h3>
             {/if}
@@ -93,6 +95,11 @@
 
 </div>
 <style>
+ .head {
+     font-family: var(--recipeHeadFont);
+     font-size: 1.2rem;
+     font-weight: bold;
+ }
  .contain {
      max-width: 800px;
  }
