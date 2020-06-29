@@ -39,4 +39,10 @@
         <HtmlBlock markupToComponentMap={markupToComponentMap} content={parsed}/>
     {/each}
 </RecipeTextStyle>
-
+<style>
+ h2 {
+     font-family: var(--recipeHeadFont);
+     font-size: 1.2rem;
+     font-weight: bold;
+ }
+</style>
