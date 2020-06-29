@@ -103,7 +103,7 @@
  button:hover {
      color: var(--black-fg);
      background: var(--white) radial-gradient(circle, transparent 1%, var(--white) 1%) center/15000%;
-     border-color: var(--heavy-underline);
+     border-color: var(--accent-bg);
  }
  button:active {
      background-color: var(--medium-bg);
@@ -114,12 +114,12 @@
 
 
  .inverse:hover {
-     color: var(--light-bg);
-     background: var(--black-fg) radial-gradient(circle, transparent 1%, var(--light-fg) 1%) center/15000%;
+     color: var(--white);
+     background: var(--black) radial-gradient(circle, transparent 1%, var(--white) 1%) center/15000%;
  }
  .inverse:active {
-     background-color: var(--medium-fg);
-     color: var(--medium-bg);
+     background-color: var(--accent-fg);
+     color: var(--accent-bg);
      background-size: 100%;
      transition: background 0s;
  }
