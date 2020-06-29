@@ -3,7 +3,7 @@ let color
 
  export const wordColors = [
      // easter eggs...
-     {matcher:/easter/i, color : {
+     {matcher:/easter\b/i, color : {
          fg:'#6434b2',
          bg:'#dcf9a8'
      }},
@@ -11,10 +11,14 @@ let color
          bg:'#1f0905',
          fg:'#f97306',
      }},
+     {matcher:/christmas/i, color : {
+         bg : '#2b3d0a',
+         fg: '#e3f2d9',
+     }},
 
      // some whimsical ingredient matchers
      {matcher:/eggplant|aubergine|gh?anou/i, color: {bg:'#614051',fg:'#ffdcff'}},
-     {matcher:/chocolate/i, color: {bg:'#5c3317',fg:'#e3cbb5'}},
+     {matcher:/chocolate|brownie/i, color: {bg:'#5c3317',fg:'#e3cbb5'}},
      {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE',
                                                                           fg:'#dedefe'}}, // - ocen blue
      {matcher:/asparagus/i, color : {bg: '#87a96b', fg:'#edfdef'}},
@@ -74,3 +78,12 @@ export function getColor (recipe) {
          fg: '#121234'
      }
  }
+
+export function getStyle (recipe, otherStyle='') {
+    let color = getColor(recipe);
+    if (color) {
+        return `--accent-bg: ${color.bg}; --accent-fg: ${color.fg};${otherStyle}`
+    } else {
+        return otherStyle;
+    }
+}
