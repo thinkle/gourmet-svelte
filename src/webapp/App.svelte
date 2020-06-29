@@ -141,8 +141,8 @@
      --note-fg : #333333;
      --note-light-bg : #ffffdf;
      --note-light-fg: #333;
-     --accent-bg: #46092b; 
-     --accent-fg: #facfde;
+     --accent-bg: #AFD2E9; 
+     --accent-fg: #121234;
      /* Typography */
      --recipeFont : Lora, Ubuntu, Cantarell, serif;
      --recipeHeadFont : Lora,'Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;
