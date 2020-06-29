@@ -5,6 +5,8 @@
  export let value=""
  export let minFontSize = 11
  export let placeholder=''
+ export let grow
+ export let flexgrow
  export function focus () {
      ref.focus();
  }
@@ -94,7 +96,7 @@ function getStyle () {
  onMount(adjustSize)
  $: shouldFocus && ref && focus()
 </script>
-<Underline>
+<Underline {grow} {flexgrow}>
 {#if oneLiner && false}
     <span class="inputwrap"><input placeholder={placeholder} style={getStyle(fontSize)} bind:this={ref} on:change on:input on:keyup on:keydown bind:value={value} type="text"></span>
 {:else}
