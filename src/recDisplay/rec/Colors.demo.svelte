@@ -96,7 +96,7 @@ Type magic word: <input bind:value="{word}">
                 Edit Color Scheme
             </IconButton>
         </h2> 
-        Categories: <CategoryInput value="{[{name:'Dessert'},{name:'Salad'}]}" /> <Button>A Button</Button>
+        Categories: <CategoryInput options="{['Dessert','Salad','Spaghetti','Italian','Chinese'].map((v)=>({name:v}))}" value="{[{name:'Dessert'},{name:'Salad'}]}" /> <Button>A Button</Button>
         <RecipeTextStyle>
             <ul><li>An unordered list</li><li><Lorem graphs="2"/></li></ul>
             <ol><li>An ordered list</li><li><Lorem graphs="2"/></li></ol>
