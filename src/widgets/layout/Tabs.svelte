@@ -1,10 +1,15 @@
+<script context="module">
+ let tabsCount = 0;
+ 
+</script>
+
 <script>
  export let sticky=false;
  export let stickyTop = undefined;
  export let data=undefined;
  export let handleActive=false;
  export let nowrap=false
-
+ 
  import {flip} from 'svelte/animate';
  import Tab from './Tab.svelte';
 
@@ -32,10 +37,16 @@
          tab.action();
      }
  }
- 
+ let myIdentifier = tabsCount;
+ tabsCount += 1;
 </script>
 
-<ul class:sticky class:nowrap class="tabs" style="{stickyTop && `top:${stickyTop}`}">
+<ul class:sticky
+    class:nowrap
+    class="tabs"
+    style="{stickyTop && `top:${stickyTop}`}"
+    tabIdentifier="{myIdentifier}"
+>
     <slot>
         {#if data}
             {#each data as tab (tab.key)}
