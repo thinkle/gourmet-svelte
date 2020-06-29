@@ -1,4 +1,5 @@
 <script>
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  export let url;
  export let value={};
  export let maxSize=1200;
@@ -6,7 +7,7 @@
  import { tick,createEventDispatcher } from 'svelte';
  const dispatch = createEventDispatcher();
 
- import {Button,IconButton,Underline} from '../'
+ import {Button,IconButton,PlainInput,Underline} from '../'
  
  let fullUrl
  let existingImage
@@ -15,18 +16,14 @@
  let targetWidth = 0;
  let targetHeight = 0;
 
- if (value) {
-     console.log('Image got value:',value);
-     url = value && value.url
-     console.log('URL is',url);
- }
-
+ url = value && value.url || url
+  
  function onExistingLoaded () {
      targetWidth = existingImage.clientWidth;
      targetHeight = existingImage.clientHeight;
      console.log('FETCH WIDTH',targetWidth);
  }
-         
+ 
  $: if (url && value) {
      // reactive update
      value.url = url;
@@ -87,22 +84,35 @@
  let elementWidth;
 
  let renderWidth, renderHeight;
+ let widthToReactTo
+ $: widthToReactTo = value.width
+ $: recalculateWidth(elementWidth,targetWidth,url,widthToReactTo);
 
- $: {
-     if (elementWidth && targetWidth) {
-         if (targetWidth < elementWidth) {
+ function recalculateWidth () {
+     let width = value && value.width || (elementWidth - 30)
+     if (width && targetWidth) {
+         if (targetWidth < width) {
              renderWidth = targetWidth;
              renderHeight = targetHeight;
          } else {
-             renderWidth = elementWidth - 30;
+             renderWidth = width;
              renderHeight = renderWidth * (targetHeight/targetWidth);
          }
-     }
+     } else if (value && value.width) {
+         renderWidth = value.width;
+         renderHeight = value.height;
+     } else if (elementWidth) {
+         renderWidth = elementWidth;
+         renderHeight = undefined;
+     } 
  }
+ 
  let fileInput
 </script>
-<div bind:clientWidth={elementWidth} class="ruler"></div>
-<div class="image" style="{url && `width:${renderWidth}px;height:${renderHeight}px;background-size:contain;background-image:url(${url});`}" class:hasImage="{url}">
+<div bind:clientWidth={elementWidth} class="ruler">
+    {elementWidth}
+</div>
+<div class="image" style="{url && `width:${renderWidth}px;height:${renderHeight}px;background-repeat:none;background-size:contain;background-image:url(${url});`}" class:hasImage="{url}">
     <div class="inputs">
         <div class="row">
             <label>
@@ -123,7 +133,9 @@
                     <IconButton icon="image" on:click="{()=>fileInput.click()}">Upload</IconButton>
                 </label>
             {:else}
-                URL: <Underline grow="{true}"><input style="width:100%;background:transparent;" type="text" bind:value="{url}"/></Underline>
+                URL: <Underline flexgrow="{true}" grow="{false}">
+                    <input style="width:100%;background:transparent;" type="text" bind:value="{url}">
+                </Underline>
             {/if}
             <span class="right">
                 <IconButton
@@ -134,12 +146,25 @@
             </span>
         </div>
         <div class="row">
-            <Button bare="{true}" toggle="true" toggled="{value.float}" on:click="{()=>value.float=!value.float}">
-                <span slot="unselected">Center Image</span>
-                <span>Float Image</span>
-            </Button>
+            <label>Caption: <PlainInput flexgrow={true} grow={false} bind:value="{value.caption}" /></label>
             <!-- <Button toggle="true" toggled="{!value.float}" on:click="{()=>value.float=!value.float}"></Button> -->
         </div>
+        <div class="row">
+            <label><input type="radio" bind:group="{value.width}" value="{undefined}"> Full Width</label>
+            <label><input type="radio" bind:group="{value.width}" value="{650}"> Medium</label>
+            <label><input type="radio" bind:group="{value.width}" value="{400}"> Small</label>
+            <label><input type="radio" bind:group="{value.width}" value="{250}"> Smaller</label>
+            <!-- <Button toggle="true" toggled="{!value.float}" on:click="{()=>value.float=!value.float}"></Button> -->
+        </div>
+        {#if value.width}
+            <div class="row">
+                <Button bare="{true}" toggle="true" toggled="{value.float}" on:click="{()=>value.float=!value.float}">
+                    <span slot="unselected">Center Image</span>
+                    <span>Float Image</span>
+                </Button>
+                <!-- <Button toggle="true" toggled="{!value.float}" on:click="{()=>value.float=!value.float}"></Button> -->
+            </div>
+        {/if}
     </div>
     
 </div>
@@ -155,7 +180,9 @@
 
 <style>
  .ruler {
-     height: 0px;
+     background-color: purple;
+     color: white;
+     height: 14px;     
      overflow: hidden;
  }
  .image {
@@ -171,6 +198,7 @@
  }
  .inputs .row {
      display: flex;
+     margin-top: 5px;
  }
 
  .hasImage .inputs {
@@ -193,5 +221,8 @@
  .file-input-wrap input {
      display: none;
  }
- 
+ label {
+     flex-grow: 1;
+     display: flex;
+ }
 </style>
