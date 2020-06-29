@@ -5,13 +5,14 @@
          activeRecipeId = id;
          editOnOpen[id] = editMode
          if (editMode && recComponents[id]) {
-             // already have a component... force it into edit
+             // already have a component... force it into edit             
              recComponent[id].setEditMode(editMode);
          }
      }
      if (onOpen) {
-         console.log('Calling onOpen');
-         onOpen(id,editMode)}
+         onOpen(id,editMode)
+     }
+     
  }
  export let onOpen
  export let hide
