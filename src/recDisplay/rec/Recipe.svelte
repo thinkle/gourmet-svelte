@@ -13,9 +13,7 @@
      editMode = val;
  }
 
- import {getColor} from './colors.js';
- let color;
- $: color = getColor(rec);
+ import {getStyle,getColor} from './colors.js';
  
  import {
      Bar,
@@ -202,7 +200,7 @@
 
 {#if valid}
     <div class='recipe-wrap'
-         style="{(color&&`--accent-bg: ${color.bg}; --accent-fg: ${color.fg};`||'')}">
+         style="getStyle(recipe)">
         <!-- Above the side-by-side view... -->
 
         <!-- <div class="top" use:watchResize="{handleResize}"> -->
