@@ -180,9 +180,7 @@
 
 <style>
  .ruler {
-     background-color: purple;
-     color: white;
-     height: 14px;     
+     height: 0;     
      overflow: hidden;
  }
  .image {
