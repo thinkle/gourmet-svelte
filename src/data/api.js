@@ -68,7 +68,7 @@ async function checkForReferences (recipe) {
                 ing.referenceExists = true;
             } else {
                 //console.log('Trying to save linked recipe...');
-                let targetRec = await api.updateRecipe(targetRec,false); // don't update timestamp
+                targetRec = await api.updateRecipe(targetRec,false); // don't update timestamp
                 if (targetRec._id) {
                     //console.log('Successfully got new ID...',targetRec._id);
                     ing.reference = targetRec._id
