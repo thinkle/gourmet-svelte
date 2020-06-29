@@ -93,23 +93,26 @@
  }
  .tag {
      display: inline-flex;
-     padding: 4px;
+     padding: 3px;
      margin: 2px;
      border-radius: 5px;
-     background-color: #c7c7d7;
-     color: #333;
+     border-width: 1px;
+     border-style: solid;
+     background-color: var(--accent-fg);
+     border-color: var(--accent-bg);
+     color: var(--accent-bg);
+     padding: 3px;
      font-weight: bold;
      font-size: 0.8rem;
      align-items: center;
      margin-right: 5px;
+     
  }
  
- .current {
-     background-color: yellow;
-     font-weight: bold;
- }
  .close {
      align-self: flex-start; /* top */
      margin-left: auto; /* right */
+     --white : var(--accent-fg);
+     --black : var(--accent-bg);
  }
 </style>
