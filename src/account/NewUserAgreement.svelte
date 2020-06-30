@@ -1,6 +1,14 @@
 <script>
+ export let onDone
+ 
  import {Button} from '../widgets/';
  import {user} from '../stores/userStore.js';
+ 
+ function accept () {
+     user.markNotNew();
+     if (onDone) {onDone()}
+ }
+ 
 </script>
 
 <h2>You look new. Welcome!</h2>
@@ -20,5 +28,5 @@
     publishing platform &mdash; it's more like the digital
     website-scraping version of that box full of notecards
     hanging out in your kitchen.</p>
-<Button on:click="{user.markNotNew}">Accept Agreement</Button>
+<Button on:click="{accept}">Accept Agreement</Button>
 <!-- End New User Agreement -->

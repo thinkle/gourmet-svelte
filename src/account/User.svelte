@@ -1,4 +1,6 @@
 <script>
+ export let onClose
+
  import {getContext} from 'svelte';
  import api from '../data/api.js';
  import {user} from '../stores/userStore.js';
@@ -34,7 +36,7 @@
         <!-- This block ensures we have a dbUser to play with -->
         <!-- New User Agreement -->
         {#if $user.remoteUser.dbUser.newUser}
-            <NewUserAgreement/>
+            <NewUserAgreement onDone="{onClose}" />
         {:else}
             <!-- Not a new user -->
             <!-- If invites -->
