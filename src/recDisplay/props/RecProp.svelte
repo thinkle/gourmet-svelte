@@ -35,8 +35,6 @@
 
  import { quintOut } from 'svelte/easing';
 
-
-
  var editInternal;
  $: setInternalState(edit)
  function setInternalState (state) {
@@ -66,6 +64,25 @@
      } else {
          return false;
      }
+ }
+
+ let lastEdit
+ $: handleEditToggle(editInternal)
+ function handleEditToggle (editInternal) {
+     console.log(prop.name,'toggles to',editInternal,'from',lastEdit)
+     if (lastEdit == true && !edit) {
+         // Turning from edit to not edit!
+         console.log(prop.name,'Edit is turning off - check values',prop.array,prop.isNull,value);
+         let orig = value;
+         if (prop.array && value && prop.isNull) {
+             value = value.filter((v)=>!prop.isNull(v))
+             if (value != orig) {
+                 console.log('Filtered',orig,'to',value);
+                 handleChange(value);
+             }
+         } 
+     }
+     lastEdit = editInternal;
  }
 
 </script>
