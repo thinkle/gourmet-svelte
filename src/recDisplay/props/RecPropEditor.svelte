@@ -6,7 +6,6 @@
      ref.focus();
  }
 
-
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import RecDef from '../../common/RecDef.js';
  import RecBlock from '../text/RecBlock.svelte';
@@ -17,7 +16,8 @@
         CategoryInput,
         NumberUnitInput,
         ImageEntry,
-        IconButton} from '../../widgets/';
+        IconButton,
+        StarRating} from '../../widgets/';
 import {lookupStores} from '../../stores/recipeStores.js';
 
  let modes = RecDef.EditModes
@@ -30,7 +30,8 @@ import {lookupStores} from '../../stores/recipeStores.js';
      [modes.MCMB] : CategoryInput,
      [modes.LNK] : UrlInput,
      [modes.NUMUNIT] : NumberUnitInput,
-     [modes.IMG] : ImageEntry
+     [modes.IMG] : ImageEntry,
+     [modes.STAR] : StarRating,
  }
 
 
