@@ -49,39 +49,6 @@
      valid = isValid(rec);
  }
 
-
-
- $: handleEditToggle(editMode)
-
-
- function handleEditToggle (editMode) {
-     if (onEditToggle) {
-         onEditToggle(editMode);
-     }
-     if (!rec) {return}
-     for (let prop of RecDef.recProps) {
-         if (editMode) {
-             // check for empty props and populate them...
-             if (prop.array && prop.empty &&
-                 (!rec[prop.name] || rec[prop.name].length==0)
-             ) {
-                 rec[prop.name] = deepcopy(prop.empty)
-             }
-         } else {
-             // check for empty props and remove them...
-             if (prop.empty &&
-                 prop.array &&
-                 JSON.stringify(rec[prop.name]) == JSON.stringify(prop.empty)
-             ) {
-                 delete rec[prop.name]; // remove the prop...
-             } 
-         }
-     }
-     rec = rec;
- }
-
-
-
  function triggerChange () {
      if (onChange) {
          onChange(rec);
@@ -179,8 +146,6 @@
  /* Check if our recipe is valid - helps us display a message rather
     than crashing outright... */
  function isValid (rec) {
-     if (!rec) {return false}
-     //if (!rec.images || !Array.isArray(rec.images)) { return false }
      if (!rec.ingredients || !Array.isArray(rec.ingredients)) { return false }
      return true;
  }
