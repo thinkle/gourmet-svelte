@@ -161,7 +161,7 @@
  }
 
 </script>
-<FullScreen {scrolls} header={false}>    
+<FullScreen {scrolls} header={false} footerHeight="56px">    
     <div slot="footer">
         <Bar>
             <nav slot="left">
