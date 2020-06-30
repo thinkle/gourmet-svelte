@@ -206,7 +206,7 @@
      padding-bottom : $smallpad;
      display: flex;
      flex-direction: column;
-     border-bottom: 1px solid var(--light-underline);
+     /* border-bottom: 1px solid var(--light-underline); */
  }
  .propBox {
      flex: 1
