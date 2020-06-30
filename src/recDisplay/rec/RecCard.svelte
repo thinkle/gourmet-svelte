@@ -259,7 +259,7 @@
      border-radius: 50%;
      overflow: hidden;
      grid-area: image;
-     align-self: center;
+     align-self: stretch;
      justify-self: center;
  }
 
