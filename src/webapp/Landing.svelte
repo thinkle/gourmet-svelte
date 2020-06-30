@@ -30,7 +30,9 @@
      ()=>{
          console.log('Landing onMount!')
          if (!netlifyStarted) {
-             netlifyIdentity.init()
+             if (!DEV) {
+                 netlifyIdentity.init()
+             }
          }
      }
  );
