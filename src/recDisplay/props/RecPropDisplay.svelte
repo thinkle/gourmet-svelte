@@ -3,14 +3,18 @@
  export let value;
  export let clickable=undefined;
  export let onClick=undefined;
+ import {NumberUnitDisplay,TimeLink} from '../../widgets/';
+ import StarDisplay from './StarDisplay.svelte';
+ $: {
+     if (prop.array && !value) {
+         value = []
+ }}
  
- $: {if (prop.array && !value) {
-     value = []
-  }}
-        import {NumberUnitDisplay,TimeLink} from '../../widgets/';
+
 
  import RecDef from '../../common/RecDef.js';
  import RecipeText from '../text/RecipeText.svelte';
+ 
 
  let modes = RecDef.EditModes
 
@@ -18,6 +22,7 @@
      [modes.NUMUNIT] : NumberUnitDisplay,
      [modes.DUR] : TimeLink,
      [modes.RCH] : RecipeText,
+     [modes.STAR] : StarDisplay,
  }
 
  var displayValue;
