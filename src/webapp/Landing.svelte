@@ -239,7 +239,7 @@
 </FullScreen>
 {#if showUserSettings}
     <Modal key="user" onClose="{()=>showUserSettings=false}">
-        <User/>
+        <User onClose="{()=>showUserSettings=false}" />
     </Modal>
 {/if}
 
