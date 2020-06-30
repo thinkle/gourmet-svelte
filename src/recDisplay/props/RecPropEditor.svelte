@@ -82,8 +82,11 @@ import {lookupStores} from '../../stores/recipeStores.js';
             </div>
         {/each}
         <span></span> <!-- Placeholder in grid -->
-        <IconButton bare="{true}" icon="add" class="icon" small="{true}"
-                    on:click="{()=>value=[...value,{...prop.empty}]}"
+        <IconButton
+            bare="{true}"
+            icon="add"
+            small="{true}"
+            on:click="{()=>value=[...value,{...prop.empty}]}"
         >Add {prop.label}</IconButton>
     </div>
 {:else}
