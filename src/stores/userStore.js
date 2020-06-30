@@ -156,6 +156,7 @@ function createUser() {
         },
         async markNotNew (newName) {
             await api.doFetch('markUserNotNew',get(userStore),{})
+            await getRemoteUser()
         },
         getRemoteUser,
         login(user) {
