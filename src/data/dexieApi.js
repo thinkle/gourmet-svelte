@@ -160,7 +160,7 @@ const dexieApi = {
                 getSortFunction(sort)
             );
             let result = allTheResults.slice((page||0),(limit&&(page||0)+limit||undefined));
-            let last = (result.length + (page||0) >= count)
+            let last = (result.length + (page||0) >= allTheResults.length)
             return {
                 result,
                 count : allTheResults.length,
