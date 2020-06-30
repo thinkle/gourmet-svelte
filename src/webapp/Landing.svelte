@@ -30,9 +30,7 @@
      ()=>{
          console.log('Landing onMount!')
          if (!netlifyStarted) {
-             console.log('Netlify init!')
-             //debugger;
-             //netlifyIdentity.init()
+             netlifyIdentity.init()
          }
      }
  );
@@ -155,6 +153,8 @@
 
  $: $user && !$user.remoteUser && checkForNetlifyToken()
  
+ 
+
  function checkForNetlifyToken () {
      console.log('Check for token?')
      if (!netlifyStarted) {netlifyIdentity.init();}
