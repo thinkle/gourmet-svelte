@@ -6,7 +6,7 @@
          editOnOpen[id] = editMode
          if (editMode && recComponents[id]) {
              // already have a component... force it into edit             
-             recComponent[id].setEditMode(editMode);
+             recComponents[id].setEditMode(editMode);
          }
      } else {
          console.log('Weird, got no id :(',id,editMode)
