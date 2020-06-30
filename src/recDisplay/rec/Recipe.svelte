@@ -200,7 +200,7 @@
 
 {#if valid}
     <div class='recipe-wrap'
-         style="getStyle(recipe)">
+         style="{getStyle(rec)}">
         <!-- Above the side-by-side view... -->
 
         <!-- <div class="top" use:watchResize="{handleResize}"> -->
