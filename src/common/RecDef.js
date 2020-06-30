@@ -17,19 +17,8 @@ const MCMB = 'multicombo';
 const IMG = 'img';
 const DUR = 'duration';
 const LNK = 'link';
+const STAR = 'stars';
 const NUMUNIT = 'numunit';
-
-const EditTypes = [
-    CMB,
-    TXT,
-    RCH,
-    NUM,
-    IMG,
-    DUR,
-    MCMB,
-    LNK,
-    NUMUNIT,
-    ]
 
 const Metadata = {
     importProps : [
@@ -170,10 +159,13 @@ const Metadata = {
         },
         {name:'rating',
          label:'Rating',
+         hideLabel:true,
+         summaryView:true,
          array:false,
          testValue:10,
          isNull:(v)=>isNaN(Number(v)),
-         edit:NUM,
+         edit:STAR,
+         display:STAR,
          toHtml:(v)=>`${v/2} of 5 stars`,
         },
 	{name:'times',
@@ -224,7 +216,8 @@ Metadata.EditModes = {
     IMG,
     DUR,
     LNK,
-    NUMUNIT,    
+    NUMUNIT,
+    STAR,
 }
 
 Metadata.importPropsByName = {}
