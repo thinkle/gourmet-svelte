@@ -10,6 +10,7 @@
  
  let lastValue = '';
  export let options=[]
+ import {unique} from '../../utils/uniq.js';
  let menu=[]
  let matches=[]
  let lastKey = undefined
@@ -253,14 +254,14 @@
         />
         {#if showMenu}
             <ul class="menu" transition:slide>            
-                {#each matches as match,i (match)}
+                {#each unique(matches) as match,i (match)}
                     <li key={match} class:current={currentMatch==i}
                         on:click={()=>doSelect(match)}
                             transition:fly
 		        animate:flip={{delay: 250, duration: 250, easing: quintOut}}>{@html highlight(match,value)}</li>
                 {/each}
                 {#if showAll}
-                    {#each options as option}
+                    {#each unique(options) as option}
                         {#if matches.indexOf(option)==-1}
                             <li transition:fly
                                 on:click={()=>doSelect(option)}
