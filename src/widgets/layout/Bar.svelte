@@ -14,7 +14,7 @@
  
  function getStyle () {
      if (maxWidth) {
-         return `width: min(${maxWidth},calc(100vw - 2em)); margin: auto; ${style};`;
+         return `width: min(${maxWidth},calc(100vw)); margin: auto; ${style};`;
      } else {
          return style;
      }
@@ -45,7 +45,7 @@
      display: flex;
      flex-shrink: 0;
      min-height: var(--bar-height);
-     padding: 0.5rem 1rem;
+     padding: var(--bar-top,0.5rem) var(--side-pad,1rem);
      line-height: 1.5;
      align-items: center;
      white-space: nowrap;
