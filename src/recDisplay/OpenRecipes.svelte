@@ -1,5 +1,8 @@
 <script>
  export function open (id, editMode=false) {
+     if (isNaN(Number(id))) {
+         console.log("WARNING: OPEN CALLED WITH NON-ID?",id);
+     }
      hide = false;
      if (id!==undefined) {
          activeRecipeId = id;
