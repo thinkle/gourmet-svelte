@@ -26,7 +26,7 @@ let color
      {matcher:/apple/i, color: {bg:'#ff0800',fg:'#ffdfee'}},
      {matcher:/tomato/i, color: {bg:'#9f0404',fg:'#ffd4c2'}},
      {matcher:/lemon/i,color:{bg:'#fff04d',fg:'#368321'}},
-
+     {matcher:/orange/i,color:{fg:'#ffeed6',bg:'#f69813'}},
      
      // courses
      {matcher:/cookie|bread/i, color:{bg:'#fdcf4c',fg:'#4c2307'}}, // beige
