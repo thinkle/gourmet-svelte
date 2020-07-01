@@ -1,9 +1,10 @@
 <script context="module">
  let tabsCount = 0;
- 
 </script>
 
 <script>
+ import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
+ export let standalone=false;
  export let sticky=false;
  export let stickyTop = undefined;
  export let data=undefined;
@@ -43,8 +44,9 @@
 
 <ul class:sticky
     class:nowrap
+    class:standalone
     class="tabs"
-    style="{stickyTop && `top:${stickyTop}`}"
+    style="{`top:${stickyTop}`}"
     tabIdentifier="{myIdentifier}"
 >
     <slot>
@@ -78,6 +80,9 @@
  }
  .nowrap :global(*) {
      white-space : nowrap;
+ }
+ .standalone {
+     padding: 0 var(--side-pad, 1rem);
  }
 </style>
 
