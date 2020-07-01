@@ -9,6 +9,7 @@
  export let editable = true;
  export let onEditToggle = undefined
  export let minPropWidth = 150;
+
  export function setEditMode (val) {
      editMode = val;
  }
@@ -348,7 +349,8 @@
                                     onChange="{triggerChange}"
                                     editable="{editable}"
                                     edit="{editMode}"
-                                    prop="{prop}" bind:value="{rec[prop.name]}"/>
+                                    prop="{prop}"
+                                    bind:value="{rec[prop.name]}"/>
                             </div>
                         {/each}
                         <!-- end block props -->
@@ -368,10 +370,10 @@
 
 {#if DEV}
 
-    <ModalLauncher modalVisible="{debug}">
+    <ModalLauncher key="rec-debug" modalVisible="{debug}">
         <Button on:click="{()=>debug=!debug}">DEBUG</Button>
     </ModalLauncher>
-    {#if debug}<Modal onClose="{()=>debug=false}">
+    {#if debug}<Modal key="rec-debug" onClose="{()=>debug=false}">
         <div>
             <li>editable {editable}</li>
             <li>editMode {editMode}</li>
