@@ -57,13 +57,11 @@ const dexieApi = {
 
     getRecipe (recid, {mongoId}={}) {
         if (mongoId) {
-            console.log('Fetch mongo...',mongoId);
             return dexieApi.db.recipes.get(
                 {_id:mongoId}
             );
         }
         else {
-            console.log('fetch standard',recid);
             return dexieApi.db.recipes.get({id:recid})
         }
     },
@@ -98,7 +96,6 @@ const dexieApi = {
 
     async searchWords (words, {deleted}={}) {
         words = stopword.removeStopwords(words);
-        console.log('searchWords',words);
         let q = dexieApi.db.recipes
         var ids = undefined;
         for (let word of words) {
@@ -128,14 +125,12 @@ const dexieApi = {
             // Note: we split words by \s when we full-text index
             query.fulltext = query.fulltext.replace(/^\s+|\s+$/g,'')
             if (query.fulltext.indexOf(' ')>-1) {
-                console.log('Query is: ',query.fulltext.split(/\s+/))
                 q = await dexieApi.searchWords(
                     query.fulltext.split(/\s+/),
                     query // this object hands in deleted
                 )
             }
             else {
-                console.log('Query is: ',query.fulltext)
                 q = dexieApi.searchWord(query.fulltext,query);
             }
         } else if (query && query.deleted !== undefined) {
@@ -143,7 +138,6 @@ const dexieApi = {
             q = dexieApi.db.recipes.where('deleted').equals(query.deleted)
                 .and((o)=>!o.isShoppingList);
         } else if (query && query.savedRemote!==undefined) {
-            console.log('Saved remote query!');
             q = dexieApi.db.recipes.where('savedRemote').equals(query.savedRemote&&1||0)
         } 
         if (!q) {
