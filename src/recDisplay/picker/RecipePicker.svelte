@@ -15,8 +15,6 @@
 <Modal
     key="picker"
     {onClose}>
-    
-    <!-- <span class="close"><IconButton bare="true" icon="close" on:click="{onClose()}" /></span> -->
     <h2>
         {message}
     </h2>
