@@ -44,7 +44,6 @@
  }
 
  function organizeItems () {
-     console.log('Re organizing items!');
      byShopItem = {
      }
      for (let item of items) {
