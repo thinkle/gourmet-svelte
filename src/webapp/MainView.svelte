@@ -213,10 +213,10 @@
 {/if}
 
 {#if DEV}
-    <ModalLauncher modalVisible="{debug}">
+    <ModalLauncher key="debug-main" modalVisible="{debug}">
         <Button on:click="{()=>debug=!debug}">DEBUG</Button>
     </ModalLauncher>
-    {#if debug}<Modal onClose="{()=>debug=false}">
+    {#if debug}<Modal key="debug-main" onClose="{()=>debug=false}">
         <div>
             Page<JsonDebug data={$recipePage}/>
             Stored<JsonDebug data={$storedRecipes}/>
