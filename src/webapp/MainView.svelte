@@ -164,7 +164,7 @@
                     </li>
                     <li>
                         <Button
-                            on:click="{async ()=>opener.open(await recipeActions.createRecipe())}">
+                            on:click="{async ()=>opener.open((await recipeActions.createRecipe()).id)}">
                             New Recipe
                         </Button>
                     </li>
