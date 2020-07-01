@@ -134,7 +134,7 @@
 
 <Bar growLeft="{true}"> 
     <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
-        Search: <PlainInput type="text" bind:value={searchInput}/>
+        Search: <PlainInput bind:value={searchInput}/>
         <!-- Debug for when infinite scroll goes wonky  -->
         <!-- <Button on:click={getMore}>M</Button> -->
         <span width="30px">
@@ -281,6 +281,33 @@
                     </div>
 
                 </RecCard>
+            </div>
+        {:else}
+            <div class="center">
+                <h2>
+                    {#if search}
+                        No results for "{search}"...
+                    {:else}
+                        No recipes yet? Maybe import some or create them!
+                    {/if}
+                </h2>
+                <div class="center"><WhiskLogo size="250" /></div>
+                {#if $connected}
+                    <IconButton
+                        icon="add"
+                        on:click="{async ()=>onRecipeClick(await recipeActions.createRecipe().id)}">
+                        Create a Recipe?
+                    </IconButton>
+                {:else}
+                    (We're still connecting...)
+                {/if}
+                <div>
+                    <a href="broken">
+                        Install the Chrome Plugin
+                        to import recipes from
+                        your favorite sites
+                    </a>
+                </div>
             </div>
         {/each}
         {#each [1,2,3] as i}
@@ -463,4 +490,14 @@
  .searchBar.searching {
      cursor: busy;
  }
+ .center {
+     display: flex;
+     height: 100%;
+     width: 100%;
+     align-items: center;
+     justify-content: center;
+     text-align: center;
+     flex-direction: column;
+ }
+
 </style>
