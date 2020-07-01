@@ -45,7 +45,7 @@
 
  $: { if (rec && !rec.title && editable) {editMode=true}}
 
-            let valid = false;
+                           let valid = false;
  $: {
      valid = isValid(rec);
  }
@@ -194,7 +194,7 @@
                     </i>
                     {#if rec}
                         {#if rec.savedRemote}
-                            <StatusIcon icon="cloud_done" tooltip="true">
+                            <StatusIcon icon="cloud_done" tooltip="true" tooltipLeft="{true}">
                                 Saved to browser and in the cloud.
                                 Last saved at {new Date($recipeState[rec.id].last_modified).toLocaleString()}
                                 <IconButton icon="refresh" bare="true" small="true"
@@ -202,7 +202,7 @@
                                 />
                             </StatusIcon>
                         {:else if $recipeState[rec.id]}
-                            <StatusIcon icon="cloud_off" tooltip="true">
+                            <StatusIcon icon="cloud_off" tooltip="true" tooltipLeft="{true}">
                                 Saving to the cloud failed - perhaps you're offline or you need to
                                 <a on:click="{()=>doLogin()}">log in again</a>.
                                 Your recipe is still being stored up locally in your web browser, but it won't be available in other devices.
@@ -212,7 +212,7 @@
                                 />
                             </StatusIcon>
                         {:else}
-                            <StatusIcon icon="info" tooltip="true" >
+                            <StatusIcon icon="info" tooltip="true" tooltipLeft={true}>
                                 Huh, no state information found for this recipe at all. Are you testing or is this a bug?
                                 <IconButton icon="refresh" bare="true" small="true"
                                             on:click="{()=>recipeActions.getRecipe(rec.id)}"
@@ -403,22 +403,6 @@
  .small {
      font-size: var(--small);
  }
- /* .top {
-    display: flex;
-    align-items: center;
-    }
-    .top button:nth-of-type(1) {
-    margin-left: auto;
-    }
-    .top button {
-    margin-right: 1em;
-    } */
- .images {
-     float : right;
- }
- /* .props {
-    display: inline-block;
-    } */
  .editContainer {
      display: contents;
  }
@@ -448,12 +432,7 @@
  .images img {
      max-width: var(--max-image-width);
  }
- .recipe {
-     max-width: 90rem;
-     margin: auto;
-     display: flex;
-     flex-direction: column;
- }
+ 
  @media (max-width: 599px) {
      h2 {
          max-width: calc(100vw - 60px);
