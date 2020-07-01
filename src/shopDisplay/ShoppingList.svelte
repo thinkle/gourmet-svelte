@@ -147,8 +147,10 @@
         <div>
             <ShoppingListItems showSubItems="{showSubItems}" items="{$shoppingList}"/>
         </div>
-        Shopping List: <JsonDebug data="{$shoppingList}"/>
-        Shop Rec: <JsonDebug data="{$localShopRec}"/>
+        {#if DEV}
+            Shopping List: <JsonDebug data="{$shoppingList}"/>
+            Shop Rec: <JsonDebug data="{$localShopRec}"/>
+        {/if}
         </FullHeight>
     {/if}
 
