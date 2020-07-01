@@ -16,16 +16,16 @@
  }
  let flyProps = {duration:350}
  if (tooltipLeft) {
-     flyProps.x = -100;
+     flyProps.x = 100; /* Comes from the right */
  }
  if (tooltipRight) {
-     flyProps.x = 100;
+     flyProps.x = -100; /* Comes from the left */
  }
  if (tooltipAbove) {
-     flyProps.y = 100;
+     flyProps.y = 100; /* Comes from below */
  }
  if (tooltipUnder) {
-     flyProps.y = -100;
+     flyProps.y = -100; /* Comes from above */
  }
 
 </script>
