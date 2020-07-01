@@ -81,7 +81,7 @@
  .side {
      display: flex;
      flex-direction: column;
-     padding: 11px;
+     padding: var(--panel-pad, 11px);
  }
  .side .scrollBox {
      flex-grow: 1;
@@ -102,10 +102,12 @@
  }
  .l {
      max-width: var(--max-left);
+     padding-left: var(--side-pad);
  }
  .r {
      max-width: var(--max-right);
      flex-grow: 1;
+     padding-right: var(--side-pad);
  }
  .stackMode .l,.stackMode .r {
      height: auto;
