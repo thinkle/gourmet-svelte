@@ -19,11 +19,9 @@ const NO_REMOTE = false;
 user.subscribe(
     (u)=>{
         if (u && u.remoteUser && u.remoteUser.dbUser) {
-            console.log('Got user and remote user - we are good to go');
             remoteApi = RecipeApi(u);
             connectedRemote.set(true);
         } else {
-            console.log('Yikes - we are not even logged in remotely');
             if (user.remoteUser && !user.remoteUser.dbUser) {
                 connectedRemote.set(NO_DB);
             } else {
@@ -58,19 +56,15 @@ async function checkForReferences (recipe) {
         console.log("Not connected = don't bother trying to get remote IDs");
     }
     let references = crawlForReferences(recipe.ingredients);
-    console.log('Found ',references.length,'references',references);
     for (let ing of references) {
         if (isLocalID(ing.reference)) {
             let targetRec = await localApi.getRecipe(ing.reference);
             if (targetRec._id) {
-                //console.log('Changing to remote ID',ing.reference,'=>',targetRec._id);
                 ing.reference = targetRec._id;
                 ing.referenceExists = true;
             } else {
-                //console.log('Trying to save linked recipe...');
                 targetRec = await api.updateRecipe(targetRec,false); // don't update timestamp
                 if (targetRec._id) {
-                    //console.log('Successfully got new ID...',targetRec._id);
                     ing.reference = targetRec._id
                     ing.referenceExists = true;
                 } else {
@@ -129,7 +123,6 @@ const api = {
                 recipe = await remoteApi.updateRecipe(recipe);
                 recipe.savedRemote = 1;
                 //recipe._id = remoteRec._id;
-                console.log('successfully saved remote')
                 if (recipe.merged) {
                     console.log('Damn, we merged');
                     console.log('Original',origRec);
@@ -162,7 +155,6 @@ const api = {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
     async sync (test=false,{onPartialSync}) {
-        console.log('api.sync!');
         if (!localApi.db) {
             await localApi.connect();
         }
