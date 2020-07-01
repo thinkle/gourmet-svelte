@@ -9,7 +9,7 @@
  export let maxTransitionTime = 500;
 
  let t = maxTransitionTime/stars
- export let curvy
+ export let curvy=false;
  let active = []
  let all = []
  let lastValue = value;
