@@ -42,15 +42,12 @@
  }
  
  function turnEditOn () {
-     console.log('Edit on - was ',editInternal)
      editInternal = true
  }
  function turnEditOff () {
-     console.log('Edit OFf - was ',editInternal)
      editInternal = false;
  }
  function handleChange (v) {
-     console.log('Rec Prop has a change!');
      onChange && onChange(value);
  }
 
@@ -68,16 +65,13 @@
 
  let lastEdit
  $: handleEditToggle(editInternal)
- function handleEditToggle (editInternal) {
-     console.log(prop.name,'toggles to',editInternal,'from',lastEdit)
+ function handleEditToggle (editInternal) {     
      if (lastEdit == true && !edit) {
          // Turning from edit to not edit!
-         console.log(prop.name,'Edit is turning off - check values',prop.array,prop.isNull,value);
          let orig = value;
          if (prop.array && value && prop.isNull) {
              value = value.filter((v)=>!prop.isNull(v))
              if (value != orig) {
-                 console.log('Filtered',orig,'to',value);
                  handleChange(value);
              }
          } 
