@@ -1,4 +1,6 @@
 <script>
+ import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
+ 
  export function open (id, editMode=false) {
      if (isNaN(Number(id))) {
          console.log("WARNING: OPEN CALLED WITH NON-ID?",id);
@@ -23,7 +25,6 @@
  export let hide
  
  import {shoppingList} from '../stores/shoppingStores.js';
- import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {getContext,onMount} from 'svelte';
  import {fade,slide} from 'svelte/transition';
  import {flip} from 'svelte/animate';
@@ -58,9 +59,9 @@
  $: {if (!activeRecipeId && $openLocalRecipes.length && $openLocalRecipes[0]) {
      openOne()
     }
-    }
+ }
 
-            let showCloseModalFor
+ let showCloseModalFor
 
  function closeRec (id,confirmed=false) {
      
@@ -84,7 +85,7 @@
 </script>
 
 <LazyIf condition="{($openLocalRecipes.length > 0) && !hide}">
-    <Tabs sticky={true} nowrap={true}>
+    <Tabs sticky={true} nowrap={true} standalone="{true}">
         {#each $openLocalRecipes as id (id)}
             <div
                 animate:flip="{{delay:100,duration:250,easing:quintOut}}"
@@ -103,7 +104,6 @@
             </div>
         {/each}
     </Tabs> <!-- close tabs -->
-    
     <FullHeight>
         <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
         {#each Object.keys($localRecipes) as id (id)}
