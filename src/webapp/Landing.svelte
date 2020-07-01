@@ -28,7 +28,6 @@
 
  onMount(
      ()=>{
-         console.log('Landing onMount!')
          if (!netlifyStarted) {
              if (!DEV) {
                  netlifyIdentity.init()
@@ -53,19 +52,15 @@
 
  netlifyIdentity.on('login',
                     u => {
-                        //console.log('Logged in',u);
                         user.login(u);
                         netlifyIdentity.close();
                         if ($redirectURL !== '') {
-                            console.log('Got redirect: ',$redirectURL);
                             location.reload();
                         } else {
                         }
  });
  netlifyIdentity.on('init',
                     u=>{
-                        console.log('Init done!',u)
-                        debugger;                        
                         if (u) {user.login(u);}
                         netlifyIdentity.close();
                         netlifyStarted = true;
@@ -148,7 +143,6 @@
                 }
             }
  );
- console.log('set toolbar context');
 
  let showUserSettings = false;
  $: showUserSettings = ($user && $user.remoteUser && $user.remoteUser.dbUser && $user.remoteUser.dbUser.newUser)||showUserSettings
@@ -158,7 +152,6 @@
  
 
  function checkForNetlifyToken () {
-     console.log('Check for token?')
      if (!netlifyStarted) {netlifyIdentity.init();}
  }
 
