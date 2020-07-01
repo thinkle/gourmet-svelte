@@ -52,15 +52,12 @@ function createUser() {
     const { subscribe, set, update } = userStore;
     if (netlifyIdentity.gotrue && netlifyIdentity.gotrue.currentUser()) {
         // refresh?
-        console.log('maybe refresh...');
         netlifyIdentity.gotrue.currentUser().jwt()
     }
 
     if (u) {
         getRemoteUser();
-    } else {
-        console.log('No user yet');
-    }
+    } 
     
     function updateDBUser (dbUser) {
             userStore.update(
@@ -78,14 +75,10 @@ function createUser() {
     async function getRemoteUser () {
         let $user = get(userStore);
         if ($user) {
-            console.log('Fetching remote user for ',$user);
             let remoteInfo = await api.doFetch('echo',$user);
-            console.log('Fetched echo response',remoteInfo);
             let remoteUser = remoteInfo.user;
-            console.log('Fetched remote user',remoteUser);
             userStore.update(
                 ($user)=>{
-                    console.log('Updating store with user: ',remoteUser);
                     $user.remoteUser = remoteUser
                     return $user;
                 }
