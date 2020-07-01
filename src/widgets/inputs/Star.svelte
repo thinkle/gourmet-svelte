@@ -45,11 +45,12 @@
 </script>
 
 <g class:editable class:fill style="{`stroke-width:${strokeWidth};--duration:${duration}ms`}" >
-    <path in:draw={{delay:indelay,duration}} 
-		  out:draw={{delay:outdelay,duration}}
-		  on:introstart={()=>fill=true}
-		  on:outrostart={()=>fill=false} d={theWholeStar}
-		  on:click
+    <path in:draw|local="{{delay:indelay,duration}}"
+	  out:draw|local="{{delay:outdelay,duration}}"
+	  on:introstart="{()=>fill=true}"
+	  on:outrostart="{()=>fill=false}"
+          d="{theWholeStar}"
+	  on:click
     />
 </g>
 
