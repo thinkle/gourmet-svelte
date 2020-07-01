@@ -20,11 +20,26 @@ export function diffRecs (r1, r2) {
 function propIsEqual (v1, v2, p) {
     if (JSON.stringify(v1) === JSON.stringify(v2)) {
         return true;
-    } else {
-        if (p.array) {
-            if ((!v1 || v1.length==0) && (!v2 || v2.length==0)) {
-                return true;
+    } 
+    if (p.array) {
+        if (p.isNull) {
+            if (Array.isArray(v1)) {
+                v1 = v1.filter((v)=>!p.isNull(v))
             }
+            if (Array.isArray(v2)) {
+                v2 = v2.filter((v)=>!p.isNull(v))
+            }
+        }
+        if ((!v1 || v1.length==0) && (!v2 || v2.length==0)) {
+            return true;
+        }
+        if (JSON.stringify(v1) == JSON.stringify(v2)) {
+            return true;
+        }
+    }
+    if (!p.array && p.isNull) {
+        if (p.isNull(v1) && p.isNull(v2)) {
+            return true;
         }
     }
     return false; // default
