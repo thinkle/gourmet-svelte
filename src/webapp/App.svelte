@@ -159,6 +159,8 @@
      --focusedInputBorder : 3px solid #777;
      --inputRadius : 3px;
      --inputPadding: 5px;
+     --side-pad: 1rem;
+     --bar-top: 0.5rem;
  }
  :global(input,textarea,[contenteditable]) {
      /* border : var(--inputBorder);
