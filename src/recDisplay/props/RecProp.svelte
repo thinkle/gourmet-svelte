@@ -102,7 +102,7 @@
             <div class="top" >
                 <label class:small={smallLabel} on:click={()=>ref.focus()}>{prop.label}</label>
                 {#if editable && !editInternal}
-                    <span class="editbutton" >
+                    <span class="editbutton">
                         <IconButton
                             small="{smallLabel}"
                             icon="edit"
@@ -113,17 +113,19 @@
                     </span>
                 {/if}
                 {#if editInternal && !edit}
-                    <IconButton small="{smallLabel}"
-                                icon="done"
-                                bare="true"
-                                ariaLabel="{`Finish editing ${prop.label}`}"
-                                on:click={turnEditOff}/>
+                    <span class="donebutton">
+                        <IconButton small="{smallLabel}"
+                                    icon="done"
+                                    bare="true"
+                                    ariaLabel="{`Finish editing ${prop.label}`}"
+                                    on:click={turnEditOff}/>
+                    </span>
                 {/if}
             </div>
         {:else if editable && !edit}
             <div class='floatingEditButton'>
                 {#if editable && !editInternal}
-                    <span class="editbutton" >
+                    <span class="editbutton">
                         <IconButton
                             bare="true"
                             icon="edit"
@@ -133,11 +135,13 @@
                     </span>
                 {/if}
                 {#if editInternal && !edit}
-                    <IconButton
-                        icon="done"
-                        bare="true"
-                        ariaLabel="{`Finish editing ${prop.label}`}"                        
-                        on:click={turnEditOff}/>
+                    <span class="donebutton">
+                        <IconButton
+                            icon="done"
+                            bare="true"
+                            ariaLabel="{`Finish editing ${prop.label}`}"                        
+                            on:click={turnEditOff}/>
+                    </span>
                 {/if}
             </div>
         {/if}
@@ -145,7 +149,7 @@
 
         <div>
             {#if editInternal}
-                <div class="editContainer" out:send in:receive>
+                <div class="editContainer">
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                     <RecPropEditor
                         bind:this="{ref}"
@@ -155,7 +159,7 @@
                     />
                 </div>
             {:else}
-                <div in:receive
+                <div
                 >
                     <!-- out:fly|local={{x:150}} in:fly|local={{y:-50,delay:300}}> -->
                 <RecPropDisplay
