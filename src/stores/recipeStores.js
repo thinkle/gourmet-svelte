@@ -84,7 +84,6 @@ export const storedRecipes = {
             return $stored[mongoId]
         } else {
             let result =  await recipeActions.getRecipe(id,mongoId);            
-            console.log('Stored grabbed',result);
             return result;
         }
     }
@@ -143,25 +142,20 @@ export const recipeActions = {
     },
 
     async getInfiniteRecipes ({query, fields, limit=15,sort}) {
-        console.log('Initial',query);
         setStoreProp(actionState,'querying',{query,fields,limit});
         let response = await api.getRecipes({query,fields,limit,sort});
         setStoredRecs(response.result);
-        console.log(get(activePage).length,'recipes in activePage before set')
         activePage.set([...new Set(response.result.map((r)=>r.id))]);
-        console.log(get(activePage).length,'recipes in activePage after set')
         setStoreProp(actionState,'querying',false);
         return {
             count:response.count,
             async more () {
-                console.log('More',query);
                 setStoreProp(actionState,'querying',{query,fields,limit,sort,page:response.nextPage});                
                 response = await api.getRecipes({query,fields,limit,sort,page:response.nextPage})
                 setStoredRecs(response.result);
                 activePage.update(
                     (page)=>{
                         page = [...new Set([...page,...response.result.map((i)=>i.id)])];
-                        console.log(page.length,'recipes in activePage after update')
                         return page
                     }
                 );
@@ -211,17 +205,13 @@ export const recipeActions = {
 function removeIdFromStores (id) {
     activePage.update(
         ($ids)=>{
-            console.log('Remove ID from page',id);
             $ids = $ids.filter((recId)=>recId!=id)
-            console.log('Got:',$ids);
             return $ids;
         }
     );
     stored.update((data)=>{
-        console.log('Remove ID from store',id);
             delete data[id]; return data});
     localRecipes.update((data)=>{
-        console.log('Remove ID from local',id);
         delete data[id]; return data});
 }
 
@@ -242,7 +232,6 @@ export function makeLocalRecipeStore () {
                 let mongoId
                 if (isNaN(Number(id))) {
                     //reject(`Open should be called with a numeric local ID, but got ${id}`);
-                    console.log('Assuming id is mongoID?',id);
                     mongoId = id;
                     id = undefined;
                 }
@@ -255,14 +244,12 @@ export function makeLocalRecipeStore () {
                         let result = storedRecipes.get(id,mongoId).then(
                             (recipe)=>{                                
                                 if (recipe) {
-                                    console.log('Successfully fetched',recipe);
                                     local.update(
                                         ($localRecipes)=>{
                                             $localRecipes[id] = deepcopy(recipe);
                                             if (recipe._id) {
                                                 $localRecipes[recipe._id] = $localRecipes[id]
                                             }
-                                            console.log('Resolve promise and update localrecs...');
                                             resolve($localRecipes[id])
                                             return $localRecipes;
                                         }
@@ -323,13 +310,7 @@ export function makeLocalRecipeStore () {
                 } else {
                     let diff = diffRecs($local[key],$stored[key]);
                     if (diff) {
-                        // if (!recState[key].edited) {
-                        //     let o1 = $local[key];
-                        //     let o2 = $stored[key];
-                        //     console.log(o1,'differs from',o2);
-                        // }
                         recState.changes = diff;
-                        console.log('Recs differ! Changed:',diff);
                         recState[key].edited = true;
                     }
                     else {
@@ -358,7 +339,7 @@ export const categoryNames = writable([],(set)=>{
         set(categories.map((cname)=>({name:cname})));
     });
     return ()=>{
-        console.log('no more subscribers to cats');
+        //console.log('no more subscribers to cats');
     }
 });
 
