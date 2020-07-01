@@ -5,8 +5,8 @@
  export let value=""
  export let minFontSize = 11
  export let placeholder=''
- export let grow
- export let flexgrow
+ export let grow=false
+ export let flexgrow=true
  export function focus () {
      ref.focus();
  }
