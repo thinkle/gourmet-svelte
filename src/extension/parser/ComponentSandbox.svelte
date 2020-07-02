@@ -19,10 +19,7 @@
              for (let t of styleTags) {
                  if (t) {
                      componentContainer.appendChild(t.cloneNode(true));
-                     console.log('Injected',t);
-                 } else {
-                     console.log('No stylesheet found for ');
-                 }
+                 } 
              }
              mountComponent();
          }
@@ -48,7 +45,6 @@
      crawlForSvelteClasses(componentContainer);
      classes = unique(classes);
      const styleNodes = []
-     console.log('Looking for ',classes);
      classes.forEach(
          (classname)=>{
              styleNodes.push(document.querySelector(`#${classname}-style`))
