@@ -1,4 +1,7 @@
 <script>
+ export let onResize=undefined;
+ export let fullWidth=false;
+
  let ifr
  import {onMount,tick} from 'svelte';
  import {unique} from '../../utils/uniq.js';
@@ -6,7 +9,7 @@
  let height
  let body
  let componentContainer;
- export let onResize=undefined;
+
  const wiggleRoom = 3; // a little extra space for size calculations...
  
  onMount( ()=>{
@@ -18,6 +21,7 @@
              let styleTags = getStyleNodes();
              for (let t of styleTags) {
                  if (t) {
+                     console.log('Pushing ',t,'into sandbox');
                      componentContainer.appendChild(t.cloneNode(true));
                  } 
              }
@@ -50,6 +54,10 @@
              styleNodes.push(document.querySelector(`#${classname}-style`))
          }
      );
+     let alsoThese = document.querySelectorAll('.__copyIntoSandbox')
+     for (let node of alsoThese) {
+         styleNodes.push(node);
+     }
      return styleNodes;
  }
 
@@ -66,15 +74,18 @@
 
 </script>
 
-<iframe title="sandbox" srcdoc='<html><body style="margin:0;padding:0;"><div style="display:inline-block"></div></body></html>' bind:this={ifr} width={width} height="{height}"> 
+<iframe class:fullWidth title="sandbox" srcdoc="{`<html><body style="margin:0;padding:0;"><div style="${!fullWidth&&'display:inline-flex'}"></div></body></html>`}" bind:this={ifr} width={width} height="{height}"> 
 </iframe>
 <div class="invisiwrap">
-<div style="display:inline-block" bind:this={componentContainer}>
+<div style="display:block" bind:this={componentContainer}>
     <slot/>
 </div>
 </div>
 
 <style>
+ .fullWidth {
+     width: 100%;
+ }
  .invisiwrap {
      position: absolute;
      top: 0;
