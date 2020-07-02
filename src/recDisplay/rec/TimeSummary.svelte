@@ -47,4 +47,8 @@
      grid-row-gap: 1em;
      grid-column-gap: 5px;
  }
+
+ div > :global(*:nth-child(3n)) { /* Ugly */
+     justify-self: flex-end;
+ }
 </style>
