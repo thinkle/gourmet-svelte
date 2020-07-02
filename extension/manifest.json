@@ -24,7 +24,7 @@
     "<all_urls>"
   ],
   "externally_connectable" : {
-      "matches":["https://localhost:*/*","http://localhost:*/*","https://gourmet-svelte.netlify.app/*"]
+      "matches":["https://localhost:*/*","http://localhost:*/*","https://gourmet-svelte.netlify.app/*","https://gourmetrecipemanager.com/*"]
   },
     "web_accessible_resources" : ["embed.js","images/cookie.png","background.js.map",
                                   "content.js.map","embed.js.map"
