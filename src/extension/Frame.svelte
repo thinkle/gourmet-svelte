@@ -4,7 +4,14 @@
  export let id;
  import {Bar,Button,IconButton,Resizer} from '../widgets/';
  import ComponentSandbox from './parser/ComponentSandbox.svelte';
- let cookie = chrome.extension.getURL("images/cookie.png");
+ let cookie
+ try {
+     cookie = chrome.extension.getURL("images/cookie.png");
+ }
+ catch (err) {
+     console.log('No extension cookie? Maybe we are testing');
+     cookie = '/favicon.png'
+ }
  let width = 300;
  let resizeWidth = '5px'; /* Hard-coded in CSS below */
  onMount(()=>{
@@ -49,7 +56,7 @@
                 onFinish="{()=>{inputShield=false}}"
             />
             <div>
-                <ComponentSandbox>
+                <ComponentSandbox fullWidth="{true}">
                     <link
                         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons&display=swap"
                         rel="stylesheet"
@@ -130,6 +137,6 @@
      background-color: #77777777;
  }
  b {
-     font: var(--recipeFont);
+     font-family: var(--recipeFont);
  }
 </style>
