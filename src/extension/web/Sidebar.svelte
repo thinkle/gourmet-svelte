@@ -106,10 +106,6 @@
 </script>
 
 <section>
-    <h2>
-        Gourmet
-    </h2>
-    
     <Tabs sticky="{true}">
         <Tab active="{tagMode}" on:click="{()=>tagMode=true}">Tag</Tab>
         <Tab active="{!tagMode}" on:click="{()=>tagMode=false}">View</Tab>
