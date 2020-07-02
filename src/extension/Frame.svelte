@@ -2,7 +2,7 @@
  import {fly} from 'svelte/transition';
  import {onMount} from 'svelte';
  export let id;
- import {IconButton,Resizer} from '../widgets/';
+ import {Bar,Button,IconButton,Resizer} from '../widgets/';
  import ComponentSandbox from './parser/ComponentSandbox.svelte';
  let cookie = chrome.extension.getURL("images/cookie.png");
  let width = 300;
@@ -29,7 +29,7 @@
  }
  let url
  let port
- $: url = port && `http://localhost:${port}/sidebar` || 'https://gourmet-svelte.netlify.app/sidebar'
+ $: url = port && `http://localhost:${port}/sidebar` || 'https://www.gourmetrecipemanager.com/sidebar'
  let startWidth
  let inputShield;
 </script>
@@ -54,16 +54,16 @@
                         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons&display=swap"
                         rel="stylesheet"
                     />
-                    <div class='head'>
-                        <img style="margin-right: auto" width=50 src="{cookie}" alt="cookie">
-                        <span style="font-weight:bold">Gourmet</span>
-                        <span style="margin-left: auto">
-                            <IconButton on:click="{minimize}" icon="chevron_right"></IconButton>
-                            <button on:click="{()=>width+=50}">+</button>
-                            <button on:click="{()=>width-=50}">-</button>
+                    <Bar>
+                        <span slot="left" ><img style="margin-right: auto" width=50 src="{cookie}" alt="cookie"></span>
+                        <span slot="center" ><b>Gourmet</b></span>
+                        <span slot="right" >
+                            <Button bare="{true}" on:click="{()=>width+=50}">+</Button>
+                            <Button bare="{true}" on:click="{()=>width-=50}">-</Button>
+                            <IconButton bare="{true} small={true}" on:click="{minimize}" icon="chevron_right"></IconButton>
                         </span>
-                    </div>
-                    <input bind:value="{port}">
+                    </Bar>
+                    <!-- <input bind:value="{port}"> -->
                 </ComponentSandbox>
                 <div>
                     <div class:inputShield></div>
@@ -122,15 +122,14 @@
      background-color: white;
      height: 100vh;
  }
- .head {
-     display: flex;
-     height: 50px;
- }
  iframe {
      height: calc(100vh - 50px);
      width: var(--grmtSidebarWidth);
  }
  div :global(.resizer) {
      background-color: #77777777;
+ }
+ b {
+     font: var(--recipeFont);
  }
 </style>
