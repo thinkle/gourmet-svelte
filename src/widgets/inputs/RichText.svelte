@@ -17,31 +17,90 @@
 
  let quill
 
+ /* https://codepen.io/farnabaz/pen/VpdaGW
+    from https://github.com/quilljs/quill/issues/252 */
+
+
+
  function setContents (html) {
      if (!quill) return
      const delta = quill.clipboard.convert(html);
      quill.setContents(delta);
  }
  
+ function newlineFix () {
+     var Parchment = Quill.import('parchment');
+     var Delta = Quill.import('delta');
+     let Break = Quill.import('blots/break');
+     let Embed = Quill.import('blots/embed');
+     let Block = Quill.import('blots/block');
+     function lineBreakMatcher() {
+         var newDelta = new Delta();
+         newDelta.insert({'break': ''});
+         return newDelta;
+     }
+
+     Break.prototype.insertInto = function(parent, ref) {
+         Embed.prototype.insertInto.call(this, parent, ref)
+     };
+     Break.prototype.length= function() {
+         return 1;
+     }
+     Break.prototype.value= function() {
+         return '\n';
+     }
+
+     return {
+         clipboard: {
+             matchers: [
+                 ['BR',lineBreakMatcher]
+             ]
+         },
+         keyboard: {
+             bindings: {
+                 linebreak : {
+                     key: 13,
+                     shiftKey : true,
+                     handler : function (range, context) {
+                         var nextChar = this.quill.getText(range.index + 1, 1)
+                         var ee = this.quill.insertEmbed(range.index, 'break', true, 'user');
+                         if (nextChar.length == 0) {
+                             // second line break inserts only at the end of parent element
+                             var ee = this.quill.insertEmbed(range.index, 'break', true, 'user');
+                         }
+                         this.quill.setSelection(range.index + 1, Quill.sources.SILENT);
+                     }
+                 } // end Shift-Enter
+             },
+         }
+     }
+ }
+
+
  onMount(async () => {
+
+
      quill = new Quill(editor, {
          modules: {
-             toolbar: toolbarOptions
+             toolbar: toolbarOptions,
+             ...newlineFix()
          },
          theme: "snow",
          placeholder: "Type text here..."
      });     
+             
+             
      quill.on('text-change', function(delta) {
          dispatch('change',quill.root.innerHTML);
          value = quill.root.innerHTML;
      });
      
  });
-
+ 
  $: {
      quill && setContents(initialValue)
  }
-
+         
 </script>
 
 <div class="editor-wrapper">
