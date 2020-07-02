@@ -29,6 +29,7 @@ const byDomain = {
         {xpath:"//span[contains(@class, 'recipe-yield-time-label')]/text()[contains(.,'Time')]/parent::span/following-sibling::span",
          tag:'time'},
         //{selector:'.recipe-yield-value',tag:'yield'},
+        {selector:'.nutrition-container',tag:'ignore'},
         {selector:'.recipe-title',tag:'title'},
         {selector:'.tag-block a',tag:'category'},
         {selector:'.byline',tag:'source'},
@@ -37,7 +38,6 @@ const byDomain = {
         {selector:'.recipe-ingredients li',tag:'ingredient'},
         {selector:'.recipe-ingredients .ingredient-name',tag:'ingredientText'},
         {selector:'.recipe-ingredients .quantity',tag:'amount'},
-        {selector:'.nutrition-container',tag:'ignore'},
         {selector:'[itemprop="recipeInstructions"]',tag:'text',detail:'Instructions'},
         {selector:'.recipe-notes',tag:'footnote'},
         {selector:'.topnote',tag:'text'},
@@ -53,6 +53,10 @@ const byDomain = {
         //     selector : '.recipe-ingredient-group',
         //     tag:'ingredient-group'
         // },
+        {
+            selector : '#comment-bubble',
+            tag : 'ignore'
+        },
         {
             selector : '.recipe-ingredient-group__title',
             tag : 'inggroup'
