@@ -152,6 +152,26 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
 }
 
+function getTextFromChunk (chunk,context) {
+    let text = chunk.text;
+    if (chunk.children) {
+        chunk.children.forEach(
+            (child)=>{
+                if (context.chunkMap[child]) {
+                    let ch = context.chunkMap[child]
+                    if (ch.tag=='ignore') {
+                        console.log('Removing ignore text...',ch,ch.text,text);
+                        text = text.replace(ch.text,'');
+                        console.log('=>',text);
+                    }
+                }
+            }
+        );
+    }
+    return text;
+    
+}
+
 export function ignoreMatchingDescendants (chunk,context,{extraTagsToIgnore,ignoreAllTags}={}) {
     if (!chunk) {return}
     if (!chunk.tag) {return}
@@ -243,7 +263,7 @@ function handleText (chunk, context, recipe) {
 function handleTitle (chunk, context, recipe) {
     ignoreMatchingDescendants(chunk,context);
     if (!chunk.text) {return context && context.localContext}
-    let title = cleanupWhitespace(chunk.text)
+    let title = cleanupWhitespace(getTextFromChunk (chunk,context)) //chunk.text)
     if (!recipe.title) {
         recipe.title = title;
     }
