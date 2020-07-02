@@ -1,5 +1,6 @@
 <script>
  import Metadata from '../../common/RecDef.js';
+ import {IconButton} from '../../widgets/';
  export let name;
  export let detail;
  let hidden = false;
@@ -35,16 +36,56 @@
      wasActive = false
   }}
               
-              // Ugliness to get around iFrame limitations (can't get proper svelte styles into the iFrame, alas)
-              const styles = `
+
+</script>
+<div class="wrap" class:active class:hidden>
+    {#if active}
+        <div bind:this={editor} class="grid">
+            <select
+                bind:this={select}
+                          bind:value={name}            
+            >
+                {#each Metadata.importProps as prop}
+                    <option on:blur={maybeInactivate} value={prop.name}>
+                        {prop.label}
+                        {#if prop.name==name && prop.hasDetail && detail}
+                            : {detail}
+                        {/if}
+                    </option>
+                {/each}
+            </select>
+            <span>
+                <!-- <IconButton bare={true} icon="delete" on:blur={maybeInactivate} style="border:none;" on:click={removeTag}/> -->
+                <IconButton bare={true} icon="close" on:click={()=>active=false}/>
+            </span>
+            <!-- <button style="border:none;" on:click={()=>active=false}>&times;</button> -->
+            {#if name && Metadata.importPropsByName[name] && Metadata.importPropsByName[name].hasDetail}
+                <input on:blur={maybeInactivate} bind:value={detail}>
+            {:else}
+                <span>&nbsp;</span>
+            {/if}
+            
+
+        </div>
+    {:else}
+        <span
+            on:click={()=>active=true}
+                     class='label'
+        >{name} {#if detail && Metadata.importPropsByName[name] && Metadata.importPropsByName[name].hasDetail}: {detail}{/if}
+
+            <IconButton bare={true} small={true} icon="delete" on:click={removeTag}/>
+        </span>
+    {/if}
+</div>
+
 <style>
-  .label:hover { 
-     background-color: yellow;
-     font-weight:bold;
-  }
-  .label {
-   padding: 0.5em;
-  }
+ .label:hover { 
+              background-color: yellow;
+              font-weight:bold;
+              }
+ .label {
+     padding: 0.5em;
+ }
 
 
  .hidden {
@@ -56,7 +97,7 @@
      border-radius: 5px;
      border: 1px solid brown;
  }
-.wrap:focus-within {
+ .wrap:focus-within {
      border-width: 2px;
      min-height: 18px;
  }
@@ -86,50 +127,9 @@
      font-weight: bold;
      text-align: right;
  }
-.grid {
-   display: inline-grid;
-   grid-template-columns: auto auto;
-}
-
-</style>
-              `
-
-</script>
-<!-- THIS ELEMENT IS BROUGHT INTO AN IFRAME SO ALL STYLES MUST BE INLINED-->
-{@html styles}
-<div class="wrap" class:active class:hidden>
-    {#if active}
-        <div bind:this={editor} class="grid">
-            <select
-                bind:this={select}
-                          bind:value={name}            
-            >
-                {#each Metadata.importProps as prop}
-                    <option on:blur={maybeInactivate} value={prop.name}>
-                        {prop.label}
-                        {#if prop.name==name && prop.hasDetail && detail}
-                            : {detail}
-                        {/if}
-                    </option>
-                {/each}
-            </select>
-            <button on:blur={maybeInactivate} style="border:none;" on:click={removeTag}>Remove</button>
-            <!-- <button style="border:none;" on:click={()=>active=false}>&times;</button> -->
-            {#if name && Metadata.importPropsByName[name] && Metadata.importPropsByName[name].hasDetail}
-                <input on:blur={maybeInactivate} bind:value={detail}>
-            {:else}
-                <span>&nbsp;</span>
-            {/if}
-            <button on:click={()=>active=false}>(close)</button>
-
-        </div>
-    {:else}
-        <span
-            on:click={()=>active=true}
-                     class='label'
-        >{name} {#if detail && Metadata.importPropsByName[name] && Metadata.importPropsByName[name].hasDetail}: {detail}{/if}</span>
-    {/if}
-</div>
-
-<style>
+ .grid {
+     display: inline-grid;
+     grid-template-columns: auto auto;
+ }
+ 
 </style>
