@@ -141,12 +141,18 @@
 
 
 TODO:
-- Fix Mark User Not New (?)
+- Fix Mark User Not New (halfway)
+  -> get it to close dialog smoothly
 - Fix Log-In and Auto-Sync process (?)
 - Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
+- Tweak new recipe empty states
+- Fix new recipe not focusing
+- Fix empty/startup state
+- Create start/login page for chrome extension + app
 - Tweak layout on mobile.
 - Save "purchased" state of shopping list items 
-
+- Make syncing thing less annoying
+- Update routing so back buttons work to move you from e.g. recipe list to open recipe to shopping list
 
 
 
