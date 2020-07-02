@@ -1,5 +1,5 @@
 <script>
- 
+ import Frame from '../Frame.svelte';
  import tagger from './tagger.js';
  import ipsum from '../../common/mocks/ipsum.js'
  import RecDef from '../../common/RecDef.js';
@@ -12,6 +12,7 @@
  );
 
  let ref;
+ let showFrame
 </script>
 <div>
 
@@ -20,6 +21,8 @@
     <h3>
         Tag selection
     </h3>
+    <button on:click="{()=>showFrame=true}">Stick a frame on the page</button>
+    {#if showFrame}<Frame/>{/if}
     {#each RecDef.importProps as prop}
         <button
             on:click={()=>response=tagger.markupAndGetSelection(prop.name)}>
