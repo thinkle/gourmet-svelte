@@ -17,6 +17,7 @@
  let params = {};
  let keyboardUser;
  let containerScrolls = false;
+ let noLanding = false
  router('/',()=>{
      page = MainView;
      containerScrolls = false;
@@ -72,13 +73,28 @@
          params = {
 
          }
+         noLanding = true
          containerScrolls = true;
      });
 
      router('/demo/:demo',(ctx)=>{
          page = Demo
          params = ctx.params
+         noLanding = true
      });
+
+     router('/login/demo/:demo',(ctx)=>{
+         page = Demo
+         params = ctx.params
+         noLanding = false;
+     });
+
+     router('/login/demo',(ctx)=>{
+         page = Demo
+         params = ctx.params
+         noLanding = false;
+     });
+
      
      router.start();
      $: {
@@ -96,12 +112,13 @@
 </script>
 
 <div class:keyboardUser>
-    <Landing scrolls="{containerScrolls}">
-        <!-- <span slot="rightnav">
-             {#if page!==MainView}<a href="/">Recipe List</a>{/if}
-             </span> -->
+    {#if noLanding}
         <svelte:component this={page} {...params}/>
-    </Landing>
+    {:else}
+        <Landing scrolls="{containerScrolls}">
+            <svelte:component this={page} {...params}/>
+        </Landing>
+    {/if}
     <div style="position: fixed; z-index: 99; bottom: 2px; right: 250px; font-size: 8pt;">{$stamp}</div>
 </div>
 <svelte:window on:keyup={detectKeyboardUser} on:mousedown={detectMouseUser}/>
