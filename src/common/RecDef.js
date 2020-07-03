@@ -121,7 +121,7 @@ const Metadata = {
          empty:{url:''},
          testValue:[{url:''}],
          isNull:(v)=>!v||!v.url,
-         toHtml:(i)=>`<img width="${i.width||''}" src="${i.url}">`
+         toHtml:(i)=>`<img style="max-width:${i.width+'px'||''}" src="${i.url}">`
         },
         {name:'yields',
 	 label:'Yield',
