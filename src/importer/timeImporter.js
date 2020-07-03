@@ -13,7 +13,7 @@ export function handleTime (chunk, context, recipe) {
         amount.seconds = amount.amount * amount.unit;
         if (amount.pretext) {
             amount.name = titleCase(cleanupWhitespace(amount.pretext))
-        }
+        } 
         else {
             amount.name = 'Time'
         }
@@ -27,6 +27,13 @@ export function handleTime (chunk, context, recipe) {
         if (candidate) {
             amount.seconds = toSeconds(parse(candidate['dateTime']));
             amount.iso8601 = candidate['dateTime']
+        }
+        if (!amount.seconds) {
+            candidate = doc.querySelector('*[content]');
+            if (candidate) {
+                amount.seconds = toSeconds(parse(candidate['content']));
+                amount.iso8601 = candidate['content']
+            }
         }
     }
     if (chunk.detail) {
