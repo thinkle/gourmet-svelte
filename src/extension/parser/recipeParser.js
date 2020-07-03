@@ -212,6 +212,9 @@ function Parser (tagger) {
 }
 
 function sanityCheck (el, tag, parsedNodes) {
+    if (el.tagName=='META') {
+        return true; // meta is allowed!
+    }
     if (parsedNodes.indexOf(el)>-1) {
         // don't parse the same node twice
         return false
