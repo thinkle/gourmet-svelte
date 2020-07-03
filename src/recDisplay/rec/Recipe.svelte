@@ -5,14 +5,15 @@
  export let onChange=undefined;;
  export let onOpenSubRec=undefined;
  export let showShopping = true;
- export let editMode = false;
  export let editable = true;
  export let onEditToggle = undefined
  export let minPropWidth = 150;
 
  export function setEditMode (val) {
-     editMode = val;
+      editMode = val;
  }
+
+ let editMode = editOnOpen;
 
  import {getStyle,getColor} from './colors.js';
  
@@ -43,9 +44,12 @@
  // import deepcopy from 'deepcopy'; 
  import {deepcopy} from './libraries.js'; 
 
- $: { if (rec && !rec.title && editable) {editMode=true}}
+ $: { if (rec && !rec.title && editable) {
+      editMode=true
+      }
+    }
 
-                           let valid = false;
+                       let valid = false;
  $: {
      valid = isValid(rec);
  }
@@ -251,7 +255,9 @@
                                     icon="save"
                                     tooltip="Attempt to save?"
                                     busy="{$recipeState[rec.id].updating}"
-                                    on:click="{()=>recipeActions.updateRecipe(rec).then(editMode=false)}">
+                                    on:click="{()=>recipeActions.updateRecipe(rec).then(()=>{
+                                          editMode=false
+                                       })}">
                                 Save
                             </IconButton></li>
                         {:else if $recipeState[rec.id] && !$recipeState[rec.id].savedRemote}
