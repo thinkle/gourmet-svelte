@@ -117,7 +117,7 @@
                               $localRecipes[id]=rec;
                               }}"
                     onEditToggle="{(val)=>editOnOpen[id]=val}"
-                    editMode="{editOnOpen[id]}"
+                    editOnOpen="{editOnOpen[id]}"
                 />
             </LazyIf>
         {/each}
