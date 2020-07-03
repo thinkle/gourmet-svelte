@@ -2,6 +2,8 @@
 export const recipeSchemaSelector = '*[itemtype="https://schema.org/Recipe"],.cookbook-recipe';
 
 export const importer = [
+    {selector:'[itemprop="name"]',
+     tag:'title'},
     {selector:'.cookbook-name',
      tag:'title'},
     {selector:'.cookbook-author',
