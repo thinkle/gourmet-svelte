@@ -18,7 +18,7 @@
         ImageEntry,
         IconButton,
         StarRating} from '../../widgets/';
-import {lookupStores} from '../../stores/recipeStores.js';
+ import {lookupStores} from '../../stores/recipeStores.js';
 
  let modes = RecDef.EditModes
 
@@ -34,6 +34,10 @@ import {lookupStores} from '../../stores/recipeStores.js';
      [modes.STAR] : StarRating,
  }
 
+ import _ from 'lodash';
+ const onChangeDebounced = _.debounce(onChange,200);
+ const onChangeOrig = onChange;
+ onChange = onChangeDebounced;
 
  function handleChange (event) {
      //value = event.detail || event.target.value;
