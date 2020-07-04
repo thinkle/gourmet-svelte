@@ -1,5 +1,5 @@
 <script>
- import Metadata from '../../common/RecDef.js';
+ import Metadata from '../../common/RecDef.js'; 
  import {IconButton} from '../../widgets/';
  export let name;
  export let detail;
