@@ -19,7 +19,11 @@ export function handleTime (chunk, context, recipe) {
         }
     }
     amount.text = cleanupWhitespace(chunk.text)
-    if (chunk.html) {
+    if (chunk.iso8601) {
+        amount.seconds = toSeconds(parse(chunk.iso8601));
+        amount.iso8601 = chunk.iso8601
+    }
+    else if (chunk.html) {
         let duration
         // Try parsing time...
         let doc = new DOMParser().parseFromString(chunk.html,'text/html');
@@ -39,11 +43,15 @@ export function handleTime (chunk, context, recipe) {
     if (chunk.detail) {
         amount.name = chunk.detail
     }
+    if (amount.seconds && !amount.text || amount.text.match(/^\s+$/)) {
+        amount.text = Times.getDescription(amount.seconds)
+    }
     if (!recipe.times) {
         recipe.times = []
     }
     if (amount.seconds) {
         recipe.times.push(amount);
     }
+
 }
 
