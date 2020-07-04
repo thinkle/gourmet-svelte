@@ -2,7 +2,25 @@ import {parseAmount} from '../utils/numbers.js';
 import {parseUnit} from '../utils/unitAmounts.js';
 import {cleanupWhitespace} from '../utils/textUtils.js';
 import {handleChunk,ignoreMatchingDescendants} from './importer.js';
-import {mergeIngredients} from '../utils/ingredientUtils.js';
+
+/**
+Ok, some explanation is in order...
+Out ingredient methods get
+- chunk (what we're reading)
+- context (information about our parse tree + the localContext with whatever tag we think we are in)
+- recipe (the recipe object we're building)
+- parent (if we have a "parent" ingredient (i.e. if we are in a group)
+
+Yikes. Why this mess?
+
+If we want to handle an "amount", it could be the start of a new
+ingredient (no context), it could be the amount that goes with an
+ingredient (ingredient is already the context), etc.
+
+**/
+
+// given context/recipe/parent, tell me what ingredient to add to or give me
+// a new ingredient to add to and stick it on the ingredient list...
 function getIng (context, recipe, parent) {
     let ing    
     if (parent) {
@@ -124,11 +142,12 @@ export function handleIngredient (chunk, context, recipe) {
     return {} // no context -- we are are complete in ourselves... 
 }
 
+
+// Convenience method to try and parse out plain ingredients from a chunk.
+// We assume ingredients might be list items or table rows or new lines
 function getPlainIngredientsFromChunk (chunk) {
     if (chunk.html) {
-        console.log('Try parsing...',chunk.html);
         let doc = new DOMParser().parseFromString(chunk.html,'text/html');
-        // we'll use xpath to grab all non-nested list items
         let iterator = document.evaluate('//li[not(ul)] | //tr[not(td//tr)]',doc,null, XPathResult.ANY_TYPE, null );
         let result = iterator.iterateNext();
         let results = [];
@@ -137,161 +156,48 @@ function getPlainIngredientsFromChunk (chunk) {
             result = iterator.iterateNext();
         }
         if (results.length > 0) {
-            console.log("Using HTML-based results...")
             return results.map((node)=>node.textContent)
         }
     }
+    // fallback to newlines...
     return chunk.text && chunk.text.split(/\n+/) || []
 }
 
-export function handleIngredients (chunk, context, recipe) {
-    if (!chunk.text && !chunk.html) {return context && context.localContext}
-    // plain text-based handling, this is the simplest...
-    
-    let ings = getPlainIngredientsFromChunk(chunk)
-
-    ings.forEach(
+export function handleIngredients (chunk, context, recipe, parent) {
+    let text = chunk.text;
+    let html = chunk.html;
+    // crawl children recursively and remove from our text and html so they
+    // don't get re-parsed with automatic parsing...
+    if (chunk.children && chunk.children.length>0) {
+        for (let childId of chunk.children) {
+            let childChunk = context.chunkMap[childId];
+            if (childChunk) {
+                if (!text.match(childChunk.text)) {
+                    console.log('warning, child text not found in text :(',childChunk,chunk)
+                }
+                if (!html.match(childChunk.html)) {
+                    console.log('warning, child html not found in text :(',childChunk,chunk)
+                }
+                text = text.replace(childChunk.text,`\nHANDLE-[${childId}]\n`)
+                html = html.replace(childChunk.html,`\n<li>HANDLE-[${childId}]</li>\n`)
+            } else {
+                console.log('WARNING: NO CHILD CHUNK FOUND FOR ID ',childId);
+            }
+        }
+    }
+    let plainIngs = getPlainIngredientsFromChunk({text,html});
+    plainIngs.forEach(
         function (line) {
-            if (line.replace(/^\s+|\s+$/g)) {
+            if (line.match(/HANDLE-\[([^>]+)\]/)) {
+                let childId = line.match(/HANDLE-\[([^>]+)\]/)[1]
+                let childChunk = context.chunkMap[childId]
+                context.localContext = handleChunk(childChunk,context,recipe);
+            } else {
                 context.localContext = handleIngredient(line,context,recipe);
             }
         }
     );
-    // And now ignore everything else...
-    ignoreMatchingDescendants(
-        chunk,context,{
-            extraTagsToIgnore : [
-                'ingredient',
-                'ingredientText',
-                'amount',
-                'unit',
-                'ingredients',
-                'inggroup',
-            ],
-        });
-    return context.localContext
-    // Code below is the "right" way to do this which is broken so screw it...
-    // I'll leave this dead code here in case I return to fight another day...
-    let tempRec = {ingredients:[]}
-    let textContext = {
-        ...context,
-        ingredients : []
-    }    
-    chunk.text && chunk.text.split('\n').forEach(
-        function (line) {
-            if (line.replace(/^\s+|\s+$/g)) {
-                textContext.localContext = handleIngredient(line,textContext,tempRec);
-            }
-        }
-    );
-    let childrenContext = {
-        ...context,
-        ingredients : []
-    }
-    if (chunk.children) {
-        // process children...
-        for (let childId of chunk.children) {
-            let childChunk = context.chunkMap[childId];
-            if (childChunk) {
-                if (childChunk && childChunk.text && childChunk.text.replace(/\s/g)==chunk.text.replace(/\s/g)) {
-                    // Ignore total duplicate
-                    childChunk.handled = true;
-                } else {
-                    handleChunk(childChunk,childrenContext,tempRec);
-                }
-            }
-        }
-    }
-
-    // Now there are *three* spots our ingredients could be: our fake recipe (if we have a group or
-    // something that would get pushed to the top level by our algorithm), or one of our two ingredient
-    // lists. If we're double or triple tagged, we'll have to reconcile to remove duplicates...
-    let newIngredients = mergeIngredientLists(
-        [
-            textContext.ingredients,
-            childrenContext.ingredients,
-            tempRec.ingredients
-        ]
-    );
-    let ingredients = context.ingredients || recipe.ingredients;
-    for (let i of newIngredients) {
-        ingredients.push(i);
-    }
-    return context;
-}
-
-function mergeIngredientLists (lists) {
-    if (lists.length==0) {
-        return []
-    } else if (lists.length==1) {
-        return lists[0]
-    } else {
-        let outputList = [...lists[0]]
-        for (let lst of lists.slice(1)) {
-            outputList = mergeIntoList(outputList,lst);
-        }
-        return outputList
-    }
-}
-
-function mergeIntoList (oldList, newList) {
-    oldList = oldList.filter((i)=>i&&i.text)
-    let mergedList = [...oldList]
-    for (let item of newList) {
-        let merged = false;
-        if (!item.text) {
-            // a lie, we're skipping this. It means we likely e.g. marked up
-            // an amount on its own and ended up with a text-less ingredient
-            // and no way to know who the amount belongs to, so we toss it
-            merged = true
-        } else {
-            let text = item.text.replace(/\s/g,'')
-            for (let oldItem of oldList) {
-                let oldText = oldItem.text.replace(/\s/g,'');
-                if (text.match(oldText) || oldText.match(text)) {
-                    mergeIngredients(text,oldText);
-                    merged = true;
-                }
-            }
-        }
-        if (!merged) {
-            mergedList.push(item)
-        }
-    }
-    return mergedList;
-}
-
-
-function handlePlainIngredient (chunk) {
-    // fixme :)
-    let text = chunk.text || chunk;
-    if (!text) {return}
-    let amount = parseAmount(text);
-    if (amount.posttext && amount.pretext) {
-        let main,extra,utext;
-        if (amount.posttext.length > amount.pretext.length) {
-            main = amount.posttext; extra = amount.pretext;
-        }
-        if (amount.posttext.length > amount.pretext.length) {
-            extra = amount.posttext; main = amount.pretext;
-        }
-        if (!extra || extra.replace(/\W+/).length == 0) {
-            utext = main;
-        } else {
-            utext = main + ' - ' + extra;
-        }
-    }
-    let unitAndText = parseUnit(amount.posttext||amount.pretext);
-
-    delete amount.posttext;
-    delete amount.pretext;
-    amount.unit = unitAndText.unit
-    amount.standardUnit = unitAndText.standardUnit
-    return {
-        originalText:text,
-        amount,
-        text:unitAndText.text,
-    }
+    return context
 }
 
 export function handleIngredientText (chunk, context, recipe, parent) {
@@ -316,7 +222,7 @@ export function handleIngredientGroup (chunk, context, recipe) {
     recipe.ingredients.push(ing);
     context.ingredients = ing.ingredients;
     context.localContext = {}
-    if (chunk.children) {
+    if (chunk.children && chunk.children.length > 0) {
         for (let childID of chunk.children) {
             let childChunk = context.chunkMap[childID];
             if (childChunk) {
