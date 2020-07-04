@@ -46,7 +46,8 @@ var Tagger = function () {
             id:id,
             html:content&&getHtmlFromDocumentFragment(content)||el.outerHTML,
             tag:tagname,
-            text:el.textContent,
+            text:el.innerText||el.textContent,
+            fullText:el.textContent,
             detail,
             address : nodeAddress
         }
