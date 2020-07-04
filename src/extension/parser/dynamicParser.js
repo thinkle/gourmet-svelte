@@ -18,6 +18,10 @@ function getClasses () {
 // Order matters here: once a class is matched, it is not matched a second time
 let generatorDef = [
     {
+        classMatcher : /\bingr(edient).*gro?u?p/i,
+        tag : 'inggroup'
+    },
+    {
         classMatcher : /\bingr(edient).*amo?u?n??t/i,
         tag : 'amount'
     },
@@ -52,6 +56,10 @@ let generatorDef = [
     {
         classMatcher : /time/,
         tag : 'time'
+    },
+    {
+        classMatcher : /rec.*title/i,
+        tag : 'title',
     },
     {
         classMatcher : /rec(ipe)?/,
