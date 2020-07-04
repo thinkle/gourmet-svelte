@@ -89,9 +89,24 @@ export function parseChunks (parsedChunks,context={}) {
     for (let chunk of parsedChunks) {
         context.localContext = handleChunk(chunk,context,recipe);
     }
+    recipe.ingredients = removeEmptyIngredients(recipe.ingredients);
     addSourceIfMissing(recipe,context);
 
     return recipe
+}
+
+function removeEmptyIngredients (ingredients) {
+    return ingredients.filter((i,n)=>{
+        if (i.ingredients && i.ingredients.length > 0) {
+            i.ingredients = removeEmptyIngredients(i.ingredients);
+            return true
+        } else if (!i.text || i.text.match(/^\s*(Ingredients)?\s*$/i)) {
+            return false;
+        } else {
+            return true
+        }
+    });
+    
 }
 
 
