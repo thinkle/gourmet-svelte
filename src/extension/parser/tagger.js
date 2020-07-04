@@ -122,7 +122,7 @@ var Tagger = function () {
         );
         contentClearOne.receive((id)=>clear(id));
         contentClearMany.receive(
-            (ids)=>ids.map((id)=>clear(id))
+            (ids)=>{ids.map((id)=>clear(id));return false}
         );
     }
 
