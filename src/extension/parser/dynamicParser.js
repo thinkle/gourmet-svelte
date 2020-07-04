@@ -83,7 +83,10 @@ export function generateParser (defs=generatorDef) {
     let classes = getClasses();
     console.log('Generating parsers for ',classes.length,'possible classes');
     let alreadyMatched = [];
-    let parsers = [];
+    let parsers = [
+        {selector:'script[type="application/ld+json"]',
+         tag:'ld+json'}
+    ];
     for (let def of defs) {
         generateParseItem(def)
     }
