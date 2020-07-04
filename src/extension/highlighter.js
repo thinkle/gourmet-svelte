@@ -37,13 +37,16 @@ contentSetIngredients.receive(
 );
 
 export async function highlight (ingredients) {
-    await crawlAndHighlight(document.body,ingredients);
+    return await crawlAndHighlight(document.body,ingredients);
 }
 
 export async function crawlAndHighlight (node,ingredients) { // async to not block...
+    if (node && node.tagName && ['SCRIPT','STYLE','META','HEAD'].includes(node.tagName)) {
+        return false;
+    }
     if (node.children) {
         for (let child of node.children) {
-            await crawlAndHighlight(child,ingredients);
+            return await crawlAndHighlight(child,ingredients);
         }
     }
     if (node.innerHTML == node.innerText) {
