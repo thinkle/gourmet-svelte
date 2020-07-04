@@ -173,10 +173,10 @@ export function handleIngredients (chunk, context, recipe, parent) {
             let childChunk = context.chunkMap[childId];
             if (childChunk) {
                 if (!text.match(childChunk.text)) {
-                    console.log('warning, child text not found in text :(',childChunk,chunk)
+                    //console.log('warning, child text not found in text :(',childChunk.text,'!in',chunk.text)
                 }
                 if (!html.match(childChunk.html)) {
-                    console.log('warning, child html not found in text :(',childChunk,chunk)
+                    //console.log('warning, child html not found in text :(',childChunk.html,'!in',chunk.html)
                 }
                 text = text.replace(childChunk.text,`\nHANDLE-[${childId}]\n`)
                 html = html.replace(childChunk.html,`\n<li>HANDLE-[${childId}]</li>\n`)
@@ -198,6 +198,38 @@ export function handleIngredients (chunk, context, recipe, parent) {
         }
     );
     return context
+}
+
+function handlePlainIngredient (chunk) {
+    // fixme :)
+    let text = chunk.text || chunk;
+    if (!text) {return}
+    let amount = parseAmount(text);
+    if (amount.posttext && amount.pretext) {
+        let main,extra,utext;
+        if (amount.posttext.length > amount.pretext.length) {
+            main = amount.posttext; extra = amount.pretext;
+        }
+        if (amount.posttext.length > amount.pretext.length) {
+            extra = amount.posttext; main = amount.pretext;
+        }
+        if (!extra || extra.replace(/\W+/).length == 0) {
+            utext = main;
+        } else {
+            utext = main + ' - ' + extra;
+        }
+    }
+    let unitAndText = parseUnit(amount.posttext||amount.pretext);
+
+    delete amount.posttext;
+    delete amount.pretext;
+    amount.unit = unitAndText.unit
+    amount.standardUnit = unitAndText.standardUnit
+    return {
+        originalText:text,
+        amount,
+        text:unitAndText.text,
+    }
 }
 
 export function handleIngredientText (chunk, context, recipe, parent) {
