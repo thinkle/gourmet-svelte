@@ -2,6 +2,7 @@ import RecDef from '../common/RecDef.js'
 import {parseAmount} from '../utils/numbers.js';
 import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup,handleIngredients} from './ingredientImporter.js';
+import {handleLDJson} from './jsonImporter.js'
 import {handleTime} from './timeImporter.js'
 
 import sanitizeHtml from 'sanitize-html';
@@ -72,7 +73,7 @@ export function parseData (parseData) {
 
 export function parseChunks (parsedChunks,context={}) {
     // We get an array of "parsed" chunks...
-    const recipe = {
+    let recipe = {
         ingredients : [],
         images : [],
     }
@@ -89,10 +90,88 @@ export function parseChunks (parsedChunks,context={}) {
     for (let chunk of parsedChunks) {
         context.localContext = handleChunk(chunk,context,recipe);
     }
+    if (context.separateImports) {
+        recipe = mergeRecipes([recipe,...context.separateImports]);
+    }
     recipe.ingredients = removeEmptyIngredients(recipe.ingredients);
     addSourceIfMissing(recipe,context);
-
     return recipe
+}
+
+function mergeRecipes (recipes) {
+    // pretty low-tech here...
+    if (recipes.length==1) {
+        return recipes[0];
+    } else {
+        let rec = recipes.shift()
+        while (recipes.length>0) {
+            let next = recipes.shift();
+            if (next) {
+                rec = mergeOne(rec,next)
+            }
+        }
+        return rec;
+    }
+}
+
+function mergeOne (orig, other) {
+    for (let {name} of RecDef.titleProps) {
+        if (!orig[name] && other[name]) {
+            orig[name] = other[name];
+        }
+    }
+    for (let {name,array,match} of RecDef.recProps) {
+        if (other[name]) {
+            if (!orig[name]) {
+                orig[name] = other[name];
+            }
+            else if (array) {
+                orig[name] = mergeArrayVals(
+                    orig[name],other[name],match
+                )
+            }
+        }
+    }
+    orig.ingredients = mergeIngredients(orig.ingredients,
+                                        other.ingredients);
+    return orig
+}
+
+function mergeIngredients (ii1, ii2) {
+    // FIXME
+    // Doing this properly is really a pain... so we'll do it
+    // simply for now...
+    if (!ii1 || ii1.length==0) {return ii2}
+    if (!ii2 || ii2.length==0) {return ii1}
+    // Ok -- if we have a conflict... let's take the one that has groups...
+    if (ii1.filter((i)=>i.ingredients&&i.ingredients.length).length) {
+        return ii1
+    }
+    if (ii2.filter((i)=>i.ingredients&&i.ingredients.length).length) {
+        return ii2
+    }
+    // If neither has groups, let's take the longest...
+    if (ii1.length >= ii2.length) {
+        return ii1
+    } else {
+        return ii2
+    }
+}
+
+function mergeArrayVals (a1, a2, matcher) {
+    for (let v2 of a2) {
+        let match = a1.find((v1)=>matcher(v2,v1));
+        if (match) {
+            Object.assign(
+                match,
+                v2,
+                match // original values take precedence in a conflict...
+            )
+        } else {
+            a1.push(v2);
+        }
+    }
+    return a1;
 }
 
 function removeEmptyIngredients (ingredients) {
@@ -116,6 +195,9 @@ export function handleChunk (chunk, context, recipe, parent) {
     }
     else {
         chunk.handled = true; // only run once per chunk
+    }
+    if (chunk.tag=='ld+json') {
+        handleLDJson(chunk,context,recipe)
     }
     if (!chunk.text && !chunk.html) {
         console.log('Weird, empty chunk? IGNORING',chunk);
@@ -175,9 +257,7 @@ function getTextFromChunk (chunk,context) {
                 if (context.chunkMap[child]) {
                     let ch = context.chunkMap[child]
                     if (ch.tag=='ignore') {
-                        console.log('Removing ignore text...',ch,ch.text,text);
                         text = text.replace(ch.text,'');
-                        console.log('=>',text);
                     }
                 }
             }
@@ -267,12 +347,20 @@ function handleText (chunk, context, recipe) {
     } else {
         header = getHeader(chunk); // may modify HTML
     }
-    recipe.text.push({
-        body:sanitizeHtml(chunk.html,
-                          {allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']}
-                         ),
-        header
-    });
+    if (chunk.html) {
+        recipe.text.push({
+            body:sanitizeHtml(chunk.html,
+                              {allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']}
+                             ),
+            header
+        });
+    } else {
+        recipe.text.push({
+            body:chunk.text,
+            header:''
+        }
+                        );
+    }
 }
 
 function handleTitle (chunk, context, recipe) {
