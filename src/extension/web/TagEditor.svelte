@@ -34,15 +34,24 @@
  }
 
  async function removeItem (item) {
-     let result = await backgroundClearOne.send(item.id)
-     console.log('Removed item',item,'result:',result);
+     try {
+         let result = await backgroundClearOne.send(item.id)
+         console.log('Removed item',item,'result:',result);
+     } catch (err) {
+         console.log('Error in removeItem',item);
+         console.log(err)
+     }
  }
 
  async function removeRule (ruleKey) {
      // In the future, we should tell the background to remove the rule set...
      for (let item of rules[ruleKey]) {
          console.log('Removing ...',item.id)
-         await backgroundClearMany.send(rules[ruleKey].map((item)=>item.id));
+         try {
+             await backgroundClearMany.send(rules[ruleKey].map((item)=>item.id));
+         } catch (err) {
+             console.log('Error in backgroundClearMany: ',item,err);
+         }
          console.log('Remove next...')
      }
  }
