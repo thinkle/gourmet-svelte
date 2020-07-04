@@ -69,6 +69,9 @@ function validate (obj, expected) {
 function Validator (name,f) {
     const v =  function (v) {
         if (!f(v)) {
+            console.log('VALIDATION ERROR @');
+            console.trace()
+            console.log('END VALIDATION TRACE');
             console.log('Invalid value:',v,'according to validator',name)
             throw Error(`Invalid value: ${JSON.stringify(v)} according to validator ${name}`)
         }
