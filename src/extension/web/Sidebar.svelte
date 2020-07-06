@@ -97,7 +97,18 @@
  }
 
 
- $: recipe = parsed && parseData(parsed);
+ $: setRecipe(parsed)
+
+ let error
+ function setRecipe (parsed) {
+     error = undefined
+     try {
+         recipe = parsed && parseData(parsed);
+     } catch (err) {
+         console.log('Error parsing recipe',parsed);
+         error = err;
+     }
+ }
 
  let tagMode = false;
  let alreadyAutoTagged = false;
@@ -133,9 +144,12 @@
     {/if}
     {#if tagMode}
         <Tagger {selectionActive} parsed={parsed}/>
-    {:else}
+    {:else if recipe}
         <Views recipe={recipe}/>
         <JsonDebug data="{recipe}"/>
+    {:else if error}
+        Error parsing recipe :(
+        <JsonDebug data="{error}"/>
     {/if}
     <JsonDebug data="{parsed}"/>
     <spacer></spacer>
