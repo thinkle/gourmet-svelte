@@ -4,7 +4,7 @@ import {titleCase,cleanupWhitespace} from '../utils/textUtils.js';
 import {handleIngredientAmount,handleIngredientUnit,handleIngredient,handleIngredientText,handleIngredientGroup,handleIngredients} from './ingredientImporter.js';
 import {handleLDJson} from './jsonImporter.js'
 import {handleTime} from './timeImporter.js'
-
+import deepcopy from 'deepcopy';
 import sanitizeHtml from 'sanitize-html';
 
 export function preprocessChunks (parsedChunks, context) {
@@ -91,7 +91,9 @@ export function parseChunks (parsedChunks,context={}) {
         context.localContext = handleChunk(chunk,context,recipe);
     }
     if (context.separateImports) {
+        let originalRecipe = deepcopy(recipe);
         recipe = mergeRecipes([recipe,...context.separateImports]);
+        recipe.alternatives = [deepcopy(recipe),originalRecipe,...context.separateImports]
     }
     recipe.ingredients = removeEmptyIngredients(recipe.ingredients);
     addSourceIfMissing(recipe,context);
@@ -138,6 +140,10 @@ function mergeOne (orig, other) {
 }
 
 function mergeIngredients (ii1, ii2) {
+    ii1 = removeEmptyIngredients(ii1)
+    ii2 = removeEmptyIngredients(ii2)
+    console.log('MERGE OPTION 1',ii1)
+    console.log('MERGE OPTION 2',ii2)
     // FIXME
     // Doing this properly is really a pain... so we'll do it
     // simply for now...
@@ -151,6 +157,13 @@ function mergeIngredients (ii1, ii2) {
         return ii2
     }
     // If neither has groups, let's take the longest...
+    let i1amounts = ii1.filter((i)=>i.amount&&i.amount.amount).length 
+    let i2amounts = ii2.filter((i)=>i.amount&&i.amount.amount).length
+    if (i1amounts > i2amounts) {
+        return ii1;
+    } else if (i2amounts > i1amounts) {
+        return ii2;
+    }
     if (ii1.length >= ii2.length) {
         return ii1
     } else {
@@ -412,7 +425,7 @@ function addSourceIfMissing (recipe, context) {
         let alreadyHaveUrl = false;
         let baseContext = context.url.replace(/https?:/,'')
         for (let source of recipe.sources) {
-            if (source.url.replace(/https?:/,'')==baseContext) {
+            if (source.url && source.url.replace(/https?:/,'')==baseContext) {
                 alreadyHaveUrl = true;
             }
         }
