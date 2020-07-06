@@ -16,12 +16,32 @@
  function doSaveRecipe () {
      saving = recipeActions.createRecipe(recipe);    
  }
+ 
+ function selectVariant (event) {
+     console.log('Select',event.target.value);
+     let oldRecipe = recipe;
+     recipe = recipe.alternatives[event.target.value]
+     recipe.alternatives = oldRecipe.alternatives;
+     console.log('Changed to',recipe,'from',oldRecipe);
+ }
+ let variantNames = {
+     0 : 'Merged',
+     1 : 'By tag',
+     2 : 'JSON',
+ }
 
 </script>
 <Tabs sticky="{true}" top="2.2em">
     <Tab active="{mode=='summary'}" on:click="{()=>{mode='summary'}}">Summary</Tab>
     <Tab active="{mode=='full'}" on:click="{()=>{mode='full'}}">Whole Recipe</Tab>
     <Tab active="{mode=='save'}" on:click="{()=>{mode='save'}}"><span class="important">Save</span></Tab>
+    {#if recipe.alternatives}
+        <select on:change="{selectVariant}">
+            {#each recipe.alternatives as variant,n}
+                <option value="{n}">{variantNames[n]||n+1}</option>
+            {/each}
+        </select>
+    {/if}
 </Tabs>
 {#if mode=='full' && recipe}
     <Recipe editable={false} rec={recipe} showShopping="{false}" />
@@ -47,5 +67,10 @@
 <style>
  .important {
      color: #444;
+ }
+ select {
+     margin-right: 1em;
+     margin-left: auto;
+     border: none;
  }
 </style>
