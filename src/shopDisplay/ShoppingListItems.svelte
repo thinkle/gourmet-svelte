@@ -1,5 +1,6 @@
 <script>
  export let items
+
  import {flip} from 'svelte/animate';
  import {JsonDebug,
         Button,
@@ -83,6 +84,7 @@
  
  
  let animating
+ 
 
  onMount(
      ()=>{
@@ -108,7 +110,10 @@
 
 <table>
     {#each shoppingItems as item (item.item)}
-        <tbody animate:maybeFlip in:receive|local="{{key:item.item}}" out:send|local="{{key:item.item}}">
+        <tbody
+            animate:maybeFlip="{{duration:300}}"
+            in:receive|local="{{key:item.item}}"
+            out:send|local="{{key:item.item}}">
             <ShoppingListItem {showSubItems} {item}/>
         </tbody>
     {:else}
