@@ -37,7 +37,15 @@ function handleLDObj (json, context) {
             recipe.sources.push({url:json.url})
         }
         if (json.author) {
-            recipe.sources = [...recipe.sources,...json.author]
+            if (Array.isArray(json.author)) {
+                recipe.sources = [...recipe.sources,...json.author]
+            } else if (typeof json.author === 'string') {
+                recipe.sources = [...recipe.sources,{name:json.author}]
+            } else if (typeof json.author === 'object' && json.author.name) {
+                recipe.sources.push(json.author)
+            } else {
+                console.log('WARNING: UNRECOGNIZED JSON AUTHOR ',json.author);
+            }
         }
         if (json.recipeCuisine) {
             recipe.categories = [...recipe.categories,{name:json.recipeCuisine,type:'cuisine'}]
@@ -101,7 +109,13 @@ function handleLDObj (json, context) {
             }
         }
         if (json.image) {
-            recipe.images = [...recipe.images,json.image]
+            if (json.image.url) {
+                recipe.images = [...recipe.images,json.image]
+            }
+            else if (typeof json.image=='string') {
+                recipe.images = [...recipe.images,{url:json.image}]
+            }
+
         }
     }
     return context
