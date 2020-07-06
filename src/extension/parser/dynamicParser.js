@@ -26,6 +26,10 @@ let generatorDef = [
         tag : 'amount'
     },
     {
+        classMatcher : /\bingr(edient).*q(uanti)?ty/i,
+        tag: 'amount'
+    },
+    {
         classMatcher : /\bingr(edient).*uni?t/i,
         tag : 'unit'
     },
