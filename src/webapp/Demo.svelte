@@ -34,7 +34,6 @@
  div {
      overflow-y: scroll;
      height: 100vh;
-     width: 100vw;
      overflow-x: scroll;
  }
 </style>
