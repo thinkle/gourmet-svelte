@@ -46,8 +46,11 @@
      scrollingElement = scrollparent(node);
  }
  let recipeGetter
- function getMore () {
-     recipeGetter && recipeGetter.more();
+ let fetchedAll = false;
+ async function getMore () {
+     if (recipeGetter && !fetchedAll) {
+         fetchedAll = await recipeGetter.more();
+     }
  }
 
  
@@ -62,6 +65,7 @@
  let lastSearch;
  
  async  function getRecipes (page=0) {
+     fetchedAll = false;
      recipeGetter = await recipeActions.getInfiniteRecipes({
          fields:['title','categories','sources','images'],
          limit,
@@ -296,7 +300,7 @@
                 {#if $connected}
                     <IconButton
                         icon="add"
-                        on:click="{async ()=>onRecipeClick(await recipeActions.createRecipe().id)}">
+                        on:click="{()=>recipeActions.createRecipe().then((r)=>onRecipeClick(id))}">
                         Create a Recipe?
                     </IconButton>
                 {:else}
@@ -311,17 +315,43 @@
                 </div>
             </div>
         {/each}
-        {#each [1,2,3] as i}
-            <div class="card filler">
-                <RecCard size="{size}" rec="{{}}"
-                >
+        {#if $recipePage.length}
+            <div class="card" >
+                <RecCard size="{size}">
+                    <div class="center">
+                        {#if $recipeActionGeneralState.querying}
+                            <p>Fetching more
+                                {#if search}
+                                    for &ldquo;{search}&rdquo;
+                                {/if}
+                            </p>
+                        {:else if fetchedAll}
+                            {#if search}
+                                <p>That's all the results we have for &ldquo;{search}&rdquo;</p>
+                            {:else}
+                                <p>That's all folks!</p>
+                            {/if}
+                        {:else}
+                            <p>Keep scrolling for more...</p>
+                        {/if}
+                    </div>
                 </RecCard>
             </div>
-        {/each}
+            {#each [1,2,3] as i}
+                <div class="card filler">
+                    <RecCard size="{size}" rec="{{}}"
+                    >
+                    </RecCard>
+                </div>
+            {/each}
+        {/if}
     </div>
-    {$recipePage.length} IDs: <JsonDebug data={$recipePage}/>
+    {#if DEV}{$recipePage.length} IDs: <JsonDebug data={$recipePage}/>{/if}
 </FullHeight>
 <style>
+ .center {
+     margin: auto;
+ }
  .card.filler {
      visibility: hidden;
  }
