@@ -149,6 +149,7 @@ export const recipeActions = {
         setStoreProp(actionState,'querying',false);
         return {
             count:response.count,
+            done:response.last,
             async more () {
                 setStoreProp(actionState,'querying',{query,fields,limit,sort,page:response.nextPage});
                 response = await api.getRecipes({query,fields,limit,sort,page:response.nextPage})
@@ -161,6 +162,7 @@ export const recipeActions = {
                 );                
                 setStoreProp(actionState,'querying',false);
                 if (response.last) {
+                    this.done = true;
                     // return true to indicate we are done!
                     return true;
                 }
