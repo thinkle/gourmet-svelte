@@ -65,19 +65,21 @@ function generateContrast (c) {
     
 
 export function getColor (recipe) {
-     for (let {matcher,color} of wordColors) {
-         if (recipe && recipe.title && recipe.title.match(matcher)) {
-             return color
-         } else if (recipe && recipe.categories && recipe.categories.find((c)=>c.name && c.name.match(matcher))) {
-             return color;
-         }
-     }
-     // generic...
-     return {
-         bg: '#AFD2E9',
-         fg: '#121234'
-     }
- }
+    if (recipe) {
+        for (let {matcher,color} of wordColors) {
+            if (recipe && recipe.title && recipe.title.match(matcher)) {
+                return color
+            } else if (recipe && recipe.categories && recipe.categories.find((c)=>c.name && c.name.match(matcher))) {
+                return color;
+            }
+        }
+    }
+    // generic...
+    return {
+        bg: '#AFD2E9',
+        fg: '#121234'
+    }
+}
 
 export function getStyle (recipe, otherStyle='') {
     let color = getColor(recipe);
