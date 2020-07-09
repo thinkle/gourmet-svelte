@@ -42,7 +42,7 @@ let color
      {matcher:/thai/i, color: {bg:'#fff194',fg:'#db5800'}}, // red/orange
      {matcher:/china|chinese|asian/i, color: {bg:'#c51015',fg:'#F8D803'}}, // red/orange
      {matcher:/french|france/i, color: {bg:'#456990',fg:'#ffc501'}}, // queen blue
-     {matcher:/mexic/,color:{bg:'#a55409',fg:'#ffe294'}},     
+     {matcher:/mexic/i,color:{bg:'#a55409',fg:'#ffe294'}},     
      {matcher:/spanish|spain/i, color: {bg:'#FED76A',fg:'#6A1410'}}, 
      
  ]
