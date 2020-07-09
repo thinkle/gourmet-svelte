@@ -134,13 +134,14 @@
 
 <Bar growLeft="{true}"> 
     <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
-        Search: <PlainInput bind:value={searchInput}/>
+        <span style="align-self: flex-start" >Search:</span>
+        <PlainInput bind:value={searchInput}/>
         <!-- Debug for when infinite scroll goes wonky  -->
         <!-- <Button on:click={getMore}>M</Button> -->
         <span width="30px">
             {#if $recipeActionGeneralState.querying}<SearchProgress/>{/if}
         </span>
-        <NavActions>
+        <NavActions menuProps="{{icon:"more_vert",anchorRight:true}}">
             <li>
                 <IconButton
                     icon="sort_by_alpha"
@@ -484,7 +485,6 @@
  }
  .count {
      font-size: var(--small);
-     width: 12rem;
      margin-left: 1em;
  }
  .searchBar.searching {
