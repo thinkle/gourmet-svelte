@@ -150,7 +150,7 @@ export const recipeActions = {
         return {
             count:response.count,
             async more () {
-                setStoreProp(actionState,'querying',{query,fields,limit,sort,page:response.nextPage});                
+                setStoreProp(actionState,'querying',{query,fields,limit,sort,page:response.nextPage});
                 response = await api.getRecipes({query,fields,limit,sort,page:response.nextPage})
                 setStoredRecs(response.result);
                 activePage.update(
@@ -158,9 +158,12 @@ export const recipeActions = {
                         page = [...new Set([...page,...response.result.map((i)=>i.id)])];
                         return page
                     }
-                );
-                
+                );                
                 setStoreProp(actionState,'querying',false);
+                if (response.last) {
+                    // return true to indicate we are done!
+                    return true;
+                }
             }
         }
     },
