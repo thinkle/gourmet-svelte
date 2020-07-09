@@ -1,10 +1,10 @@
 <script>
- export let rec
+ export let rec=undefined
  export let hideCheck = false;
  export let checked=undefined
  export let onClick=undefined
  export let nocolor=false
- $: thumb = rec.images && rec.images.length > 0 && rec.images[0];
+ $: thumb = rec && rec.images && rec.images.length > 0 && rec.images[0];
  import RecDef from '../../common/RecDef.js';
  import RecPropDisplay from '../props/RecPropDisplay.svelte';
  import {Button,Checkbox,OneLiner} from '../../widgets/'
@@ -12,7 +12,8 @@
  import {getColor} from './colors.js';
 
  $: color = !nocolor && getColor(rec);
-
+ let placeholder
+ $: placeholder = !rec;
 
 </script>
 <article
@@ -22,54 +23,57 @@
     class:lg="{size=='lg'}"
     class:xl="{size=='xl'}"
     class:hasImage="{!!thumb}" style="{color&&`--accent-bg: ${color.bg}; --accent-fg: ${color.fg};`}">
-    <div class="topbg"></div>
-    <div class="bottombg"></div>
-    <h2 class:withCheck="{!thumb && !hideCheck}">
-        {#each RecDef.titleProps as titleProp}
-            <span
-                on:click="{()=>onClick({rec,title:rec[titleProp.name],target:'title'})}"
-            >{rec[titleProp.name]||titleProp.nullValueText}</span>
-        {/each}
-        {#if !thumb && !hideCheck}
-            <div class="floatingCheck">
-                <Checkbox bind:checked="{checked}" on:change color="white" />
+    {#if placeholder}
+        <div class="fillall"> <slot/></div>
+    {:else}
+        <div class="topbg"></div>
+        <div class="bottombg"></div>
+        <h2 class:withCheck="{!thumb && !hideCheck}">
+            {#each RecDef.titleProps as titleProp}
+                <span
+                    on:click="{()=>onClick({rec,title:rec[titleProp.name],target:'title'})}"
+                >{rec[titleProp.name]||titleProp.nullValueText}</span>
+            {/each}
+            {#if !thumb && !hideCheck}
+                <div class="floatingCheck">
+                    <Checkbox bind:checked="{checked}" on:change color="white" />
+                </div>
+            {/if}
+        </h2>
+        {#if thumb}
+            <div class='image' >
+                <img src={thumb.url} alt={thumb.alt||rec.title}/>
+                <!-- Forget the thumbnails for now -->
             </div>
+            {#if !hideCheck}
+                <div class="check">
+                    <Checkbox bind:checked="{checked}" on:change color="{color.fg}" />
+                </div>
+            {/if}
         {/if}
-    </h2>
-    {#if thumb}
-        <div class='image' >
-            <img src={thumb.url} alt={thumb.alt||rec.title}/>
-            <!-- Forget the thumbnails for now -->
+        <div class="info" >
+            {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
+                <div class="propBox">
+                    <OneLiner bg="var(--light-bg)" fg="var(--light-fg)">
+                        <RecPropDisplay 
+                            clickable="{true}"
+                            onClick="{onClick}"
+                            prop="{prop}"
+                            value="{rec[prop.name]}"
+                        />
+                    </OneLiner>
+                </div>
+            {/each}        
         </div>
-        {#if !hideCheck}
-            <div class="check">
-                <Checkbox bind:checked="{checked}" on:change color="{color.fg}" />
-            </div>
-        {/if}
+        
+        <div class="left">
+            <slot name="left"/>
+        </div>
+
+        <div class="right">
+            <slot name="right"/>
+        </div>
     {/if}
-    <div class="info" >
-        {#each RecDef.recProps.filter((p)=>p.summaryView) as prop}
-            <div class="propBox">
-                <OneLiner bg="var(--light-bg)" fg="var(--light-fg)">
-                    <RecPropDisplay 
-                        clickable="{true}"
-                        onClick="{onClick}"
-                        prop="{prop}"
-                        value="{rec[prop.name]}"
-                    />
-                </OneLiner>
-            </div>
-        {/each}        
-    </div>
-    
-    <div class="left">
-        <slot name="left"/>
-    </div>
-
-    <div class="right">
-        <slot name="right"/>
-    </div>
-
 </article>
 
 
@@ -262,6 +266,11 @@
      align-self: stretch;
      justify-self: center;
  }
-
+ .fillall {
+     grid-column-start: 1;
+     grid-column-end: 4;
+     grid-row-start: 1;
+     grid-row-end: 5;
+ }
 
 </style>
