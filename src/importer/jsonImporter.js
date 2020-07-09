@@ -48,24 +48,56 @@ function handleLDObj (json, context) {
             }
         }
         if (json.recipeCuisine) {
-            recipe.categories = [...recipe.categories,{name:json.recipeCuisine,type:'cuisine'}]
+            if (typeof json.recipeCuisine == 'string') {
+                recipe.categories = [...recipe.categories,{name:json.recipeCuisine,type:'cuisine'}]
+            }
+            else if (Array.isArray(json.recipeCuisine)) {
+                recipe.categories = [...recipe.categories,
+                                     ...json.recipeCuisine
+                                     .filter((v)=>typeof v=='string')
+                                     .map((v)=>({name:v,type:'cuisine'}))
+                                    ];
+            }
         }
         if (json.recipeCategory) {
-            recipe.categories = [...recipe.categories,{name:json.recipeCategory}]
+            if (typeof json.recipeCategory == 'string') {
+                recipe.categories = [...recipe.categories,{name:json.recipeCategory}]
+            }
+            else if (Array.isArray(json.recipeCategory)) {
+                recipe.categories = [...recipe.categories,
+                                     ...json.recipeCategory
+                                     .filter((v)=>typeof v=='string')
+                                     .map((v)=>({name:v}))
+                                    ];
+            }
         }
         if (json.recipeYield) {
-            handleChunk(
-                {text:json.recipeYield,
-                 tag:'yields'},
-                context,recipe
-            )
+            if (typeof json.recipeYield=='string') {
+                handleChunk(
+                    {text:json.recipeYield,
+                     tag:'yields'},
+                    context,recipe
+                );
+            } else if (Array.isArray(json.recipeYield)) {
+                json.recipeYield.forEach(
+                    (y)=>{
+                        if (typeof y=='string') {
+                            handleChunk(
+                                {text:json.recipeYield,
+                                 tag:'yields'},
+                                context,recipe
+                            );
+                        }
+                    }
+                );
+            }
         }
         // times
         for (let [prop,name] of [['cookTime','Cooking Time'],
                                  ['totalTime','Total Time'],
                                  ['prepTime','Preparation Time']
                                 ]) {
-            if (json[prop]) {
+            if (json[prop] && typeof json[prop] == 'string') {
                 if (json[prop][0]=='P') {
                     handleChunk(
                         {text:' ',iso8601:json[prop],
@@ -96,6 +128,13 @@ function handleLDObj (json, context) {
                             recipe
                         );
                     }
+                );
+            } else if (typeof json.recipeInstructions == 'string') {
+                handleChunk(
+                    {text:json.recipeInstructions,
+                     tag:'text'},
+                    context,
+                    recipe
                 );
             }
         }
