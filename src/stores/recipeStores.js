@@ -231,7 +231,6 @@ export function makeLocalRecipeStore () {
             return new Promise((resolve,reject)=>{
                 let mongoId
                 if (isNaN(Number(id))) {
-                    //reject(`Open should be called with a numeric local ID, but got ${id}`);
                     mongoId = id;
                     id = undefined;
                 }
@@ -246,16 +245,22 @@ export function makeLocalRecipeStore () {
                                 if (recipe) {
                                     local.update(
                                         ($localRecipes)=>{
-                                            $localRecipes[id] = deepcopy(recipe);
-                                            if (recipe._id) {
-                                                $localRecipes[recipe._id] = $localRecipes[id]
+                                            let retrieved_id = recipe.id;
+                                            if (!retrieved_id) {
+                                                console.log('Recipe has no iD????',retrieved_id,recipe);
+                                                reject(`Recipe without id! #$#$@#%& ${JSON.stringify(recipe)}`);
                                             }
-                                            resolve($localRecipes[id])
+                                            let retrieved_mongoId = recipe._id;
+                                            $localRecipes[retrieved_id] = deepcopy(recipe);
+                                            if (retrieved_mongoId) {
+                                                $localRecipes[retrieved_mongoId] = $localRecipes[retrieved_id]
+                                            }
+                                            resolve($localRecipes[retrieved_id])
                                             return $localRecipes;
                                         }
                                     );
                                 } else {
-                                    console.log('Unable to open recipe',id);
+                                    console.log('!!Unable to open recipe',id,mongoId);
                                 }
                             }
                         );
