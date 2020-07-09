@@ -5,6 +5,7 @@
   "version" : "0.1",
   "manifest_version": 2,
   "icons": {
+    "128" : "GourmetChromeIcon.png"
   },
   "background" : {
     "scripts" : ["background.js"]
@@ -24,9 +25,18 @@
     "<all_urls>"
   ],
   "externally_connectable" : {
-      "matches":["https://localhost:*/*","http://localhost:*/*","https://gourmet-svelte.netlify.app/*","https://www.gourmetrecipemanager.com/*","https://gourmetrecipemanager.com/*"]
+    "matches":[
+      "https://www.gourmetrecipemanager.com/*",
+      "https://gourmetrecipemanager.com/*",
+      "https://localhost:*/*",
+      "http://localhost:*/*"
+    ]
   },
-    "web_accessible_resources" : ["embed.js","images/cookie.png","background.js.map",
-                                  "content.js.map","embed.js.map"
-                                 ]
+  "web_accessible_resources" : [
+    "embed.js",
+    "images/cookie.png",
+    "background.js.map",
+    "content.js.map",
+    "embed.js.map"
+  ]
 }
