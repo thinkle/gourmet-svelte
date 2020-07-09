@@ -113,6 +113,7 @@ function getStyle () {
      width : 100%;
      margin: 0;
      flex-grow: 1;
+     min-width: var(--min-input-width,4rem);
      /* border: var(--inputBorder);
         border-right: none;
         border-left: none;
