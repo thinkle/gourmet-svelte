@@ -150,6 +150,7 @@
          -webkit-line-clamp: 3;
          -webkit-box-orient: vertical;
          overflow: hidden;
+         line-height: 1.2; /* Otherwise the descenders get hidden by the overflow: hidden */
          text-overflow: ellipsis;
      }
 
