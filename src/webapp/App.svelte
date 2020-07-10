@@ -146,8 +146,8 @@
      --black : #111131;
      --link : #001160;
      --grey : #727272;
-     --light-bg : #eef8fa;
-     --light-fg : #322742;
+     --light-bg : #f8f8fa;
+     --light-fg : #323742;
      --medium-bg: #dadaff;
      --medium-fg: #343434;
      --focus-border: #2222df;
