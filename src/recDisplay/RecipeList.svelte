@@ -76,6 +76,9 @@
      if (scrollingElement) {
          scrollingElement.scrollTop = 0;
      }
+     if (recipeGetter.done) {
+         fetchedAll = true;
+     }
      // Note: if you call it recipeGetter.more() once below
      // automatically, you'll trigger a terrible bug
      
@@ -97,7 +100,6 @@
              }
          }
      }
-     console.log('selection change!',selectedIds);
      onSelectionChange(selectedIds);
      if (selectedIds.length) {
          areSelected = true;
@@ -116,7 +118,6 @@
      //alreadyFetched = [...ids]
      let ids = [...new Set(listOfIDs)]
      ids.filter((id)=>id) // remove null
-     console.log('Page is',ids)
      return ids
  }
 
@@ -134,6 +135,23 @@
          size = sizes[idx-1]
      }
  }
+
+ let cardWidth
+ let scrollContainerWidth
+ let fillerCards = []
+ $: calculateFiller(scrollContainerWidth,cardWidth,$recipePage);
+ function calculateFiller () {
+     fillerCards = []
+     let cardsPerRow = Math.floor(scrollContainerWidth/cardWidth) || 1;
+     // Plus one because we have the "info" card after the recipe w/ the scrolling feedback
+     let lastRow = ($recipePage.length + 1) % cardsPerRow;
+     if (lastRow) {
+         for (let i=0; i<(cardsPerRow-lastRow); i++) {
+             fillerCards = [...fillerCards,1]
+         }
+     } 
+ }
+ 
 </script>
 
 <Bar growLeft="{true}"> 
@@ -242,9 +260,10 @@
 
 
 <FullHeight scrolls={true}>
-    <div class="cards" use:getScrollingElement>        
-        {#each $recipePage as id (id)}
+    <div class="cards" bind:clientWidth="{scrollContainerWidth}" use:getScrollingElement>        
+        {#each $recipePage as id,n (id)}
             <div animate:flip="{{duration:300}}"
+                 in:fade|local
                  class="card">
                 <RecCard size="{size}" rec="{$storedRecipes[id]}"
                          hideCheck={!onSelectionChange}
@@ -288,12 +307,16 @@
                 </RecCard>
             </div>
         {:else}
-            <div class="center">
+            <div class="center" in:fade out:fade>
                 <h2>
-                    {#if search}
-                        No results for "{search}"...
+                    {#if $recipeActionGeneralState.querying}
+                        Fetching recipes...
                     {:else}
-                        No recipes yet? Maybe import some or create them!
+                        {#if search}
+                            No results for "{search}"...
+                        {:else}
+                            No recipes yet? Maybe import some or create them!
+                        {/if}
                     {/if}
                 </h2>
                 <div class="center"><WhiskLogo size="250" /></div>
@@ -316,7 +339,7 @@
             </div>
         {/each}
         {#if $recipePage.length}
-            <div class="card" >
+            <div class="card" bind:clientWidth="{cardWidth}" in:fade out:fade>
                 <RecCard size="{size}">
                     <div class="center">
                         {#if $recipeActionGeneralState.querying}
@@ -337,7 +360,7 @@
                     </div>
                 </RecCard>
             </div>
-            {#each [1,2,3] as i}
+            {#each fillerCards as i}
                 <div class="card filler">
                     <RecCard size="{size}" rec="{{}}"
                     >
@@ -361,139 +384,9 @@
      place-content: space-around;
  }
  
- /* https://stackoverflow.com/questions/18744164/flex-box-align-last-row-to-grid */
- .cards::after {
-     content: "";
-     flex: auto;
- }
-
  .card {
      display: inline-block;
  }
- table {
-     margin: auto; /* center  */
- }
- /* Grid mode */
- 
- table :global(td.title) {grid-area:title;}
- table :global(td.thumb) {grid-area:thumb;}
- table :global(td.categories) {grid-area:categories;}
- table :global(td.sources) {grid-area:sources;}
- table :global(td.times) {grid-area:times;}
- table :global(td.title) {grid-area:title;}
- table :global(td.title) {
-     min-width: 329px;
-     max-width: 450px;
- }
- @media (max-width: 949px) {
-     table :global(td) {
-         border : none;
-     }
-     table tr {
-         border-bottom: 1px solid var(--light-underline);
-         padding-bottom: 1.5em;
-         padding-top: 1.5em;
-         justify-items: left;
-         justify-content: center;
-     }
-
-     table :global(td.categories),
-     table :global(td.sources) {
-         align-self: start;
-     }
- }
- @media (max-width: 620px) {
-     table tr {
-         display : grid;
-         align-items: center;
-         grid-template-columns: 28px 2fr 1fr;
-         grid-template-areas:
-             "checkbox   title      thumb"
-             ".          categories thumb";
-     }
-     tr :global(td) {
-         display: none;
-     }
-     tr td.checkbox,
-     tr :global(td.title),
-     tr :global(td.thumb),
-     tr :global(td.categories)
-     {
-         display: table-cell;
-     }
-
-     tr :global(td.categories) {
-         font-size: var(--small);
-     }
-
- }
- @media (min-width: 621px) and (max-width: 949px) {
-     table {
-         margin-left: 2em;
-         margin-right: 2em;
-     }
-     
-     table tr {
-         display : grid;
-         align-items: center;
-         justify-items: left;
-         margin-top: 1em;
-         margin-bottom: 1em;
-         display : grid;
-         grid-template-columns: 28px 1fr 1fr 150px;
-         grid-template-areas:
-             "checkbox title      title   thumb"
-             ".        categories sources thumb";
-     }
-     tr :global(td) {
-         display: none;
-     }
-     tr :global(td.title),
-     tr td.checkbox,
-     tr :global(td.thumb),
-     tr :global(td.categories),
-     tr :global(td.sources) {
-         display: table-cell;
-     }
-     tr :global(td.categories),
-     tr :global(td.sources) {
-         font-size: var(--small);
-     }
-
- }
- @media (min-width: 950) {
-     tr :global(td.thumb) {
-         max-width: 150px;
-         width: 150px;
-     }
-     tr :global(td.categories),
-     tr :global(td.sources) {
-         max-width: 200px;
-         width: 200px;
-     }
-     tr :global(td.title) {
-         max-width: 400px;
-         width: 400px;
-     }
-
- }
-
- @media (min-width: 950px) {
-     table {
-         max-width: 1250px;
-         margin-left: auto;
-         margin-right: auto;
-         /* border-collapse: separate;
-            border-spacing: 5px 2rem; */
-     }
-     table :global(td) {
-         border-bottom: 1px solid var(--light-underline);
-         padding-top: 1em;
-         padding-bottom: 1em;
-         vertical-align: middle;
-     }
- }
-
  
  .center {
      display: flex;
