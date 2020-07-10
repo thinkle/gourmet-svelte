@@ -76,8 +76,10 @@ export function getColor (recipe) {
     }
     // generic...
     return {
-        bg: '#AFD2E9',
-        fg: '#121234'
+        // bg: '#AFD2E9',
+        // fg: '#121234'
+        fg : '#feffcd',
+        bg : '#7a4443'
     }
 }
 
