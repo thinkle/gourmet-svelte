@@ -137,32 +137,48 @@
   -> Note: I've built a framework for testing the recipe widget simply enough
   -> Testing save/edit buttons involves either having or mocking state and store
      which is rather a pain...
-
-
+- Tweak new recipe empty states (x)
+- Fix new recipe not focusing (x)
+- Fix Mark User Not New (x)
+  -> get it to close dialog smoothly
+- Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
 
 TODO:
-- Fix Mark User Not New (halfway)
-  -> get it to close dialog smoothly
+
+- Import tweaks
+  -> Allow user to interface with JSON imports
+     -> We added an "alternatives" to the recipe with our different options... now we should be able
+        to just add a user toggle to move between them.
+  -> Have importer give back multiple recipes so we can let user choose?
+- Fix search bar on mobile
+- Fix shopping list updates from multiple browsers...
 - Fix Log-In and Auto-Sync process (?)
-- Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
-- Tweak new recipe empty states
-- Fix new recipe not focusing
-- Fix empty/startup state
+- Fix empty/startup state 
 - Create start/login page for chrome extension + app
-- Tweak layout on mobile.
-- Save "purchased" state of shopping list items 
 - Make syncing thing less annoying
-- Update routing so back buttons work to move you from e.g. recipe list to open recipe to shopping list
-
-
-
 - Test Syncing from local to cloud... 
-- Export to file functionality (back-up)
-- Import from file functionality (maybe?)
+
+Maybe before publish?
+- Simple export to file functionality (back-up)
+- Simple import from file functionality (maybe?)
+
 - Publish chrome extension
+  -> Get icons/graphics ready for chrome extension store thing
+
 - Publish version 1
 - Set-up dev branch in github and get a dev and a main URL working
 
 
-- Consider moving more work to webworkers? e.g. recipe parsing?
 - Fix sorting in firefox?
+
+Wishlist / Next version
+
+- Update routing so back buttons work to move you from e.g. recipe list to open recipe to shopping list
+- Save "purchased" state of shopping list items 
+- Tweak layout on mobile.
+
+Future
+- i18n
+- Look into FF extension/other browser extensions
+
+- Consider moving more work to webworkers? e.g. recipe parsing?
