@@ -10,6 +10,8 @@
  import Demo from './Demo.svelte';
  import Sidebar from '../extension/web/Sidebar.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
+ import Support from './static/Support.svelte';
+ import Promo from './static/Promo.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
  let name = 'Gourmet';
@@ -58,57 +60,69 @@
  router('/rl',()=>{
      page = RecipeList;
      containerScrolls = false;
-     params={}}
+     params={
+     }
+ }
  );
-     router('/shop',()=>{
-         page = ShoppingList;
-         params={
-         };
-         containerScrolls = false;
+ router('/shop',()=>{
+     page = ShoppingList;
+     params={
+     };
+     containerScrolls = false;
+ }
+ );
+ router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
+ router('/demo/',(ctx)=>{
+     page = Demo
+     params = {
+         
      }
-     );
-     router('/oneRec',()=>{page = Recipe; params={rec:testRecs.standard}});
-     router('/demo/',(ctx)=>{
-         page = Demo
-         params = {
+     noLanding = true
+     containerScrolls = true;
+ });
+ 
+ router('/demo/:demo',(ctx)=>{
+     page = Demo
+     params = ctx.params
+     noLanding = true
+ });
+ 
+ router('/login/demo/:demo',(ctx)=>{
+     page = Demo
+     params = ctx.params
+     noLanding = false;
+ });
+ 
+ router('/login/demo',(ctx)=>{
+     page = Demo
+     params = ctx.params
+     noLanding = false;
+ });
+ 
+ router('/support/', (ctx)=>{
+     page = Support;
+     params = ctx.params;
+     noLanding = true;
+ });
 
-         }
-         noLanding = true
-         containerScrolls = true;
-     });
+ router('/promo/', (ctx)=>{
+     page = Promo;
+     params = ctx.params;
+     noLanding = true;
+ });
 
-     router('/demo/:demo',(ctx)=>{
-         page = Demo
-         params = ctx.params
-         noLanding = true
-     });
 
-     router('/login/demo/:demo',(ctx)=>{
-         page = Demo
-         params = ctx.params
-         noLanding = false;
-     });
-
-     router('/login/demo',(ctx)=>{
-         page = Demo
-         params = ctx.params
-         noLanding = false;
-     });
-
-     
-     router.start();
-     $: {
+ router.start();
+ 
+ function detectKeyboardUser (event) {
+     if (event.keyCode==9) {
+         keyboardUser = true;
      }
-     
-     function detectKeyboardUser (event) {
-         if (event.keyCode==9) {
-             keyboardUser = true;
-         }
-     }
-     function detectMouseUser () {
-         keyboardUser = false;
-     }
-     
+ }
+ function detectMouseUser () {
+     keyboardUser = false;
+ }
+ 
 </script>
 
 <div class:keyboardUser>
@@ -158,8 +172,8 @@
      --note-fg : #333333;
      --note-light-bg : #ffffdf;
      --note-light-fg: #333;
-     --accent-bg: #7a4443;
-     --accent-fg: #baecdc;
+     --accent-bg: #6b411d;
+     --accent-fg: #baece5;
      /* Typography */
      --recipeFont : Lora, Ubuntu, Cantarell, serif;
      --recipeHeadFont : Lora,'Noto Sans',Ubuntu,Cantarell,-apple-system,sans-serif;
