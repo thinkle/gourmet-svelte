@@ -19,15 +19,17 @@ let color
      // some whimsical ingredient matchers
      {matcher:/eggplant|aubergine|gh?anou/i, color: {bg:'#614051',fg:'#ffdcff'}},
      {matcher:/chocolate|brownie/i, color: {bg:'#5c3317',fg:'#e3cbb5'}},
-     {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE',
-                                                                          fg:'#dedefe'}}, // - ocen blue
      {matcher:/asparagus/i, color : {bg: '#87a96b', fg:'#edfdef'}},
      {matcher:/spinach/i, color: {bg:'#455439',fg:"#deffcd"}},
      {matcher:/apple/i, color: {bg:'#ff0800',fg:'#ffdfee'}},
      {matcher:/tomato/i, color: {bg:'#9f0404',fg:'#ffd4c2'}},
      {matcher:/lemon/i,color:{bg:'#fff04d',fg:'#368321'}},
      {matcher:/orange/i,color:{fg:'#ffeed6',bg:'#f69813'}},
+     {matcher:/pumpkin/i,color:{fg:'#5c3f00',bg:'#e19005'}},
+     {matcher:/avocado/i,color:{fg:'#181E10',bg:'#d7e869'}},
      
+     {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE',
+                                                                          fg:'#dedefe'}}, // - ocean blue
      // courses
      {matcher:/cookie|bread/i, color:{bg:'#fdcf4c',fg:'#4c2307'}}, // beige
      {matcher:/dessert/i, color: {bg:'#FF3366',fg:'#ffdede'}}, // red/pink
