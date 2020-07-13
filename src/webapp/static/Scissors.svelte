@@ -1,0 +1,85 @@
+<svg
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:ns1="http://sozi.baierouge.fr"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    id="svg3119"
+    sodipodi:docname="openclipart-big-scissors-nofont.svg"
+    xml:space="preserve"
+    viewBox="0 0 310 221.5"
+    y="0px"
+    version="1.1"
+    enable-background="new 0 0 310 221.5"
+    x="0px"
+    inkscape:version="0.48.4 r9939"
+  >
+  <sodipodi:namedview
+      id="namedview9"
+      bordercolor="#666666"
+      inkscape:pageshadow="0"
+      guidetolerance="10"
+      pagecolor="#ffffff"
+      gridtolerance="10"
+      inkscape:window-maximized="1"
+      inkscape:zoom="1.9290323"
+      objecttolerance="10"
+      borderopacity="1"
+      inkscape:current-layer="svg3119"
+      inkscape:cx="147.54275"
+      inkscape:cy="79.135151"
+      inkscape:window-y="25"
+      inkscape:window-x="0"
+      inkscape:window-width="1920"
+      showgrid="false"
+      inkscape:pageopacity="0"
+      inkscape:window-height="1022"
+  />
+  <title
+      id="title3211"
+    >Openclipart Scissors Stencil</title
+  >
+  <g
+      id="layer1"
+      transform="translate(-183.65 -346.99)"
+    >
+    <path
+        id="path3186"
+        d="m46 3.2188c-16.45-0.141-33.368 7.1072-38.312 20.593-7.3485 16.274 4.457 35.266 24.593 41.126 0.064 0.016 0.159-0.018 0.219 0 21.958 7.936 49.296 11.813 73.09 36.442l8.91 9.24-8.03 8.19c-23.869 24.58-51.114 28.35-73.095 36.25-0.048 0.03-0.163-0.02-0.219 0-20.081 5.8-31.74 24.72-24.594 40.97 0.0255 0.05-0.0245 0.14 0.0005 0.19 6.1095 16.44 30.102 23.71 49.376 19.34 0.064-0.01 0.153 0.01 0.218 0 19.741-3.44 35.925-19.48 31.344-35.72-2.26-8.01-5.165-11.75-7.844-13.96-1.339-1.11-2.495-1.8-3.25-2.44-0.03-0.03-0.119-0.07-0.156-0.1-2.603 1.49-6.871 3.92-12.5 7.13 2.023 1.8 3.571 3.99 4.594 6.41 2.803 6.62 1.443 14.7-5.875 20.56-4.879 3.9-12.654 6.09-20 5.75-7.346-0.35-13.955-3.09-17.407-8.38l-0.218-0.15c-4.839-6.17-3.427-13.15 1.312-19 4.739-5.86 12.859-10.2 21.313-10.32v0.04c0.65-0.02 1.331-0.03 1.75 0 4.214 0 7.877 0.93 10.906 2.56l17.125-10.06c0.058-0.04 0.127-0.09 0.188-0.13 2.547-1.62 6.878-3.62 12.437-6 11.285-4.84 27.905-11.66 47.005-22.66 34.52 19.63 79.39 45.05 104.18 59.1 24.8 14.05 50.18 6.97 60.69 0.53l-133-78.06 133.75-78.816c-20.73-12.785-44.4-7.354-60.16 0.344-35.03 19.87-70.18 39.634-105.28 59.437-16-8.749-33.17-16.771-48.06-23.187-4.129-1.78-7.546-3.287-10.094-4.626-0.088-0.046-0.195-0.11-0.281-0.156-0.857-0.457-1.619-0.9-2.25-1.312-0.124-0.081-0.375-0.216-0.531-0.313-0.569-0.332-2.769-1.648-3.906-2.312-3.744-2.185-7.217-4.202-12.907-7.531-2.983 1.558-6.57 2.476-10.687 2.468h-0.219c-8.767 0.406-17.319-3.65-22.406-9.594s-6.547-13.325-1.531-19.687v-0.187c3.472-5.28 10.288-7.844 17.624-8.188 0.459-0.022 0.915-0.028 1.376-0.031 6.9-0.05 13.837 1.953 18.406 5.625 7.301 5.866 8.694 13.936 5.875 20.562-1.057 2.485-2.679 4.733-4.781 6.563l12.874 7.312c1.696-1.474 3.303-3.124 4.626-4.531 2.248-2.394 4.916-5.949 6.437-12.125 4.022-16.331-11.61-32.429-31.344-35.906-3.83-0.8442-7.937-0.968-11.312-1.219l0.031-0.0312z"
+        transform="translate(183.65,346.99)"
+    />
+  </g
+  >
+<metadata
+    ><rdf:RDF
+      ><cc:Work
+        ><dc:format
+          >image/svg+xml</dc:format
+        ><dc:type
+            rdf:resource="http://purl.org/dc/dcmitype/StillImage"
+        /><cc:license
+            rdf:resource="http://creativecommons.org/licenses/publicdomain/"
+        /><dc:publisher
+          ><cc:Agent
+              rdf:about="http://openclipart.org/"
+            ><dc:title
+              >Openclipart</dc:title
+            ></cc:Agent
+          ></dc:publisher
+        ></cc:Work
+      ><cc:License
+          rdf:about="http://creativecommons.org/licenses/publicdomain/"
+        ><cc:permits
+            rdf:resource="http://creativecommons.org/ns#Reproduction"
+        /><cc:permits
+            rdf:resource="http://creativecommons.org/ns#Distribution"
+        /><cc:permits
+            rdf:resource="http://creativecommons.org/ns#DerivativeWorks"
+        /></cc:License
+      ></rdf:RDF
+    ></metadata
+  ></svg
+>
