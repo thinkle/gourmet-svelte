@@ -14,15 +14,9 @@
     "default_icon" : "images/cookie.png",
     "default_title" : "Gourmet click"
   },
-  "content_scripts" : [
-    {"matches":["http://*/*","https://*/*"],
-     "js":["content.js"],
-     "all_frames":false}
-  ],
   "permissions" : [
-    "tabs",
-    "contextMenus",
-    "<all_urls>"
+    "activeTab",
+    "contextMenus"
   ],
   "externally_connectable" : {
     "matches":[
