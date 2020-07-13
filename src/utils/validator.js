@@ -24,6 +24,9 @@ function validate (obj, expected) {
             e.actual = obj;
             throw e;
         }
+    } else if (expected === undefined) {
+        // don't check at all
+        return;
     }
     else {
         if (typeof obj !== typeof expected) {
