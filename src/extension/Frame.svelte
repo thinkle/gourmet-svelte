@@ -39,6 +39,7 @@
  $: url = port && `http://localhost:${port}/sidebar` || 'https://www.gourmetrecipemanager.com/sidebar'
  let startWidth
  let inputShield;
+ let showDevMode=false;
 </script>
 <link
     href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons&display=swap"
@@ -63,14 +64,14 @@
                     />
                     <Bar>
                         <span slot="left" ><img style="margin-right: auto" width=50 src="{cookie}" alt="cookie"></span>
-                        <span slot="center" ><b>Gourmet</b></span>
+                        <span slot="center" ><b>Gourme<span on:click="{()=>showDevMode=!showDevMode}">t</span></b></span>
                         <span slot="right" >
                             <Button bare="{true}" on:click="{()=>width+=50}">+</Button>
                             <Button bare="{true}" on:click="{()=>width-=50}">-</Button>
                             <IconButton bare="{true} small={true}" on:click="{minimize}" icon="chevron_right"></IconButton>
                         </span>
                     </Bar>
-                    <!-- <input bind:value="{port}"> -->
+                    {#if showDevMode}Developer Mode - localhost port:<input bind:value="{port}">{/if}
                 </ComponentSandbox>
                 <div>
                     <div class:inputShield></div>
@@ -123,6 +124,7 @@
      position: fixed;
      width: 300px;
      width: calc(var(--grmtSidebarWidth) + 5px);
+     min-width: calc(var(--grmtSidebarWidth) + 5px); /* In case page styles conflict */
      top: 0;
      right : 0;
      z-index: 9999999999999999;
