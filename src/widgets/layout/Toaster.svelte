@@ -27,7 +27,15 @@ export function close () {
 
  function delayClose () {
      clearTimeout(timeout);
-     
+ }
+
+ function resumeClose () {
+     if (show) {
+         timeout = setTimeout(
+             ()=>{show=false},
+             delay
+         )
+     }
  }
 
  let show
@@ -37,7 +45,7 @@ export function close () {
     <div class="toaster"
          transition:fade="{{duration:500}}"
          on:mouseenter="{delayClose}"
-         on:mouseleave="{popUp}"> <!-- Starts the timer again... -->
+         on:mouseleave="{resumeClose}"> <!-- Starts the timer again... -->
         <slot/>
         <div class="close">
             <IconButton on:click="{close}" bare="{true}" small="{true}" icon="close"/>
@@ -64,9 +72,6 @@ export function close () {
      position: relative;
      padding: var(--small);
      border-radius: 5px 5px 0px 0px;
-     border-color: rgba(128,128,128,0.5);
-     border-style: solid;
-     border-width: 5px 5px 0 5px;
  }
  .close {
      position: absolute;
