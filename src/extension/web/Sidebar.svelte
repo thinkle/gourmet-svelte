@@ -146,13 +146,17 @@
         <Tagger {selectionActive} parsed={parsed}/>
     {:else if recipe}
         <Views recipe={recipe}/>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
         <JsonDebug data="{recipe}"/>
     {:else if error}
         Error parsing recipe :(
         <JsonDebug data="{error}"/>
     {/if}
+    <div class="spacer"></div>
     <JsonDebug data="{parsed}"/>
-    <spacer></spacer>
+    <div class="spacer"></div>
 </section>
 
 <style>
@@ -160,7 +164,7 @@
      height: 90vh;
      overflow-y: scroll;
  }
- spacer {
+ .spacer {
      height: 10vh;
  }
  span:hover {
