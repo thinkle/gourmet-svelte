@@ -154,7 +154,6 @@ function Parser (tagger) {
                 }
             }
             if (!parsers) {
-                //parsers = defaultParsers
                 parsers = generateParser();
             }
             parsers.forEach((parser)=>{
