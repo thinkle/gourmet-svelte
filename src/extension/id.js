@@ -1,2 +1,2 @@
-export default 'aaaloblfbkmkhcpbandokicnfpifbmlj';
-export const extensionUrl = 'http://www.tomhinkle.net'
+export default 'bhneoidcckdhbjhmcpgbhhnapbbbojik';
+export const extensionUrl = 'http://www.gourmetrecipemanager.com'
