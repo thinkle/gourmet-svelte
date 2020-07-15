@@ -64,8 +64,7 @@
     on:keypress
     on:keyup
     bind:this={b}>
-    <slot>
-    </slot>
+    <span class:left class:compact><slot/></span>
     <i class="material-icons"
        class:compact
        class:left
@@ -74,14 +73,16 @@
     </i>
 </Button>
 <style>
- i {
-     margin-left: 6px;
- }
- i.left {
-     margin-left: 0px;
+ span {
      margin-right: 6px;
  }
- i.compact {
+ .left {
+     margin-left: 6px;
+     margin-right: 0;
+ }
+ .compact,
+ span.left:empty,
+ span:empty {
      margin: 0;
  }
 </style>
