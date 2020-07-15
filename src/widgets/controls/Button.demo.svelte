@@ -21,6 +21,14 @@
 <Button {bare} {small} toggle="true" toggled="{bare}" on:click="{()=>bare=!bare}">Bare?</Button>
 <Button {bare} {small} toggle="true" toggled="{small}" on:click="{()=>small=!small}">Small?</Button>
 <br>
+
+<br>No text:
+<IconButton {bare} {small} icon="save"/> <IconButton {bare} {small} icon="cloud"/>
+<IconButton {bare} {small} on:click="{()=>active=!active}" toggle="true" toggled="{active}" icon="save"/>
+<IconButton {bare} {small} toggle="{true}" toggled="{active}" on:click="{()=>active=!active}" icon="cloud"/>
+
+
+<br>
 <DownloadButton content="Hello World!" filename="hello.txt">
     Download Something!
 </DownloadButton>
