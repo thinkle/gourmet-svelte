@@ -167,6 +167,7 @@
             <li>
                 <IconButton
                     icon="sort_by_alpha"
+                    bare="{true}"
                     toggle="{true}"
                     toggled="{sort&&sort=='title'}"
                     on:click="{()=>{if (sort=='title') {sort=undefined} else {sort='title'}}}"
@@ -174,6 +175,7 @@
             </li>
             <li>
                 <IconButton
+                    bare="{true}"
                     icon="access_time"
                     toggle="{true}"
                     toggled="{sort&&sort.prop=='last_modified'}"
@@ -185,12 +187,14 @@
             </li>
             <li>
                 <IconButton
+                    bare="{true}"
                     icon="zoom_in"
                     on:click="{zoomIn}"
                 />
             </li>
             <li>
                 <IconButton
+                    bare="{true}"
                     icon="zoom_out"
                     on:click="{zoomOut}"
                 />
@@ -330,7 +334,7 @@
                     (We're still connecting...)
                 {/if}
                 <div>
-                    <a href="broken">
+                    <a href="https://chrome.google.com/webstore/detail/gourmet-recipe-manager/bhneoidcckdhbjhmcpgbhhnapbbbojik?hl=en&authuser=0">
                         Install the Chrome Plugin
                         to import recipes from
                         your favorite sites
