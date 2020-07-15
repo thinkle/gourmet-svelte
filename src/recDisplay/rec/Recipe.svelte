@@ -27,10 +27,13 @@
      ModalLauncher,
      NavActions,
      StatusIcon,
+     Tabs,
+     Tab
  }  from '../../widgets/';
  import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
  import IngredientList from '../ing/IngredientList.svelte';
+ import TimeSummary from './TimeSummary.svelte';
  import RecProp from '../props/RecProp.svelte';
 
  import RecDef from '../../common/RecDef.js';
@@ -113,7 +116,7 @@
  let widthLeftOfImage = ''
  let imageCentered = false;
  let maxImageWidth = 100;
- /* onMount(()=>{
+  /* onMount(()=>{
   *     handleResize()
   * }
   * ); */
@@ -166,6 +169,8 @@
 
  
  let debug
+ let showTimesOverIngredients = false;
+ let showTimeButton = false;
 </script>
 
 {#if valid}
@@ -280,8 +285,8 @@
             stackSidesAt="{550}"
             maxWidthRight='45rem' maxWidthLeft='45rem'
         >
-	    <div class="inghead" slot="leftHead"> 
-	        <h3>Ingredients</h3>
+	    <div class="inghead" slot="leftHead">
+	        <h3 on:click="{()=>showTimesOverIngredients=false}">Ingredients</h3>
                 {#if !editMode && editable}
                     {#if ingeditmode}
                         <IconButton
@@ -308,16 +313,28 @@
                         showPlusMinusButtons="{true}"
                     />
                 </div>
+                {#if showTimeButton}
+                    <IconButton
+                        on:click="{()=>showTimesOverIngredients=!showTimesOverIngredients}"
+                        style="margin-left:auto;"
+                        bare="{true}"
+                        icon="access_time"
+                        toggle="{true}"
+                        toggled="{showTimesOverIngredients}"
+                    />
+                {/if}
 	    </div>
-	    <div slot="left" on:dblclick="{()=>ingeditmode=true}">
+	    <div slot="left" on:dblclick="{()=>{if (!showTimesOverIngredients) ingeditmode=true}}">
+                <div class="timeSummary" class:hidden="{!showTimesOverIngredients}">
+                    <TimeSummary onReadTimes="{(times)=>showTimeButton=!!times.length}" rec="{rec}"/>
+                </div>
 	        <IngredientList
                     {editable}
                     {onOpenSubRec}
                     onChange="{triggerChange}"
                     editMode="{ingredientsAreEditable}"
                     bind:ingredients="{rec.ingredients}"
-                >
-	        </IngredientList>
+                />
 	    </div>		
 	    
 	    <div class='rectext' slot="right" bind:this="{rightBlock}" use:resizeOnUpdate style="{`--widthRightBlock:${rightBlockWidth}px`}">
@@ -458,8 +475,24 @@
  .inghead {
      display: flex;
      flex-direction: row;
+     align-items: center;
  }
  .recipe-wrap {
      display: contents;
+ }
+
+
+ .timeSummary {
+     max-height: 65vh;
+     transition: all 600ms;
+     opacity: 1;
+     overflow-y: scroll;
+ }
+ .hidden {
+     opacity: 0;
+ }
+ .timeSummary.hidden {
+     max-height: 0;
+     overflow-y: hidden;
  }
 </style>
