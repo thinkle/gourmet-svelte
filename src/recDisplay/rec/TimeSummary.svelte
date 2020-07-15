@@ -1,5 +1,6 @@
 <script>
  export let rec
+ export let onReadTimes
 
  import {TimeLink,JsonDebug} from '../../widgets/';
  import {extractTimes} from '../../utils/times.js';
@@ -9,12 +10,19 @@
  $: times = getTimes(rec);
  
  function getTimes (rec) {
-     times = [...rec.times]
-     for (let text of rec.text) {
-         const extracted = extractTimes(text.body);
-         console.log('extracted ',extracted.length,'from text',text);
-         times = [...times,...extracted]
+     if (rec.times) {
+         times = [...rec.times]
+     } else {
+         times = [];
      }
+     if (rec.text) {
+         for (let text of rec.text) {
+             const extracted = extractTimes(text.body);
+             console.log('extracted ',extracted.length,'from text',text);
+             times = [...times,...extracted]
+         }
+     }
+     if (onReadTimes) {onReadTimes(times)}
      return times
  }
 
