@@ -27,7 +27,6 @@
     "rollup-plugin-svelte": "^5.0.3",
     "rollup-plugin-terser": "^5.1.2",
     "svelte": "^3.0.0",
-    "svelte-image": "^0.2.3",
     "svelte-jester": "^1.0.3"
   },
   "dependencies": {
