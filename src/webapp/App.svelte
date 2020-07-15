@@ -162,7 +162,7 @@
      --grey : #727272;
      --light-bg : #f8f8fa;
      --light-fg : #323742;
-     --medium-bg: #dadaff;
+     --medium-bg: #eaeaff;
      --medium-fg: #343434;
      --focus-border: #2222df;
      --light-underline : #aaa;
