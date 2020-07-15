@@ -17,6 +17,8 @@
      b.focus()
  }
  let b;
+
+  
 </script>
 <button
     class:disabled
@@ -41,7 +43,7 @@
     aria-label="{ariaLabel}"
 >
     <b class:toggled="{!toggled}"><slot name="unselected"/></b>
-    {#if toggle}
+    {#if toggle && !bare}
         <span class:toggled></span>
     {/if}
     <b class:toggled="{toggled}"><slot/></b>
@@ -65,6 +67,9 @@
 
  .toggle b:first-child {
      margin-right: 5px;
+ }
+ .toggle b:first-child:empty {
+     margin-right: 0;
  }
  
  button {
@@ -90,12 +95,29 @@
  button.small i {
      font-size: var(--small);
  }
- 
- button.bare {
-     border: none;
-     background-color: transparent;
+ button.bare.toggle {
+     border-width: 1px;
+     border-color: transparent;
+ }
+ button.bare.toggle:hover {
+     border-color: var(--accent-bg);
+ }
+ button.bare.toggled {
+     background-color: var(--light-bg);
+     color: var(--light-fg);
+ }
+ button.bare.toggled {
+     border-width: 1px;
+     border-color: var(--medium-bg);
  }
 
+ button.bare {
+     border-width: 0;
+     background-color: transparent;
+ }
+ button.bare:hover {
+     border-width: 1px; 
+ }
  button:hover {
      color: var(--black-fg);
      background: var(--white) radial-gradient(circle, transparent 1%, var(--white) 1%) center/15000%;
