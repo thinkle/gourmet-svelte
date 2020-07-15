@@ -9,6 +9,8 @@ import { terser } from 'rollup-plugin-terser';
 //import { scss, coffeescript, pug } from 'svelte-preprocess'
 import { sass } from 'svelte-preprocess-sass';
 import css from "rollup-plugin-css-only";
+import image from 'svelte-image'
+
 //import smelte from "smelte/rollup-plugin-smelte"; // 
 
 
@@ -46,6 +48,7 @@ export default [
 	        },
                 preprocess: {
                     style: sass({}, { name: 'scss' }),
+                    ...image()
                 },
                 
 	    }),
@@ -107,6 +110,7 @@ export default [
             replace({
                 BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : ()=>new Date().getTime(),
+                DEV : !production,
             }),
         ]
     },
@@ -122,6 +126,7 @@ export default [
             replace({
                 BUILD_TIME : ()=>new Date()+'',
                 BUILD_MS : ()=>new Date().getTime(),
+                DEV : !production,
             }),
             svelte({
 	        // enable run-time checks when not in production
