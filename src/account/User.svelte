@@ -28,15 +28,17 @@
 </script>
 
 <div class="block">
-    <h2>Hello {$user.remoteUser && $user.remoteUser.name || $user.username}</h2>
-    
+    <h2>Hello {$user && $user.remoteUser && $user.remoteUser.name || $user && $user.username}</h2>
     <p>Here you can manage user settings</p>
+
     <!-- If Remote User exists -->
     {#if ($user && $user.remoteUser && $user.remoteUser.dbUser)}
         <!-- This block ensures we have a dbUser to play with -->
         <!-- New User Agreement -->
         {#if $user.remoteUser.dbUser.newUser}
-            <NewUserAgreement onDone="{onClose}" />
+            <section>
+                <NewUserAgreement onDone="{onClose}" />
+            </section>
         {:else}
             <!-- Not a new user -->
             <!-- If invites -->
@@ -70,9 +72,11 @@
             </div>
         {/if}
     {:else}
+        <section>
         Hmm... we don't seem to have your user info.
-        <FormTask icon="reload" promiseAction="{user.getRemoteUser}" inline="true"/>
+        <FormTask icon="refresh" promiseAction="{user.getRemoteUser}" inline="true"/>
         <Button on:click="{doLogout}">Logout</Button> <Button on:click="{doLogin}">Login</Button>
+        </section>
     {/if}
 
     <!-- spacer. stuff to be removed -->
@@ -86,11 +90,30 @@
 </div>
 
 <style>
- h3 {
+ div :global(h2) {
+     font-size: 2rem;
+     font-weight: bold;
+     font-family: var(--uiFont);
+     text-decoration: none;
+ }
+ div :global(h3) {
      margin-top: 1em;
+     font-weight: bold;
+     font-size: 1.5rem;
+     font-family: var(--uiFont);
+     text-decoration: none;
+ }
+ section {
+     border: 1px solid #aaa;
+     padding: 1rem;
  }
  .block {
      max-width: 30em;
      margin: auto;
+     font-family: var(--recipeFont);
+     font-size: 1rem;
+ }
+ div :global(p),:global(h2),:global(h3) {
+     margin-bottom: 1rem;
  }
 </style>
