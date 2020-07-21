@@ -7,7 +7,6 @@
  export let icon="save"
  import IconButton from './IconButton.svelte';
  import {onMount} from 'svelte';
-
  
 
  let link
