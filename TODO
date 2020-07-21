@@ -142,28 +142,36 @@
 - Fix Mark User Not New (x)
   -> get it to close dialog smoothly
 - Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
+- Publish chrome extension
+  -> Get icons/graphics ready for chrome extension store thing (x)
+  -> Allow user to interface with JSON imports (x)
+     -> We added an "alternatives" to the recipe with our different options... now we should be able
+        to just add a user toggle to move between them.
+  -> Have importer give back multiple recipes so we can let user choose? (x)
+- Fix search bar on mobile (x)
+- Fix shopping list updates from multiple browsers... (x)
+- Make syncing thing less annoying (fixed bug in close button...) (x)
+- Simple import from file functionality (maybe?) (x)
 
 TODO:
 
 - Import tweaks
-  -> Allow user to interface with JSON imports
-     -> We added an "alternatives" to the recipe with our different options... now we should be able
-        to just add a user toggle to move between them.
-  -> Have importer give back multiple recipes so we can let user choose?
-- Fix search bar on mobile
-- Fix shopping list updates from multiple browsers...
 - Fix Log-In and Auto-Sync process (?)
 - Fix empty/startup state 
 - Create start/login page for chrome extension + app
-- Make syncing thing less annoying
 - Test Syncing from local to cloud... 
 
-Maybe before publish?
-- Simple export to file functionality (back-up)
-- Simple import from file functionality (maybe?)
 
-- Publish chrome extension
-  -> Get icons/graphics ready for chrome extension store thing
+Maybe before publish?
+- Simple export to file functionality (back-up) (part-way...)
+- Allow pushing parsers from web-app to chrome extension so we don't have to update chrome extension (?)
+
+- Create simple "sharing" interface -- "sharing" a recipe makes the
+  link public -- when people follow the link they get a recipe they
+  can copy to their DB (we strip the _ID and owner from it when
+  downloading...?)
+
+
 
 - Publish version 1
 - Set-up dev branch in github and get a dev and a main URL working
