@@ -1,9 +1,12 @@
 <script>
- import {recipeActions} from '../stores/recipeStores.js';
+ import {recipeActions,recipePage,storedRecipes} from '../stores/recipeStores.js';
+ import {exportRecipes} from '../exporters/'
  import {connectedRemote} from '../data/api.js';
  import {tick} from 'svelte';
  import {
-     IconButton
+     WhiskLogo,
+     IconButton,
+     DownloadButton
  } from '../widgets/';
 
  let fileInput
@@ -28,13 +31,45 @@
      await recipeActions.importRecipes(json);
  }
 
+
+ let exporting
+ let progmsg
+ function startBackupExport () {
+     console.log('EXPSTART BACKUP')
+     exporting = async function () {
+         console.log('EXPgetting loader');
+         let recLoader = await recipeActions.getInfiniteRecipes();
+         progmsg = 'Loading recipes...';
+         console.log('Loaded first set...',recLoader,$recipePage);
+         while (!recLoader.done) {
+             await recLoader.more()
+             console.log('EXPloading more...');
+             progmsg = `Loaded ${$recipePage.length} recipes...`;
+         }
+         // Got 'em all...
+         console.log('EXPgot em all...');
+         let recipes = $recipePage.map((id)=>$storedRecipes[id]);
+         progmsg = 'Finished loading recipes, converting... (be patient)'
+         await tick();
+         console.log('EXP export to new file format...')
+         let exportedJson = exportRecipes(recipes,'gourmet-json');
+         progmsg = 'Done converting, preparing file... '
+         await tick();
+         console.log('Complete process',exportedJson);
+         return JSON.stringify(exportedJson,undefined,2); // indent
+     }()
+ }
+
+
 </script>
 
 <div>
     
     <h2>Import/Export</h2>
-    <div>Import File</div>
+
+    <h3>Import File</h3>
     {#if $connectedRemote}
+
         {#if !importing}
             <label class="file-input-wrap">
                 <input
@@ -57,8 +92,42 @@
     {:else}
         No user logged in ?? Not connected yet
     {/if}
+
+
+    <h3>Export Backup</h3>
+    {#if !exporting}
+        <IconButton icon="download" on:click="{startBackupExport}">
+            Backup Recipe Database as File
+        </IconButton>
+        <!-- <IconButton icon="download" on:click="{startBackupExport}">
+             Download JSON-LD version of Recipes
+             </IconButton> -->
+    {:else}
+        {#await exporting}
+            <p>Generating file... Hard at work</p>
+            <WhiskLogo autorestart="{true}"/>
+        {:then complete}
+            <DownloadButton
+                type="application/json"
+                filename="recipes.grmt-web.json"
+                content="{complete}">
+                Download File
+            </DownloadButton>
+        {/await}
+    {/if}
+    
 </div>
 <style>
+ h2 {
+     font-weight: bold;
+     font-size: 2rem;
+     margin-bottom: 1rem;
+ }
+ h3 {
+     font-weight: bold;
+     font-size: 1.5rem;
+     margin-top: 1rem;
+ }
  div {
      min-width: 80vw;
  }
