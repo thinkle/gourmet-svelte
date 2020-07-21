@@ -141,7 +141,7 @@ export const recipeActions = {
         return localCopy;
     },
 
-    async getInfiniteRecipes ({query, fields, limit=15,sort}) {
+    async getInfiniteRecipes ({query, fields, limit=15,sort}={}) {
         setStoreProp(actionState,'querying',{query,fields,limit});
         let response = await api.getRecipes({query,fields,limit,sort});
         setStoredRecs(response.result);
