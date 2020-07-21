@@ -1,4 +1,5 @@
 {
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg+KOXd81bcX4wTZ6ME3QYvuFp30YlVAWs+2VSbMJbp7il9nDb0HKzj7+7kn92FINqXClYhbfnqN7/4HaPHtHQfr0NnzWdnc6JG0yRA0NZbIv7STBEemB99jDBcKnGqSnn1OdmQwztZSwjj4OFmoAUjBOHZhAEky9eWvc8uAt3k2Z5NSj0pcI04yvpCihcpznGE5giB1qaWwWL7ILIElvrnPpimHyRCOrI7qm2QBJg3e16IE89yjZeUjimQn3S35f/5efrDcg5Ewd6Y2UwxKSz58jhFh5w5L6TsTMOUkkq19uEx1QAEEZGCZhGp1iWPxpTAJSL6ZvshlVIrA0bxT72QIDAQAB",
   "name" : "Gourmet Recipe Manager",
   "short_name" : "Gourmet",
   "description" : "Recipe importer and manager for chrome.",
