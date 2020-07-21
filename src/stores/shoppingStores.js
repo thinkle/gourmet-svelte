@@ -122,7 +122,7 @@ export const shoppingList = {
                 unit : 'recipe'
             },
             text : recipe.title,
-            reference : id
+            reference : recipe._id||recipe.id // fallback to local ID won't really work very well...
         }
         if (!get(localShopRec)) {
             await shoppingList.get();
