@@ -204,7 +204,12 @@ export const recipeActions = {
     async permanentlyDeleteRecipe (id) {
         await api.permanentlyDeleteRecipe (id);
         removeIdFromStores(id);
+    },
+
+    async importRecipes (json) {
+        return await api.importRecipes(json);
     }
+    
 }
 
 function removeIdFromStores (id) {
