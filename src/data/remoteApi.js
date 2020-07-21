@@ -7,6 +7,7 @@ import querystring from 'querystring'
 import {addRecipeRequest,
         getRecipeRequest,
         getRecipesRequest,
+        importRecipesRequest,
         updateRecipeRequest} from './requests/index.js';
 const baseURL = "/.netlify/functions/api?"
 
@@ -97,7 +98,11 @@ function RecipeApi (user) {
                 {user,params}
             );
         },
-
+        importRecipes (params) {
+            return importRecipesRequest.makeRequest(
+                {user,params}
+            );
+        },
         deleteRecipe (_id) {
             return doFetch(
                 'trashRecipe',

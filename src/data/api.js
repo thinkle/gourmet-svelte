@@ -154,6 +154,19 @@ const api = {
     async updateRecipes (recipes) {
         recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
     },
+
+    async importRecipes (json) {
+        let batches = batchRecipes(json);
+        console.log('Split into ',batches.length,'batches');
+        while (batches) {
+            let json = batches.pop();
+            console.log('Processing batch...',json);
+            let recipes = await remoteApi.importRecipes(json) // push to remote DB...
+            await this.updateRecipes(recipes); // lazy lazy... - now push to local DB
+        }
+        return
+    },
+    
     async sync (test=false,{onPartialSync}) {
         if (!localApi.db) {
             await localApi.connect();
@@ -245,6 +258,22 @@ const api = {
                                   total:result.length})
         return {recs:result}
     },
+}
+
+function batchRecipes (json) {
+    // One import must be split up...
+    const batchSize = 50;
+    let currentBatch = 0;
+    let batches = []
+    while (json.recipes.length > currentBatch*batchSize) {
+        let batch = {
+            ...json,
+            recipes : json.recipes.slice(currentBatch*batchSize,(currentBatch+1)*(batchSize))
+        }
+        batches.push(batch);
+        currentBatch += 1;
+    }
+    return batches;
 }
 
 export default api;
