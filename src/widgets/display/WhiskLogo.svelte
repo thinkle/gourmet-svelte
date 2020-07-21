@@ -1,6 +1,7 @@
 <script>
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  export let size=300;
+ export let autorestart = false;
  import { draw,fade } from 'svelte/transition';
  let show = false;
  import {onMount} from 'svelte'
@@ -18,9 +19,20 @@
          500
      )
  }
+
+
+ function onFinished () {
+     console.log('Drawing is finished!');
+     if (autorestart) {
+         console.log('Autorestart');
+         restart();
+     }
+ }
+ 
 </script>
+<div style="{`width:${size}px;height:${size}px`}">
 {#if show}
-    <div on:click={restart} style="{`width:${size}px;height;${size}px`}">
+    <div on:click={restart} style="{`width:${size}px;height:${size}px`}">
         <svg out:fade viewBox="0 0 300 300" width={size} height={size}>
             <path
                 in:draw={{delay:handleStart,duration}}
@@ -56,6 +68,7 @@
                 class="darkShadow"/>
             <path
                 in:draw={{delay:handleStart+step*4,duration}}
+                on:introend="{onFinished}"
                 id="path1099"
                 d="M 23.280582,28.508835 L 86.191123,94.349022"
                 class="lightShadow"
@@ -97,7 +110,7 @@
         </svg>    
     </div>
 {/if}
-
+</div>
 
 <style>
 
