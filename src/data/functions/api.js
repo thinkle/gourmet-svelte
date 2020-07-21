@@ -1,5 +1,6 @@
 import {registerHandlerObject} from '../requests/remoteRequest.js'
 import loadIt from './recipeFunctions.js';
+import loadItToo from './importRecipeFunction.js'
 const requestHandlers = {
 }
 registerHandlerObject(requestHandlers);
