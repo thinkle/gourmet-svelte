@@ -418,3 +418,6 @@ let testRecs = {
 }
 
 export {testRecs}
+export const standard = testRecs.standard;
+export const oldstandard = testRecs.oldstandard
+export const empty = testRecs.empty
