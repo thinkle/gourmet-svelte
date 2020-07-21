@@ -83,7 +83,7 @@ function handleLDObj (json, context) {
                     (y)=>{
                         if (typeof y=='string') {
                             handleChunk(
-                                {text:json.recipeYield,
+                                {text:y,
                                  tag:'yields'},
                                 context,recipe
                             );
@@ -146,6 +146,11 @@ function handleLDObj (json, context) {
                                      recipe)
                 )
             }
+        }
+        if (json.images) {
+            recipe.images = json.images.map(
+                (i)=>i.url && i || {url:i}
+            );
         }
         if (json.image) {
             if (json.image.url) {
