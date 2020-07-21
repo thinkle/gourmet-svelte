@@ -64,3 +64,11 @@ export const deleteRecipeRequest = Request(
      responseDef:1
     }
 );
+
+export const importRecipesRequest = Request(
+    {name:'importRecipes',
+     requestDef:{
+         recipes : [],
+     },
+     responseDef:[]}
+);
