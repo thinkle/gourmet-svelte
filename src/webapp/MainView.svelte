@@ -5,6 +5,7 @@
  import {shoppingList,recipesOnList} from '../stores/shoppingStores.js';
  import {user} from '../stores/userStore.js';
  import status from '../stores/statusStore.js';
+ import ImportExport from './ImportExport.svelte';
  import {
      Bar,
      Button,
@@ -92,8 +93,26 @@
      }
  }
 
-
  let debug
+
+ let toolbar = getContext('toolbar');
+ let showImportExportModal = false;
+ let importToolbarItem = toolbar.addItem({
+     key:'import-export',
+     props : {
+         icon:'import_export',
+     },
+     content:'Import',
+     onClick () {showImportExportModal=!showImportExportModal}
+ });
+ console.log('ADDED TOOLBAR ITEM!!!');
+
+ $: if (showImportExportModal) {
+     importToolbarItem.showModal();
+ } else {
+     importToolbarItem.hideModal();
+ }
+
 </script>
 
 
@@ -210,6 +229,13 @@
     <div>
         <WhiskLogo/>
     </div>
+{/if}
+{#if showImportExportModal}
+<Modal key="import-export"
+       modalVisible="{showImportExportModal}"
+       onClose="{()=>showImportExportModal=false}">
+    <ImportExport/>
+</Modal>
 {/if}
 
 {#if DEV}

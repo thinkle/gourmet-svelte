@@ -81,6 +81,9 @@
          user_metadata : {
              full_name : 'Thomas Hinkle',
          },
+         remoteUser : {
+             dbUser : 'tmhinkle@gmail.com'
+         },
          token : {
              expires_at : new Date().getTime()+60*1000*60*3,
              token_type : 'bearer',
