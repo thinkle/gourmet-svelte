@@ -8,7 +8,7 @@ let color
          bg:'#dcf9a8'
      }},
      {matcher:/halloween/i, color : {
-         bg:'#1f0905',
+         bg:'#000000',
          fg:'#f97306',
      }},
      {matcher:/christmas/i, color : {
