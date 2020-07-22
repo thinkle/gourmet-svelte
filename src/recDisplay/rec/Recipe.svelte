@@ -182,7 +182,7 @@
 
         <Bar large="true" growLeft="{true}" maxWidth="1250px"
              style="border-bottom: 2px solid var(--accent-bg);">
-            <div slot="left" style="align-items: flex-end">
+            <div class="titleSlot" slot="left" style="align-items: flex-end">
                 <h2>
 	            {#each RecDef.titleProps as prop}
                         <RecProp
@@ -321,6 +321,7 @@
                         icon="access_time"
                         toggle="{true}"
                         toggled="{showTimesOverIngredients}"
+                        tt="Show times in recipe"
                     />
                 {/if}
 	    </div>
@@ -457,17 +458,20 @@
  }
  
  @media (max-width: 599px) {
+     .titleSlot {
+         overflow: hidden;
+     }
      h2 {
-         max-width: calc(100vw - 60px);
-         text-overflow: ellipsis;
+         font-size: 1.5rem;
+         /* max-width: calc(100vw - 60px);
+          */text-overflow: ellipsis;
          overflow: hidden;
          white-space: nowrap;
      }
-     h2:hover :global('.title') {
-         max-width: calc(100vw - 210px);
+     h2 :global(*) {
+         overflow: hidden;
          text-overflow: ellipsis;
-         overflow: initial;
-         white-space: normal;
+         max-width: 100%;
      }
 
  }
