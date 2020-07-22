@@ -32,17 +32,17 @@
 <DownloadButton content="Hello World!" filename="hello.txt">
     Download Something!
 </DownloadButton>
-<Button {bare} {small} toggle="true" toggled="{auto}" on:click="{()=>auto=!auto}">Auto-download?</Button>
+<Button {bare} {small} tt="Hello world of tooltips" toggle="true" toggled="{auto}" on:click="{()=>auto=!auto}">Auto-download?</Button>
 {#if auto}<DownloadButton auto="true" hidden="true" content="Automatic World!" filename="force-download.txt"/>
 {/if}
 
 <br>
-<Button {bare} {small} on:click="{()=>clickCount+=1}">This is a Plain Button</Button>
-<Button {bare} {small} on:click="{()=>clickCount+=1}">This is a small Button</Button>
-<Button {bare} {small} toggle="true" toggled="{active}" on:click="{()=>active=!active}">This is a toggle Button</Button>
+<Button tt="Hello world of tooltips" {bare} {small} on:click="{()=>clickCount+=1}">This is a Plain Button</Button>
+<Button tt="Hello world of tooltips" {bare} {small} on:click="{()=>clickCount+=1}">This is a small Button</Button>
+<Button tt="Hello world of tooltips" {bare} {small} toggle="true" toggled="{active}" on:click="{()=>active=!active}">This is a toggle Button</Button>
 <br>
-<Button {bare} {small} inverse="true" toggle="true" toggled="{active}" on:click="{()=>active=!active}">Inverse Toggle Button</Button>
-<Button {bare} {small} inverse="true" on:click="{()=>active=!active}">Inverse Button</Button>
+<Button tt="Hello world of tooltips" {bare} {small} inverse="true" toggle="true" toggled="{active}" on:click="{()=>active=!active}">Inverse Toggle Button</Button>
+<Button tt="Hello world of tooltips" {bare} {small} inverse="true" on:click="{()=>active=!active}">Inverse Button</Button>
 <IconButton {bare} {small} icon="chevron_right" on:click="{()=>clickCount+=1}">This is a Plain IconButton</IconButton>
 <IconButton {bare} {small} icon="save" on:click="{()=>clickCount+=1}">This is a small IconButton</IconButton>
 <br>

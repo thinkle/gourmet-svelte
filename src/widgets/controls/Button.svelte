@@ -12,12 +12,13 @@
  export let disabled=undefined;
  export let compact=false; /* No padding, no margin */
  export let ariaLabel=undefined;
+ export let tt=undefined;
 
  export function focus () {
      b.focus()
  }
  let b;
-
+ import {tooltip} from './tooltip.js';
   
 </script>
 <button
@@ -40,7 +41,9 @@
     on:keyup
     bind:this="{b}"
     disabled="{disabled||busy}"
-    aria-label="{ariaLabel}"
+    aria-label="{ariaLabel||tt}"
+    use:tooltip="{{content:tt}}"
+    
 >
     <b class:toggled="{!toggled}"><slot name="unselected"/></b>
     {#if toggle && !bare}

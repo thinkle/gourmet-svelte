@@ -17,6 +17,7 @@
  export let disabled=false;
  export let width=undefined;
  export let ariaLabel=undefined;
+ export let tt;
 
  const autoLabel = {
      'close' : 'close',
@@ -57,6 +58,7 @@
     {compact}
     {width}
     {ariaLabel}
+    {tt}
     rtl="{left}"
     on:click
     on:focus
