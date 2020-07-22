@@ -170,6 +170,7 @@
                     bare="{true}"
                     toggle="{true}"
                     toggled="{sort&&sort=='title'}"
+                    tt="Sort alphabetically"
                     on:click="{()=>{if (sort=='title') {sort=undefined} else {sort='title'}}}"
                 />
             </li>
@@ -178,6 +179,7 @@
                     bare="{true}"
                     icon="access_time"
                     toggle="{true}"
+                    tt="Sort by most recent"
                     toggled="{sort&&sort.prop=='last_modified'}"
                     on:click="{()=>{if (sort && sort.prop=='last_modified') {
                               sort = undefined
