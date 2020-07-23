@@ -15,6 +15,7 @@ import TimeSummary from "../recDisplay/rec/TimeSummary.demo.svelte";
 import RecipeText from "../recDisplay/text/RecipeText.demo.svelte";
 import Button from "../widgets/controls/Button.demo.svelte";
 import Timer from "../widgets/controls/Timer.demo.svelte";
+import Tooltip from "../widgets/controls/Tooltip.demo.svelte";
 import OneLiner from "../widgets/display/OneLiner.demo.svelte";
 import Status from "../widgets/display/Status.demo.svelte";
 import SVGs from "../widgets/display/SVGs.demo.svelte";
@@ -47,6 +48,7 @@ export default {
     RecipeText,
     Button,
     Timer,
+    Tooltip,
     OneLiner,
     Status,
     SVGs,
