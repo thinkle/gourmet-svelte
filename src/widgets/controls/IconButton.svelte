@@ -17,7 +17,7 @@
  export let disabled=false;
  export let width=undefined;
  export let ariaLabel=undefined;
- export let tt;
+ export let tt='';
 
  const autoLabel = {
      'close' : 'close',
