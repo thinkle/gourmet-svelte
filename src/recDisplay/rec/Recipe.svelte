@@ -28,7 +28,8 @@
      NavActions,
      StatusIcon,
      Tabs,
-     Tab
+     Tab,
+     tooltip
  }  from '../../widgets/';
  import SideBySide from '../../widgets/layout/SideBySide.svelte';
 
@@ -304,7 +305,7 @@
                             icon="edit" />
                     {/if}
                 {/if}
-                <div class='multiplier'>
+                <div class='multiplier' use:tooltip="{{content:'Multiply recipe'}}">
                     &times;
                     <AmountInput
                         ariaLabel="multiply by"
