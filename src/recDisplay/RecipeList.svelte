@@ -154,7 +154,7 @@
  
 </script>
 
-<Bar growLeft="{true}"> 
+<Bar z="{3}" growLeft="{true}"> 
     <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
         <span style="align-self: flex-start" >Search:</span>
         <PlainInput bind:value={searchInput}/>
@@ -292,22 +292,37 @@
 
                     <div class="slot" slot="left">
                         {#if $localRecipes[id]}
-                            <StatusIcon icon="done"/>
+                            <StatusIcon tt="Already open" icon="done"/>
                         {/if}
                         {#if $recipesOnList.find((r)=>r.id==id)}
-                            <StatusIcon icon="shopping_cart"/>
+                            <StatusIcon tt="On shopping list" icon="shopping_cart"/>
                         {/if}
                     </div>
                     <div class="slot" slot="right">
                         {#if showShop}
                             {#if !$recipesOnList.find((r)=>r.id==id)}
-                                <IconButton icon="add_shopping_cart" bare="true" on:click={()=>onRecipeClick(id,'shop')}/>
+                                <IconButton icon="add_shopping_cart"
+                                            bare="true"
+                                            tt="Add to shopping list" 
+                                            on:click={()=>onRecipeClick(id,'shop')}
+                                />
+                                    
                             {/if}
                         {/if}
                         {#if showEdit}
-                            <IconButton icon="edit" bare="true" on:click={()=>onRecipeClick(id,'edit')}/>
+                            <IconButton
+                                icon="edit"
+                                bare="true"
+                                tt="Edit recipe" 
+                                on:click={()=>onRecipeClick(id,'edit')}/>
+
                         {/if}
-                        <IconButton icon="read_more" bare="true" on:click={()=>onRecipeClick(id)}/>
+                        <IconButton
+                            icon="read_more"
+                            bare="true"
+                            tt="Open recipe card"
+                            on:click={()=>onRecipeClick(id)}/>
+
                     </div>
 
                 </RecCard>
