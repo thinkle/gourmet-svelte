@@ -6,6 +6,20 @@
  export function reload () {
      getRecipes();
  }
+ export function selectAll () {
+     for (let id of $recipePage) {
+         console.log('select',id);
+         selected[id] = true;
+     }
+     updateSelected();
+ }
+ 
+ export function selectNone () {
+     selected = {
+     }
+     updateSelected();
+ }
+
 
  import SvelteInfiniteScroll from 'svelte-infinite-scroll'
  import scrollparent from 'scrollparent';
