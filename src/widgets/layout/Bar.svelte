@@ -7,6 +7,7 @@
  export let growLeft=undefined;
  export let growRight=undefined
  export let maxWidth=undefined;
+ export let z=0
  export let style=''
  function stopEvents (event) {
      event.stopPropagation();
@@ -14,10 +15,12 @@
  
  function getStyle () {
      if (maxWidth) {
-         return `width: min(${maxWidth},calc(100vw)); margin: auto; ${style};`;
-     } else {
-         return style;
+         style = `width: min(${maxWidth},calc(100vw)); margin: auto; ${style};`;
      }
+     if (z) {
+         style = `z-index: ${z}; ${style}`
+     }
+     return style;
  }
 
 </script>
@@ -38,7 +41,12 @@
 
 <style>
  .grow {
-     flex-grow: 3
+     flex-grow: 3;
+ }
+
+ .bar > div {
+     flex-shrink: 1;
+     max-width: 100%;
  }
 
  .bar {
