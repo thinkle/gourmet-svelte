@@ -113,6 +113,8 @@
      importToolbarItem.hideModal();
  }
 
+ let recipeListComponent
+
 </script>
 
 
@@ -156,6 +158,7 @@
     </LazyIf>
     <LazyIf condition="{page=='RecipeList'}">
         <RecipeList
+            bind:this="{recipeListComponent}"
             onSelectionChange="{(ids)=>selectedRecipes=ids}"
             onRecipeClick="{onRecipeSelected}"
         >
@@ -193,27 +196,37 @@
                 {selectedRecipes.length} Selected
             </div>
             <div class="slot" slot="selectedRight">
-                Bulk Actions:
                 <NavActions>
+                    <li>
+                        <IconButton icon="cancel" on:click="{recipeListComponent.selectNone}"
+                        tt="Unselect all">
+                        </IconButton>
+                    </li>
+                    <li>
+                        <IconButton icon="select_all" on:click="{recipeListComponent.selectAll}"
+                        tt="Select All">
+                        </IconButton>
+                    </li>
                     <li>
                         <IconButton icon="delete"
                                     on:click={deleteSelected}
+                                    tt="Delete All"
                         >
-                            Delete
                         </IconButton>
                     </li>
                     <li>
                         <IconButton icon="shopping_cart"
                                     on:click={shopSelected}
+                                    tt="Add all to shopping list"
                         >
-                            Add to Shopping List
+
                         </IconButton>
                     </li>
                     <li>
-                        <IconButton icon="open"
+                        <IconButton icon="read_more"
                                     on:click={openSelected}
+                                    tt="Open all"
                         >
-                            Open
                         </IconButton>
                     </li>
                 </NavActions>
