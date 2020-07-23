@@ -35,6 +35,16 @@
      node.parentElement.insertBefore(ref,node);
      node.remove();
  }
+
+ function moveToTop (node) {
+     let {top,left} = node.getBoundingClientRect();
+     let bod = document.querySelector('body')
+     bod.appendChild(node);
+     node.style.position = 'fixed';
+     node.style.top = top + 'px';
+     node.style.left = left + 'px';
+ }
+ 
 </script>
 
 <label>
@@ -42,15 +52,22 @@
 </label>
 <div bind:this={ref} on:click="{(e)=>e.preventDefault()}">
     {#if show}
-        <div class:hidden={timerHidden} class="timerBox" bind:this={timerBox}
-                          on:mouseover={()=>active=true}
-             on:mouseleave={()=>active=false}
-                          transition:fly>
-            <div class="top"><IconButton
-                                 iconSize="12px"
-                                 on:click={()=>timerHidden=true}
-                                           icon="close"
-                                 bare="true"/></div>
+        <div
+            use:moveToTop>
+        <div class:hidden="{timerHidden}"
+             class="timerBox"
+             bind:this="{timerBox}"
+             on:mouseover="{()=>active=true}"
+             on:mouseleave="{()=>active=false}"
+             transition:fly
+              >
+            <div class="top">
+                <IconButton
+                    iconSize="12px"
+                    on:click="{()=>timerHidden=true}"
+                    icon="close"
+                    bare="true"/>
+            </div>
             <div class="content">
                 <Timer onEditModeToggle={(edit)=>draggable=!edit}
                                         duration={seconds}
@@ -58,6 +75,7 @@
                 />
                 <label><OneLiner>{@html timestring||times.getDescription(seconds)}</OneLiner></label>
             </div>
+        </div>
         </div>
         {#if !timerHidden}
             <Moveable
