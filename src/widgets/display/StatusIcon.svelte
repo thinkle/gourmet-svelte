@@ -1,8 +1,10 @@
 <script>
  import {fly} from 'svelte/transition'
+ import {tooltip as tooltipAction} from '../index.js';
  import {IconButton} from '../';
  export let icon
- export let tooltip
+ export let tt=''
+ export let tooltip=undefined
  export let showTooltip=false;
  export let tooltipLeft=false
  export let tooltipRight=true
@@ -15,9 +17,9 @@
      tooltipUnder = false;
  }
  let flyProps = {duration:350}
- if (tooltipLeft) {
-     flyProps.x = 100; /* Comes from the right */
- }
+     if (tooltipLeft) {
+         flyProps.x = 100; /* Comes from the right */
+     }
  if (tooltipRight) {
      flyProps.x = -100; /* Comes from the left */
  }
@@ -30,9 +32,10 @@
 
 </script>
 
-<span>
-    <i class="material-icons" class:clickable={tooltip}
-       on:click={()=>showTooltip=!showTooltip}
+<span use:tooltipAction="{{content:tt}}">
+    <i class="material-icons"
+       class:clickable="{tooltip}"
+       on:click="{()=>showTooltip=!showTooltip}"
     >
         {icon}
     </i>
