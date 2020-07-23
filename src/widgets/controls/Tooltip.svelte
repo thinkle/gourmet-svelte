@@ -20,9 +20,9 @@
 </script>
 {#if show}
     <section
-	style="{`position:fixed;top:${y}px;left:${x}px;--width:${width}px;--pad:${pad}px;--arrow:${arrow}px`}"
+	style="{`position:fixed;z-index:99;top:${y}px;left:${x}px;--width:${width}px;--pad:${pad}px;--arrow:${arrow}px`}"
     >
-        <div in:fade out:fade="{{delay:300,duration:300}}"
+        <div in:fade="{{delay:300,duration:300}}" out:fade="{{delay:400,duration:450}}"
 	     class:top={topMode}
 	     class:bottom={!topMode}
 	     class:right={rightMode}
@@ -36,15 +36,16 @@
 <style>
  div {  
      pointer-events: none;
-     background-color: #555;
-     color: #fff;
+     background-color: var(--accent-bg, #555);
+     color: var(--accent-fg, #fff);
      text-align: center;
      border-radius: 6px;
      padding: 5px;
      position: absolute;
-     z-index: 1;
+     z-index: 99;
      font-size: small;
      width:var(--width);
+     white-space: normal;
      }
  .top {
      bottom: var(--pad);
@@ -72,16 +73,22 @@
  .top::before {
      bottom:calc(var(--arrow)*-2);
      left: calc(var(--width)/2 - var(--arrow));
-     border-color: #555 transparent transparent transparent;
+     border-color: var(--accent-bg,#555) transparent transparent transparent;
      border-width: var(--arrow);
      border-style: solid;
  }
  .bottom::before {
      top:calc(var(--arrow)*-2);
      left: calc(var(--width)/2 - var(--arrow));
-     border-color: transparent transparent #555 transparent;
+     border-color: transparent transparent var(--accent-bg,#555) transparent;
      border-width: var(--arrow);
      border-style: solid;
+ }
+ .right::before {
+     left: calc(var(--width)/3 - var(--arrow));
+ }
+ .left::before {
+     left: calc(var(--width)*2/3 - var(--arrow));
  }
  
  
