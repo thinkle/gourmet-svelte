@@ -2,6 +2,7 @@
  export let value
  export let timerSize=50
  export let minimal=false;
+ export let alwaysShowClock=false;
  export function focus () {
      fref.focus()
  }
@@ -172,7 +173,7 @@
  }
 
 </script>
-<span class='outer'>
+<span class='outer' class:clockOnFocus="{!alwaysShowClock}">
     {#if !minimal}
         <Underline grow="{false}">
             <input placeholder="Label (Baking Time)…" type="text"  class="text" bind:value={value.name} on:change="{change}">
@@ -251,12 +252,12 @@
      font-weight: bold;
      font-size: 2em;
  }
- .outer canvas {
+ .clockOnFocus canvas {
      opacity: 0;
      transition: opacity 300ms;
  }
 
- .outer:focus-within canvas {
+ .clockOnFocus:focus-within canvas {
      opacity: 1
  }
 </style>
