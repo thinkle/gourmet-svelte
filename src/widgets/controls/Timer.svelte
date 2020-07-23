@@ -1,5 +1,5 @@
 <script>
- import IB from './IconButton.svelte';
+ import IconButton from './IconButton.svelte';
  import {onMount} from 'svelte';
  import Timer from '../../utils/timerDrawer.js';
  import Times from '../../utils/times.js';
@@ -112,18 +112,18 @@
 
 <div style={`width:${size*1.25}px`}>
     {#if state==INITIAL}
-        <span class="topright"><IB inverse={editMode} on:click="{edit}" bare={true} icon="edit"></IB></span>
+        <span class="topright"><IconButton toggle="{true}" toggled="{editMode}" on:click="{edit}" bare={true} icon="{editMode && "done" || "edit"}"></IconButton></span>
     {/if}
     {#if editMode}
-        <DurationInput minimal={true} timerSize={size} value={{seconds:duration}} on:change={updateDuration}/>
+        <DurationInput alwaysShowClock="{true}" minimal={true} timerSize={size} value={{seconds:duration}} on:change={updateDuration}/>
     {:else}
         {#if state==PAUSED||timeLeft<0}
-            <span class="topleft"> <IB on:click="{reset}" bare={true} icon="replay"></IB></span>
+            <span class="topleft"> <IconButton on:click="{reset}" bare={true} icon="replay"></IconButton></span>
         {/if}
         {#if state==GOING}
-            <IB on:click="{pause}" bare={true} icon="pause_circle_filled"></IB>
+            <IconButton on:click="{pause}" bare={true} icon="pause_circle_filled"></IconButton>
         {:else}
-            <IB on:click="{resume}" bare={true} icon="play_circle_filled"></IB>
+            <IconButton on:click="{resume}" bare={true} icon="play_circle_filled"></IconButton>
         {/if}
     {/if}
     <canvas class:hidden={editMode}  on:click={toggleTimer} width="{size}"  height="{size}" bind:this={canv}/>
@@ -165,7 +165,7 @@
      right: 0;
  }
  .hidden {
-     visibility: hidden;
+     display: none;
  }
  canvas {
      display: block;
