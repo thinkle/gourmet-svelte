@@ -9,7 +9,6 @@ function tooltip (node,props) {
     setTimeout(
         ()=>{
             //let body = document.querySelector('body')
-            console.log('Adding tooltip to node:',node);
             t = new Tooltip({target:node,accessors:true,props});
             let ttwidth = props.width||120;
 
