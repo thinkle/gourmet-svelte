@@ -24,9 +24,42 @@
      page = MainView;
      containerScrolls = false;
      params={
+
      }
  }
  );
+
+ router('/main/:page/:detail',(ctx)=>{
+     page = MainView
+     containerScrolls = false;
+     params = {
+         page : ctx.params.page,
+         detail : ctx.params.detail,
+     }
+ });
+
+ router('/main/:page',(ctx)=>{
+     page = MainView;
+     containerScrolls = false;
+     params={
+         page : ctx.params.page
+     }
+ }
+ );
+
+
+ router('/ShoppingList',()=>{
+     page = MainView;
+     containerScrolls = false;
+     params={
+         page:'ShoppingList'
+     }
+ }
+ );
+
+
+
+
  router('/admin',()=>{
      page = Admin;
      containerScrolls = true;
