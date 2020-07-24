@@ -18,7 +18,6 @@
      if (rec.text) {
          for (let text of rec.text) {
              const extracted = extractTimes(text.body);
-             console.log('extracted ',extracted.length,'from text',text);
              times = [...times,...extracted]
          }
      }
