@@ -1,4 +1,5 @@
 <script>
+ import router from 'page';
  import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  
  export function open (id, editMode=false) {
@@ -21,9 +22,14 @@
      }
      
  }
+ export let openIDs
+ export let activeID
  export let onOpen
  export let hide
- 
+
+ $:console.log('OpenRecipes got openIDs',openIDs)
+ $:console.log('OpenRecipes got activeID',activeID)
+
  import {shoppingList} from '../stores/shoppingStores.js';
  import {getContext,onMount} from 'svelte';
  import {fade,slide} from 'svelte/transition';
@@ -48,6 +54,18 @@
 
  let activeRecipeId
 
+ if (!openIDs) {
+     openIDs = $openLocalRecipes
+ } else {
+     for (let id of openIDs) {
+         if (!$localRecipes[id]) {
+             console.log('Opening recipe from prop...');
+             localRecipes.open(id);
+         }
+     }
+ }
+
+ 
 
  let recComponents = {}
  let editOnOpen = {}
@@ -56,12 +74,14 @@
      activeRecipeId = $openLocalRecipes[0]
  }
 
+ $: activeRecipeId && router(`/main/OpenRecipes/${$openLocalRecipes.join(',')}#${activeRecipeId}`)
+
  $: {if (!activeRecipeId && $openLocalRecipes.length && $openLocalRecipes[0]) {
      openOne()
     }
- }
+    }
 
- let showCloseModalFor
+                  let showCloseModalFor
 
  function closeRec (id,confirmed=false) {
      
