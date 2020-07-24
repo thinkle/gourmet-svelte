@@ -1,4 +1,16 @@
 <script>
+ export let page='RecipeList'
+ export let detail=undefined;
+ export let recipe = undefined;
+ import router from 'page';
+ let lastPage = page;
+ $:console.log('MainView got page:',page,'detail:',detail);
+ $: {
+     if (page != lastPage ) {
+         router(`/main/${page}`);
+     }
+ }
+
  import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
@@ -39,7 +51,7 @@
  import {writable} from 'svelte/store'
  let hideOpenButton = writable(true);
 
- let page='RecipeList'
+
 
  let selectedRecipes = []
 
@@ -235,6 +247,7 @@
         </RecipeList>
     </LazyIf>
     <OpenRecipes bind:this="{opener}"
+                 openIDs="{detail && detail.split(',').map(Number)}"
                  hide="{page!=='OpenRecipes'}"
                  onOpen="{()=>page='OpenRecipes'}"
     />
