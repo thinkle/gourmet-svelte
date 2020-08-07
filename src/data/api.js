@@ -72,6 +72,13 @@ async function checkForReferences (recipe) {
                     console.log(ing.reference,ing);
                 }
             }
+        } else {
+            let targetRec = await localApi.getRecipe(undefined,{mongoId:ing._id});
+            if (targetRec) {
+                ing.referenceExists = true;
+            } else {
+                console.log('WARNING: linked recipe appears to not exist???',ing.reference,recipe);
+            }
         }
     }
 }
