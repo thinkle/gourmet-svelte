@@ -121,7 +121,7 @@ export const shoppingList = {
                 amount : quantity,
                 unit : 'recipe'
             },
-            text : recipe.title,
+            text : recipe.title,            
             reference : recipe._id||recipe.id // fallback to local ID won't really work very well...
         }
         if (!get(localShopRec)) {
@@ -281,9 +281,7 @@ export const shoppingList = {
 
     async save () {
         // FIX ME
-        console.log('Shopping list save!');
         let result = await api.updateRecipe(get(localShopRec))
-        console.log('Got result!',result);
         storedShopRec.update(()=>result);
         localShopRec.update(()=>deepcopy(result))
         // Now update our local recipes as well...
