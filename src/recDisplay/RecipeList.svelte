@@ -156,6 +156,10 @@
  $: calculateFiller(scrollContainerWidth,cardWidth,$recipePage);
  function calculateFiller () {
      fillerCards = []
+     if (!cardWidth) {
+         // Avoid infinite loop if cardWidth is 0...
+         return;
+     }
      let cardsPerRow = Math.floor(scrollContainerWidth/cardWidth) || 1;
      // Plus one because we have the "info" card after the recipe w/ the scrolling feedback
      let lastRow = ($recipePage.length + 1) % cardsPerRow;
