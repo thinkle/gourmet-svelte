@@ -4,13 +4,17 @@
  export let recipe = undefined;
  import router from 'page';
  let lastPage = page;
- $:console.log('MainView got page:',page,'detail:',detail);
+ $:console.log('PAGE: MainView got page:',page,'detail:',detail);
  $: {
      if (page != lastPage ) {
+         console.log('PAGE',page,'switching from ',lastPage);
          router(`/main/${page}`);
+         lastPage = page;
+     } else {
+         console.log('PAGE ',page,'NO SWITCH needed');
      }
  }
-
+ 
  import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import RecipeList from '../recDisplay/RecipeList.svelte';
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
