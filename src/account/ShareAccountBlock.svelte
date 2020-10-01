@@ -13,10 +13,7 @@
 
 <h3>Share Account</h3>
 <div>
-    Want to make sure your domestic partner can access all your recipes on their device without having to sign in as you?
-    You can let them access through their own email account by adding the email here.
-    The account you share with will have all the same control as you over your recipe collection,
-    so please only share with someone you trust.
+    You can give a spouse or family member total access to your account by adding their email here. The account you share with will have all the same control as you over your recipe collection, so only share with someone you trust.
 </div>
 {#if $user.remoteUser.dbUser.linkedAccounts} <!-- If we share our account... -->
     <b>You currently share your account with:
