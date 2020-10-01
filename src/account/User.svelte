@@ -47,6 +47,10 @@
                 <ShareAccountBlock/>
             {/if}
 
+            <h3>Subscribe</h3>
+            <div>
+                There are no subscriptions required or available yet, but eventually this service will probably require some level of subscription to pay for my server fees. You <em>can</em> <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WK4V83SNX38AJ" target="_blank"><b>donate</b></a> money to me to support ongoing development.</div>
+
             <h3>Change Name</h3>
             <div>Your user name isn't really used for anything, but go ahead and change it if it makes you happy!
             </div>
@@ -60,11 +64,6 @@
                 <label>Name:</label>
                 <input bind:value="{newName}">
             </FormTask>
-
-            <h3>Subscribe</h3>
-            <div>
-                I'm just kidding -- I'm still just getting this thing ready. But you <em>can</em> donate money to me. And eventually this service will probably require some level of subscription to pay for my server fees and such.
-            </div>
 
             <h3>Changing Email?</h3>
             <div>
@@ -80,13 +79,13 @@
     {/if}
 
     <!-- spacer. stuff to be removed -->
-    <div style="height:5em"></div>
-    Fake user (local dev mode only):
-    <br>Name: <input bind:value="{name}" >
-    <br>Email: <input bind:value="{email}" >
-    <button on:click="{user.fake({name,email})}">Set Fake User</button>
-    
-    User Data:<JsonDebug data="{$user}"/>
+    <!-- <div style="height:5em"></div>
+         Fake user (local dev mode only):
+         <br>Name: <input bind:value="{name}" >
+         <br>Email: <input bind:value="{email}" >
+         <button on:click="{user.fake({name,email})}">Set Fake User</button>
+         
+         User Data:<JsonDebug data="{$user}"/> -->
 </div>
 
 <style>
@@ -98,6 +97,7 @@
  }
  div :global(h3) {
      margin-top: 1em;
+     margin-bottom: 0;
      font-weight: bold;
      font-size: 1.5rem;
      font-family: var(--uiFont);
@@ -112,7 +112,9 @@
      margin: auto;
      font-family: var(--recipeFont);
      font-size: 1rem;
+     line-height: 1.6;
  }
+ 
  div :global(p),:global(h2),:global(h3) {
      margin-bottom: 1rem;
  }
