@@ -69,7 +69,7 @@
 
  
  let search = '';
- let sort;
+ let sort={prop:'last_modified',reverse:true};
  let searchInput = '';
  let updateSearchDebounced = _.debounce(val => {search = val}, 250)
  $: updateSearchDebounced(searchInput);
@@ -171,7 +171,6 @@
  }
  
 </script>
-
 <Bar z="{3}" growLeft="{true}"> 
     <div slot="left" class="searchBar" class:searching={$recipeActionGeneralState.querying}>
         <span style="align-self: flex-start" >Search:</span>
@@ -244,6 +243,7 @@
         <slot name="right"/>
     </div>
 </Bar>
+
 
 {#if areSelected}
     <div transition:slide>
