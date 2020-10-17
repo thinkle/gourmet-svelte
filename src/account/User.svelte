@@ -72,7 +72,7 @@
         {/if}
     {:else}
         <section>
-        Hmm... we don't seem to have your user info.
+            Hmm... we don't seem to have your user info. <br>If you've already logged in and you keep seeing this message, just try <a on:click="{()=>window.location.reload()}">refreshing the page</a> as that usually does the trick.
         <FormTask icon="refresh" promiseAction="{user.getRemoteUser}" inline="true"/>
         <Button on:click="{doLogout}">Logout</Button> <Button on:click="{doLogin}">Login</Button>
         </section>
