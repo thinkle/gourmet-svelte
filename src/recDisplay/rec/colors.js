@@ -31,7 +31,7 @@ let color
      {matcher:/\bsea\b|fish|salmon|crab|lobster|squid|calamar/i, color : {bg: '#0077BE',
                                                                           fg:'#dedefe'}}, // - ocean blue
      // courses
-     {matcher:/cookie|bread/i, color:{bg:'#fdcf4c',fg:'#4c2307'}}, // beige
+     {matcher:/cookie|bread/i, color:{bg:'#eed9a0',fg:'#4c2307'}}, // beige
      {matcher:/dessert/i, color: {bg:'#FF3366',fg:'#ffdede'}}, // red/pink
      {matcher:/salad/i, color: {bg:'#bdeabd',
                                 fg:'#133f13'
