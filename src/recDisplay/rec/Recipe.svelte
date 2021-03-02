@@ -487,16 +487,17 @@
  }
 
 
- .timeSummary {
-     max-height: 65vh;
-     transition: all 600ms;
-     opacity: 1;
-     overflow-y: scroll;
+ .timeSummary {     
+     transition: all 300ms; /* scaled to oversized max-height */
+     min-height: 100px;
+     opacity: 1;     
+     max-width: 95%;
  }
  .hidden {
      opacity: 0;
  }
  .timeSummary.hidden {
+     min-height: 0;
      max-height: 0;
      overflow-y: hidden;
  }
