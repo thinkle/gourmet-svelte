@@ -85,9 +85,12 @@
      and adds them to it.
 -->
 {#each components as component,i}
-    <span use:addSelfToDom={i}><svelte:component  this={components[i].type} bind:this={components[i].component} {...mapAttrs(components[i].node.attributes)} >
-        {@html components[i].node.innerHTML}
-    </svelte:component></span>
+    <span use:addSelfToDom={i}><svelte:component  
+        this={components[i].type} 
+        bind:this={components[i].component} 
+        {...mapAttrs(components[i].node.attributes)} ><!-- no whitespace!
+        -->{@html components[i].node.innerHTML}<!-- no whitespace!
+    --></svelte:component></span>
 {/each}
 <style>
  div {
