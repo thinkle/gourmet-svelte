@@ -1,60 +1,3 @@
-* set up initial testing framework (x)
-* set up mocking framework (x)
-* set up simple widget demos/tests for quick development cycles (x)
-* set up initial svelte stuff (x)
-* create side-by-side scrolly ingredient view (x)
-* define basic API mocks to show how we will retrieve recipe data (x)
-* define basic API mocks to show how we will save recipe data (x)
-* Mock up basic UI for editing recipe ______ (x)
-* Decide on some kind of store/data model. We will eventually need to deal with some significant complexity / support the possibility of auto-save, offline vs. online saving, yada yada yada (x)
-* Bind ingredients list the same way you do recprop and rectext (x)
-* Simplify the damned data model already (? - maybe did that?) (ish) (x)
-* Set up basic code for caching recipe changes / working offline (Hey - that works!) (x)
-* Set up faunadb and netlify for testing (x)
-* Implement user authentication model (https://docs.fauna.com/fauna/current/tutorials/authentication/user.html)
-  -> Actually, we set up netlify identity service as a stand-in... might be worth abstracting this out a bit... presumably we'll change
-     identity solutions in time. (x)
-  -> Ok, actually, faunadb + GraphQL is kind of a time-suck and then faunadb doesn't support
-     custom interfaces anyway and ends up creating a whole bunch of collections for my schema
-     which kind of feels like SQL anyway and defeats the whole purpose of using a NoSQL DB, right?
-     So I'm switching course to MongoDB. (x)
-
-     - MongoDB seems simple, open source, so far so good.
-     - Not sure it's worth using "Mongoose" and schema with it. If I understand it, this puts a bunch
-       of validation and stuff in the middle layer. I may regret this later, but since the middle layer
-       is the layer I'm potentially paying for, I might rather push validation onto clients where their
-       computers can run the logic and keep my netlify function layer as thin as possible.
-* initial implementation of a remote recipe db implementation (x)
-* Update recipe model to handle syncing to remote DB
-  -> Grab from remote DB (x)
-     - how to sync the ID's / version #'s... ? (let's just use modified time stamps for now...) (x)
-  -> Compare to local DB (x)
-  -> Maybe come up with some way to version / avoid grabbing remote data if we don't need to? (x)
-* Update display to handle new layout (x)
-* Build handy little link conveniences (auto-timers, ingredient highlighter)
-  - part way: I have a way to insert custom widgets into code blocks
-* Build editor widget types for recipe editing (x)
-
-* Build out chrome extension / translation of react extension for importing recipes
-  -> Get svelte compiling into extension (x)
-  -> Set up sidebar to communicate with website so we can run ourselves in a sidebar (x)
-  -> Set up right-click actions to allow interacting with existing recipes (x)
-  -> Set up test harness for moving from magic parser to parsed recipe to import UI (x)
-         - Is import UI different from editing UI? How? (x)
-         - Is Import UI different from mark-up on the page? How? 
-
-         Option 1: mark-up items on the page, bring them in. Some smarts must be applied in converting marked up text to JSON. (x)
-         Option 2: interpret the page directly, some smarts need be applied. (x)
-
-         We generate JSON with a bunch of "pieces" that need to be parsed into items. I guess option three is figuring out how to "add" those pieces. (x)
-
-  -> Set up magic links and stuff (x)
-  -> Think through login business... (x)
-
-- Improve side-by-side widget code. (x)
-- Support adding new linked recipes as ingredients (x)
-- Make chrome extension a bit more slick... (x)
-
 * Next up:
 - Make chrome extension notice when we've already imported a page. 
 - Make chrome extension "helper" view
@@ -66,69 +9,6 @@
         or triple import the same stuff when automatically parsing, and if we
         could clear that up, it would be much better.
 
-
-- Add shopping list support (x)
-  > A shopping list is a recipe w/ only ingredients (?) (x)
-  > We fetch the ingredients from nested recipes - otherwise our display is pretty similar (x)
-  > We add metadata to ingredients as needed (shopping item) (x)
-  > We make shopping display of ingredient (shopping item vs. regular item) (x)
-  > We add metadata to ingredients (don't buy/buy) -> implemented shopIgnore and shopItem (x)
-
-- Fix source on import (it's not always adding the website for some reason) (x)
-- Consider module reorganization before release... (x)(x)
-- Think through basic UI layout for mobile/app/etc. (x)
-- Figure out why we can't use keyed lists for the RecipeList - is our store giving us
-  pages with repeats? Why? (x)
-- Add "delete" functionality. (ok, I can't bring myself to add user-unfriendly delete... we'll go ahead
-  and implement a deleted property the right way --i.e. trash) (x)
-- Implement infinite scroll (x)
-- Make it so syncing doesn't bring 50 recipes into the recipe view (x)
-
-- Fix syncing UI (x)
-  -> Store time of last sync in localStorage (x)
-  -> Automatically sync if we haven't synced yet... (x)
-  -> Automatically offer to sync after given time period... (x)
-  -> Offer way to sync manually as needed. (x)
-  -> Pretty up progress bars & "toaster" sync (x)
-
-- Sorting of recipes - basic support (x)
-- Fix recipe display / width issues (x)
-- Fix up placeholders/empty state (x)
-
-- Build extension recipe highlighting magic (x)
-- Fix RegExps for Firefox compatability (x)
-
-- Shopping lists don't transfer properly between browsers since they
-  use local IDs atm. The "right" fix is probably to automatically fix
-  all recipe references when saving remotely, which means when we save
-  an item with a remote recipe, we (1) check for remote ID (2) save
-  that recipe remotely if it's not already saved (3) change local IDs
-  to remote IDs (4) save remotely (5) update local copy w/ new IDs (x)
-
-- Improve magic ingredient editor code (change on the fly?) (x)
-- Build smart auto-complete for category (and source?) fields (x)
-
-- Fix ShoppingList syncing - we actually are very likely to be adding recipes from other tabs
-  etc. in a standard workflow so I've got to figure this out...
-  > Plan:
-    - Front-end needs to know when it last synced...
-    - Backend needs to know...
-      -> If the front-end was starting from the same version that's on the backend, replace when we update
-      -> If the front-end was starting from a different version than is on the backend, merge when we update
-      -> This means the backend must... update a "version" each time we commit
-      -> Can we just use last_modified?
-         Currently: last_modified is updated on clientside before push (or not if we're saving without a real difference)
-         -> We also have a savedRemote which is a boolean -- maybe that becomes a timestamp? 
-         -> Simpler, given current DB, is to add a new property "last_remote_save" that we add on MongoDB side. (x)
-  > Think through "add to shopping list" button
-    - EITHER
-      -> Fetch fresh shopping list before added if we haven't made local changes
-    - OR
-      -> Consider implementing back-end first shopping list updates (x)
-    -> Consider making all the shopping list changes save right away. (x)
-- Make image editable (x)
-- Consider implementing new Request API to add error-checking and clearer code to requests. (x)
-   -> mocked up in Request.js (x)
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
   up. (speaking of - we broke recipe editing state updates again
@@ -137,21 +17,7 @@
   -> Note: I've built a framework for testing the recipe widget simply enough
   -> Testing save/edit buttons involves either having or mocking state and store
      which is rather a pain...
-- Tweak new recipe empty states (x)
-- Fix new recipe not focusing (x)
-- Fix Mark User Not New (x)
-  -> get it to close dialog smoothly
-- Troubleshoot issues w/ shopping list not seeming to sync correctly. (x)
-- Publish chrome extension
-  -> Get icons/graphics ready for chrome extension store thing (x)
-  -> Allow user to interface with JSON imports (x)
-     -> We added an "alternatives" to the recipe with our different options... now we should be able
-        to just add a user toggle to move between them.
-  -> Have importer give back multiple recipes so we can let user choose? (x)
-- Fix search bar on mobile (x)
-- Fix shopping list updates from multiple browsers... (x)
-- Make syncing thing less annoying (fixed bug in close button...) (x)
-- Simple import from file functionality (maybe?) (x)
+
 
 TODO:
 
@@ -170,7 +36,15 @@ Maybe before publish?
   link public -- when people follow the link they get a recipe they
   can copy to their DB (we strip the _ID and owner from it when
   downloading...?)
+  => Flag to be public or not
+  => Links to public recipes work for anyone
+  => You can add a recipe?
+     => recipes as ingredients get added recursively
+  => Copy recipe ability...
+  
 
+Quick Fix:
+-> grams / second unit import (NYTimes!!!)
 
 
 - Publish version 1
@@ -180,7 +54,6 @@ Maybe before publish?
 - Fix sorting in firefox?
 
 Wishlist / Next version
-
 - Update routing so back buttons work to move you from e.g. recipe list to open recipe to shopping list
 - Save "purchased" state of shopping list items 
 - Tweak layout on mobile.
@@ -189,4 +62,8 @@ Future
 - i18n
 - Look into FF extension/other browser extensions
 
+
 - Consider moving more work to webworkers? e.g. recipe parsing?
+
+- Set up DEV version + Stable version (???)
+- Nutrition!
