@@ -43,7 +43,7 @@
                 `}"
          class:stackMode
     >
-        <div class="side l" style="{`width:${leftWidth}px`}">
+        <div class="side l" style="{!stackMode && `width:${leftWidth}px`}">
 	    <div class="head scrollHead">
 	        <slot name="leftHead">
 	        </slot>
@@ -98,8 +98,25 @@
      overflow-y: scroll;
  }
  .scrollBox {
-     overflow-y: scroll; 
+     overflow-y: scroll;      
  }
+
+ .scrollBox::-webkit-scrollbar-track {
+  padding: 2px 0;
+  background-color: var(--light-bg);
+}
+
+.scrollBox::-webkit-scrollbar {
+  width: 5px;
+}
+.stackMode .scrollBox::-webkit-scrollbar {
+    width: 0px;
+}
+.scrollBox::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: var(--accent-bg);
+}
+
  .l {
      max-width: var(--max-left);
      padding-left: var(--side-pad);
@@ -111,6 +128,7 @@
  }
  .stackMode .l,.stackMode .r {
      height: auto;
+     margin: auto;
  }
  
 </style>
