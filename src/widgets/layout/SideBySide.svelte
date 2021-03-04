@@ -7,17 +7,34 @@
  export let maxWidthRight = undefined;
 
  import FullHeight from './FullHeight.svelte';
+ import {IconButton} from '../';
  import {registerBuild} from '../../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
  import {onMount} from 'svelte';
  import {Resizer} from '../';
  let stackMode = false;
  let ref
-
+ let leftSideRef;
+ let leftOffScreen = false;
  let initialLeftWidth
  import {watchResize} from 'svelte-watch-resize';
-
+ var observer;
  onMount(
      ()=>{
+        observer = new IntersectionObserver(
+        (entries)=>{
+            if (!leftSideFlyIn) {
+                if (entries[0].isIntersecting === true) {
+                    console.log('left side visible',entries[0].intersectionRatio);
+                    leftOffScreen = false;
+                } else {
+                    console.log('left side not visible',entries[0].intersectionRatio);
+                    leftOffScreen = true;
+                }
+            }
+        },
+        {threshold : [.2]}
+
+     );
  });
 
 
@@ -30,7 +47,27 @@
      }
  }
 
+ let leftSideFlyIn = false;
+ let flyDistance = 0;
+ let extraFlyInPad = 30
+ function toggleLeftSideFlyIn () {
+    leftSideFlyIn = !leftSideFlyIn;
+    flyDistance = leftSideRef.parentElement.scrollTop;
+    leftSideRef.style = leftSideFlyIn && `
+        transform: translateY(${flyDistance+extraFlyInPad}px);
+        border: 3px solid var(--accent-bg);
+        background-color: var(--white);
+        color: var(--black);
 
+    ` || ''
+    console.log('toggled flyIn',leftSideFlyIn,flyDistance,leftSideRef)
+ }
+
+ $: { 
+     if (leftSideRef) {    
+        observer.observe(leftSideRef);
+    }
+ }
 </script>
 
 <FullHeight>
@@ -43,12 +80,18 @@
                 `}"
          class:stackMode
     >
-        <div class="side l" style="{!stackMode && `width:${leftWidth}px`}">
+        <div class="side l" style="{!stackMode && `width:${leftWidth}px`}" bind:this={leftSideRef}>
+            {#if leftSideFlyIn}
+            <div style={`position:absolute; right: 3px; top: -${extraFlyInPad}px;`}>
+            <IconButton icon="close" on:click={toggleLeftSideFlyIn}/>
+            </div>
+        {/if}
 	    <div class="head scrollHead">
 	        <slot name="leftHead">
-	        </slot>
-	    </div>
-	    <div class="scrollBox">
+	        </slot>            
+	    </div>        
+	    <div class="scrollBox" >
+           
 	        <slot name="left"></slot>
 	    </div>
 	    
@@ -59,6 +102,9 @@
                 onDrag="{(dx)=>leftWidth=initialLeftWidth-dx}"
             />
         {/if}
+        <div class:showHandle={leftOffScreen && !leftSideFlyIn} class="mobileHandle" on:click={toggleLeftSideFlyIn}>
+            <slot name="leftHandle">ING</slot>
+        </div>
         <div class="side r">
 	    <div class="head scrollHead">
 	        <slot name="rightHead">
@@ -69,6 +115,9 @@
 	    </div>
 	    
         </div>
+
+        
+
     </div>
 </FullHeight>
 
@@ -129,6 +178,38 @@
  .stackMode .l,.stackMode .r {
      height: auto;
      margin: auto;
+ }
+
+ .stackMode .l {
+     transition: all 300ms;
+ }
+
+ .mobileHandle {
+     display: none;
+     transition: opacity 300ms; 
+ }
+ .stackMode .mobileHandle {
+     display: flex;
+     opacity: 0;
+ }
+.showHandle.mobileHandle {
+    opacity: 1;
+}
+
+ .mobileHandle {
+     position: sticky;
+     top: 10px;
+     margin-left: auto;
+     margin-right: var(--side-pad);
+     width: 50px;
+     height: 50px;
+     margin-top: -50px;
+     background-color: var(--accent-bg);
+     color: var(--accent-fg);
+     text-align: center;
+     border-radius: 50%;
+     align-items: center;
+     justify-content: center;
  }
  
 </style>
