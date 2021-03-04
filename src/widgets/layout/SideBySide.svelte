@@ -157,11 +157,6 @@
      overflow-y: scroll;      
  }
 
- .scrollBox::-webkit-scrollbar-track {
-  padding: 2px 0;
-  background-color: var(--light-bg);
-}
-
 .scrollBox::-webkit-scrollbar {
   width: 5px;
 }
