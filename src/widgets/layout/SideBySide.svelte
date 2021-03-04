@@ -24,11 +24,15 @@
         (entries)=>{
             if (!leftSideFlyIn) {
                 if (entries[0].isIntersecting === true) {
-                    console.log('left side visible',entries[0].intersectionRatio);
                     leftOffScreen = false;
                 } else {
-                    console.log('left side not visible',entries[0].intersectionRatio);
                     leftOffScreen = true;
+                }
+            } else {
+                /* If we scroll back up, put the ingredients back where they started */
+                if (!entries[0].isIntersecting) {
+                    leftSideFlyIn = false;
+                    leftSideRef.style = ''
                 }
             }
         },
@@ -57,6 +61,9 @@
         transform: translateY(${flyDistance+extraFlyInPad}px);
         border: 3px solid var(--accent-bg);
         background-color: var(--white);
+        opacity: 1;
+        position: relative;
+        z-index: 2;
         color: var(--black);
 
     ` || ''
@@ -187,6 +194,7 @@
  .mobileHandle {
      display: none;
      transition: opacity 300ms; 
+     z-index: 2;
  }
  .stackMode .mobileHandle {
      display: flex;
