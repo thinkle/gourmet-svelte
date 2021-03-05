@@ -4,7 +4,15 @@ import api from '../data/remoteApi.js';
 import netlifyIdentity from 'netlify-identity-widget'
 
 import {
-    getUserRequest
+    getUserRequest,
+    setFakeUserRequest,
+    removeLinkedAccountRequest,
+    addLinkedAccountsRequest,
+    setLinkedAccountsRequest,
+    setNameRequest,
+    markUserNotNewRequest,
+    acceptLinkedAccountRequest,
+
 } from '../data/requests/';
 
 const mock = {
@@ -75,8 +83,8 @@ function createUser() {
     async function getRemoteUser () {
         let $user = get(userStore);
         if ($user) {
-            let remoteInfo = await api.doFetch('echo',$user);
-            let remoteUser = remoteInfo.user;
+            //let remoteInfo = await api.doFetch('echo',$user);
+            let remoteUser = await getUserRequest.makeRequest($user);
             userStore.update(
                 ($user)=>{
                     $user.remoteUser = remoteUser
@@ -95,7 +103,11 @@ function createUser() {
         subscribe,
         fake (u) {
             set(u);
-            api.doFetch('setFakeUser',get(userStore),u).then(
+            //api.doFetch('setFakeUser',get(userStore),u)
+            setFakeUserRequest.makeRequest(
+                {user:get(userStore),params:u}
+            )
+            .then(
                 ()=>{
                     console.log('Told Remote to Faked user: ',u)
                     getRemoteUser();
@@ -107,49 +119,72 @@ function createUser() {
             );
         },
         async removeLinkedAccount () {
-            let result = await api.doFetch(
+            let result = await removeLinkedAccountRequest.makeRequest(
+                {user:get(userStore)}
+            )
+            /* let result = await api.doFetch(
                 'removeLinkedAccount',
                 get(userStore),
                 {}
-            );
+            ); */
             updateDBUser(result);
             return
             
         },
         async acceptLinkedAccount (account) {
-            let result = await api.doFetch(
+            /* let result = await api.doFetch(
                 'acceptLinkedAccount',
                 get(userStore),
                 {account}
+            ); */
+            let result = await acceptLinkedAccountRequest.makeRequest(
+                {user:get(userStore),
+                params:{account}}
             );
             updateDBUser(result);
             return
         },
         async setInvites (accounts) {
-            let result = await api.doFetch(
+            /* let result = await api.doFetch(
                 'setLinkedAccounts',
                 get(userStore),
                 {accounts}
-            );
+            ); */
+            let result = await setLinkedAccountsRequest.makeRequest(
+                {user:get(userStore),
+                params:{accounts}}
+            )
             updateDBUser(result);
             return
         },
         async addInvite (account) {
-            let result = await api.doFetch(
+            /* let result = await api.doFetch(
                 'addLinkedAccounts',
                 get(userStore),
                 {accounts:[account]}
-            );
+            ); */
+            let result = await addLinkedAccountsRequest.makeRequest(
+                {user:get(userStore),
+                params:{accounts:[account]}}
+            )
             updateDBUser(result);
             return
         },
         async setName (newName) {
-            let dbuser = await api.doFetch('changeName',get(userStore),{name:newName})
+            //let dbuser = await api.doFetch('changeName',get(userStore),{name:newName})
+            let dbuser = await setNameRequest.makeRequest(
+                {
+                    user:get(userStore),
+                    params:{name:newName},
+                }
+            )
             updateDBUser(dbuser)            
         },
         async markNotNew (newName) {
-            await api.doFetch('markUserNotNew',get(userStore),{})
-            await getRemoteUser()
+            await markUserNotNewRequest.makeRequest({user:get(userStore)});
+            await getRemoteUser();
+            /* await api.doFetch('markUserNotNew',get(userStore),{})
+            await getRemoteUser() */
         },
         getRemoteUser,
         login(user) {
@@ -162,9 +197,10 @@ function createUser() {
                 token_type: user.token.token_type,
             }
             set(currentUser)
-            api.doFetch('echo',currentUser).then(
-                (result)=>{
-                    currentUser.remoteUser = result.user
+            // api.doFetch('echo',currentUser)
+            getUserRequest.makeRequest({user:currentUser}).then(
+                (user)=>{
+                    currentUser.remoteUser = user
                     set(currentUser);
                     if (netlifyIdentity.gotrue) {
                         netlifyIdentity.gotrue.currentUser().update({

@@ -1,34 +1,16 @@
 import {registerHandlerObject} from '../requests/remoteRequest.js'
-import loadIt from './recipeFunctions.js';
-import loadItToo from './importRecipeFunction.js'
+import './recipeFunctions.js';
+import './importRecipeFunction.js';
+import './nutritionFunctions.js';
+
 const requestHandlers = {
 }
 registerHandlerObject(requestHandlers);
 
 import {DB} from './mongoConnect.js';
-import setupHandler from './setupDB.js';
-import {getFakeUser,fakeUser,setFakeUser} from './netlifyDevUserMock.js';
-import {getUser,
-        addLinkedAccounts,
-        setLinkedAccounts,
-        acceptLinkedAccount,
-        changeName,
-        markUserNotNew,
-        userCache} from './userFunctions.js';
-
-const functions = {
-    setup : setupHandler,
-    echo,
-    throwError,
-    getUser,
-    setLinkedAccounts,
-    markUserNotNew,
-    changeName,
-    addLinkedAccounts,
-    setFakeUser,
-    acceptLinkedAccount,
-    //...recipeApi
-}
+import './setupDB.js';
+import {fakeUser} from './netlifyDevUserMock.js';
+import {userCache,getUser} from './userFunctions.js';
 
     
 const handler = async (event, context) => {
@@ -52,7 +34,7 @@ const handler = async (event, context) => {
     } = context.clientContext
     if (!user && event.headers.referer.indexOf('localhost')>-1) {
         console.log('fakeUser:',fakeUser);
-        user = getFakeUser()
+        user = fakeUser;
         user.extraApiStuff = 'fakey fake fake stuff'
     }
     if (user && userCache[user.email]) {
@@ -72,7 +54,6 @@ const handler = async (event, context) => {
     let body, error
     // new way
     if (requestHandlers[params.mode]) {
-        console.log('Using new fangled requestHandler for ',params.mode);
         let handler = requestHandlers[params.mode]
         try {
             body = await handler(user,params);
@@ -81,22 +62,7 @@ const handler = async (event, context) => {
             error = err;
             //console.log('Got error',error);
         }
-    } else {
-        // old way -- once we transition to new system, we can delete this code
-        let f = functions[params.mode]
-        //console.log('Request',params.mode,params.params)
-        if (!f) {
-            return {
-                statusCode:400,
-                body:JSON.stringify({error:`No function associated with requested mode ${params.mode}`}),
-            }
-        }
-        try {
-            body = await f(event,context,user,params)
-        } catch (err) {
-            error = err;
-        }
-    }
+    } 
     if (body) {
         //console.log('Return response');
         return {
@@ -118,19 +84,23 @@ const handler = async (event, context) => {
     }
 }
 
+// A couple of utility functions
+import {EchoRequest,ThrowErrorRequest} from '../requests/index.js';
 
-function echo (event,context,user,params) {
+EchoRequest.setRequestHandler((user,params) => {
     return {params,
             DB,
             user:user,
-            context,event}
-}
+            }
+    }
+);
 
-function throwError () {
-    let duck = {}
-    duck.boo.bar += 7;
-}
+ThrowErrorRequest.setRequestHandler(
+    ()=>{
+        let duck = {};
+        duck.boo.bar += 7;
+    }
+);
 
-//console.log('hello world');
 
 exports.handler = handler;

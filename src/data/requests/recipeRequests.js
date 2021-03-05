@@ -72,3 +72,10 @@ export const importRecipesRequest = Request(
      },
      responseDef:[]}
 );
+
+export const getSharedRecipeRequest = Request(
+    {name:'getSharedRecipe',
+     requestDef:{_id:''},
+     responseDef:validRec,
+     chatty:true
+    });

@@ -1,11 +1,20 @@
 import {insertOne,insertMany,queryCollection,getOne,updateOne,replaceOne} from './mongoConnect.js';
-import {getUserRequest} from '../requests/index.js';
+import {
+    getUserRequest,
+    acceptLinkedAccountRequest,
+    setLinkedAccountsRequest,
+    addLinkedAccountsRequest,
+    setNameRequest,
+    markUserNotNewRequest,
+    removeLinkedAccountRequest,
+    setFakeUserRequest,
+} from '../requests/index.js';
 export const userCache = {
     
 }
 
-const cache =  (f) => async (event,context,user,params)=>{
-    let result = await f(event, context, user, params);
+const cache =  (f) => async (user,params)=>{
+    let result = await f(user, params);
     userCache[user.email] = result;
     return {
         ...userCache[user.email],
@@ -16,8 +25,6 @@ const cache =  (f) => async (event,context,user,params)=>{
 export async function add (user) {
     return insertOne('users',user)
 }
-
-
 
 export async function getUser (user) {
     console.log('getUser!',user);
@@ -57,77 +64,86 @@ export async function getUser (user) {
 
 getUserRequest.setRequestHandler(getUser);
 
-
-
 async function checkForLinkInvites (email) {
     return queryCollection('users',{linkedAccounts:email})
 }
 
 
-export const removeLinkedAccount = cache(async function (event, context, user, params) {
-    console.log('removeLinkedAccount for ',user,params);
-    let dbUser = user.dbUser;
-    dbUser.linked = undefined;
-    replaceOne('users',{_id:dbUser._id},dbUser);
-    return dbUser
-});
+removeLinkedAccountRequest.setRequestHandler(cache(
+    async function (user, params) {
+        console.log('removeLinkedAccount for ',user,params);
+        let dbUser = user.dbUser;
+        dbUser.linked = undefined;
+        replaceOne('users',{_id:dbUser._id},dbUser);
+        return dbUser
+    })
+);
 
-
-export const acceptLinkedAccount = cache(async function (event, context, user, params) {
-    console.log('acceptLinkedAccount for ',user,params);
-    let dbUser = user.dbUser;
-    let otherAccount = await getOne('users',{email:params.account})
-    if (otherAccount && otherAccount.linkedAccounts && otherAccount.linkedAccounts.includes(user.email)) {
-        dbUser.linked = params.account
-        replaceOne('users',{email:user.email,_id:dbUser._id},dbUser)
-    } else {
-        throw new Error(
-            `No invite for user ${user.user} to account ${params.account}`
-        );
-    }
-    return dbUser
-});
-
-export const addLinkedAccounts = cache(async function (event,context,user,params) {
-    let linkedAccounts = params.accounts;
-    let dbUser = user.dbUser;
-    if (dbUser.linkedAccounts) {
-        if (!Array.isArray(dbUser.linkedAccounts)) {
-            console.log('bad linkedAccounts stored: not an array',dbUser.linkedAccounts);
-            dbUser.linkedAccounts = []
+acceptLinkedAccountRequest.setRequestHandler(
+    cache(
+        async function (user,params) {
+            console.log('acceptLinkedAccount for ',user,params);
+            let dbUser = user.dbUser;
+            let otherAccount = await getOne('users',{email:params.account})
+            if (otherAccount && otherAccount.linkedAccounts && otherAccount.linkedAccounts.includes(user.email)) {
+                dbUser.linked = params.account
+                replaceOne('users',{email:user.email,_id:dbUser._id},dbUser)
+            } else {
+                throw new Error(
+                    `No invite for user ${user.user} to account ${params.account}`
+                );
+            }
+            return dbUser
         }
-        dbUser.linkedAccounts = [...new Set([...dbUser.linkedAccounts,...linkedAccounts])]
-    } else {
-        dbUser.linkedAccounts = [...linkedAccounts];
-    }
-    return update({email:dbUser.email,_id:dbUser._id},dbUser);
-});
+    )
+)
 
-export const setLinkedAccounts = cache(
-    async function (event,context,user,params) {
+addLinkedAccountsRequest.setRequestHandler(
+    cache(async function (user,params) {
+        let linkedAccounts = params.accounts;
+        let dbUser = user.dbUser;
+        if (dbUser.linkedAccounts) {
+            if (!Array.isArray(dbUser.linkedAccounts)) {
+                console.log('bad linkedAccounts stored: not an array',dbUser.linkedAccounts);
+                dbUser.linkedAccounts = []
+            }
+            dbUser.linkedAccounts = [...new Set([...dbUser.linkedAccounts,...linkedAccounts])]
+        } else {
+            dbUser.linkedAccounts = [...linkedAccounts];
+        }
+        return update({email:dbUser.email,_id:dbUser._id},dbUser);
+}));
+
+setLinkedAccountsRequest.setRequestHandler(
+    cache(
+    async function (user,params) {
         let linkedAccounts = params.accounts;
         let dbUser = user.dbUser;
         dbUser.linkedAccounts = params.accounts
         return update({_id:dbUser._id},dbUser);
     }
-);
+));
 
-export const markUserNotNew = cache(async function (event, context, user, params) {
-    console.log('markUserNotNew Upated!')
-    //let result = await updateOne('users',{_id:user.dbUser._id},{$set:{newUser:false}});
-    user.dbUser.newUser = false;
-    let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
-    console.log('markUserNotNew Upated!',result)
-    return result
-});
+markUserNotNewRequest.setRequestHandler(
+    cache(async function (user, params) {
+        console.log('markUserNotNew Upated!')
+        //let result = await updateOne('users',{_id:user.dbUser._id},{$set:{newUser:false}});
+        user.dbUser.newUser = false;
+        let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
+        console.log('markUserNotNew Upated!',result)
+        return result
+    })
+);
                                 
-export const changeName = cache(async function (event, context, user, params) {
-    //let result = await updateOne('users',{_id:user.dbUser._id},{$set:{name:params.name}});
-    user.dbUser.name = params.name;
-    user.name = params.name
-    let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
-    return result;
-});
+setNameRequest.setRequestHandler(
+    cache(async function (user, params) {
+        //let result = await updateOne('users',{_id:user.dbUser._id},{$set:{name:params.name}});
+        user.dbUser.name = params.name;
+        user.name = params.name
+        let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
+        return result;
+    })
+);
 
 async function update (query, user) {
     console.log('Update',query,user);

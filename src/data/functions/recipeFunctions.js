@@ -8,7 +8,8 @@ import {addRecipeRequest,
         mostRecentRequest,
         updateRecipeRequest,
         getRecipeRequest,
-        getRecipesRequest
+        getRecipesRequest,
+        getSharedRecipeRequest,      
         } from '../requests/index.js';
 
 export async function getMostRecent (user) {
@@ -158,6 +159,20 @@ export async function getRecipe (user,params) {
 
 getRecipeRequest.setRequestHandler(getRecipe)
 
+export async function getSharedRecipe (user,{_id}) {
+    // FIX ME: We should check that the recipe is actually shared by adding a parameter to getOne, but this will
+    // let us test easier for now... FIXME FIXME FIXME
+    let recipe = await getOne('recipes',{_id})
+    if (recipe) {
+        return recipe
+    } else {
+        throw Error(`No recipe found @ id ${_id}`);
+    }
+}
+
+getSharedRecipeRequest.setRequestHandler(getSharedRecipe);
+
+
 export async function getRecipes (user,params) {
         let {page,query,fields,limit} = params;
         // Enforce user only searches own recipes!
@@ -280,4 +295,3 @@ function makeIngredientsExpression ({newIngs, oldIngs}) {
     }
 }
 
-export default 'loaded'

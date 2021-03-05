@@ -93,8 +93,11 @@ export function Request ({
                 throw e.error;
             }
         },
-        setRequestHandler (f) {
-            async function handleRequest (user, params) {
+        /** 
+        * @param {requestCallback} cb - callback(user, params) 
+        */
+        setRequestHandler (f) {           
+            async function handleRequest (user, params) {                
                 let result = await f(user,params);
                 try {
                     validate(result,responseDef);

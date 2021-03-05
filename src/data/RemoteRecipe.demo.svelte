@@ -4,15 +4,33 @@
  import { user, redirectURL } from '../stores/userStore.js';
  import {testRecs} from "../common/mocks/recipes.js";
  import deepcopy from 'deepcopy';
+ import {getNutrientInfoRequest,queryNutrientRequest} from './requests/index.js';
  let remoteApi
  $: remoteApi = RecipeApi($user);
  let selectedProp;
  
+function showData (d) {
+    console.log('Data:',d);
+    return jsonConcisify(d);
+}
+
  let promise
  let currentFunction
  let savedResults = []
  let theOne
  let functions = [
+     {
+         name:'queryNutrientRequest',
+         action:()=>{
+            promise = queryNutrientRequest.makeRequest({params:{query:'baked potato'}});
+         }
+    },
+    {
+        name: 'getNutrientInfoRequest',
+        action:()=>{
+            promise = getNutrientInfoRequest.makeRequest({params:{id:'1450081'}})
+        }
+    },
      {
          name:'Add recipe',
          action:()=>{
@@ -54,7 +72,7 @@
     {#if theOne}
     <div style="float:right;width:30%">
         <h2>The One</h2>
-        {jsonConcisify(theOne)}
+        {showshowData(theOne)}
     </div>
     {/if}
     {#each functions as f}
@@ -72,36 +90,36 @@
             Fetching data... {currentFunction}
         {:then data}
             <h3>Got data :)</h3> <button on:click={()=>savedResults = [data,...savedResults]}>save</button>
-            <div>{jsonConcisify(data)}</div> <p on:click={()=>theOne=data}>Make "the one"</p>
+            <div>{showData(data)}</div> <p on:click={()=>theOne=data}>Make "the one"</p>
             {#if data.result}
                 {#if Array.isArray(data.result)}
                     .result:
                     {#each data.result as item}
-                        <div on:click={()=>theOne=item}>{jsonConcisify(item)}</div>
+                        <div on:click={()=>theOne=item}>{showData(item)}</div>
                     {/each}
                 {:else}
-                    <div on:click={()=>theOne=data.result}>.result: {jsonConcisify(data.result)}</div>
+                    <div on:click={()=>theOne=data.result}>.result: {showData(data.result)}</div>
                 {/if}
             {/if}
 
         {:catch err}
             <h3>Got error :(</h3>
-            <div>{jsonConcisify(err)}</div>
+            <div>{showData(err)}</div>
         {/await}
     {/if}
 
     
     {#if savedResults}
         {#each savedResults as data}
-            <div>{jsonConcisify(data)}</div> <p on:click={()=>theOne=data}>Make "the one"</p>
+            <div>{showData(data)}</div> <p on:click={()=>theOne=data}>Make "the one"</p>
             {#if data.result}
                 {#if Array.isArray(data.result)}
                     .result:
                     {#each data.result as item}
-                        <div on:click={()=>theOne=item}>{jsonConcisify(item)}</div>
+                        <div on:click={()=>theOne=item}>{showData(item)}</div>
                     {/each}
                 {:else}
-                    <div on:click={()=>theOne=data.result}>.result: {jsonConcisify(data.result)}</div>
+                    <div on:click={()=>theOne=data.result}>.result: {showData(data.result)}</div>
                 {/if}
             {/if}
 

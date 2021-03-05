@@ -3,6 +3,7 @@
 import {loadDB,runTest,insertOne,insertMany,queryCollection} from './mongoConnect.js';
 import recs from '../recs.json'
 import {validateRec,prepRecsRemote} from '../validate.js'
+import {AdminSetupRequest} from '../requests/index.js'
 
 const functions = {
     mongoConnect : runTest,
@@ -12,7 +13,7 @@ const functions = {
         results.push(await functions.create_user_index());
         return results;
     },
-    has_access : async (event,context,user,params)=>{
+    has_access : async (user,params)=>{
         if (user.email=='tmhinkle@gmail.com') {
             return {access:true}
         }
@@ -35,12 +36,12 @@ const functions = {
             {'fullText':/oven/i},
             {});
     },
-    create_users : async (event, context, user, params)=>{
+    create_users : async (user, params)=>{
         let {client,db} = await loadDB();
         let result = await db.collection('users').drop();
     },
 
-    create_recipes : async (event,context,user,params)=>{
+    create_recipes : async (user,params)=>{
         if (params.user) {
             user = params.user // set up for user
         }
@@ -82,17 +83,17 @@ const functions = {
     },
 }
 
-export default async function (event, context, user, params) {
+AdminSetupRequest.setRequestHandler(
+    async function (user, params) {
     if (user && user.email=='tmhinkle@gmail.com') {
-        return functions[params.action](event,context,user,params)
-        //return {message:'Congratulations, you are allowed via my hard-coded non-secure security magic!'}
+        return functions[params.action](user,params)
     }
     else {
         return {message:'No way sir, no how no go: user not permitted!!,',
                 status:'ERROR',
                 user:user||'no user logged in'}
     }
-}
+});
 
 let actions = Object.keys(functions);
 export {actions}
