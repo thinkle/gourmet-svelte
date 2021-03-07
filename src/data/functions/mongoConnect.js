@@ -7,12 +7,28 @@ export const DB = 'MONGO_DB_NAME'
 
 var lastResult = undefined
 
+let cachedDB;
+
 export function getLastResult () {
     return lastResult;
 }
 
 export function loadDB (name=DB) {
     return new Promise ((resolve,reject)=>{
+        if (cachedDB) {
+            resolve(cachedDB);
+            console.log('Using cache - good idea? Maybe?');
+            if (cachedDb.client.serverConfig.isConnected()) {
+                console.log('probably was a good idea!')
+                //resolve(cachedDB);
+                //return
+            } else {
+                console.log('Have cachedDB but no connection?',cachedDB,cachedDB.client.serverConfig)
+            }
+            return;
+        }
+
+
         const client = new MongoClient(url, { useNewUrlParser: true });
         client.connect(err => {
             if (err) {
@@ -20,6 +36,7 @@ export function loadDB (name=DB) {
                 reject(err)
             }
             const db = client.db(name);
+            cachedDB = {client,db}
             resolve({
                 client,db
             });
