@@ -19,10 +19,10 @@
 
 </script>
 {#if show}
-    <section
+    <div
 	style="{`position:fixed;z-index:99;top:${y}px;left:${x}px;--width:${width}px;--pad:${pad}px;--arrow:${arrow}px`}"
     >
-        <div in:fade="{{delay:300,duration:300}}" out:fade="{{delay:400,duration:450}}"
+        <div class="tip" in:fade="{{delay:300,duration:300}}" out:fade="{{delay:400,duration:450}}"
 	     class:top={topMode}
 	     class:bottom={!topMode}
 	     class:right={rightMode}
@@ -31,10 +31,10 @@
 	>
             <slot/>{content}
         </div>
-    </section>
+    </div>
 {/if}
 <style>
- div {  
+ .tip {  
      pointer-events: none;
      background-color: var(--accent-bg, #555);
      color: var(--accent-fg, #fff);
@@ -64,7 +64,7 @@
      text-align: center;
  }
  /* arrows */
- div::before {
+ .tip::before {
      content:'';
      position: absolute;
      width: 0px;
@@ -91,6 +91,11 @@
      left: calc(var(--width)*2/3 - var(--arrow));
  }
  
+ @media print {
+     div {
+         display: none;
+     }
+ }
  
 </style>
 <svelte:options accessors/>

@@ -54,5 +54,14 @@
      left: 0;
      top: 0;
  }
+
+ @media print {
+     article {
+         display: block;
+         height: auto;
+         width: auto;
+         position: static;
+     }
+ }
  
 </style>

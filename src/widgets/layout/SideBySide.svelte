@@ -80,14 +80,13 @@
 <FullHeight>
     <div use:watchResize={handleResize} bind:this={ref} class="sidebyside"
          style="{`
-                width: ${stackSidesAt+2}; 
                 --max-width:${maxWidth};
                 --max-left:${maxWidthLeft};
                 --max-right:${maxWidthRight};
                 `}"
          class:stackMode
     >
-        <div class="side l" style="{!stackMode && `width:${leftWidth}px`}" bind:this={leftSideRef}>
+        <div class="side l" style="{!stackMode && `--left-width:${leftWidth}px`}" bind:this={leftSideRef}>
             {#if leftSideFlyIn}
             <div style={`position:absolute; right: 3px; top: -${extraFlyInPad}px;`}>
             <IconButton icon="close" on:click={toggleLeftSideFlyIn}/>
@@ -100,8 +99,7 @@
 	    <div class="scrollBox" >
            
 	        <slot name="left"></slot>
-	    </div>
-	    
+	    </div>	    
         </div>
         {#if !stackMode}
             <Resizer
@@ -119,15 +117,10 @@
 	    </div>
 	    <div class="scrollBox">
 	        <slot name="right"></slot>
-	    </div>
-	    
+	    </div>	    
         </div>
-
-        
-
     </div>
 </FullHeight>
-
 <style>
  .head > :global(*) {
      border-bottom: 1px solid var(--grey);
@@ -171,6 +164,7 @@
  .l {
      max-width: var(--max-left);
      padding-left: var(--side-pad);
+     width: var(--left-width);
  }
  .r {
      max-width: var(--max-right);
@@ -214,6 +208,11 @@
      align-items: center;
      justify-content: center;
  }
+
+ @media print {
+     .scrollBox {
+         overflow:visible
+     }
+ }
  
 </style>
-.

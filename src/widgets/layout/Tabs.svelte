@@ -84,5 +84,17 @@
  .standalone {
      padding: 0 var(--side-pad, 1rem);
  }
+
+ @media screen and (max-width: 920px) {
+    .tabs {
+        font-size: 60%
+    }
+}
+@media print {
+    .tabs {
+        color: green;
+        display: none;
+    }
+}
 </style>
 

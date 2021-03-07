@@ -20,6 +20,8 @@
  let keyboardUser;
  let containerScrolls = false;
  let noLanding = false
+
+
  router('/',()=>{
      page = MainView;
      containerScrolls = false;
@@ -28,6 +30,15 @@
      }
  }
  );
+
+ router('/share/:id', (ctx)=>{
+     containerScrolls = false;
+     // FIXME
+     page = SingleRecipe
+     params = {
+         id : ctx.params.id
+     };
+ })
 
  router('/main/:page/:detail',(ctx)=>{
      page = MainView
@@ -166,12 +177,23 @@
             <svelte:component this={page} {...params}/>
         </Landing>
     {/if}
-    <div style="position: fixed; z-index: 99; bottom: 2px; right: 250px; font-size: 8pt;">{$stamp}</div>
+    <div class="stamp" style="">{$stamp}</div>
 </div>
 <svelte:window on:keyup={detectKeyboardUser} on:mousedown={detectMouseUser}/>
 
 <style>
-
+.stamp {
+    position: fixed; 
+    z-index: 99; 
+    bottom: 2px; 
+    right: 250px; 
+    font-size: 8pt;
+}
+@media print {
+    .stamp {
+        display: none;
+    }
+}
  p {
      font-size : var(--small);
      font-family: var(--brandFont);
@@ -181,10 +203,6 @@
      max-width: 1200px;
      font-family: var(--uiFont);
      font-size: 100%;
- }
-
- :global(body) {
-     overflow-y: hidden; /* Mistake? */
  }
 
  :root {

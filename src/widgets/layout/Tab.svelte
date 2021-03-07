@@ -97,6 +97,7 @@
      transition: all 300ms;
      display: flex;
      position: relative;
+     align-items: center;
      border-bottom: 1px solid var(--light-underline);
      /* max-width: 15em;
         overflow: hidden;

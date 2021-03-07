@@ -96,5 +96,10 @@
      margin-right: 2px;
  }
 
+ @media screen and (max-width: 920px) {
+    .bar {
+        font-size: 60%
+    }
+}
 
 </style>

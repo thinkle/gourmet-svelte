@@ -276,5 +276,11 @@
  .brand {
      font-family: var(--brandFont);
  }
+
+ @media print {
+     nav {
+         display: none;
+     }
+ }
  
 </style>

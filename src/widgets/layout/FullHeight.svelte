@@ -22,4 +22,15 @@
      overflow-y: scroll;
  }
  
+ @media print {
+     .scrolls {
+         overflow-y: visible;
+         position: static;
+         display: block;
+     }
+     section {
+         display: block;
+
+     }
+ }
 </style>

@@ -30,7 +30,6 @@
  const frame = {
      translate : [0,0]
  }
- 
  export function addToDOM (node) {
      node.parentElement.insertBefore(ref,node);
      node.remove();
@@ -46,7 +45,6 @@
  }
  
 </script>
-
 <label>
     {#if label}{label.replace(/[.;:?,!]$/,'')}{/if}
 </label>
@@ -99,7 +97,7 @@
 </div>
 <span class:active href="#showTimer" on:click={toggleTimer}>
     <slot>
-        {timestring||times.getDescription(seconds)}
+        {(timestring||times.getDescription(seconds)).replace(/\s*$/,'')}
     </slot>
 </span>
 

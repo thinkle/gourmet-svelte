@@ -211,5 +211,10 @@
  .busy {
      cursor: wait;
  }
+ @media print {
+     button {
+         display: none;
+     }
+ }
 
 </style>
