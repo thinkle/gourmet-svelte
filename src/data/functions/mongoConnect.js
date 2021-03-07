@@ -16,19 +16,14 @@ export function getLastResult () {
 export function loadDB (name=DB) {
     return new Promise ((resolve,reject)=>{
         if (cachedDB) {
-            resolve(cachedDB);
-            console.log('Using cache - good idea? Maybe?');
-            if (cachedDb.client.serverConfig.isConnected()) {
-                console.log('probably was a good idea!')
-                //resolve(cachedDB);
-                //return
+            if (cachedDB.db.serverConfig.s.coreTopology.state==='connected') {
+                console.log('using cache!')
+                resolve(cachedDB);
+                return;
             } else {
-                console.log('Have cachedDB but no connection?',cachedDB,cachedDB.client.serverConfig)
+                console.log('Trouble with cache?',cachedDB)
             }
-            return;
         }
-
-
         const client = new MongoClient(url, { useNewUrlParser: true });
         client.connect(err => {
             if (err) {
