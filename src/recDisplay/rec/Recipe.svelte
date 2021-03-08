@@ -7,7 +7,7 @@
   export let onOpenSubRec = undefined;
   export let showShopping = true;
   export let editable = true;
-  export let onEditToggle = undefined;
+  //export let onEditToggle = undefined;
   export let minPropWidth = 150;
 
   export function setEditMode(val) {
@@ -79,6 +79,17 @@
   setContext("ingredientList", ingredientList);
   let highlightedIngredient = writable({ active: [] });
   setContext("highlightedIngredient", highlightedIngredient);
+  let popupIngPanel = false;
+  $: {
+      if ($highlightedIngredient) {
+          if  ($highlightedIngredient.highlighted) {
+            popupIngPanel = $highlightedIngredient.highlighted; // $highlightedIngredient.highlighted;
+          } else {
+            popupIngPanel = false;
+          }
+          console.log('set popupIngPanel!',popupIngPanel,$highlightedIngredient)
+      }
+  }
 
   $: if (rec && rec.ingredients) {
     // Let's check for a change before assigning...
@@ -319,6 +330,7 @@
       stackSidesAt={550}
       maxWidthRight="45rem"
       maxWidthLeft="45rem"
+      forceLeftFlyIn={popupIngPanel}
     >
       <div class="inghead" slot="leftHead">
         <h3 on:click={() => (showTimesOverIngredients = false)}>Ingredients</h3>

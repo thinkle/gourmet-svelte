@@ -4,6 +4,7 @@
   export let leftWidth = 300;
   export let maxWidthLeft = undefined;
   export let maxWidthRight = undefined;
+  export let forceLeftFlyIn = false;
 
   import FullHeight from "./FullHeight.svelte";
   import { IconButton } from "../";
@@ -75,6 +76,20 @@
       observer.observe(leftSideRef);
     }
   }
+
+
+  $: forceLeftFlyIn && forceFlyIn()
+  
+  function forceFlyIn () {
+      console.log('force left fly in!')
+      if (!leftSideFlyIn) {
+        toggleLeftSideFlyIn()
+        forceLeftFlyIn = false;
+      } else {
+          console.log('already flown?')
+      }
+  }
+
 </script>
 
 <FullHeight>
