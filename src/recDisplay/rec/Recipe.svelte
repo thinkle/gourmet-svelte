@@ -376,6 +376,7 @@
           />
         {/if}
       </div>
+      <span slot="leftHandle">Ingredients</span>
       <div
         slot="left"
         on:dblclick={() => {

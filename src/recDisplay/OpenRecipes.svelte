@@ -9,7 +9,7 @@
     }
     hide = false;
     if (id !== undefined) {
-      activeRecipeId = id;
+      $activeRecipeId = id;
       editOnOpen[id] = editMode;
       if (editMode && recComponents[id]) {
         // already have a component... force it into edit
@@ -52,6 +52,7 @@
     localRecipes,
     recipeState,
     recipeActions,
+    activeRecipeId
   } from "../stores/recipeStores.js";
   import { getStyle } from "./rec/colors.js";
   function getTabTitle(id) {
@@ -60,8 +61,6 @@
       "Untitled"
     ); // fixme
   }
-
-  let activeRecipeId;
 
   if (!openIDs) {
     openIDs = $openLocalRecipes;
@@ -78,16 +77,16 @@
   let editOnOpen = {};
 
   function openOne() {
-    activeRecipeId = $openLocalRecipes[0];
+    $activeRecipeId = $openLocalRecipes[0];
   }
 
-  $: activeRecipeId &&
+  $: $activeRecipeId &&
     router(
-      `/main/OpenRecipes/${$openLocalRecipes.join(",")}#${activeRecipeId}`
+      `/main/OpenRecipes/${$openLocalRecipes.join(",")}#${$activeRecipeId}`
     );
 
   $: {
-    if (!activeRecipeId && $openLocalRecipes.length && $openLocalRecipes[0]) {
+    if (!$activeRecipeId && $openLocalRecipes.length && $openLocalRecipes[0]) {
       openOne();
     }
   }
@@ -102,7 +101,7 @@
       if (index > 0) {
         index = index + 1;
       }
-      activeRecipeId = $openLocalRecipes[index]; // change ID
+      $activeRecipeId = $openLocalRecipes[index]; // change ID
     } else {
       showCloseModalFor = id;
     }
@@ -121,8 +120,8 @@
         style={getStyle($localRecipes[id])}
       >
         <Tab
-          active={activeRecipeId == id}
-          on:click={() => (activeRecipeId = id)}
+          active={$activeRecipeId == id}
+          on:click={() => ($activeRecipeId = id)}
         >
           <span class="tabtitle">{$localRecipes[id].title || "Untitled"}</span>
           <div class="close">
@@ -155,9 +154,9 @@
   </Tabs>
   <!-- close tabs -->
   <FullHeight>
-    <!--  $openLocalRecipes.indexOf(activeRecipeId)>-1 &&  ?? -->
+    <!--  $openLocalRecipes.indexOf($activeRecipeId)>-1 &&  ?? -->
     {#each Object.keys($localRecipes) as id (id)}
-      <LazyIf condition={id == activeRecipeId}>
+      <LazyIf condition={id == $activeRecipeId}>
         <Recipe
           bind:this={recComponents[id]}
           rec={$localRecipes[id]}
@@ -172,17 +171,17 @@
       </LazyIf>
     {/each}
     <!-- 
-        {#if $localRecipes[activeRecipeId]}
+        {#if $localRecipes[$activeRecipeId]}
             <Recipe
-                bind:this="{recComponents[activeRecipeId]}"
-                rec="{$localRecipes[activeRecipeId]}"
+                bind:this="{recComponents[$activeRecipeId]}"
+                rec="{$localRecipes[$activeRecipeId]}"
                 {onOpenSubRec}
                 onChange="{(rec)=>{
                           console.log('OpenRecipes got change!',rec);
                           $localRecipes[rec.id]=rec;
                           }}"
-                onEditToggle="{(val)=>editOnOpen[activeRecipeId]=val}"
-                editMode="{editOnOpen[activeRecipeId]}"
+                onEditToggle="{(val)=>editOnOpen[$activeRecipeId]=val}"
+                editMode="{editOnOpen[$activeRecipeId]}"
             />
         {:else}
             {$openLocalRecipes.length>0 && openOne()}                    

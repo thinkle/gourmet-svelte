@@ -350,5 +350,7 @@ export const lookupStores = {
   categories: categoryNames,
 };
 
+export const activeRecipeId = writable();
+
 const { localRecipes, openLocalRecipes, recipeState } = makeLocalRecipeStore();
 export { localRecipes, openLocalRecipes, recipeState };

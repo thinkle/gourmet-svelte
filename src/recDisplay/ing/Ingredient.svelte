@@ -60,7 +60,14 @@
      return {
          update (highlighted) {
              if (highlighted===ing.text && $highlightedIngredient && $highlightedIngredient.scrolledIngFor!==ing.text) {
-                 scrollIntoView(node);
+                // Use a timeout so that when we're in pop-in stacked mode, we wait for the ingredients to 
+                // fly in using a transform before we scroll the ingredient we want to the center. 
+                setTimeout(
+                     ()=>{
+                         scrollIntoView(node)
+                     },
+                     300
+                 );
                  $highlightedIngredient.scrolledIngFor = ing.text;
              }              
          }

@@ -141,8 +141,9 @@
             {#if i.ingredients}
                 <!-- nested ingredients...! -->
                 <tr class:highlighted={i.text==$highlightedIngredient.highlighted}
-                                      class:hover={i.text==$highlightedIngredient.hover}
-                    class:ing={!i.ingredients} class:grouphead={i.ingredients}>
+                    class:hover={i.text==$highlightedIngredient.hover}
+                    class:ing={!i.ingredients} class:grouphead={i.ingredients}
+                    >
                     <td colspan="4">
                         {#if editMode}
                             <div style="display: flex">
@@ -158,7 +159,8 @@
                         {/if}
                         <table class="inglist">
                             {#each i.ingredients as ii,nn (ii)}
-                                <tbody animate:flip>
+                                <tbody animate:flip
+                                >
                                 <Ingredient
                                     ing="{ii}"
                                     {onOpenSubRec}

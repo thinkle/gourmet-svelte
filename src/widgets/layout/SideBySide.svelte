@@ -51,8 +51,19 @@
 
   let leftSideFlyIn = false;
   let flyDistance = 0;
-  let extraFlyInPad = 30;
+  let extraFlyInPad = 55;
+
+  $: !stackMode && leftSideRef && resetLeftSide()
+
+  function resetLeftSide () {
+    leftSideFlyIn = false;
+    leftSideRef.style = '';
+  }
+
   function toggleLeftSideFlyIn() {
+    if (!leftSideRef || !leftSideRef.parentElement) {
+      return
+    }
     leftSideFlyIn = !leftSideFlyIn;
     flyDistance = leftSideRef.parentElement.scrollTop;
     leftSideRef.style =
@@ -68,7 +79,6 @@
 
     `) ||
       "";
-    console.log("toggled flyIn", leftSideFlyIn, flyDistance, leftSideRef);
   }
 
   $: {
@@ -77,15 +87,14 @@
     }
   }
 
-  $: forceLeftFlyIn && forceFlyIn()
-  
-  function forceFlyIn () {
-      if (!leftSideFlyIn) {
-        toggleLeftSideFlyIn()
-        forceLeftFlyIn = false;
-      } 
-  }
+  $: forceLeftFlyIn && stackMode && forceFlyIn();
 
+  function forceFlyIn() {
+    if (!leftSideFlyIn) {
+      toggleLeftSideFlyIn();
+      forceLeftFlyIn = false;
+    }
+  }
 </script>
 
 <FullHeight>
@@ -93,23 +102,18 @@
     use:watchResize={handleResize}
     bind:this={ref}
     class="sidebyside"
+    class:stackMode
     style={`
                 --max-width:${maxWidth};
                 --max-left:${maxWidthLeft};
                 --max-right:${maxWidthRight};
                 `}
-    class:stackMode
   >
     <div
       class="side l"
       style={!stackMode && `--left-width:${leftWidth}px`}
       bind:this={leftSideRef}
     >
-      {#if leftSideFlyIn}
-        <div style={`position:absolute; right: 3px; top: -${extraFlyInPad}px;`}>
-          <IconButton icon="close" on:click={toggleLeftSideFlyIn} />
-        </div>
-      {/if}
       <div class="head scrollHead">
         <slot name="leftHead" />
       </div>
@@ -123,12 +127,17 @@
         onDrag={(dx) => (leftWidth = initialLeftWidth - dx)}
       />
     {/if}
-    <div
-      class:showHandle={leftOffScreen && !leftSideFlyIn}
-      class="mobileHandle"
-      on:click={toggleLeftSideFlyIn}
-    >
-      <slot name="leftHandle">ING</slot>
+    <div class="mobileHandleWrap" class:showHandle={leftOffScreen}>
+      {#if !leftSideFlyIn}
+        <IconButton
+          icon="arrow_drop_down_circle"
+          on:click={toggleLeftSideFlyIn}
+          tooltip="Pop down content">
+            <slot name="leftHandle" />
+        </IconButton>
+      {:else}
+        <IconButton icon="close" on:click={toggleLeftSideFlyIn} />
+      {/if}
     </div>
     <div class="side r">
       <div class="head scrollHead">
@@ -140,8 +149,8 @@
     </div>
   </div>
 </FullHeight>
-
 <style>
+  /* First child of head gets bottom border - whatever element they put in slot */
   .head > :global(*) {
     border-bottom: 1px solid var(--grey);
     margin: 0;
@@ -165,11 +174,14 @@
   .sidebyside.stackMode {
     display: block;
     overflow-y: scroll;
-  }
+  } 
   .scrollBox {
     overflow-y: scroll;
   }
-
+  .stackMode .scrollBox {
+    overflow-y: unset;
+  }
+  
   .scrollBox::-webkit-scrollbar {
     width: 5px;
   }
@@ -198,36 +210,30 @@
   }
 
   .stackMode .l {
-    transition: all 300ms;
+    transition: all 200ms; /* Note: this number interacts with the delay on scrolling in Ingredient.svelte */
   }
 
-  .mobileHandle {
-    display: none;
-    transition: opacity 300ms;
-    z-index: 2;
-  }
-  .stackMode .mobileHandle {
-    display: flex;
-    opacity: 0;
-  }
-  .showHandle.mobileHandle {
-    opacity: 1;
-  }
-
-  .mobileHandle {
+  .mobileHandleWrap {
     position: sticky;
     top: 10px;
-    margin-left: auto;
+    height: 0;
+    display: block;
+    text-align: right;
+    z-index: 3;
+  }
+
+  .mobileHandleWrap {
+    display: none;
+    transition: opacity 300ms;
+    z-index: 3;
+  }
+  .stackMode .mobileHandleWrap {
+    opacity: 0;
+    display: block;
     margin-right: var(--side-pad);
-    width: 50px;
-    height: 50px;
-    margin-top: -50px;
-    background-color: var(--accent-bg);
-    color: var(--accent-fg);
-    text-align: center;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
+  }
+  .showHandle.mobileHandleWrap {
+    opacity: 1;
   }
 
   @media print {

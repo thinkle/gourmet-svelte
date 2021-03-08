@@ -3,18 +3,6 @@
   export let detail = undefined;
   export let recipe = undefined;
   import router from "page";
-  let lastPage = page;
-  $: console.log("PAGE: MainView got page:", page, "detail:", detail);
-  $: {
-    if (page != lastPage) {
-      console.log("PAGE", page, "switching from ", lastPage);
-      router(`/main/${page}`);
-      lastPage = page;
-    } else {
-      console.log("PAGE ", page, "NO SWITCH needed");
-    }
-  }
-
   import { registerBuild } from "../stores/debugStore.js";
   registerBuild(Number("BUILD_MS"));
   import RecipeList from "../recDisplay/RecipeList.svelte";
@@ -46,9 +34,11 @@
     connectedRemote,
     localRecipes,
     openLocalRecipes,
+    activeRecipeId,
     recipePage,
     recipeActions,
   } from "../stores/recipeStores.js";
+
   let opener;
   let syncingPromise;
 
@@ -56,6 +46,27 @@
 
   import { getContext, onMount } from "svelte";
   import { writable } from "svelte/store";
+
+  let lastPage = page;
+  $: console.log("PAGE: MainView got page:", page, "detail:", detail);
+  $: {
+    if (page != lastPage) {
+      console.log("PAGE", page, "switching from ", lastPage);
+      if (page=='OpenRecipes') {
+        // Code duplicated in OpenRecipes.svelte -- easier to just duplicate one line
+        // than to pull out in separate util, especially since we're dealing w/ a store.
+        router(`/main/OpenRecipes/${$openLocalRecipes.join(",")}#${$activeRecipeId||$openLocalRecipes[0]}`);
+      } else {
+        router(`/main/${page}`);
+      }
+      lastPage = page;
+    } else {
+      console.log("PAGE ", page, "NO SWITCH needed");
+    }
+  }
+
+
+
   let hideOpenButton = writable(true);
 
   let selectedRecipes = [];
