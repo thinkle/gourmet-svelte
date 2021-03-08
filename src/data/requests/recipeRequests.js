@@ -79,3 +79,12 @@ export const getSharedRecipeRequest = Request(
      responseDef:validRec,
      chatty:true
     });
+
+export const setRecipeSharingRequest = Request(
+    {
+        name:'shareRecipe',
+        requestDef:{_id:'',share:true},
+        responseDef:validRec,
+        chatty:true,
+    }
+);

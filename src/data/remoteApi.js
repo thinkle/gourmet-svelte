@@ -8,7 +8,10 @@ import {addRecipeRequest,
         getRecipeRequest,
         getRecipesRequest,
         importRecipesRequest,
-        updateRecipeRequest} from './requests/index.js';
+        updateRecipeRequest,
+        setRecipeSharingRequest,
+        getSharedRecipeRequest,
+    } from './requests/index.js';
 
 function RecipeApi (user) {
     
@@ -53,7 +56,16 @@ function RecipeApi (user) {
                 {user,params}
             );
         },
-        
+        setRecipeSharing (params) {
+            return setRecipeSharingRequest.makeRequest(
+                {user,params}
+            );
+        },
+        getSharedRecipe (params) {
+            return getSharedRecipeRequest.makeRequest(
+                {user,params}
+            )
+        }
     }
 
     return api;
