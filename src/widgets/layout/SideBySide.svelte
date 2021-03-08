@@ -77,17 +77,13 @@
     }
   }
 
-
   $: forceLeftFlyIn && forceFlyIn()
   
   function forceFlyIn () {
-      console.log('force left fly in!')
       if (!leftSideFlyIn) {
         toggleLeftSideFlyIn()
         forceLeftFlyIn = false;
-      } else {
-          console.log('already flown?')
-      }
+      } 
   }
 
 </script>
