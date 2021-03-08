@@ -80,6 +80,8 @@
   let highlightedIngredient = writable({ active: [] });
   setContext("highlightedIngredient", highlightedIngredient);
   let popupIngPanel = false;
+  /* Set ingredient list to pop down in mobile view if highlighted ingredient changes so user can
+  click word in recipe to see that item pop up on the ingredient list. */
   $: {
       if ($highlightedIngredient) {
           if  ($highlightedIngredient.highlighted) {
@@ -87,7 +89,6 @@
           } else {
             popupIngPanel = false;
           }
-          console.log('set popupIngPanel!',popupIngPanel,$highlightedIngredient)
       }
   }
 
