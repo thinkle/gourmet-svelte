@@ -123,8 +123,12 @@
     </div>
     {#if !stackMode}
       <Resizer
-        onStart={({ x, y }) => (initialLeftWidth = leftWidth)}
-        onDrag={(dx) => (leftWidth = initialLeftWidth - dx)}
+        onStart={({ x, y }) => {
+          initialLeftWidth = leftSideRef.clientWidth;
+        }}
+        onDrag={(dx) => {
+          leftWidth = initialLeftWidth - dx
+        }}
       />
     {/if}
     <div class="mobileHandleWrap" class:showHandle={leftOffScreen}>
