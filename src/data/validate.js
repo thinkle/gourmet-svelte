@@ -129,7 +129,6 @@ export function prepRecsRemote (recs,user) {
     recs.recipes.forEach(
         (r)=>prepRecRemote(r,user)
     )
-
 }
 
 export function prepRecLocal (rec) {
@@ -159,6 +158,14 @@ export function prepRecLocal (rec) {
         rec.sourceNames = rec.sources.map((s)=>s.name);
     }
     return rec;
+}
+
+export function getReferencedIDs (recipe) {
+    let allTheIngredients = [];
+    recipe.ingredients && recipe.ingredients.map((i)=>crawlIngredient(i,allTheIngredients));
+    return allTheIngredients.filter(
+        (i)=>i.reference
+    ).map((i)=>i.reference)
 }
 
 export {validateRec}

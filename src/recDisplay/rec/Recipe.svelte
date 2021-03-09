@@ -30,6 +30,7 @@
     StatusIcon,
     Tabs,
     Tab,
+    Stack,
     tooltip,
   } from "../../widgets/";
   import SideBySide from "../../widgets/layout/SideBySide.svelte";
@@ -194,6 +195,7 @@
 
     <Bar
       large="true"
+      alignTop={true}
       growLeft={true}
       maxWidth="1250px"
       style="border-bottom: 2px solid var(--accent-bg);"
@@ -214,9 +216,13 @@
       </div>
       <div slot="right">
         <div class="status">
-          <i class="material-icons"> offline_pin </i>
-          {#if rec}
+          {#if rec && editable}
+            <StatusIcon 
+              icon="offline_pin"
+              tt="Saved to browser"
+            />
             {#if rec.savedRemote}
+
               <StatusIcon icon="cloud_done" tooltip="true" tooltipLeft={true}>
                 Saved to browser and in the cloud. Last saved at {new Date(
                   $recipeState[rec.id].last_modified
@@ -255,7 +261,46 @@
                   on:click={() => recipeActions.getRecipe(rec.id)}
                 />
               </StatusIcon>
-            {/if}
+            {/if}            
+            <StatusIcon
+              icon="share"
+              bare="true"
+              small="true"
+              tooltip="true"
+              tooltipWidth={130}
+            >
+              {#if rec.share}
+                <Stack>
+                  <a class="underline" target="_blank" href={`/share/${rec._id}/`}>
+                    Sharing Link
+                  </a>
+                  <IconButton 
+                    bare="true"
+                    icon="content_copy" 
+                    inverse="true"
+                    on:click={()=>navigator.clipboard.writeText(
+                      new URL(`/share/${rec._id}/`,location.origin).toString()
+                      )
+                    }>
+                    Copy Link
+                  </IconButton>
+                  <IconButton 
+                    bare="true"
+                    icon="lock" 
+                    inverse="true"
+                    on:click={()=>recipeActions.setRecipeSharing({_id:rec._id},false)}
+                    tt="People you shared the recipe with will no longer be able to access it."
+                    >
+                    Unshare
+                  </IconButton>
+                </Stack>
+              {:else}
+                <IconButton icon="share" on:click={()=>recipeActions.setRecipeSharing({_id:rec._id},true)}
+                  tt="This will allow you to share a link which lets other users see or copy your recipe."
+                >Make Recipe Shareable
+                </IconButton>
+              {/if}
+            </StatusIcon>
           {/if}
         </div>
         <NavActions>
@@ -281,7 +326,7 @@
                 on:click={() => (editMode = !editMode)}
               >
                 Edit{#if editMode}ing{/if}
-                Recipe
+                Recipe{#if !editMode}&nbsp;&nbsp;&nbsp;{/if}
               </IconButton>
             </li>
             {#if $recipeState[rec.id] && $recipeState[rec.id].edited}

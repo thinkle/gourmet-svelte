@@ -34,9 +34,11 @@
  router('/share/:id', (ctx)=>{
      containerScrolls = false;
      // FIXME
+     console.log('Got ID',ctx.params.id)
      page = SingleRecipe
      params = {
-         id : ctx.params.id
+         id : ctx.params.id,
+         shared : true,
      };
  })
 
@@ -58,7 +60,6 @@
  }
  );
 
-
  router('/ShoppingList',()=>{
      page = MainView;
      containerScrolls = false;
@@ -67,9 +68,6 @@
      }
  }
  );
-
-
-
 
  router('/admin',()=>{
      page = Admin;

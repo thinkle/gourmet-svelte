@@ -57,6 +57,7 @@ function RecipeApi (user) {
             );
         },
         setRecipeSharing (params) {
+            console.log('setRecipeSharing',params)
             return setRecipeSharingRequest.makeRequest(
                 {user,params}
             );

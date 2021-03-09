@@ -18,8 +18,15 @@
      b.focus()
  }
  let b;
+import { unique } from '../../utils/uniq.js';
  import {tooltip} from './tooltip.js';
-  
+ let rulerDiv;
+$: if (rulerDiv) {
+    console.log('width=',rulerDiv.clientWidth);
+    if (!width && rulerDiv && rulerDiv.clientWidth) {
+        width = rulerDiv.clientWidth + 'px';
+    }
+}
 </script>
 <button
     class:disabled
@@ -42,8 +49,7 @@
     bind:this="{b}"
     disabled="{disabled||busy}"
     aria-label="{ariaLabel||tt}"
-    use:tooltip="{{content:tt}}"
-    
+    use:tooltip="{{content:tt}}"   
 >
     <b class:toggled="{!toggled}"><slot name="unselected"/></b>
     {#if toggle && !bare}
@@ -51,8 +57,43 @@
     {/if}
     <b class:toggled="{toggled}"><slot/></b>
 </button>
+{#if toggle && !invisible}
+<div class="measurer" bind:this={rulerDiv}>
+<svelte:self 
+invisible=true
+toggled=true
+{inverse}
+{bare}
+{busy}
+{toggle}
+{rtl}
+{width}
+{fontSize}
+{small}
+{disabled}
+{compact} 
+{ariaLabel}
+{tt}
+><u><slot/></u>
+<u slot="unselected"><slot name="unselected"/></u></svelte:self>
+</div>
+{/if}
+
 <style>
- b { display: contents; font-weight: normal }
+    u {
+        text-decoration: none;
+        display: contents;
+    }
+.measurer {
+    position: fixed;
+    top: -2000px;
+    visibility: hidden;
+    border: 3px solid green;
+}  
+ b { 
+     display: contents; 
+     font-weight: normal 
+    }
 
  .toggle b {
      display: flex;
@@ -82,6 +123,7 @@
      align-items: center;
      padding: 5px;
      transition: all 300ms;
+     box-sizing: border-box;
      width: var(--button-width);
      border-radius: 10px;
      border-width: 1px;
@@ -123,7 +165,7 @@
  }
  button:hover {
      color: var(--black-fg);
-     background: var(--white) radial-gradient(circle, transparent 1%, var(--white) 1%) center/15000%;
+     background: var(--light-bg) radial-gradient(circle, transparent 1%, var(--light-bg) 1%) center/15000%;
      border-color: var(--accent-bg);
  }
  button:active {
@@ -138,12 +180,12 @@
      color: var(--light-bg);
  }
  .inverse:hover {
-     color: var(--white);
-     background: var(--black) radial-gradient(circle, transparent 1%, var(--black) 1%) center/15000%;
+     color: var(--light-bg);
+     background: var(--light-fg) radial-gradient(circle, transparent 1%, var(--light-fg) 1%) center/15000%;
  }
  .inverse:active {
      border-color: var(--accent-fg);
-     background-color: var(--light-fg);
+     background-color: var(--black);
      color: var(--light-bg);
      background-size: 100%;
      transition: background 0s;

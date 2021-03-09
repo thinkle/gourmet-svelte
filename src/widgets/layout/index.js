@@ -10,3 +10,4 @@ export {default as NavActions} from './NavActions.svelte';
 export {default as Tabs} from './Tabs.svelte';
 export {default as Tab} from './Tab.svelte';
 export {default as Toaster} from './Toaster.svelte';
+export {default as Stack} from './Stack.svelte';

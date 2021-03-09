@@ -207,6 +207,20 @@ export const recipeActions = {
   async importRecipes(json) {
     return await api.importRecipes(json);
   },
+
+  async openSharedRecipe (_id) {
+    let rec = await api.getSharedRecipe({_id});
+    setStoreProp(localRecipes, _id, deepcopy(rec));
+  },
+
+  async setRecipeSharing (recipe, share) {
+    recipe.share = share;
+    let updatedRecipe = await api.setRecipeSharing(recipe)
+    console.log('Got updated recipe!',updatedRecipe)
+    setStoredRec(updatedRecipe);
+    setStoreProp(localRecipes, updatedRecipe.id, deepcopy(updatedRecipe));
+  }
+
 };
 
 function removeIdFromStores(id) {

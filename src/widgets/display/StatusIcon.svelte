@@ -1,55 +1,28 @@
 <script>
  import {fly} from 'svelte/transition'
  import {tooltip as tooltipAction} from '../index.js';
- import {IconButton} from '../';
+ import {IconButton,Tooltip} from '../';
  export let icon
  export let tt=''
  export let tooltip=undefined
- export let showTooltip=false;
- export let tooltipLeft=false
- export let tooltipRight=true
- export let tooltipAbove=false
- export let tooltipUnder=true
- if (tooltipLeft) {
-     tooltipRight = false;
- }
- if (tooltipAbove) {
-     tooltipUnder = false;
- }
- let flyProps = {duration:350}
-     if (tooltipLeft) {
-         flyProps.x = 100; /* Comes from the right */
-     }
- if (tooltipRight) {
-     flyProps.x = -100; /* Comes from the left */
- }
- if (tooltipAbove) {
-     flyProps.y = 100; /* Comes from below */
- }
- if (tooltipUnder) {
-     flyProps.y = -100; /* Comes from above */
- }
-
+ export let tooltipWidth;
+ let showTooltip;
+ let domRef;
 </script>
 
-<span use:tooltipAction="{{content:tt}}">
+<span use:tooltipAction="{{content:tt}}" bind:this={domRef}>
     <i class="material-icons"
        class:clickable="{tooltip}"
        on:click="{()=>showTooltip=!showTooltip}"
     >
         {icon}
     </i>
-    {#if tooltip && showTooltip}
-        <div class:tooltipLeft class:tooltipRight class:tooltipAbove class:tooltipUnder
-             transition:fly={flyProps}
-        >
-            <span class="topRight">
-                <IconButton icon="close" bare="true" small="true" on:click={()=>showTooltip=false}/>
-            </span>
-            <slot/>
-        </div>
-    {/if}
-
+    <Tooltip width={tooltipWidth} show={showTooltip} target={domRef} interactive={true}>
+        <span class="topRight">
+            <IconButton inverse={true} icon="close" bare={true} small={true} on:click={()=>showTooltip=false}/>
+        </span>
+        <slot/>
+    </Tooltip>
 </span>
 <style>
  
@@ -68,8 +41,9 @@
 
  .topRight {
      position: absolute;
-     right: 3px;
-     top: 3px;
+     right: -5px;
+     top: -5px;
+     z-index: 3;
  }
 
  .tooltipRight {

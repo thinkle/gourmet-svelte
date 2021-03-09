@@ -76,8 +76,9 @@ async function checkForReferences(recipe) {
         }
       }
     } else {
-      let targetRec = await localApi.getRecipe(undefined, { mongoId: ing._id });
+      let targetRec = await localApi.getRecipe(undefined, { mongoId: ing.reference });
       if (targetRec) {
+        
         ing.referenceExists = true;
       } else {
         console.log(
@@ -95,7 +96,9 @@ const api = {
 
   // Simple ones...
   async setRecipeSharing () {
-    return await remoteApi.setRecipeSharing(...arguments)
+    let updated = await remoteApi.setRecipeSharing(...arguments);
+    localApi.updateRecipe(updated);
+    return updated;
   },
   async getSharedRecipe () {
     return await remoteApi.getSharedRecipe(...arguments)

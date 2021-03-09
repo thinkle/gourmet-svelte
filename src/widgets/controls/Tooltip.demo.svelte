@@ -1,5 +1,6 @@
 <script>
  import {tooltip} from './tooltip.js'
+ import {StatusIcon} from '../'
  let show
  let spans = ['Cool beans','Awesome sauce','Fan-nnn-tastic']
 </script>
@@ -8,10 +9,14 @@
     {#each spans as span}
 	<span use:tooltip="{{content:`${span}This one uses an action`}}">{span}</span>
     {/each}
+    <StatusIcon icon="save">Save icon with a tooltip!</StatusIcon>
+
 </h2>
 
 <p use:tooltip={{content:"this one is absolute positioned"}}>
     Foof
+    <StatusIcon icon="save">Save icon with a tooltip!</StatusIcon>
+
 </p>
 
 <blockquote >
@@ -22,9 +27,16 @@
 	Bottom 1
     </div>
     <div use:tooltip={{content:"this one is on the very bottom"}}>		
-	Bottom 2
+	Bottom 2 
     </div>
+    <StatusIcon icon="save">Save icon with a tooltip!</StatusIcon>
+
 </blockquote> 
+
+<blockquote style="right:10px">
+    <StatusIcon icon="save">Save icon with a tooltip!</StatusIcon>
+</blockquote>>
+
 <style>
  blockquote {
      position: fixed;

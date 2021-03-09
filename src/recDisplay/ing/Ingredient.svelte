@@ -18,6 +18,7 @@
  import IngredientEditor from './IngredientEditor.svelte';
 
  import {getContext} from 'svelte';
+ let baseUrl = location.href.indexOf('share') && '/share/' || '/rec/'
 
  /* Linked Recipe opener */
  function handleReferenceClick (event) {
@@ -103,7 +104,7 @@
             <td
                 class="link"
             >
-                <a target="_blank" href="/rec/{ing.reference}"
+                <a target="_blank" href="{`${baseUrl}${ing.reference}`}"
                    on:click="{handleReferenceClick}"
                 >{ing.text}</a>
             </td>
@@ -168,6 +169,11 @@
      background-color: var(--note-light-bg);
      color: var(--note-light-fg);
  }
-
+ /* Don't show full URL after internal recipe links */
+ @media print {
+    a::after {
+        content: "" !important; /* sorry world */
+    }
+ }
  
 </style>
