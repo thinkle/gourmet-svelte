@@ -1,64 +1,97 @@
 <script>
- export let id
- import {connected,
-        recipeActions,
-        storedRecipes,
-        openLocalRecipes,
-        localRecipes,
-        recipeState} from '../stores/recipeStores.js';
- import Recipe from './rec/Recipe.svelte';
- import {FullHeight,Bar,WhiskLogo} from '../widgets/';
+  export let id;
+  export let shared = false;
 
- async function open () {
-     if (!isNaN(Number(id))) {
-         await recipeActions.openRecipe(Number(id))
-     }
-     else {
-         await recipeActions.openRecipe(id)
-     }
- }
+  import {
+    connected,
+    connectedRemote,
+    recipeActions,
+    storedRecipes,
+    openLocalRecipes,
+    localRecipes,
+    recipeState,
+  } from "../stores/recipeStores.js";
+  import Recipe from "./rec/Recipe.svelte";
+  import { Button, FullHeight, Bar, WhiskLogo, NavActions } from "../widgets/";
 
- $: if ($connected && id) {
-     open(id)
- }
- 
+  async function open() {
+    if (!shared) {
+      if (!isNaN(Number(id))) {
+        await recipeActions.openRecipe(Number(id));
+      } else {
+        await recipeActions.openRecipe(id);
+      }
+    }
+  }
 
+  $: if ($connected && !shared && id) {
+    console.log("Open", id);
+    open(id);
+  }
+
+  $: if ($connectedRemote && shared && id) {
+    console.log('Here we go!',$connected)
+    recipeActions.openSharedRecipe(id);
+  }
+  $: console.log("R:", $localRecipes[id]);
 </script>
 
+<Bar>
+  <a slot="left" target="_BLANK" href="/"> Recipe List </a>
+  <span slot="center">{$localRecipes[id] && $localRecipes[id].title}</span>
+  <b slot="right">Gourmet</b>
+</Bar>
+<FullHeight scroll={false}>
+  {#if shared}
     <Bar>
-        <a slot="left" target="_BLANK" href="/">
-        Recipe List
-        </a>
-        <span slot="center">{$localRecipes[id] && $localRecipes[id].title}</span>
-        <b slot="right">Gourmet</b>
+      <h3 slot="left">
+        {$localRecipes[id]?.owner?.email || "Someone"} shared a recipe with you!
+      </h3>
+      <div slot="right">
+        <NavActions>
+            <li>
+            <Button on:click={() => recipeActions.copyRec($localRecipes[id])}
+                >Copy to your Recipes
+            </Button>
+            </li>
+            <li>
+            <Button on:click={() => window.print()}>Print</Button>
+            </li>
+        </NavActions>
+      </div>
     </Bar>
-    <FullHeight scroll="{false}">
-    {#if $localRecipes[id]}
-        <Recipe rec={$localRecipes[id]}
-                    onChange={(rec)=>{
-                             console.log('SingleRecipe onChange',rec)
-                             $localRecipes[rec.id]=rec
-                             }}
-        />
-    {:else}
-        <blockquote>
-            Loading recipe... just one second
-            <WhiskLogo/>
-            <!-- <button on:click={()=>open(id)}>Kick it</button> -->
-        </blockquote>
-    {/if}
-    </FullHeight>
+  {/if}
+  {#if $localRecipes[id]}
+    <Recipe
+      rec={$localRecipes[id]}
+      editable={!shared}
+      showShopping={!shared}
+      onChange={(rec) => {
+        console.log("SingleRecipe onChange", rec);
+        $localRecipes[rec.id] = rec;
+      }}
+    />
+  {:else}
+    <blockquote>
+      Loading recipe... just one second
+      <WhiskLogo />
+      <!-- <button on:click={()=>open(id)}>Kick it</button> -->
+    </blockquote>
+  {/if}
+</FullHeight>
 
+<style>
+  blockquote {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-items: center;
+  }
 
-   
-    <style>
-     blockquote {
-         position: fixed;
-         width: 100vw;
-         height: 100vh;
-         top: 0;
-         left: 0;
-         align-items: center;
-         justify-items: center;
-     }
+  @media print {
+      * {display: none}
+  }
 </style>
