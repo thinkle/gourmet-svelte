@@ -121,7 +121,11 @@ const Metadata = {
          empty:{url:''},
          testValue:[{url:''}],
          isNull:(v)=>!v||!v.url,
-         toHtml:(i)=>`<img style="max-width:${i.width+'px'||''}" src="${i.url}">`,
+         toHtml:(i)=>`
+         <figure style="display: flex; margin: auto; flex-direction: column">
+           <img alt="${i.caption||"recipe image"}" style="max-width:${(i.width||'nomax')+'px'||''}" src="${i.url}" >
+           ${i.caption && '<figcaption style="margin: auto">'+i.caption+'</figcaption>' || ''}
+         </figure>`,
          match:(v1,v2)=>v1.url==v2.url,
         },
         {name:'yields',
