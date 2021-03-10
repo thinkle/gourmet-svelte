@@ -6,79 +6,70 @@
 **************/
 // Validate and prepare our recipe for insertion...
 // This may do DB-specific things to the recipe to make life easier...
-import stopword from 'stopword';
+import stopword from "stopword";
 
-const salt = new Date().getTime().toString(36)
+const salt = new Date().getTime().toString(36);
 
-function quickHash (s) {
-     var hash = 0;
-    for (var i = 0; i < s.length; i++) {
-        var character = s.charCodeAt(i);
-        hash = ((hash<<5)-hash)+character;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
+function quickHash(s) {
+  var hash = 0;
+  for (var i = 0; i < s.length; i++) {
+    var character = s.charCodeAt(i);
+    hash = (hash << 5) - hash + character;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
 }
 
-function makeId (id,user) {
-    let userSalt = quickHash(JSON.stringify(user)).toString(36)
-    return `${id}-${salt}-${userSalt}`
+function makeId(id, user) {
+  let userSalt = quickHash(JSON.stringify(user)).toString(36);
+  return `${id}-${salt}-${userSalt}`;
 }
 let count = 1;
 
-function validateRec (rec) {
-    rec.flatIngredients = []
-    if (!rec.ingredients) {
-        rec.ingredients = []
-    }
-    if (!rec.images) {
-        rec.images = []
-    }
-    rec.ingredients.map((i)=>crawlIngredient(i,rec.flatIngredients))
-    rec.fullText = getFullText(rec)
-    if (!rec.deleted) {
-        rec.deleted = 0;
-    } else {
-        rec.deleted = 1;
-    }
+function validateRec(rec) {
+  rec.flatIngredients = [];
+  if (!rec.ingredients) {
+    rec.ingredients = [];
+  }
+  if (!rec.images) {
+    rec.images = [];
+  }
+  rec.ingredients.map((i) => crawlIngredient(i, rec.flatIngredients));
+  rec.fullText = getFullText(rec);
+  if (!rec.deleted) {
+    rec.deleted = 0;
+  } else {
+    rec.deleted = 1;
+  }
 }
 
-function getFullText (rec) {
-    let texts = [];
-    texts.push(rec.title||'')
-    rec.text && rec.text.forEach(
-        (text)=>texts.push(removeMarkup(text.body))
-    );
-    rec.flatIngredients.forEach(
-        (ing)=>texts.push(ing.text||'')
-    );
-    rec.sources && rec.sources.forEach(
-        (source)=>texts.push(source.name||'')
-    );
-    rec.categories && rec.categories.forEach(
-        (cat)=>texts.push(cat.name)
-    );
-    return texts.join(' ');
+function getFullText(rec) {
+  let texts = [];
+  texts.push(rec.title || "");
+  rec.text && rec.text.forEach((text) => texts.push(removeMarkup(text.body)));
+  rec.flatIngredients.forEach((ing) => texts.push(ing.text || ""));
+  rec.sources && rec.sources.forEach((source) => texts.push(source.name || ""));
+  rec.categories && rec.categories.forEach((cat) => texts.push(cat.name));
+  return texts.join(" ");
 }
 
-function removeMarkup (txt) {
-    return txt.replace(/(<([^>]+)>)/ig,"");
+function removeMarkup(txt) {
+  return txt.replace(/(<([^>]+)>)/gi, "");
 }
 
-function crawlIngredient (ingredient, array) {
-    if (ingredient.ingredients) {
-        ingredient.ingredients.map((i)=>crawlIngredient(i,array))
-    }
-    else {
-        array.push(ingredient)
-    }
+function crawlIngredient(ingredient, array) {
+  if (ingredient.ingredients) {
+    ingredient.ingredients.map((i) => crawlIngredient(i, array));
+  } else {
+    array.push(ingredient);
+  }
 }
 
 /**
 For preparing a recipe collection that's been exported for import...
 **/
-export function prepRecRemote (r,user) {
-       /**
+export function prepRecRemote(r, user) {
+  /**
           WTF: For reasons I don't understand, MongoDB fetch/retrieve
           was simply failing to fetch back a new recipe when passed
           through the API. To fix it, I had to provide an _id from the
@@ -95,78 +86,79 @@ export function prepRecRemote (r,user) {
           shouldn't be a problem, but of course it could change in the future).
         **/
 
-    validateRec(r);
-    r.owner = {
-        email : user.email,
-        full_name : user.metadata && user.metadata.full_name
-    };
-    //r.user = user.email
-    if (!r._id) {
-        if (r.localid) {
-            r._id = makeId(r.localid,user);
-        }
-        else {
-            r._id = makeId(count,user);
-            count += 1;
-        }
+  validateRec(r);
+  r.owner = {
+    email: user.email,
+    full_name: user.metadata && user.metadata.full_name,
+  };
+  //r.user = user.email
+  if (!r._id) {
+    if (r.localid) {
+      r._id = makeId(r.localid, user);
+    } else {
+      r._id = makeId(count, user);
+      count += 1;
     }
-    crawlIngsForIds(r.ingredients);
-    validateRec(r)
+  }
+  crawlIngsForIds(r.ingredients);
+  validateRec(r);
 
-    function crawlIngsForIds (ii) {
-        ii.forEach(
-            (i) => {
-                if (i.reference && !i.referenceExists) {
-                    i.reference = makeId(i.reference,user);
-                }
-            }
-        );
-    }
-
+  function crawlIngsForIds(ii) {
+    ii.forEach((i) => {
+      if (i.reference && !i.referenceExists) {
+        i.reference = makeId(i.reference, user);
+      }
+    });
+  }
 }
 
-export function prepRecsRemote (recs,user) {    
-    recs.recipes.forEach(
-        (r)=>prepRecRemote(r,user)
-    )
+export function prepRecsRemote(recs, user) {
+  recs.recipes.forEach((r) => prepRecRemote(r, user));
 }
 
-export function prepRecLocal (rec) {
-    validateRec(rec); // step 1...
-    rec.words = rec.fullText.split(/\s+/).map((w)=>w.toLowerCase());
-    delete rec.fullText; // we don't need to keep this.
-    rec.words = stopword.removeStopwords(rec.words);
-    rec.ings = []
-    rec.flatIngredients.forEach(
-        (i)=>{
-            if (i.text) {
-                rec.ings.push(i.text.toLowerCase());
-                if (i.text.split().length > 1) {
-                    rec.ings = [...rec.ings,...i.text.split()];
-                }
-            }
-            if (i.ingkey) {
-                rec.ings.push(i.ingkey.toLowerCase());
-            }
-        });
-    rec.ings = stopword.removeStopwords(rec.words);
-    delete rec.flatIngredients // not keeping this either
-    if (rec.categories) {
-        rec.categoryNames = rec.categories.map((c)=>c.name);
+export function prepRecLocal(rec) {
+  validateRec(rec); // step 1...
+  rec.words = rec.fullText.split(/\s+/).map((w) => w.toLowerCase());
+  delete rec.fullText; // we don't need to keep this.
+  rec.words = stopword.removeStopwords(rec.words);
+  rec.ings = [];
+  rec.flatIngredients.forEach((i) => {
+    if (i.text) {
+      rec.ings.push(i.text.toLowerCase());
+      if (i.text.split().length > 1) {
+        rec.ings = [...rec.ings, ...i.text.split()];
+      }
     }
-    if (rec.sources) {
-        rec.sourceNames = rec.sources.map((s)=>s.name);
+    if (i.ingkey) {
+      rec.ings.push(i.ingkey.toLowerCase());
     }
-    return rec;
+  });
+  rec.ings = stopword.removeStopwords(rec.words);
+  delete rec.flatIngredients; // not keeping this either
+  if (rec.categories) {
+    rec.categoryNames = rec.categories.map((c) => c.name);
+  }
+  if (rec.sources) {
+    rec.sourceNames = rec.sources.map((s) => s.name);
+  }
+  return rec;
 }
 
-export function getReferencedIDs (recipe) {
-    let allTheIngredients = [];
-    recipe.ingredients && recipe.ingredients.map((i)=>crawlIngredient(i,allTheIngredients));
-    return allTheIngredients.filter(
-        (i)=>i.reference
-    ).map((i)=>i.reference)
+export function getReferencedIDs(recipe) {
+  let allTheIngredients = [];
+  recipe.ingredients &&
+    recipe.ingredients.map((i) => crawlIngredient(i, allTheIngredients));
+  return allTheIngredients.filter((i) => i.reference).map((i) => i.reference);
 }
 
-export {validateRec}
+export function isLocalID(id) {
+  if (isNaN(Number(id))) {
+    // mongo IDs are strings
+    return false;
+  } else {
+    // IndexedDB IDs are Numbers
+    return true;
+  }
+}
 
+export { validateRec };

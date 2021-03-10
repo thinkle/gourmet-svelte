@@ -72,7 +72,7 @@ function showData (d) {
     {#if theOne}
     <div style="float:right;width:30%">
         <h2>The One</h2>
-        {showshowData(theOne)}
+        {showData(theOne)}
     </div>
     {/if}
     {#each functions as f}

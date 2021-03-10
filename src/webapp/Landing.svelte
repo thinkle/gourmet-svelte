@@ -262,15 +262,6 @@
      align-items: center;
      font-size: var(--small);
  }
- nav div {
-     display: flex;
- }
- nav div:first-child {
-     margin-right: auto;
- }
- nav div:last-child {
-     margin-left: auto;
- }
  
  .brand {
      font-family: var(--brandFont);

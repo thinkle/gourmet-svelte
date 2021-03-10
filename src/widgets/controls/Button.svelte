@@ -137,7 +137,7 @@ toggled=true
      font-size: var(--fontSize);
  }
  
- button.small i {
+ button.small {
      font-size: var(--small);
  }
  button.bare.toggle {

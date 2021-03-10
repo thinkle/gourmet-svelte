@@ -29,16 +29,7 @@
  span {
      position: relative;
  }
- div {
-     position: absolute;
-     z-index: 99;
-     width: 350px;
-     background-color: var(--note-bg);
-     color : var(--note-fg);
-     padding: 24px;
-     white-space: normal;
- }
-
+ 
  .topRight {
      position: absolute;
      right: -5px;
@@ -46,18 +37,6 @@
      z-index: 3;
  }
 
- .tooltipRight {
-     left : 24px;
- }
- .tooltipLeft {
-     right : 24px;
- }
- .tooltipAbove {
-     bottom : 24px;
- }
- .tooltipUnder {
-     top: 24px;
- }
  .clickable:hover {
      background-color: var(--medium-bg);
      color: var(--medium-fg);
