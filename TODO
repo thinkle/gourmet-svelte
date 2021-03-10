@@ -20,8 +20,19 @@
 
 
 TODO:
+- Finish "Sharing" code
+  -> Check if recipe is marked "shared" before showing it (x)
+  -> Implement "Share" button to make it shared (x)
+  -> Handle multiple recipes / collections (x)
+
+- Copy recipe button...
+- While we're at it... maybe clean up the API issue...
+
+- Consider renaming the 400 things called "api" to something nicer. While you're at it, split code a bit
+  so files like remoteApi.js are less overwhelming.
 
 - Import tweaks
+
 - Fix Log-In and Auto-Sync process (?)
 - Fix empty/startup state 
 - Create start/login page for chrome extension + app
