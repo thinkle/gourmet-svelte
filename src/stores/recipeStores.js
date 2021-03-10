@@ -1,9 +1,9 @@
 import { readable, writable, get, derived } from "svelte/store";
 import { tick } from "svelte";
-import api from "../data/api.js";
-export { connectedRemote } from "../data/api.js";
+import recipeData from "../data/recipeData.js";
+export { connectedRemote } from "../data/recipeData.js";
 import deepcopy from "deepcopy";
-import { diffRecs } from "../data/diff.js";
+import { diffRecs } from "../data/utils/diff.js";
 const stored = writable({});
 
 const activePage = writable([]);
@@ -12,7 +12,7 @@ const actionState = writable({}); // for e.g. "searching recipes..."
 const individualActionState = writable({}); // for e.g. updating recipe #123124
 
 export const connected = readable(false, (set) => {
-  api
+  recipeData
     .connect()
     .then(() => {
       set(true);
@@ -92,7 +92,7 @@ export const recipePage = {
 
 export const recipeActions = {
   async doSync({ testing = false, onPartialSync, onSync } = {}) {
-    await api.sync(testing, { onPartialSync });
+    await recipeData.sync(testing, { onPartialSync });
     if (onSync) {
       onSync();
     } //await recipeActions.getRecipes({limit:50});
@@ -103,7 +103,7 @@ export const recipeActions = {
       r = {};
     }
     setStoreProp(actionState, "creating", true);
-    let recipe = await api.addRecipe(r);
+    let recipe = await recipeData.addRecipe(r);
     setStoredRec(recipe);
     tick();
     localRecipes.open(recipe.id);
@@ -113,7 +113,7 @@ export const recipeActions = {
   },
   async getRecipe(id, mongoId) {
     setStoreProp(actionState, "loading", true);
-    let response = await api.getRecipe(id, { mongoId });
+    let response = await recipeData.getRecipe(id, { mongoId });
     if (response) {
       setStoredRec(response);
       setStoreProp(actionState, "loading", false);
@@ -132,7 +132,7 @@ export const recipeActions = {
 
   async getInfiniteRecipes({ query, fields, limit = 15, sort } = {}) {
     setStoreProp(actionState, "querying", { query, fields, limit });
-    let response = await api.getRecipes({ query, fields, limit, sort });
+    let response = await recipeData.getRecipes({ query, fields, limit, sort });
     setStoredRecs(response.result);
     activePage.set([...new Set(response.result.map((r) => r.id))]);
     setStoreProp(actionState, "querying", false);
@@ -147,7 +147,7 @@ export const recipeActions = {
           sort,
           page: response.nextPage,
         });
-        response = await api.getRecipes({
+        response = await recipeData.getRecipes({
           query,
           fields,
           limit,
@@ -171,7 +171,7 @@ export const recipeActions = {
 
   async getRecipes({ query, fields, sort, limit, page } = {}) {
     setStoreProp(actionState, "querying", { query, fields, sort, limit, page });
-    let response = await api.getRecipes({ query, fields, sort, limit, page });
+    let response = await recipeData.getRecipes({ query, fields, sort, limit, page });
     setStoredRecs(response.result);
     activePage.set(response.result.map((r) => r.id));
     pageInfo.set({
@@ -185,7 +185,7 @@ export const recipeActions = {
   },
 
   async updateRecipe(recipe) {
-    let updatedRecipe = await api.updateRecipe(recipe);
+    let updatedRecipe = await recipeData.updateRecipe(recipe);
     setStoredRec(updatedRecipe);
   },
 
@@ -195,27 +195,27 @@ export const recipeActions = {
   },
 
   async deleteRecipe(id) {
-    await api.deleteRecipe(id);
+    await recipeData.deleteRecipe(id);
     removeIdFromStores(id);
   },
 
   async permanentlyDeleteRecipe(id) {
-    await api.permanentlyDeleteRecipe(id);
+    await recipeData.permanentlyDeleteRecipe(id);
     removeIdFromStores(id);
   },
 
   async importRecipes(json) {
-    return await api.importRecipes(json);
+    return await recipeData.importRecipes(json);
   },
 
   async openSharedRecipe (_id) {
-    let rec = await api.getSharedRecipe({_id});
+    let rec = await recipeData.getSharedRecipe({_id});
     setStoreProp(localRecipes, _id, deepcopy(rec));
   },
 
   async setRecipeSharing (recipe, share) {
     recipe.share = share;
-    let updatedRecipe = await api.setRecipeSharing(recipe)
+    let updatedRecipe = await recipeData.setRecipeSharing(recipe)
     console.log('Got updated recipe!',updatedRecipe)
     setStoredRec(updatedRecipe);
     setStoreProp(localRecipes, updatedRecipe.id, deepcopy(updatedRecipe));
@@ -352,7 +352,7 @@ export function makeLocalRecipeStore() {
 }
 
 export const categoryNames = writable([], (set) => {
-  api.getCategories().then((categories) => {
+  recipeData.getCategories().then((categories) => {
     set(categories.map((cname) => ({ name: cname })));
   });
   return () => {

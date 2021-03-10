@@ -3,7 +3,7 @@ dexieApi.js implements the interface for storing recipes in IndexDB
 
 **/
 
-import {prepRecLocal} from '../data/validate.js';
+import {prepRecLocal} from '../utils/validate.js';
 import Dexie from 'dexie';
 import stopword from 'stopword'
 

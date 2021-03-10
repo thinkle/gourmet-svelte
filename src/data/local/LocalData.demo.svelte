@@ -1,6 +1,6 @@
 <script>
  import localApi from './dexieApi.js';
- import {JsonDebug,Button} from '../widgets/'
+ import {JsonDebug,Button} from '../../widgets'
  async function addRec () {
      results = await localApi.addRecipe({title:'Hello world',savedRemote:0});
  }

@@ -1,12 +1,12 @@
 <script>
  import {jsonConcisify} from '../utils/textUtils.js';
- import {RecipeApi} from '../data/remoteApi.js';
+ import {RemoteRecipeData} from '../data/remoteRecipeData';
  import { user, redirectURL } from '../stores/userStore.js';
  import {testRecs} from "../common/mocks/recipes.js";
  import deepcopy from 'deepcopy';
  import {getNutrientInfoRequest,queryNutrientRequest} from './requests/index.js';
- let remoteApi
- $: remoteApi = RecipeApi($user);
+ let remoteRecipeData
+ $: remoteRecipeData = RemoteRecipeData($user);
  let selectedProp;
  
 function showData (d) {
@@ -34,7 +34,7 @@ function showData (d) {
      {
          name:'Add recipe',
          action:()=>{
-             promise = remoteApi.addRecipe(
+             promise = remoteRecipeData.addRecipe(
                  {recipe:deepcopy(testRecs.standard)}
              );
          }
@@ -42,7 +42,7 @@ function showData (d) {
      {
          name : 'Fetch the one back',
          action : ()=>{
-             promise = remoteApi.getRecipe(
+             promise = remoteRecipeData.getRecipe(
                  theOne._id
              );
          }
@@ -51,7 +51,7 @@ function showData (d) {
          name : 'Update the one',
          action : ()=>{
              theOne.title = 'UPDATED: '+theOne.title
-             promise = remoteApi.updateRecipe(
+             promise = remoteRecipeData.updateRecipe(
                  theOne
              );
          }
@@ -59,7 +59,7 @@ function showData (d) {
      {
          name : 'Fetch 10',
          action : ()=>{
-             promise = remoteApi.getRecipes({limit:10});
+             promise = remoteRecipeData.getRecipes({limit:10});
          }
      }
  ]

@@ -1,3 +1,26 @@
+
+Structure of this Directory
+
+data/ ==> all of our data management code, largely called on by stores...
+data/
+  functions/ -> lambda function code (server side, interface to mongodb)
+  requests/ -> definitions of requests we make to our functions
+  utils/ -> convenience functions
+  local/ -> for managing in-browser data (Dexie)
+  
+  remoteApi.js -> front-end interface to lambda functions
+  api.js -> combination logic for grabbing presenting recipe info
+            from browser storage and/or remote storage
+
+  validate.js -> validator for preparing recipes to upload
+  schema.js -> probably should become type definition?
+
+NOTE: We often interact with this data in the front-end THROUGH stores.
+../stores/ -> svelte stores. 
+Basically, an abstraction of state that needs to be shared between svelte components.
+
+
+
 -----
 Ok -- this is a place for some notes about recipe data.
 

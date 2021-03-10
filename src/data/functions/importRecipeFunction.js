@@ -1,5 +1,5 @@
 import {importRecipesRequest} from '../requests/index.js';
-import {prepRecsRemote} from '../validate.js'
+import {prepRecsRemote} from '../utils/validate.js'
 import {insertMany} from './mongoConnect.js';
 
 importRecipesRequest.setRequestHandler(importRecipes);

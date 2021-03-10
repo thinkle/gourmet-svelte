@@ -2,7 +2,7 @@
  export let onClose
 
  import {getContext} from 'svelte';
- import api from '../data/api.js';
+ import api from '../data/recipeData.js';
  import {user} from '../stores/userStore.js';
  import {
      Button,

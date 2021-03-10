@@ -1,5 +1,5 @@
 import schemaExporter from './schemaExporter.js'
-import {prepRecLocal} from '../data/validate.js'
+import {prepRecLocal} from '../data/utils/validate.js'
 
 const exporters = [
     {

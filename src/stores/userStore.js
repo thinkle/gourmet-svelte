@@ -1,6 +1,6 @@
 /* See https://github.com/babycourageous/netlify-identity-demo-svelte/blob/master/src/store.js */
 import { writable, get } from 'svelte/store'
-import api from '../data/remoteApi.js';
+import api from '../data/remoteRecipeData.js';
 import netlifyIdentity from 'netlify-identity-widget'
 
 import {

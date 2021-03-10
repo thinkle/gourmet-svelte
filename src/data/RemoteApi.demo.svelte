@@ -3,8 +3,8 @@
  import RemoteRecipeTester from './RemoteRecipe.demo.svelte';
  import netlifyIdentity from 'netlify-identity-widget'
  import { user, redirectURL } from '../stores/userStore.js'
- import remoteApi from '../data/remoteApi.js'
- import api from '../data/api.js';
+ import remoteRecipeData from '../data/remoteRecipeData'
+ import api from './recipeData.js';
  import {Button,JsonDebug} from '../widgets/'
 
  let apiResponse
@@ -14,7 +14,7 @@
  $: username = $user !== null ? $user.username : ' there!'
 
  function throwError () {
-     apiResponse = remoteApi.doFetch(
+     apiResponse = remoteRecipeData.doFetch(
          'throwError',
          $user,
          {foo:'bar',boo:7}
@@ -22,7 +22,7 @@
  }
 
  function doBadModeRequest () {
-     apiResponse = remoteApi.doFetch(
+     apiResponse = remoteRecipeData.doFetch(
          'nonexistentmode',
          $user,
          {some:'options','because':'why not?'}
@@ -30,7 +30,7 @@
  }
 
  function setup () {
-     apiResponse = remoteApi.doFetch(
+     apiResponse = remoteRecipeData.doFetch(
          'setup',
          $user,
          {action:'has_access'}
@@ -40,7 +40,7 @@
 
  function testApi () {
      console.log('test the api');
-     apiResponse = remoteApi.doFetch(
+     apiResponse = remoteRecipeData.doFetch(
          'echo',
          $user,
          {message:'hello world'}
@@ -89,7 +89,7 @@
  }
 
  function doApiTest(mode,params) {
-     apiResponse = remoteApi.doFetch(mode,$user,params);
+     apiResponse = remoteRecipeData.doFetch(mode,$user,params);
  }
  let account;
  let email;

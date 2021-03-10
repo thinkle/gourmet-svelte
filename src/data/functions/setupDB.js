@@ -2,7 +2,7 @@
 //import {runQuery,runImport} from './gql.js';
 import {loadDB,runTest,insertOne,insertMany,queryCollection} from './mongoConnect.js';
 import recs from '../recs.json'
-import {validateRec,prepRecsRemote} from '../validate.js'
+import {validateRec,prepRecsRemote} from '../utils/validate.js'
 import {AdminSetupRequest} from '../requests/index.js'
 
 const functions = {

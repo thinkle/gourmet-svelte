@@ -1,7 +1,7 @@
 <script>
  import {recipeActions,recipePage,storedRecipes} from '../stores/recipeStores.js';
  import {exportRecipes} from '../exporters/'
- import {connectedRemote} from '../data/api.js';
+ import {connectedRemote} from '../data/recipeData.js';
  import {tick} from 'svelte';
  import {
      WhiskLogo,

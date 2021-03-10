@@ -1,4 +1,4 @@
-import RecDef from '../common/RecDef.js'
+import RecDef from '../../common/RecDef.js'
 
 export function diffRecs (r1, r2) {
     if (r1 && !r2) {return r1}

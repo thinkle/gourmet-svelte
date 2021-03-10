@@ -1,6 +1,6 @@
 import { readable, writable, get, derived } from 'svelte/store';
 import { makeLocalRecipeStore, recipeActions } from './recipeStores.js';
-import api from '../data/api.js';
+import api from '../data/recipeData.js';
 import deepcopy from 'deepcopy';
 
 const {localRecipes,recipeState,openLocalRecipes} = makeLocalRecipeStore();

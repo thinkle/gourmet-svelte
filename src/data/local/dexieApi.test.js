@@ -2,8 +2,8 @@ import Dexie from 'dexie';
 import indexedDB from 'fake-indexeddb';
 import IDBKeyRange from"fake-indexeddb/lib/FDBKeyRange";
 import api from './dexieApi.js';
-import user from "../common/mocks/user.js"
-import {testRecs} from "../common/mocks/recipes.js"
+import user from "../../common/mocks/user.js"
+import {testRecs} from "../../common/mocks/recipes.js"
 
 Dexie.dependencies.indexedDB = indexedDB;
 Dexie.dependencies.IDBKeyRange = IDBKeyRange

@@ -2,7 +2,7 @@ import deepcopy from 'deepcopy';
 import {require} from '../../utils/requireParams.js';
 import {jsonConcisify} from '../../utils/textUtils.js';
 import {loadDB,DB,getLastResult,insertOne,insertMany,queryCollection,getOne,replaceOne,deleteOne,updateOne} from './mongoConnect.js';
-import {prepRecRemote,getReferencedIDs}  from '../validate.js';
+import {prepRecRemote,getReferencedIDs}  from '../utils/validate.js';
 import {addRecipeRequest,
         deleteRecipeRequest,
         mostRecentRequest,

@@ -1,11 +1,11 @@
 import User from "../account/User.demo.svelte";
-import LocalData from "../data/LocalData.demo.svelte";
 import RemoteApi from "../data/RemoteApi.demo.svelte";
 import RemoteRecipe from "../data/RemoteRecipe.demo.svelte";
 import ShoppingList from "../shopDisplay/ShoppingList.demo.svelte";
 import ShoppingListItems from "../shopDisplay/ShoppingListItems.demo.svelte";
 import RecipeStores from "../stores/RecipeStores.demo.svelte";
 import Widgets from "../widgets/Widgets.demo.svelte";
+import LocalData from "../data/local/LocalData.demo.svelte";
 import Highlight from "../extension/parser/Highlight.demo.svelte";
 import RecipePicker from "../recDisplay/picker/RecipePicker.demo.svelte";
 import Colors from "../recDisplay/rec/Colors.demo.svelte";
@@ -32,13 +32,13 @@ import Toaster from "../widgets/layout/Toaster.demo.svelte";
  
 export default {
     User,
-    LocalData,
     RemoteApi,
     RemoteRecipe,
     ShoppingList,
     ShoppingListItems,
     RecipeStores,
     Widgets,
+    LocalData,
     Highlight,
     RecipePicker,
     Colors,

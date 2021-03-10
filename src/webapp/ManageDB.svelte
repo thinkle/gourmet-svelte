@@ -1,7 +1,6 @@
 <script>
  import {connected} from '../stores/recipeStores.js';
- import dexieApi from '../data/dexieApi.js';
- import api from '../data/api.js';
+ import dexieApi from '../data/local/dexieApi.js';
  import {JsonDebug,Button} from '../widgets/';
 
  let action

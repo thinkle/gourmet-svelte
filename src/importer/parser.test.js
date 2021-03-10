@@ -100,3 +100,14 @@ it(
         console.log(parsed);
     }
 );
+
+fit(
+    'Food.com import that had weird ingredient # bug',
+    ()=>{
+        let results = getResults('brokenFood.html');
+        //console.log('Results: ',results);
+        let parsed = parseChunks(results);
+        //console.log('Parsed: ',parsed);
+        console.log('Ingredients:',parsed.ingredients);
+    }
+);
