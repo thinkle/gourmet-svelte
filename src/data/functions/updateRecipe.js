@@ -43,7 +43,7 @@ export async function updateRecipe(user, params) {
                                 ...recipe,
                                 ingTexts: {
                                     $map: {
-                                        input: recipe.ingredients,
+                                        input: recipe.ingredients || [],
                                         "in": "$$this.text"
                                     }
                                 },
@@ -153,6 +153,26 @@ export function makeFindMatchingIngListExpression (targetText, list) {
 
 // Helper functions to prevent me from losing my mind with too many levels of indentation
 export function makeIngredientsExpression ({newIngs, oldIngs}) {
+    return {
+        $concatArrays : [
+            newIngs,
+            {$filter : {
+                input: oldIngs,
+                cond : {
+                    $eq : [
+                        -1,
+                        {$indexOfArray : [
+                            {$map:{
+                                input:newIngs,
+                                "in":"$$this.text"}
+                            },
+                            "$$this.text"
+                        ]}
+                    ]
+                }
+            }}
+        ]
+    }
   return {
       $cond : {
           if : {
