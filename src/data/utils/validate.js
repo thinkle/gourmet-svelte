@@ -36,10 +36,16 @@ function validateRec(rec) {
   }
   rec.ingredients.map((i) => crawlIngredient(i, rec.flatIngredients));
   rec.fullText = getFullText(rec);
+  // Convert booleans to integers
   if (!rec.deleted) {
     rec.deleted = 0;
   } else {
     rec.deleted = 1;
+  }
+  if (!rec.share) {
+      rec.share = 1;
+  } else {
+      rec.share = 0;
   }
 }
 
@@ -68,7 +74,7 @@ function crawlIngredient(ingredient, array) {
 /**
 For preparing a recipe collection that's been exported for import...
 **/
-export function prepRecRemote(r, user) {
+export function prepRecRemote(r, user, isImport=false) {
   /**
           WTF: For reasons I don't understand, MongoDB fetch/retrieve
           was simply failing to fetch back a new recipe when passed
@@ -91,6 +97,11 @@ export function prepRecRemote(r, user) {
     email: user.email,
     full_name: user.metadata && user.metadata.full_name,
   };
+  if (isImport) {
+    r.localid = r._id
+    delete r._id
+    delete r.id
+  }
   //r.user = user.email
   if (!r._id) {
     if (r.localid) {
@@ -112,8 +123,8 @@ export function prepRecRemote(r, user) {
   }
 }
 
-export function prepRecsRemote(recs, user) {
-  recs.recipes.forEach((r) => prepRecRemote(r, user));
+export function prepRecsRemote(recs, user, isImport=false) {
+  recs.recipes.forEach((r) => prepRecRemote(r, user, isImport));
 }
 
 export function prepRecLocal(rec) {
