@@ -543,10 +543,7 @@
     </Modal>
   {/if}
 {/if}
-<style>
-  .editContainer {
-    display: contents;
-  }
+<style>  
   h2 {
     flex-grow: 2;
     font-weight: bold;
