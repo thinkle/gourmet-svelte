@@ -88,7 +88,7 @@ async function crawlIngredients(
         }
         if (recipe) {
           if (recipe.ingredients) {
-            let recMultiplier;
+            let recMultiplier = 1;
             if (
               ingredient.amount &&
               ingredient.amount.amount &&
@@ -101,7 +101,7 @@ async function crawlIngredients(
               (useParentAsSource && source) || recipe,
               $localRecipes,
               items,
-              recMultiplier,
+              recMultiplier * multiplier,
               [...parentRecs, recipe.id],
               true
             );
