@@ -79,13 +79,15 @@
     {/if}
 
     <!-- spacer. stuff to be removed -->
-    <!-- <div style="height:5em"></div>
+    {#if DEV}
+     <div style="height:5em"></div>
          Fake user (local dev mode only):
          <br>Name: <input bind:value="{name}" >
          <br>Email: <input bind:value="{email}" >
          <button on:click="{user.fake({name,email})}">Set Fake User</button>
          
-         User Data:<JsonDebug data="{$user}"/> -->
+         User Data:<JsonDebug data="{$user}"/>
+    {/if}
 </div>
 
 <style>

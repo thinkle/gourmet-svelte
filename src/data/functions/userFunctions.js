@@ -27,7 +27,7 @@ export async function add (user) {
 
 export async function getUser (user) {
     //console.log('getUser!',user);
-    if (!user.email) {
+    if (!user || !user.email) {
         //console.log('No email, return empty user');
         return {}
     } else {
