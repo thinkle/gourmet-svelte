@@ -17,13 +17,17 @@
  let parsed
  $: {
      if (text) {
-         if (ingredientList && $ingredientList && $ingredientList.length > 1) {
-             parsed = parseIngredients(text,$ingredientList);
-         } else {
-             parsed = text;
-         }
-         parsed = parseTimes(parsed);
+         setTimeout(doTextMagic,50)
      }
+ }
+
+function doTextMagic () {
+    if (ingredientList && $ingredientList && $ingredientList.length > 1) {
+        parsed = parseIngredients(text,$ingredientList);
+    } else {
+        parsed = text;
+    }
+    parsed = parseTimes(parsed);
  }
  
  let markupToComponentMap = {

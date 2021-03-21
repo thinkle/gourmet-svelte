@@ -6,23 +6,35 @@
  import {extractTimes} from '../../utils/times.js';
 
  let times = []
-
- $: times = getTimes(rec);
+ let fetched = '';
  
+ $: getTimes(rec);
+ let count = 0;
+
  function getTimes (rec) {
-     if (rec.times) {
-         times = [...rec.times]
+     let toFetch = JSON.stringify({text:rec.text,times:rec.times});
+     if (toFetch==fetched) {
+        return
      } else {
-         times = [];
+         fetched = toFetch;
      }
-     if (rec.text) {
-         for (let text of rec.text) {
-             const extracted = extractTimes(text.body);
-             times = [...times,...extracted]
-         }
-     }
-     if (onReadTimes) {onReadTimes(times)}
-     return times
+     setTimeout(
+        ()=>{    
+        count += 1;
+        if (rec.times) {
+            times = [...rec.times]
+        } else {
+            times = [];
+        }
+        if (rec.text) {
+            for (let text of rec.text) {
+                const extracted = extractTimes(text.body);
+                times = [...times,...extracted]
+            }
+        }
+        if (onReadTimes) {onReadTimes(times)}
+        }, 50
+     );
  }
 
  
