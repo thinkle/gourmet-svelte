@@ -378,8 +378,8 @@ export function parseUnit (text, requireIngredient=false) {
 export function addAmounts (amounts, item) {
     let byUnit = {}
     for (let amountObj of amounts) {
-        let unit = getStandardUnit(amountObj.unit)||amountObj.unit||'';
-        let amount = amountObj.amount;
+        let unit = getStandardUnit(amountObj?.unit)||amountObj?.unit||'';
+        let amount = amountObj?.amount;
         if (byUnit[unit]) {
             //console.log('Found same unit, adding',amount,'to',byUnit[unit]);
             byUnit[unit] += (amount||1);            
