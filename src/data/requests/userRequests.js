@@ -1,4 +1,5 @@
 import {Request} from './remoteRequest.js';
+import {empty} from '../../utils/validator'
 
 let user = {
     email : '',
@@ -16,7 +17,7 @@ export const getUserRequest = Request(
 export const setFakeUserRequest = Request(
     {name:'setFakeUser',
      requestDef:{},
-     responseDef:undefined,
+     responseDef:{},
     }
 )
 
@@ -30,7 +31,7 @@ export const getFakeUserRequest = Request(
 
 export const removeLinkedAccountRequest = Request(
     {name:'removeLinkedAccount',
-     requestDef:undefined,
+     requestDef:empty,
      responseDef:user
     }
 )
@@ -63,6 +64,6 @@ export const setNameRequest = Request({
 
 export const markUserNotNewRequest = Request({
     name : 'markUserNotNew',
-    requestDef:{},
+    requestDef:empty,
     responseDef:user,
 })

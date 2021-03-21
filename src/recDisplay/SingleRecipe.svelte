@@ -13,6 +13,7 @@
   } from "../stores/recipeStores.js";
   import Recipe from "./rec/Recipe.svelte";
   import { Button, FullHeight, Bar, WhiskLogo, NavActions } from "../widgets/";
+  import router from "page";
 
   async function open() {
     if (!shared) {
@@ -50,7 +51,11 @@
       <div slot="right">
         <NavActions>
             <li>
-            <Button on:click={() => recipeActions.copyRec($localRecipes[id])}
+            <Button on:click={
+              () => recipeActions
+                      .copySharedRecipes([$localRecipes[id]])
+                      .then((result)=>result.length && setTimeout(1000,router.redirect(`/rec/${result[0]._id}`)))
+            }
                 >Copy to your Recipes
             </Button>
             </li>

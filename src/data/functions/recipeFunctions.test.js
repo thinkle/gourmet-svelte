@@ -9,8 +9,8 @@ import {addRecipe,
         getRecipe,
         getRecipes,
         getMostRecent,
-        updateRecipe,
        } from './recipeFunctions.js';
+import { updateRecipe } from "./updateRecipe";
 import {testRecs} from '../../common/mocks/recipes.js';
 import user,{otherUser} from '../../common/mocks/user.js';
 import {setupDBwithRecs} from './setupMockDB.js'

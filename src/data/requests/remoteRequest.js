@@ -58,14 +58,19 @@ export function Request ({
     chatty,
 }) {
     return {
+        requestDef,
+        responseDef,
         async makeRequest ({user,params}) {
+            if (!user) {
+                throw 'No user!'
+            }
             try {
                 validate(params,requestDef);
                 if (chatty) {
                     console.log(`RemoteAction ${name} Sending valid request `,user,params);
                 }
             } catch (err) {
-                console.log(`$RemoteAction {name} makeRequest called with invalid parameters:`,params);
+                console.log(`$RemoteAction ${name} makeRequest called with invalid parameters:`,params);
                 console.log('Expected',requestDef);
                 err.context = this;
                 throw err;
@@ -75,7 +80,8 @@ export function Request ({
                 headers : {
                     Accept : 'application/json',
                     'Content-Type':'application/json',
-                    Authorization : 'Bearer ' + (user && user.access_token || '')
+                    Authorization : 'Bearer ' + (user && user.access_token || ''),
+                    localuser : user && JSON.stringify(user) || '',
                 },
                 body : JSON.stringify(params)
             });
@@ -102,7 +108,7 @@ export function Request ({
                 try {
                     validate(result,responseDef);
                 } catch (err) {
-                    console.log(`$RemoteAction {name} makeRequest handler created invalid response:`,result);
+                    console.log(`$RemoteAction ${name} makeRequest handler created invalid response:`,result);
                     console.log('Expected',responseDef);
                     err.context = this;
                     throw err;

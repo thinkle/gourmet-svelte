@@ -75,6 +75,9 @@
 
  if (window.location.host.indexOf('localhost')>-1) {
      console.log('Fake login...');
+     console.log('User=',$user)
+    }
+     /*
      user.login({
          email : 'tmhinkle@gmail.com',
          user_metadata : {
@@ -90,7 +93,7 @@
          }
      });
  }
-
+ */
 
  setContext(
      'login',

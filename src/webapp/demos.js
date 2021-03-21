@@ -1,6 +1,7 @@
 import User from "../account/User.demo.svelte";
 import RemoteApi from "../data/RemoteApi.demo.svelte";
 import RemoteRecipe from "../data/RemoteRecipe.demo.svelte";
+import RemoteRequest from "../data/RemoteRequest.demo.svelte";
 import ShoppingList from "../shopDisplay/ShoppingList.demo.svelte";
 import ShoppingListItems from "../shopDisplay/ShoppingListItems.demo.svelte";
 import RecipeStores from "../stores/RecipeStores.demo.svelte";
@@ -34,6 +35,7 @@ export default {
     User,
     RemoteApi,
     RemoteRecipe,
+    RemoteRequest,
     ShoppingList,
     ShoppingListItems,
     RecipeStores,

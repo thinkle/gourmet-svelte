@@ -42,17 +42,23 @@ const mock = {
 // }
 
 function createUser() {
-    const localUser = JSON.parse(localStorage.getItem('gotrue.user'))
+    let localUser;
+    try {
+         localUser = JSON.parse(localStorage.getItem('gotrue.user'))
+    } catch (err) {
+        console.log('Bad localUser stored :(',localStorage.getItem('gotrue.user'))
+        localStorage.setItem('gotrue.localuser','null');
+    }
 
     let u = null
     if (localUser) {
         u = {
-            username: localUser.user_metadata.full_name,
+            username: localUser?.user_metadata?.full_name,
             email: localUser.email,
-            access_token: localUser.token.access_token,
-            expires_at: localUser.token.expires_at,
-            refresh_token: localUser.token.refresh_token,
-            token_type: localUser.token.token_type,
+            access_token: localUser?.token?.access_token,
+            expires_at: localUser?.token?.expires_at,
+            refresh_token: localUser?.token?.refresh_token,
+            token_type: localUser?.token?.token_type,
             id:localUser.id,
         }
     }
@@ -84,7 +90,7 @@ function createUser() {
         let $user = get(userStore);
         if ($user) {
             //let remoteInfo = await api.doFetch('echo',$user);
-            let remoteUser = await getUserRequest.makeRequest($user);
+            let remoteUser = await getUserRequest.makeRequest({user:$user});
             userStore.update(
                 ($user)=>{
                     $user.remoteUser = remoteUser
@@ -101,22 +107,21 @@ function createUser() {
     
     return {
         subscribe,
-        fake (u) {
+        async fake (u) {
             set(u);
             //api.doFetch('setFakeUser',get(userStore),u)
-            setFakeUserRequest.makeRequest(
-                {user:get(userStore),params:u}
-            )
-            .then(
-                ()=>{
-                    console.log('Told Remote to Faked user: ',u)
-                    getRemoteUser();
-                }
-            ).catch(
-                (err)=>{
-                    console.log('Error fetching user',err)
-                }
-            );
+            try {
+                await setFakeUserRequest.makeRequest(
+                    {user:get(userStore),params:u}
+                )
+            } catch (err) {
+                console.log('Error fetching new user after fake :(',err)
+                return;
+            }
+            await getRemoteUser();
+            console.log('Set gotrue...');
+            localStorage.setItem('gotrue.user',JSON.stringify(get(userStore)))
+            console.log('$user is now',get(userStore))
         },
         async removeLinkedAccount () {
             let result = await removeLinkedAccountRequest.makeRequest(

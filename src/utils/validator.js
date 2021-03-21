@@ -114,6 +114,18 @@ export function optional (obj) {
     );
 }
 
+export const empty = Validator(
+        'is null',
+        (v)=>{
+            if (!v) {
+                return true
+            } else {
+                return false;
+            }
+        }
+    );
+
+
 export function each (obj) {
     return Validator(
         `each ${JSON.stringify(obj)}`,

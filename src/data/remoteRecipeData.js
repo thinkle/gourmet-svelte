@@ -8,6 +8,7 @@ import {addRecipeRequest,
         getRecipeRequest,
         getRecipesRequest,
         importRecipesRequest,
+        exportRecipesRequest,
         updateRecipeRequest,
         setRecipeSharingRequest,
         getSharedRecipeRequest,
@@ -23,7 +24,7 @@ function RecipeData (user) {
                 return true;
             }
         },
-        addRecipe (recipe) {
+        addRecipe (recipe) {            
             return addRecipeRequest.makeRequest(
                 {user,params:{recipe}}
             );
@@ -50,6 +51,30 @@ function RecipeData (user) {
             return getRecipesRequest.makeRequest(
                 {user,params}
             );
+        },
+        async exportRecipes (params) {
+            let response = await exportRecipesRequest.makeRequest(
+                {user,params}
+            )
+            let result = response.result
+            while (result.length < response.count) {
+                response = await exportRecipesRequest.makeRequest(
+                    {
+                        user,
+                        params:{
+                            ...params,
+                            page:result.length,
+                        }
+                    }
+                );
+                if (!response.result.length) {
+                    // we must be done?
+                    return result;
+                } else {
+                result = [...result,...response.result];
+                }
+            }
+            return result;
         },
         importRecipes (params) {
             return importRecipesRequest.makeRequest(

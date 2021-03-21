@@ -20,6 +20,7 @@ export const mostRecentRequest = Request(
     }
 );
 
+
 export const addRecipeRequest = Request(
     {name:'addRecipe',
      responseDef:{_id:'',...validRec},
@@ -72,6 +73,16 @@ export const importRecipesRequest = Request(
      },
      responseDef:[]}
 );
+
+export const exportRecipesRequest = Request(
+    {name:'exportRecipes',
+    requestDef: {
+        ids: [],
+    },
+    responseDef: []
+}
+
+)
 
 export const getSharedRecipeRequest = Request(
     {name:'getSharedRecipe',

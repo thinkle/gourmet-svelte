@@ -56,7 +56,6 @@ async function checkForReferences(recipe) {
     } else {
       let targetRec = await localRecipeData.getRecipe(undefined, { mongoId: ing.reference });
       if (targetRec) {
-
         ing.referenceExists = true;
       } else {
         console.log(
@@ -71,21 +70,6 @@ async function checkForReferences(recipe) {
 
 const recipeData = {
   ...localRecipeData,
-
-  // Simple ones...
-  async setRecipeSharing () {
-    let updated = await remoteRecipeData.setRecipeSharing(...arguments);
-    localRecipeData.updateRecipe(updated);
-    return updated;
-  },
-  async getSharedRecipe () {
-    return await remoteRecipeData.getSharedRecipe(...arguments)
-  },
-  // And everything else is more complicated...
-  // we typically have to touch both remote and
-  // local and handle failure of remote connection
-  // appropriately...
-  
   connectRemote: () => remoteRecipeData && true,
 
   async addRecipe(recipe) {
@@ -104,6 +88,12 @@ const recipeData = {
       console.log(err);
     }
     return recipe;
+  },
+
+  async deleteRecipe(id) {
+    let recipe = await recipeData.getRecipe(id);
+    recipe.deleted = true;
+    this.updateRecipe(recipe);
   },
   // This is for "patching" -- current use case is just for shopping lists where we likely
   // have changed the recipe on the backend and our "edits" usually just mean we're adding
@@ -152,27 +142,81 @@ const recipeData = {
     await localRecipeData.updateRecipe(recipe);
     return recipe;
   },
-  async deleteRecipe(id) {
-    let recipe = await recipeData.getRecipe(id);
-    recipe.deleted = true;
-    this.updateRecipe(recipe);
-  },
+  
   async updateRecipes(recipes) {
     recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
   },
 
+  // Sharing code
+  async getSharedRecipe () {
+    return await remoteRecipeData.getSharedRecipe(...arguments)
+  },
+  async setRecipeSharing () {
+    let updated = await remoteRecipeData.setRecipeSharing(...arguments);
+    localRecipeData.updateRecipe(updated);
+    return updated;
+  },
+  
+  /* Copy a list of shared recipes. This will crawl the recipe recursively for
+  references and copy those as well... intended to be called with a single
+  recipe, but has other signature to allow recursively crawling linked recipes.
+
+  Call with IDs if we don't already have the recipes.
+  */
+  async getSharedRecipes ({recipes=[], ids=[]}) { 
+    if (ids) {
+      console.log('Grab recipes from IDs...',ids)
+      recipes.push(...await remoteRecipeData.exportRecipes({ids}));
+    }
+    let alreadyImported = new Set(recipes.map((r)=>r._id));
+    // fetch any recipes linked within ingredient list....
+    let newIds = new Set()
+    for (let r of recipes) {
+      if (r.ingredients) {
+        let references = crawlForReferences(r.ingredients)
+        for (let i of references) {
+          if (!alreadyImported.has(i.reference)) {
+            newIds.add(i.reference)
+          }
+        }
+      }
+    }
+    if (newIds.size) {
+      console.log('Recursive call to grab new IDs')
+      return await this.copySharedRecipes(
+        {recipes, ids:Array.from(newIds)}
+      );
+    } else {
+      return recipes
+    }
+  },
+
+  async copySharedRecipes ({recipes=[],ids=[]}) {
+    let theRecipes = await this.getSharedRecipes({recipes,ids});
+    return this.importRecipes({recipes:theRecipes});
+  },
+
+  async copyRecipe (recipe) {
+    if (recipe._id) {recipe.copyOf = recipe._id}
+    recipe.id = undefined;
+    recipe._id = undefined;
+    return await this.addRecipe(recipe);
+  },
+
+  // import & sync
   async importRecipes(json) {
     let batches = batchRecipes(json);
     console.log("Split into ", batches.length, "batches");
-    while (batches) {
+    while (batches.length) {
       let json = batches.pop();
       console.log("Processing batch...", json);
-      let recipes = await remoteRecipeData.importRecipes(json); // push to remote DB...
+      var recipes = await remoteRecipeData.importRecipes(json); // push to remote DB...
+      console.log('Remote process resulted in',recipes)
       await this.updateRecipes(recipes); // lazy lazy... - now push to local DB
     }
-    return;
+    return recipes;
   },
-
+  // sync
   async sync(test = false, { onPartialSync }) {
     if (!localRecipeData.db) {
       await localRecipeData.connect();

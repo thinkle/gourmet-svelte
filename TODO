@@ -20,10 +20,12 @@
 
 
 TODO:
-- Finish "Sharing" code
+- Finish "Sharing" code (x)
   -> Check if recipe is marked "shared" before showing it (x)
   -> Implement "Share" button to make it shared (x)
   -> Handle multiple recipes / collections (x)
+
+- Fix import of frustrating NYT ingredients with multiple units...
 
 - Copy recipe button...
 - While we're at it... maybe clean up the API issue...

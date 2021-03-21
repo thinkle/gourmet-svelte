@@ -2,17 +2,17 @@ import {registerHandlerObject} from '../requests/remoteRequest.js'
 import './recipeFunctions.js';
 import './importRecipeFunction.js';
 import './nutritionFunctions.js';
-
+import './shareRecipeFunctions';
+import './exportRecipeFunctions';
 const requestHandlers = {
 }
 registerHandlerObject(requestHandlers);
 
 import {DB} from './mongoConnect.js';
 import './setupDB.js';
-import {fakeUser} from './netlifyDevUserMock.js';
+import {getFakeUser} from './netlifyDevUserMock.js';
 import {userCache,getUser} from './userFunctions.js';
 
-    
 const handler = async (event, context) => {
     console.log('Calling handler, we have cached users: ',userCache)
     let params = event.queryStringParameters;
@@ -33,16 +33,20 @@ const handler = async (event, context) => {
         user, // actual user info you can use for your serverless functions
     } = context.clientContext
     if (!user && event.headers.referer.indexOf('localhost')>-1) {
-        console.log('fakeUser:',fakeUser);
-        user = fakeUser;
+        try {
+        user = JSON.parse(event.headers.localuser)
         user.extraApiStuff = 'fakey fake fake stuff'
+        } catch (err) {
+            console.log('no good - headers were',event.headers,'use default fake')
+            user = getFakeUser();
+        }
     }
     if (user && userCache[user.email]) {
-        console.log('Got cached user',user.email)
+        //console.log('Got cached user',user.email)
         user.dbUser = userCache[user.email]
         user.usedCached = true;
     } else if (user) {
-        console.log('!!!Fetch DB user',user)
+        //console.log('!!!Fetch DB user',user)
         //console.log('getUser(',event,context,user,params,')')
         // Note: this just gets the user...
         await getUser(user);
@@ -97,8 +101,7 @@ EchoRequest.setRequestHandler((user,params) => {
 
 ThrowErrorRequest.setRequestHandler(
     ()=>{
-        let duck = {};
-        duck.boo.bar += 7;
+        throw 'Big Error'
     }
 );
 

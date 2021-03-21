@@ -7,7 +7,6 @@ import {
     setNameRequest,
     markUserNotNewRequest,
     removeLinkedAccountRequest,
-    setFakeUserRequest,
 } from '../requests/index.js';
 export const userCache = {
     
@@ -27,9 +26,9 @@ export async function add (user) {
 }
 
 export async function getUser (user) {
-    console.log('getUser!',user);
+    //console.log('getUser!',user);
     if (!user.email) {
-        console.log('No email, return empty user');
+        //console.log('No email, return empty user');
         return {}
     } else {
         const query = {
@@ -43,11 +42,11 @@ export async function getUser (user) {
             invites = undefined;
         }
         if (result) {
-            console.log('Got result, use as dbUser',result)
+            //console.log('Got result, use as dbUser',result)
             if (invites) {result.invites = invites;}
             userCache[user.email] = result;
             user.dbUser = result;
-            console.log('Found user: ',user);
+            //console.log('Found user: ',user);
             return user;
         }
         else {
@@ -75,7 +74,7 @@ removeLinkedAccountRequest.setRequestHandler(cache(
         let dbUser = user.dbUser;
         dbUser.linked = undefined;
         replaceOne('users',{_id:dbUser._id},dbUser);
-        return dbUser
+        return user
     })
 );
 
@@ -93,7 +92,7 @@ acceptLinkedAccountRequest.setRequestHandler(
                     `No invite for user ${user.user} to account ${params.account}`
                 );
             }
-            return dbUser
+            return user
         }
     )
 )
@@ -111,7 +110,8 @@ addLinkedAccountsRequest.setRequestHandler(
         } else {
             dbUser.linkedAccounts = [...linkedAccounts];
         }
-        return update({email:dbUser.email,_id:dbUser._id},dbUser);
+        await update({email:dbUser.email,_id:dbUser._id},dbUser);
+        return user;
 }));
 
 setLinkedAccountsRequest.setRequestHandler(
@@ -120,7 +120,8 @@ setLinkedAccountsRequest.setRequestHandler(
         let linkedAccounts = params.accounts;
         let dbUser = user.dbUser;
         dbUser.linkedAccounts = params.accounts
-        return update({_id:dbUser._id},dbUser);
+        await update({_id:dbUser._id},dbUser);
+        return user;
     }
 ));
 
@@ -131,7 +132,7 @@ markUserNotNewRequest.setRequestHandler(
         user.dbUser.newUser = false;
         let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
         console.log('markUserNotNew Upated!',result)
-        return result
+        return user
     })
 );
                                 
@@ -141,7 +142,7 @@ setNameRequest.setRequestHandler(
         user.dbUser.name = params.name;
         user.name = params.name
         let result = await replaceOne('users',{_id:user.dbUser._id},user.dbUser);
-        return result;
+        return user;
     })
 );
 
