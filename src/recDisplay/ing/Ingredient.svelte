@@ -75,6 +75,12 @@
      }
  }
  /* End highlighting code */
+ 
+ // We do the highlight work in a timeout so that we render quicker
+ // and then the highlighting pops in. Makes a difference for big recipes
+ // where it was taking a long time to switch to the tab.
+ let itemMarkup = ing?.text||''
+ $: setTimeout(()=>itemMarkup=highlightItem(ing),5)
 
 </script>
 
@@ -115,7 +121,7 @@
                  on:mouseover="{()=>hoverOn(ing)}"
                  on:mouseleave="{()=>hoverOff(ing)}"
                  >
-                 <span class='item'>{@html highlightItem(ing)}</span>
+                 <span class='item'>{@html itemMarkup}</span>
                  </td>
         {/if}
     </tr>

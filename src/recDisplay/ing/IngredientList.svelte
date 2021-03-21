@@ -14,7 +14,6 @@
  import {floatToFrac} from '../../utils/numbers.js';
  import {onMount,tick} from 'svelte';
  import {flip} from 'svelte/animate'
- import {highlightItem} from '../../utils/ingredientUtils.js';
  let highlightedIngredient = getContext('highlightedIngredient');
  let groups;
 
