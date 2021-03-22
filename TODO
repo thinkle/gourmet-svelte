@@ -1,7 +1,25 @@
-* Next up:
+*Fixes*
+- Fix sorting in firefox?
+
+*New Features*
+- Bring "copy recipe" button into main recipe interface
+- Simple export to file functionality (back-up) (part-way...)
+- Improve full-app layout on mobile to save screen space
+- Save "purchased" state of shopping list items 
+- i18n
+- Look into FF extension/other browser extensions
+- Consider moving more work to webworkers? e.g. recipe parsing?
+- Nutritional Information
+
+**Extension**
 - Make chrome extension notice when we've already imported a page. 
 - Make chrome extension "helper" view
+- Create start/login page for chrome extension + app (when we haven't signed in yet)
+- Allow pushing parsers from web-app to chrome extension so we don't have to update chrome extension (?)
 
+
+*Refactor/Code Change/Development Improvements*
+- Refactor / Use typescript???
 - Improve autoparsing
   -> Build proper testing framework for looking at import and parser w/o having
      to wait for extension reloads
@@ -9,6 +27,7 @@
         or triple import the same stuff when automatically parsing, and if we
         could clear that up, it would be much better.
 
+*Testing*
 - Consider automated test of recipe editing -- it seems really easy to
   screw up the state handling so the save/revert buttons don't show
   up. (speaking of - we broke recipe editing state updates again
@@ -18,70 +37,4 @@
   -> Testing save/edit buttons involves either having or mocking state and store
      which is rather a pain...
 
-
-TODO:
-- Finish "Sharing" code (x)
-  -> Check if recipe is marked "shared" before showing it (x)
-  -> Implement "Share" button to make it shared (x)
-  -> Handle multiple recipes / collections (x)
-
-- Fix import of frustrating NYT ingredients with multiple units... (x)
-- Set up stable and testing branch w/ launch? (x)
-
-- Refactor / Use typescript???
-
-
-
-- Copy recipe button... (x)
-- While we're at it... maybe clean up the API issue... (x)
-- Consider renaming the 400 things called "api" to something nicer. While you're at it, split code a bit
-  so files like remoteApi.js are less overwhelming. (x)
-
-- Import tweaks
-
-- Speed up loading of recipe page (x)
-
-- Fix Log-In and Auto-Sync process (?)
-- Fix empty/startup state  (x)
-- Create start/login page for chrome extension + app
 - Test Syncing from local to cloud... 
-
-
-Maybe before publish?
-- Simple export to file functionality (back-up) (part-way...)
-- Allow pushing parsers from web-app to chrome extension so we don't have to update chrome extension (?)
-
-- Create simple "sharing" interface -- "sharing" a recipe makes the
-  link public -- when people follow the link they get a recipe they
-  can copy to their DB (we strip the _ID and owner from it when
-  downloading...?) (x)
-  => Flag to be public or not
-  => Links to public recipes work for anyone
-  => You can add a recipe?
-     => recipes as ingredients get added recursively
-  => Copy recipe ability... (x)
-  
-
-Quick Fix:
--> grams / second unit import (NYTimes!!!) (x)
-
-
-- Publish version 1
-
-
-- Fix sorting in firefox?
-
-Wishlist / Next version
-- Update routing so back buttons work to move you from e.g. recipe list to open recipe to shopping list
-- Save "purchased" state of shopping list items 
-- Tweak layout on mobile.
-
-Future
-- i18n
-- Look into FF extension/other browser extensions
-
-
-- Consider moving more work to webworkers? e.g. recipe parsing?
-
-- Set up DEV version + Stable version (???)
-- Nutrition!
