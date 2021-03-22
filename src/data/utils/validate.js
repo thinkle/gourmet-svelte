@@ -42,7 +42,7 @@ function validateRec(rec) {
   } else {
     rec.deleted = 1;
   }
-  if (!rec.share) {
+  if (rec.share) {
       rec.share = 1;
   } else {
       rec.share = 0;
