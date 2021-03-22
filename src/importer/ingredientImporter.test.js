@@ -15,11 +15,20 @@ fit('Parsing ingredients',
             console.log('Got recs:',rec.ingredients)
             return rec.ingredients[0]
         }
-        let result = parseIng('½   cucumber, peeled, halved lengthwise, seeded, and diced fine (1/2 cup)');
+
+        let result = parseIng('1 ½ cups/360 milliliters whole milk');
         expect(result.text).toMatch(
-                /cucumber, peeled, halved lengthwise, seeded.*/
+                /.*whole milk.*/
         );
-        expect(result.amount.amount).toEqual(0.5);
+        expect(result.amount.amount).toEqual(1.5);
+        expect(result.amount.unit).toEqual('cups')
+        
+        result = parseIng('2 ½   cucumbers, peeled, halved lengthwise, seeded, and diced fine (1/2 cup)');
+        expect(result.text).toMatch(
+                /cucumbers, peeled, halved lengthwise, seeded.*/
+        );
+        expect(result.amount.amount).toEqual(2.5);
+        expect(result.amount.unit).toEqual('cup')
         result = parseIng('6 ounces medium-large shrimp, (31 to 40 per pound), peeled, deveined, halved lengthwise, and halved crosswise');
         expect(result.text).toMatch(
                 /medium-large shrimp/
@@ -146,7 +155,7 @@ it('Ingredient in pieces',
          
    })
 
-xit('Ingredient Groups vanilla',
+it('Ingredient Groups vanilla',
    ()=>{
        let result = parseChunks(
            [
