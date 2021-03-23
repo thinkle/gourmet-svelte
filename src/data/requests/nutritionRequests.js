@@ -3,7 +3,7 @@ import {each,optional} from '../../utils/validator.js';
 
 export const queryNutrientRequest = Request(
     {name:'queryNutrients',
-     requestDef:{query:'query'},
+     requestDef:{query:'query',sortBy:optional([""]),dataType:optional([""])},
      responseDef:
          {}
      , // number - i.e. timestamp

@@ -1,5 +1,6 @@
 <script>
   export let nutrients;
+  export let multiplier=1;
   import {MACRO_RDI,NUTRIENTS_RDI,RDI_BY_NUTRIENT} from './rdi';
   $: console.log(nutrients)
   const KCAL = 1008; // kcal
@@ -22,14 +23,14 @@
     let amount = nut?.amount || 0;
     if (RDI_BY_NUTRIENT[id]) {
       console.log('Setting percent for ',id)
-      console.log('amount is',amount)
-      percentDV[id] = Math.round(100 * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
-      percentDV[name] = Math.round(100 * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
+      console.log('amount is',amount * multiplier)
+      percentDV[id] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
+      percentDV[name] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
       console.log('% is',percentDV[id]) 
-      return `${Math.round(amount)}${RDI_BY_NUTRIENT[id].unit}`     
+      return `${Math.round(amount*multiplier)}${RDI_BY_NUTRIENT[id].unit}`     
     }
     console.log(id,'no RDI... amount is',amount)
-    return amount.toFixed()
+    return (multiplier*amount).toFixed()
   }
 
  </script>

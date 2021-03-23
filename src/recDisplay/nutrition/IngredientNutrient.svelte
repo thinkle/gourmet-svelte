@@ -5,6 +5,7 @@
   import {getNutritionQuery,extractItems} from '../../utils/ingredientUtils';
   import {queryNutrientRequest, getNutrientInfoRequest} from '../../data/requests/'
   let items = [];
+  let multiplier = 1;
   let lastIng = '';
   let lastSearch = '';
   let searchTerms = '';
@@ -18,6 +19,7 @@
     }
   }
   let queryResponse = {foods:[]};
+  let nutrients = [];
   let chosenFood;
   let nutritionInfo;
   async function doSearch () {
@@ -42,9 +44,19 @@
     if (response) {
       nutritionInfo = response?.result
       console.log('Got info:',nutritionInfo)
+      if (nutritionInfo?.foodPortions?.length) {
+        portion = nutritionInfo.foodPortions[0];
+      }
+      if (nutritionInfo?.foodNutrients) {
+        console.log('new nutrients')
+        nutrients = nutritionInfo.foodNutrients;
+      }
     }
   }
-
+  let portion;
+  $: if (portion && portion.gramWeight) {
+    multiplier = portion.gramWeight / 100;
+  }
   $: getInfo(chosenFood);
   $: syncSearch(ing)
 </script>
@@ -64,8 +76,14 @@
       ({portion.gramWeight})</li>
       {/each}
   {/if}
+  {#if portion}
+  Nutritional Info for {portion.portionDescription} ({portion.gramWeight}g)
+  {/if}
   {#if nutritionInfo?.foodNutrients}
-  <NutritionLabel foodNutrients={nutritionInfo.foodNutrients}/>
+  {nutritionInfo.description}
+  {#each [nutritionInfo] as nutritionInto (nutritionInfo.description)}
+  <NutritionLabel key={nutritionInfo.description} {nutrients} {multiplier}/>
+  {/each}
   <h5>Nutrients</h5>
   {#each nutritionInfo.foodNutrients as nutrient}
   <li>ID: {nutrient?.nutrient?.id}  {nutrient?.nutrient?.name}
