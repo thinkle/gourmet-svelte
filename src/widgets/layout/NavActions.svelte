@@ -2,14 +2,14 @@
  export let menuProps={
      anchorRight : true
  }
-
+ export let forceHide;
  import Menu from './Menu.svelte';
- 
+ $: console.log(menuProps);
 </script>
 
 
 <div class="mobile">
-    <Menu {...menuProps}>
+    <Menu {...menuProps} {forceHide}>
         <slot/>
     </Menu>
 </div>

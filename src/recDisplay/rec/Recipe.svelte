@@ -185,6 +185,7 @@
   let debug;
   let showTimesOverIngredients = false;
   let showTimeButton = false;
+  let hideMenu;
 </script>
 
 {#if valid}
@@ -215,7 +216,7 @@
         </h2>
       </div>
       <div slot="right">
-        <div class="status">
+        <!-- <div class="status"> -->
           {#if rec && editable}
             <StatusIcon 
               icon="offline_pin"
@@ -302,13 +303,14 @@
               {/if}
             </StatusIcon>
           {/if}
-        </div>
-        <NavActions>
+       <!--  </div> -->
+        <NavActions forceHide={hideMenu}>
           {#if showShopping}
             <li>
               <IconButton
                 icon="shopping_cart"
                 on:click={async () => {
+                  hideMenu = true;
                   await shoppingList.addRecipe(rec.id, $multiplier);
                   shoppingList.save();
                 }}
@@ -323,7 +325,7 @@
                 icon="edit"
                 toggle={true}
                 toggled={editMode}
-                on:click={() => (editMode = !editMode)}
+                on:click={() => {editMode = !editMode; hideMenu = true}}
               >
                 Edit{#if editMode}ing{/if}
                 Recipe{#if !editMode}&nbsp;&nbsp;&nbsp;{/if}
@@ -333,7 +335,7 @@
               <li>
                 <IconButton
                   icon="undo"
-                  on:click={() => recipeActions.revertRecipe(rec.id)}
+                  on:click={() => {recipeActions.revertRecipe(rec.id); hideMenu = true;}}
                   busy={$recipeState[rec.id].updating}
                 >
                   Revert Changes
@@ -344,10 +346,11 @@
                   icon="save"
                   tooltip="Attempt to save?"
                   busy={$recipeState[rec.id].updating}
-                  on:click={() =>
+                  on:click={() => {
+                    hideMenu = true;
                     recipeActions.updateRecipe(rec).then(() => {
                       editMode = false;
-                    })}
+                    })}}
                 >
                   Save
                 </IconButton>
@@ -357,7 +360,7 @@
                 <IconButton
                   busy={$recipeState[rec.id].updating}
                   icon="cloud_upload"
-                  on:click={() => recipeActions.updateRecipe(rec)}
+                  on:click={() => {recipeActions.updateRecipe(rec); hideMenu = true}}
                 >
                   Save to Cloud
                 </IconButton>
@@ -549,6 +552,7 @@
     font-weight: bold;
     font-size: 1.5rem;
   }
+
   .prop:first-child {
     margin-top: 0;
   }
@@ -576,7 +580,7 @@
       overflow: hidden;
     }
     h2 {
-      font-size: 1.5rem;
+      font-size: 1rem;
       /* max-width: calc(100vw - 60px);
           */
       text-overflow: ellipsis;
@@ -587,6 +591,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 420px) {
+    h2 {
+      font-size: .7rem;
     }
   }
 
