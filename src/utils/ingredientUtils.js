@@ -128,6 +128,27 @@ export function extractItems (text) {
     return words;
 }
 
+export function getNutritionQuery (text) {
+    let words = text.split(/[^\w\u00C0-\u017F]+/);
+    let searchWords = stopword.removeStopwords(words);
+    let keyWords = stopword.removeStopwords(searchWords,prepWords);
+    keyWords = stopword.removeStopwords(keyWords,
+                                     [/chop(s|ped)?/i,/mince[sd]?/i]);
+    let query = '';
+    for (let word of searchWords) {
+        if (keyWords.indexOf(word)>-1) {
+            query += ' +'+word
+        } else {
+            query += ' '+word; 
+        }
+    }
+    if (query.length) {
+        // cut off first space
+        query = query.substr(1); 
+    }
+    return query;
+}
+
 export function getShopItem (ingredient) {
      if (ingredient.shopItem) {
          return ingredient.shopItem
