@@ -159,34 +159,18 @@
       <LazyIf condition={id == $activeRecipeId}>
         <Recipe
           bind:this={recComponents[id]}
-          rec={$localRecipes[id]}
+          bind:rec={$localRecipes[id]}
           {onOpenSubRec}
-          onChange={(rec) => {
-            console.log("OpenRecipes got change!", rec);
-            $localRecipes[id] = rec;
-          }}
+          
           onEditToggle={(val) => (editOnOpen[id] = val)}
           editOnOpen={editOnOpen[id]}
         />
+        <!-- onChange={(rec) => {
+          console.log("OpenRecipes got change!", rec);
+          $localRecipes[id] = rec;
+        }} -->
       </LazyIf>
-    {/each}
-    <!-- 
-        {#if $localRecipes[$activeRecipeId]}
-            <Recipe
-                bind:this="{recComponents[$activeRecipeId]}"
-                rec="{$localRecipes[$activeRecipeId]}"
-                {onOpenSubRec}
-                onChange="{(rec)=>{
-                          console.log('OpenRecipes got change!',rec);
-                          $localRecipes[rec.id]=rec;
-                          }}"
-                onEditToggle="{(val)=>editOnOpen[$activeRecipeId]=val}"
-                editMode="{editOnOpen[$activeRecipeId]}"
-            />
-        {:else}
-            {$openLocalRecipes.length>0 && openOne()}                    
-        {/if} -->
-    <!-- Are you sure you want to close modal... -->
+    {/each}    
     {#if showCloseModalFor !== undefined}
       <div class="modal">
         {$localRecipes[showCloseModalFor] &&
