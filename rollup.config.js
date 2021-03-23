@@ -220,7 +220,7 @@ function bundleDemos(options) {
           let moduleName = bn.split(".")[0];
           let pathname = pathBase + fn.replace(/^[^/]+\//, "");
           moduleNames.push(moduleName);
-          return `import ${moduleName} from "${pathname}";`;
+          return `export {default as ${moduleName}} from "${pathname}";`;
         })
         .join("\n");
 
@@ -230,7 +230,8 @@ export default {
 } 
 `;
       let currentContents = fs.readFileSync(options.target);
-      let newContents = `${importStatements}\n\n${exportStatement}`;
+      //let newContents = `${importStatements}\n\n${exportStatement}`;
+      let newContents = `${importStatements}`;
       if (currentContents != newContents) {
         console.log("demos.js changed, rewriting!");
         fs.writeFileSync(options.target, newContents);

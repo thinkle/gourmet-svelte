@@ -1,6 +1,6 @@
 <script>
  import {registerBuild} from '../stores/debugStore.js'; registerBuild(Number("BUILD_MS"));
- import demos from './demos.js';
+ import * as demos from './demos.js';
  export let demo
 
  $: {
