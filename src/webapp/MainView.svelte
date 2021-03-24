@@ -2,7 +2,7 @@
   export let page = "RecipeList";
   export let detail = undefined;
   export let recipe = undefined;
-  import router from "page";
+  import router, { show } from "page";
   import { registerBuild } from "../stores/debugStore.js";
   registerBuild(Number("BUILD_MS"));
   import RecipeList from "../recDisplay/RecipeList.svelte";
@@ -154,43 +154,68 @@
   }
 
   let recipeListComponent;
+  let hiddenTabMode = false;
+  let showTabs = true;
 </script>
 
 {#if $connected}
-  <Bar>
-    <div slot="left">
-      <Tabs>
-        <Tab
-          active={page == "RecipeList"}
-          on:click={() => (page = "RecipeList")}
-        >
-          Recipe List
-        </Tab>
-        <Tab
-          active={page == "ShoppingList"}
-          on:click={() => (page = "ShoppingList")}
-        >
-          Shopping List
-          {#if $recipesOnList && $recipesOnList.length}
-            ({$recipesOnList.length})
-          {/if}
-        </Tab>
-        {#if $openLocalRecipes.length > 0}
+  <div style={`display:contents;${!showTabs&&'--bar-height:2px'}`}
+    on:mouseenter={()=>{if (hiddenTabMode) showTabs=true}}
+    on:mouseleave={()=>{if (hiddenTabMode) showTabs=false}}
+  >
+    <Bar slotStyles={{right:'align-self:start'}}>
+      <div slot="left">
+        {#if showTabs}
+        <Tabs>
           <Tab
-            active={page == "OpenRecipes"}
-            on:click={() => (page = "OpenRecipes")}
+            active={page == "RecipeList"}
+            on:click={() => (page = "RecipeList")}
           >
-            {#if $openLocalRecipes.length == 1}
-              View Recipe
-            {:else}
-              View Recipes ({$openLocalRecipes.length})
+            Recipe List
+          </Tab>
+          <Tab
+            active={page == "ShoppingList"}
+            on:click={() => (page = "ShoppingList")}
+          >
+            Shopping List
+            {#if $recipesOnList && $recipesOnList.length}
+              ({$recipesOnList.length})
             {/if}
           </Tab>
+          {#if $openLocalRecipes.length > 0}
+            <Tab
+              active={page == "OpenRecipes"}
+              on:click={() => (page = "OpenRecipes")}
+            >
+              {#if $openLocalRecipes.length == 1}
+                View Recipe
+              {:else}
+                View Recipes ({$openLocalRecipes.length})
+              {/if}
+            </Tab>
+          {/if}
+        </Tabs>
         {/if}
-      </Tabs>
-    </div>
-  </Bar>
-
+      </div>
+      <div slot="right">
+        <small style="position:relative;" on:click={()=>{
+          hiddenTabMode=!hiddenTabMode
+          if (hiddenTabMode) {
+            showTabs = false;
+          } else {
+            showTabs = true;
+          }
+        }}
+        >
+          {#if hiddenTabMode}
+            <span style="position:absolute; right: 0; top: -8px; z-index: 3"><IconButton bare={true} icon="expand_more"/></span>
+          {:else}
+            <IconButton icon="expand_less" bare={true}/>
+          {/if}
+        </small>
+      </div>
+    </Bar>
+  </div>
   <LazyIf condition={page == "ShoppingList"}>
     <ShoppingList />
   </LazyIf>

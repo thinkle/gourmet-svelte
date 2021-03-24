@@ -7,6 +7,7 @@
   export let growLeft = undefined;
   export let growRight = undefined;
   export let maxWidth = undefined;
+  export let slotStyles = {}
   export let alignTop;
   export let z = 0;
   export let style = "";
@@ -33,13 +34,13 @@
   class:scroll={scrollAll}
   on:click={stopEvents}
 >
-  <div class="left" class:scroll={scrollLeft} class:grow={growLeft}>
+  <div class="left" class:scroll={scrollLeft} class:grow={growLeft} style={slotStyles.left||''}>
     <slot name="left" />
   </div>
-  <div class="center" class:scroll={scrollCenter}>
+  <div class="center" class:scroll={scrollCenter} style={slotStyles.center||''}>
     <slot name="center" />
   </div>
-  <div class="right" class:scroll={scrollRight} class:grow={growRight}>
+  <div class="right" class:scroll={scrollRight} class:grow={growRight} style={slotStyles.right||''}>
     <slot name="right" />
   </div>
 </div>
@@ -76,6 +77,7 @@
   }
   .bar > div {
     display: flex;
+    min-width: 0; /* Prevent overflow */
   }
 
   .center {

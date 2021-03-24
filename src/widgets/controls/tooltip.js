@@ -15,7 +15,9 @@ function tooltip(node, props) {
     //let body = document.querySelector('body')
     t = new Tooltip({ target: node, accessors: true, props });
     node.addEventListener("mouseover", () => (t.show = true));
-    node.addEventListener("mouseout", () => (t.show = false));
+    node.addEventListener("mouseleave", () => (t.show = false));
+    node.addEventListener("focusout", () => (t.show = false));
+
   }, 0);
 
   return {
