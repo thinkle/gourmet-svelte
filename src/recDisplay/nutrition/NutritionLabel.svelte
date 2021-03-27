@@ -1,6 +1,7 @@
 <script>
   export let nutrients;
   export let multiplier=1;
+  export let unitName;
   import {MACRO_RDI,NUTRIENTS_RDI,RDI_BY_NUTRIENT} from './rdi';
   $: console.log(nutrients)
   const KCAL = 1008; // kcal
@@ -9,7 +10,11 @@
   const SUGAR = 2000; // sugars
   const CARBDIFF = 1005; // carbs by difference???
   let alreadyUsed = [];
-
+  const MAIN = 0;
+  const DET = 1;
+  const ALL = 2;
+  
+  let detailLevel = MAIN
   const percentDV = {}
 
   function getNutrient (nameOrId) {
@@ -18,15 +23,29 @@
   }
 
   function getNutrientAmountFromID (id, name) {
-    let nut = nutrients.find((n) => n?.nutrient?.id == id);
+    /* Nutrients can looks like...
+    
+    {
+      nutrientId : id,
+      value : ...,
+      nutrientName : ...,
+      unitName : ...,
+    }
+    OR
+    {
+      amount : amount,
+      nutrient : {
+        id : ...,
+        name : ...,
+      }
+    }
+    */
+    let nut = nutrients.find((n) => n?.nutrient?.id == id||n?.nutrientId==id);
     alreadyUsed = [...alreadyUsed,id];
-    let amount = nut?.amount || 0;
+    let amount = nut?.amount || nut?.value || 0;
     if (RDI_BY_NUTRIENT[id]) {
-      console.log('Setting percent for ',id)
-      console.log('amount is',amount * multiplier)
       percentDV[id] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
       percentDV[name] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
-      console.log('% is',percentDV[id]) 
       return `${Math.round(amount*multiplier)}${RDI_BY_NUTRIENT[id].unit}`     
     }
     console.log(id,'no RDI... amount is',amount)
@@ -37,7 +56,13 @@
 
 <div class="facts">
   <div class="cal">
-    <b>Calories</b>
+    <div class="vertical">
+      <b class="small">
+        Amount per {unitName||''} 
+        {#if unitName}({/if}{100*multiplier}g{#if unitName}){/if}
+      </b>
+      <b>Calories</b>
+  </div>
     <b>
       {getNutrient(KCAL)}
     </b>
@@ -86,31 +111,58 @@
     <div>{getNutrient('Protein')}</div>
     <b>{percentDV['Protein']}</b>
   </div>
-  {#each NUTRIENTS_RDI as nutrient}
-    {#if percentDV[nutrient.nutrient]!='0%'}
-    <div>
-      <div>{nutrient.nutrient}</div>
-      <div>{getNutrient(nutrient.nutrient)}</div>
-      <div>{percentDV[nutrient.nutrient]}</div>
-    </div>
-    {/if}
-  {/each}
-  {#each nutrients as nutrient}
-    {#if alreadyUsed.indexOf(nutrient.nutrient.id) == -1
-    && nutrient.amount}
+  {#if detailLevel==DET||detailLevel==ALL}
+    {#each NUTRIENTS_RDI as nutrient}
+      {#if percentDV[nutrient.nutrient]!='0%'}
       <div>
-        <div>
-          {nutrient.nutrient.name}
-          <br>{nutrient.nutrient.id}
-        </div>
-        <div>
-          {nutrient.amount}
-          {nutrient.nutrient.unitName}
-        </div>
-        <div></div>
+        <div>{nutrient.nutrient}</div>
+        <div>{getNutrient(nutrient.nutrient)}</div>
+        <div>{percentDV[nutrient.nutrient]}</div>
       </div>
-    {/if}
-  {/each}
+      {/if}
+    {/each}
+  {/if}
+  {#if detailLevel==ALL}
+    {#each nutrients as nutrient}
+      {#if alreadyUsed.indexOf(nutrient?.nutrient?.id||nutrient?.nutrientId)== -1
+      && (nutrient?.amount||nutrient?.value)}
+        <div>
+          <div>
+            {nutrient?.nutrient?.name||nutrient?.nutrientName}
+            <br>{nutrient?.nutrient?.id||nutrient?.nutrientId}
+          </div>
+          <div>
+            {nutrient.amount||nutrient.value}
+            {nutrient?.nutrient?.unitName||nutrient?.unitName}
+          </div>
+          <div></div>
+        </div>
+      {/if}
+    {/each}
+  {/if}
+  {#if detailLevel==MAIN}
+    <div>
+      <div>
+        <span on:click={()=>detailLevel=DET}>Show more</span>
+        <span on:click={()=>detailLevel=ALL}>Show all</span>
+
+      </div>        
+    </div>
+  {:else if detailLevel==DET}
+    <div>
+      <div>
+        <span on:click={()=>detailLevel=MAIN}>Show less</span>
+        <span on:click={()=>detailLevel=ALL}>Show more</span>
+      </div>        
+    </div>
+  {:else}
+  <div>
+    <div>
+      <span on:click={()=>detailLevel=DET}>Show less</span>
+      <span on:click={()=>detailLevel=MAIN}>Show less less</span>
+    </div>        
+  </div>
+  {/if}
 </div>
 
 <style>
@@ -140,5 +192,12 @@
   }
   .facts > div > *:last-child {
     margin-left: auto;
+  }
+  .vertical {
+    display: flex;
+    flex-direction: column;
+  }
+  .small {
+    font-size: x-small;
   }
 </style>

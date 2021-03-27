@@ -1,0 +1,106 @@
+Ok... let's think through nutritional info...
+
+Each recipe is made up of ingredients
+{... ingredients : [...]}
+
+For nutritional information, we need each ingredient to include a gram weight
+and an ID
+
+{
+  amount : {
+    gramWeight : ...
+  },
+  fdcId : ... 
+}
+
+We want to be able to store these if the user enters them directly or we "confirm" them. But also we could infer them.
+
+So we probably need some magic that takes in an ingredient and outputs...
+
+{ amount : {
+
+    gramWeight | inferred_gramWeight 
+},
+ fdcId | inferred_fdcId
+}
+
+We then need a separate table which links...
+
+fdcId => nutrients
+
+Those can be updated at any time from the usda database, but it's worth storing locally for speed.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-
+From a user perspective... we want as much information to be available as possible with as little interaction.
+
+BUT... we also need a UI to make associations or correct information.
+
+User selects an ingredient => USDA ingredient match.
+
+Option A
+Program should then query that ingredient throughout the database and offer to update 
+(this is kind of a pain because of our document database structure... sorry world)
+
+Option B
+Program then learns association for future inferences but doesn't do the update right away. When we make 
+inferences we check our previous inferences and do our best to learn from them.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Database design:
+-> Nutritional associations should probably all live in the MongoDB. Users contribute to the communal
+   DB when they make an association and benefit from the DB when they get information back. We want this
+   database to grow faster than the individual user's store of information.
+
+   ingredient : {
+     document...
+   },
+   keyWords : [],
+   modifiers : [],
+   accuracy : numeric scale (we present a UI to user to say "close enough", "good guess", "exact match")
+   fdcId : ###,
+   user : ???
+
+
+-> Local nutrients can live in the local database OR in USDA -- maybe we need to store in MongoDB 
+   or maybe not? Seems nicer not to hit our API if we can avoid it. USDA does support fetching 20 nutrients
+   at a time, so most recipes can be fetched all at once if we have the associations already on hand.
+
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+How does our call look?
+
+
+If you already have the inferred items, you don't have to ask for them.
+If you already have the real items, you don't have to ask for them.
+If we are missing items...
+
+We say Backend, here is the recipe I want nutritional info for...
+MongoDB says... here are the items I can infer based on my vast wisdom...
+
+If there are missing items still, you say, hey USDA, what associations can I make?
+USDA gives you options, you choose options.
+
+When you save a recipe, the backend checks for gramWeight and/or for fdcId... it then stores a separate record
+with that information...
+
+-=-=-=-=-=-=-=-
+Implementation Process:
+1. Build UI for associating ingredients with USDA items from scratch...
+  Ingredient association
+   > Take in ingredient list...
+   > Check for existing associations. When there's a gap, fetch...
+   > Grab first usda result as "default" -- then let user refine search / replace, etc.
+   GramWeight association
+   > Check if we are a known weight unit already, if so, just convert...
+   > Check if we are a known volume unit already, if so offer some kind of density conversion
+   > Fetch complete USDA density/item info... allow picking all those weird things 
+
+
+2. Modify nutrition label to take a list of ingredients.
+2. Build backend for saving nutritional association from recipe into separate backend nutritional DB
+3. Build interface for getting nutritional association back from backend.
+4. Profit!
+
+
+-=-=-=-=-=-=-=-=-
+NOTE: Two different forms of nutritional data from USDA have two different forms :(

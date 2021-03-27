@@ -1,106 +1,110 @@
 <script>
+
+  import {Button} from '../../widgets/'
   export let ing
+  export let gramWeight = 100;
+  export let unitName;
   import NutritionLabel from './NutritionLabel.svelte';
   import {user} from '../../stores/userStore'
   import {getNutritionQuery,extractItems} from '../../utils/ingredientUtils';
   import {queryNutrientRequest, getNutrientInfoRequest} from '../../data/requests/'
-  let items = [];
-  let multiplier = 1;
+  let multiplier = gramWeight / 100;
+  $: multiplier = gramWeight / 100;
   let lastIng = '';
   let lastSearch = '';
   let searchTerms = '';
   function syncSearch (ing) {
     console.log('syncSearch',ing)
     if (ing?.text && ing.text != lastIng) {
-      items = extractItems(ing.text||'')
       searchTerms = getNutritionQuery(ing.text||'');
       lastIng = ing?.text
       doSearch();
     }
   }
   let queryResponse = {foods:[]};
-  let nutrients = [];
-  let chosenFood;
-  let nutritionInfo;
+  ing.nutrient;
+
   async function doSearch () {
+    page = 1;
     if (searchTerms != lastSearch) {
       console.log('Search!',searchTerms)
       queryResponse = await queryNutrientRequest.makeRequest({user:$user,params:{query:searchTerms}})
-      lastSearch = searchTerms;
+      lastSearch = searchTerms;      
       console.log('RESPONSE:',queryResponse.foods)
       if (queryResponse?.foods?.length) {
-        chosenFood = queryResponse.foods[0]
+        ing.nutrient = queryResponse.foods[0]
       }
     }
   }
-
-  async function getInfo (food) {
-    if (!food?.fdcId) {return}
-    let response = await getNutrientInfoRequest.makeRequest(
-      {user:$user,
-        params: {id:`${food.fdcId}`}
-      }
-    );
-    if (response) {
-      nutritionInfo = response?.result
-      console.log('Got info:',nutritionInfo)
-      if (nutritionInfo?.foodPortions?.length) {
-        portion = nutritionInfo.foodPortions[0];
-      }
-      if (nutritionInfo?.foodNutrients) {
-        console.log('new nutrients')
-        nutrients = nutritionInfo.foodNutrients;
-      }
-    }
+  let page = 1;
+  async function getMore () {
+    page += 1;
+    let nextQueryResponse = await queryNutrientRequest.makeRequest({user:$user,params:{query:searchTerms,page}})
+    queryResponse.foods = [...queryResponse.foods,...nextQueryResponse.foods]
   }
   let portion;
-  $: if (portion && portion.gramWeight) {
-    multiplier = portion.gramWeight / 100;
-  }
-  $: getInfo(chosenFood);
   $: syncSearch(ing)
+  let showNutritionLookup = {}
 </script>
 
 <div>
-  [Searching for: {JSON.stringify(items)}]
   <input bind:value={searchTerms} on:blur={doSearch}>
-  {searchTerms}
-  <h3>Info</h3>
-  <h4>{nutritionInfo?.description}</h4>
-  {nutritionInfo?.dataType} {nutritionInfo?.startDate}-{nutritionInfo?.endDate}
+  <select bind:value={ing.nutrient}>
+    {#each queryResponse.foods as food}
+    <option value={food}>{food.description} ({food.dataType})</option>
+    {/each}
+  </select>
+  <Button on:click={getMore}>Fetch more options...</Button>
 
-  {#if nutritionInfo?.foodPortions}
-  <h5>Portions</h5>
+  <h3>Info</h3>
+  SELECTED <pre>{JSON.stringify(ing.nutrient)}</pre>
+  <h4>{ing.nutrient?.description}</h4>
+  {ing.nutrient?.dataType} {ing.nutrient?.startDate}-{ing.nutrient?.endDate}
+
+  <!-- {#if nutritionInfo?.foodPortions} -->
+  <!-- <h5>Portions</h5>
       {#each nutritionInfo.foodPortions as portion}
       <li>{portion.portionDescription}
       ({portion.gramWeight})</li>
       {/each}
   {/if}
-  {#if portion}
-  Nutritional Info for {portion.portionDescription} ({portion.gramWeight}g)
-  {/if}
-  {#if nutritionInfo?.foodNutrients}
-  {nutritionInfo.description}
-  {#each [nutritionInfo] as nutritionInto (nutritionInfo.description)}
-  <NutritionLabel key={nutritionInfo.description} {nutrients} {multiplier}/>
-  {/each}
-  <h5>Nutrients</h5>
-  {#each nutritionInfo.foodNutrients as nutrient}
-  <li>ID: {nutrient?.nutrient?.id}  {nutrient?.nutrient?.name}
-   Amount {nutrient.amount}
-   unit {nutrient?.nutrient?.unitName}
-  {JSON.stringify(nutrient)}
-  </li>
-  {/each}
-  {/if}
-  {JSON.stringify(nutritionInfo)}
-  <br>
-  <h3>Responses</h3>
-  {#if queryResponse && queryResponse.foods}
-  {#each queryResponse.foods as food}
-    <br>{food.description} {food.score} {food.dataType}
-    
+  {#if portion} -->
+  <!-- Nutritional Info for {portion.portionDescription} ({portion.gramWeight}g)
+  {/if} -->
+  {#if ing.nutrient?.foodNutrients}
+  {ing.nutrient?.description}
+  {#each [ing.nutrient] as nutritionInfo (nutritionInfo.description)}
+  <NutritionLabel 
+    unitName={unitName||gramWeight+'g'} 
+    key={nutritionInfo.description} 
+    nutrients={nutritionInfo.foodNutrients} 
+    {multiplier}
+    />
   {/each}
   {/if}
 </div>
+  <!-- <h5>Nutrients</h5>
+  
+  {/if}
+  <br>
+  <h3>Responses</h3>
+  Show=>{JSON.stringify(showNutritionLookup)}
+  {#if queryResponse && queryResponse.foods}
+  {#each queryResponse.foods as food}
+    <br>{food.description} {food.score} {food.dataType}
+    <div>
+      <button on:click={()=>showNutritionLookup[food.fdcId]=!showNutritionLookup[food.fdcId]}>
+         Show nutrition
+      </button>
+      <button on:click={()=>ing.nutrient=food}>
+        Make main 
+      </button>
+        {#if showNutritionLookup[food.fdcId]}
+          <NutritionLabel nutrients={food.foodNutrients}/>
+        {/if}
+    </div>
+    
+  {/each}
+  {/if}
+</div> -->
 
