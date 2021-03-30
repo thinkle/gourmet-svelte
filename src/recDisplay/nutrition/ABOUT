@@ -95,6 +95,10 @@ Implementation Process:
    > Check if we are a known volume unit already, if so offer some kind of density conversion
    > Fetch complete USDA density/item info... allow picking all those weird things 
 
+NEXT STEP...
+  Do we want a store for nutrition info? Figure out how we store that 
+  info and handle fetching e.g. portion info if we need it. Probably don't actually want to stick it on the ing object...
+
 
 2. Modify nutrition label to take a list of ingredients.
 2. Build backend for saving nutritional association from recipe into separate backend nutritional DB

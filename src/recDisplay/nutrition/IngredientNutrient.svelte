@@ -1,15 +1,17 @@
 <script>
-
+  import {nutrientMatches,nutrients} from '../../stores/nutritionStores';
   import {Button} from '../../widgets/'
   export let ing
-  export let gramWeight = 100;
+  //export let gramWeight = 100;
+  let gramWeight = 100;
+  $: gramWeight = ing.gramWeight || ing.inferred_gramWeight || 100
   export let unitName;
   import NutritionLabel from './NutritionLabel.svelte';
   import {user} from '../../stores/userStore'
   import {getNutritionQuery,extractItems} from '../../utils/ingredientUtils';
   import {queryNutrientRequest, getNutrientInfoRequest} from '../../data/requests/'
-  let multiplier = gramWeight / 100;
-  $: multiplier = gramWeight / 100;
+  //let multiplier = gramWeight / 100;
+  //$: multiplier = gramWeight / 100;
   let lastIng = '';
   let lastSearch = '';
   let searchTerms = '';
@@ -22,20 +24,23 @@
     }
   }
   let queryResponse = {foods:[]};
-  ing.nutrient;
+  let nutrient;
 
-  async function doSearch () {
-    page = 1;
-    if (searchTerms != lastSearch) {
-      console.log('Search!',searchTerms)
-      queryResponse = await queryNutrientRequest.makeRequest({user:$user,params:{query:searchTerms}})
-      lastSearch = searchTerms;      
-      console.log('RESPONSE:',queryResponse.foods)
-      if (queryResponse?.foods?.length) {
-        ing.nutrient = queryResponse.foods[0]
-      }
-    }
+  function doSearch () {
+    nutrientMatches.search(searchTerms);
   }
+
+  $: if (searchTerms) {
+    console.log('Update queryResponse for ',searchTerms)
+    queryResponse = $nutrientMatches[searchTerms];
+    console.log(queryResponse);
+  }
+  
+  $: if (!nutrient && queryResponse && queryResponse?.foods?.length) {
+    nutrient = queryResponse.foods[0];
+    ing.inferred_fdcId = nutrient.fdcId;
+  }    
+
   let page = 1;
   async function getMore () {
     page += 1;
@@ -44,22 +49,29 @@
   }
   let portion;
   $: syncSearch(ing)
+
+  $: if (nutrient) {
+    ing.fdcId = nutrient.fdcId
+  }
+
   let showNutritionLookup = {}
 </script>
 
 <div>
-  <input bind:value={searchTerms} on:blur={doSearch}>
-  <select bind:value={ing.nutrient}>
+  <input bind:value={searchTerms} on:change={doSearch}>
+  {#if queryResponse && queryResponse.foods}
+  <select bind:value={nutrient}>
     {#each queryResponse.foods as food}
     <option value={food}>{food.description} ({food.dataType})</option>
     {/each}
   </select>
   <Button on:click={getMore}>Fetch more options...</Button>
+  {/if}
 
   <h3>Info</h3>
-  SELECTED <pre>{JSON.stringify(ing.nutrient)}</pre>
-  <h4>{ing.nutrient?.description}</h4>
-  {ing.nutrient?.dataType} {ing.nutrient?.startDate}-{ing.nutrient?.endDate}
+  SELECTED <pre>{JSON.stringify(nutrient)}</pre>
+  <h4>{nutrient?.description}</h4>
+  {nutrient?.dataType} {nutrient?.startDate}-{nutrient?.endDate}
 
   <!-- {#if nutritionInfo?.foodPortions} -->
   <!-- <h5>Portions</h5>
@@ -71,17 +83,19 @@
   {#if portion} -->
   <!-- Nutritional Info for {portion.portionDescription} ({portion.gramWeight}g)
   {/if} -->
-  {#if ing.nutrient?.foodNutrients}
-  {ing.nutrient?.description}
-  {#each [ing.nutrient] as nutritionInfo (nutritionInfo.description)}
+  <!-- {#if nutrient?.foodNutrients}
+  {nutrient?.description} -->
+  <!-- {#each [nutrient] as nutritionInfo (nutritionInfo.description)} -->
+  {#if $nutrients[ing.fdcId||ing.inferred_fdcId]?.foodNutrients}
   <NutritionLabel 
     unitName={unitName||gramWeight+'g'} 
-    key={nutritionInfo.description} 
-    nutrients={nutritionInfo.foodNutrients} 
-    {multiplier}
+    key={$nutrients[ing.fdcId||ing.inferred_fdcId]?.description} 
+    nutrients={$nutrients[ing.fdcId||ing.inferred_fdcId]?.foodNutrients} 
+    multiplier={gramWeight/100}
     />
-  {/each}
-  {/if}
+    {/if}
+  <!-- {/each} -->
+  <!-- {/if} -->
 </div>
   <!-- <h5>Nutrients</h5>
   
@@ -96,7 +110,7 @@
       <button on:click={()=>showNutritionLookup[food.fdcId]=!showNutritionLookup[food.fdcId]}>
          Show nutrition
       </button>
-      <button on:click={()=>ing.nutrient=food}>
+      <button on:click={()=>nutrient=food}>
         Make main 
       </button>
         {#if showNutritionLookup[food.fdcId]}

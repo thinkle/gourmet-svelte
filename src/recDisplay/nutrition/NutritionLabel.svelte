@@ -17,7 +17,12 @@
   let detailLevel = MAIN
   const percentDV = {}
 
-  function getNutrient (nameOrId) {
+  function getPercentageDV (name, multiplier) {
+    return percentDV[name]
+  }
+  
+  /* Multiplier required so we are reactive when multiplier changes */
+  function getNutrient (nameOrId, multiplier) {
     let rdi = RDI_BY_NUTRIENT[nameOrId];
     return getNutrientAmountFromID(rdi?.id||nameOrId,nameOrId);
   }
@@ -64,60 +69,60 @@
       <b>Calories</b>
   </div>
     <b>
-      {getNutrient(KCAL)}
+      {getNutrient(KCAL,multiplier,nutrients,nutrients)}
     </b>
   </div>
   <div>
     <b>Total Fat</b>
-    <div>{getNutrient('Fat')}</div>
-    <b>{percentDV['Fat']}</b>
+    <div>{getNutrient('Fat',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Fat',multiplier,nutrients)}</b>
   </div>
   <div class="indent">
     <div>Saturated Fat</div>
-    <div>{getNutrient('Saturated Fat')}</div>
-    <b>{percentDV['Saturated Fat']}</b>
+    <div>{getNutrient('Saturated Fat',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Saturated Fat',multiplier,nutrients)}</b>
 
   </div>
   <div>
     <b>Cholesterol</b>
-    <div>{getNutrient('Cholesterol')}</div>
-    <b>{percentDV['Cholesterol']}</b>
+    <div>{getNutrient('Cholesterol',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Cholesterol',multiplier,nutrients)}</b>
 
   </div>
   <div>
     <b>Sodium</b>
-    <div>{getNutrient('Sodium')}</div>
-    <b>{percentDV['Sodium']}</b>
+    <div>{getNutrient('Sodium',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Sodium',multiplier,nutrients)}</b>
 
   </div>
   <div>
     <b>Total Carbohydrates</b>
-    <div>{getNutrient('Carbohydrates')||getNutrient(CARBS)}</div>
-    <b>{percentDV['Carbohydrates']}</b>
+    <div>{getNutrient('Carbohydrates',multiplier,nutrients)||getNutrient(CARBS,multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Carbohydrates',multiplier,nutrients)}</b>
 
   </div>
   <div class="indent">
     <div>Dietary fiber</div>
-    <div>{getNutrient('Dietary Fiber')}</div>
-    <b>{percentDV['Dietary Fiber']}</b>
+    <div>{getNutrient('Dietary Fiber',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Dietary Fiber',multiplier,nutrients)}</b>
   </div>
   <div class="indent">
     <div>Total Sugars</div>
-    <div>{getNutrient(SUGAR)}g</div>
+    <div>{getNutrient(SUGAR,multiplier,nutrients)}g</div>
     <div></div>
   </div>
   <div class="last">
     <b>Protein</b>
-    <div>{getNutrient('Protein')}</div>
-    <b>{percentDV['Protein']}</b>
+    <div>{getNutrient('Protein',multiplier,nutrients)}</div>
+    <b>{getPercentageDV('Protein',multiplier,nutrients)}</b>
   </div>
   {#if detailLevel==DET||detailLevel==ALL}
     {#each NUTRIENTS_RDI as nutrient}
       {#if percentDV[nutrient.nutrient]!='0%'}
       <div>
         <div>{nutrient.nutrient}</div>
-        <div>{getNutrient(nutrient.nutrient)}</div>
-        <div>{percentDV[nutrient.nutrient]}</div>
+        <div>{getNutrient(nutrient.nutrient,multiplier,nutrients)}</div>
+        <div>{getPercentageDV(nutrient.nutrient,multiplier,nutrients)}</div>
       </div>
       {/if}
     {/each}

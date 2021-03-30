@@ -124,15 +124,15 @@ const DENSITY_TABLE = {
     "light cream":1.012,
     "half and half":1.025,
     "honey":1.420,
-    "sugar, granulated":0.9,
+    "sugar, granulated":0.847,
     "salt":2.165,
     "butter":0.911,
     "oil, vegetable":0.88,
     "oil, olive":0.88,
     "oil, corn":0.88,
     "oil, sesame":0.88,
-    "flour, all purpose": 0.55,
-    "flour, whole wheat": 0.53,
+    "flour, all purpose": 0.508,
+    "flour, whole wheat": 0.5,
     "corn starch": 0.6,
     "sugar, powdered": 0.6,
     "sugar, confectioners": 0.6
@@ -417,6 +417,32 @@ export function addAmounts (amounts, item) {
             amount : byUnit[unit]
         })
     )
+}
+
+export function getML (amount, unit) {
+    let standardUnit = amount.standardUnit||getStandardUnit(amount.unit)
+    if (toMilliliters[standardUnit]) {
+        let ml = toMilliliters[standardUnit] * amount.amount;
+        return ml;
+    } 
+}
+
+export function getGramWeight (amount, density=1) {     
+    let standardUnit = amount.standardUnit||getStandardUnit(amount.unit)
+    if (toGrams[standardUnit]) {
+        return {
+            gramWeight : toGrams[standardUnit] * amount.amount,
+            isWeight : true,
+        }
+    } else {
+        let ml = toMilliliters[standardUnit] * amount.amount
+        return {
+            gramWeight : toMilliliters[standardUnit] * amount.amount * density,
+            density,
+            isWeight: false,
+        }
+    }
+
 }
 
 

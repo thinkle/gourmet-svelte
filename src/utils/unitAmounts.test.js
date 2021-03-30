@@ -1,6 +1,6 @@
 import {getInAConversion,getMultiplierConversion,
         addAmounts,
-        getStandardUnit,parseUnit,UNIT_REGEXP} from './unitAmounts.js';
+        getStandardUnit,parseUnit,UNIT_REGEXP, getGramWeight} from './unitAmounts.js';
 
 it(
     'unit regex',
@@ -133,3 +133,62 @@ it(
     }
 );
 
+it(
+    'get gram weights',
+    ()=>{
+        expect(getGramWeight({
+            unit : 'kg',
+            amount : 10
+        })).toEqual(
+            expect.objectContaining({
+                gramWeight : 10000,
+                isWeight : true,
+            }
+            )
+        )
+        expect(getGramWeight({
+            unit : 'kilos',
+            standardUnit : 'kg',
+            amount : 10
+        })).toEqual(
+            expect.objectContaining({
+                gramWeight : 10000,
+                isWeight : true,
+            }
+            )
+        )
+        expect(getGramWeight({
+            unit : 'liters',
+            amount : 10
+        })).toEqual(
+            expect.objectContaining({
+                gramWeight : 10000,
+                isWeight : false,
+                density : 1,
+            }
+            )
+        )
+        expect(getGramWeight({
+            unit : 'liters',
+            amount : 10
+        })).toEqual(
+            expect.objectContaining({
+                gramWeight : 10000,
+                isWeight : false,
+                density : 1,
+            }
+            )
+        )
+        expect(getGramWeight({
+            unit : 'cup',
+            amount : 3
+        })).toEqual(
+            expect.objectContaining({
+                gramWeight : 709.764,
+                isWeight : false,
+                density : 1,
+            }
+            )
+        )
+    }
+)
