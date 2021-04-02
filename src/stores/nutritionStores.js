@@ -1,4 +1,4 @@
-import { writable, get } from "svelte/store";
+import { writable, get, derived } from "svelte/store";
 import { user } from "./userStore";
 import {
   queryNutrientRequest,
@@ -7,8 +7,13 @@ import {
 import { parseAmount } from "../utils/numbers";
 import { parseUnit, getML } from '../utils/unitAmounts';
 import { getGramWeight } from "../utils/unitAmounts";
+import dexieApi from '../data/local/dexieApi';
 
 let fetching = false;
+
+if (!dexieApi.db) {
+  dexieApi.connect();
+}
 
 function waitMyTurn() {
   return new Promise((resolve, reject) => {
@@ -32,110 +37,178 @@ for for looking up info...
 
 export let nutrientMatches = writable({});
 
-nutrientMatches.search = async (searchTerms) => {
+nutrientMatches.cachedSearch = async (searchTerms) => {
+  let result = await dexieApi.db.nutrientSearches
+  .get({search:searchTerms});
+  if (result) {
+    console.log('Got result, now fetch foods...',result)
+    console.log('Result of type',typeof result,JSON.stringify(result));
+    let foods = await dexieApi.db.nutrients.bulkGet(
+      result.foods.map((o)=>o.fdcId)
+    );
+    result.foods = foods;
+    console.log('Added foods',result.foods)
+  }
+  return result;
+}
+
+nutrientMatches.usdaSearch = async (searchTerms, page=1) => {
+  await waitMyTurn();
+  fetching = true;
+  let $user = get(user);
+  let queryResponse;
+  try {
+    queryResponse = await queryNutrientRequest.makeRequest({
+      user: $user,
+      params: { query: searchTerms },
+    });
+  } catch (err) {
+    fetching = false;
+    throw err;
+  }
+  fetching = false;
+  let result = {
+    page: page,
+    ...queryResponse,
+  };
+  console.log('Store nutrientSearches in dexie')
+  dexieApi.db.nutrientSearches.put(
+    {search:searchTerms,
+      page,
+      foodSearchCriteria:queryResponse.foodSearchCriteria,
+      foods:queryResponse.foods.map((f)=>({fdcId:f.fdcId}))
+    }
+  );
+  return result;
+}
+
+nutrientMatches.search = async (searchTerms) => {  
   console.log("Store is searching!");
   let $matches = get(nutrientMatches);
+  // check store...
   if ($matches[searchTerms]) {
     return $matches[searchTerms];
   } else {
-    await waitMyTurn();
-    fetching = true;
-    let $user = get(user);
-    let queryResponse;
-    try {
-      queryResponse = await queryNutrientRequest.makeRequest({
-        user: $user,
-        params: { query: searchTerms },
-      });
-    } catch (err) {
-      fetching = false;
-      throw err;
-    }
-    fetching = false;
-    let page = 1;
-    let result = {
-      page: 1,
-      ...queryResponse,
-    };
-    if (queryResponse.foods) {
-      nutrients.update(($nutrients) => {
-        for (let food of queryResponse.foods) {
-          $nutrients[food.fdcId] = food;
-        }
-        console.log("Updated nutrients store: ", $nutrients);
-        return $nutrients;
-      });
-    }
-    nutrientMatches.update(($matches) => {
-      $matches[searchTerms] = result;
-      return $matches;
-    });
-    return result;
+    let queryResponse = await nutrientMatches.cachedSearch(searchTerms);
+    console.log('Cached result: ',queryResponse);
+    if (!queryResponse) {
+        queryResponse = await nutrientMatches.usdaSearch(searchTerms);
+
+    }    
+    nutrientMatches.storeResult(queryResponse)
+    return queryResponse;
   }
 };
 
+nutrientMatches.storeResult = function (queryResponse) {
+  let searchTerms = queryResponse.foodSearchCriteria.query;
+  if (queryResponse.foods) {
+    nutrients.update(($nutrients) => {
+      for (let food of queryResponse.foods) {
+        if ($nutrients[food.fdcId]) {
+          $nutrients[food.fdcId] = {
+            ...$nutrients[food.fdcId],
+            ...food
+          };
+        } else {
+          $nutrients[food.fdcId] = food;
+        }
+      }
+      console.log("Updated nutrients store: ", $nutrients);
+      return $nutrients;
+    });
+  }
+  nutrientMatches.update(($matches) => {
+    $matches[searchTerms] = queryResponse;
+    return $matches;
+  });
+}
+
+nutrientMatches.fetchMore = async function (searchTerms) {
+  let currentResults = get(nutrientMatches)[searchTerms];
+  // Handle accidental "more" when there is no more...
+  if (!currentResults) {
+    await nutrientMatches.search(searchTerms);
+    return;
+  } else {
+    let page = currentResults.foodSearchCriteria.pageNumber + 1;
+    console.log('Fetch page ',page,currentResults,searchTerms)
+    let $user = get(user)
+    let queryResponse = await queryNutrientRequest.makeRequest({
+        user : $user,
+        params : {
+          query : searchTerms,
+          page : page,
+          pageNumber : page,
+        }
+      });
+    queryResponse.foods = [
+      ...currentResults.foods,
+      ...queryResponse.foods]
+    nutrientMatches.storeResult(queryResponse);
+    return;
+  } 
+}
+
 export let nutrients = writable({}); /* Eventually will be in local storage */
 
-export let portions = writable([]);
+export let portionsById = writable({});
+export let portions = derived([portionsById],([$portionsById])=>{
+  return Object.values($portionsById);
+})
+
+
+
+nutrients.fetchFromUsda = async function ({fdcId}) {
+  console.log('Fetch from USDA')
+  await waitMyTurn();
+  console.log('Done waiting, let us fetch!')
+  fetching = true;
+  let response;
+  let $user = get(user);
+  try {
+    response = await getNutrientInfoRequest.makeRequest({
+      user: $user,
+      params: { id: `${fdcId}` },
+    });
+  } catch (err) {
+    fetching = false;
+    console.log("Pity, an error",err)
+    throw err;
+  }
+  console.log('Success',response)
+  fetching = false;
+  if (response) {
+    return response.result
+  }    
+}
+
+nutrients.fetchCached = async function ({fdcId}) {
+  console.log('Check for cached nutrient',fdcId)
+  let result = await dexieApi.db.nutrients.get({fdcId});
+  console.log('Got cached: ',result)
+  return result;
+}
 
 nutrients.fetchDetails = async function ({ fdcId }) {
+  console.log('Fetch details!')
+  if (!fdcId) { return }
   let currentNutrient = get(nutrients)[fdcId];
-  if (currentNutrient.detailed) {
+  if (currentNutrient?.detailed) {
     return currentNutrient;
-  } else {
-    await waitMyTurn();
-    fetching = true;
-    let response;
-    let $user = get(user);
-    try {
-      response = await getNutrientInfoRequest.makeRequest({
-        user: $user,
-        params: { id: `${fdcId}` },
-      });
-    } catch (err) {
-      fetching = false;
-      throw err;
-    }
-    fetching = false;
-    if (response) {
-      console.log("Got details for ", fdcId, response);
-      if (response?.result) {   
-        let densities = [];    
-        if (response?.result?.foodPortions) {
-          portions.update(($portions) => {
-            $portions = [
-              ...$portions,
-              ...response.result.foodPortions.map((p) => {
-                p = {
-                    ...p,
-                  fdcId,
-                  foodDescription: response.result.description,
-                  foodClass: response.result.foodClass,
-                  foodCode: response.result.foodCode,
-                  amount : getAmountFromPortion(p)
-                };
-                if (p.amount?.density) {
-                  densities.push(p);
-                }
-                return p;
-              }),
-            ];
-            return $portions;
-          });          
-        }
-        nutrients.update(($nutrients) => {
-          $nutrients[fdcId] = { detailed: true, ...response.result };
-          if (densities.length) {
-            $nutrients[fdcId].densities = densities;
-            $nutrients[fdcId].density = densities[0].amount.density;
-          }
-          return $nutrients;
-        });
-      }
-      fetching = false;
-      return true;
-    }
-    return false;
+  }
+  else if (!currentNutrient) {
+    currentNutrient = await nutrients.fetchCached({fdcId});
+  }
+  if (!currentNutrient?.detailed) {   
+    currentNutrient = await nutrients.fetchFromUsda({fdcId});
+    currentNutrient.storedLocally = false;
+  }
+  if (currentNutrient) {   
+    
+    nutrients.update(($nutrients) => {
+      $nutrients[fdcId] = { detailed: true, ...currentNutrient };      
+    });
   }
 };
 
@@ -175,5 +248,70 @@ export function getAmountFromPortion (portion) {
     amount.unit = amount.text;
   }
   amount.unitModifier = amount.posttext && amount.posttext.replace(/^\s+|\s+$/g,'') || amount.modifier;
+  if (amount.unitModifier == amount.unit) {
+    delete amount.unitModifier
+  }
   return amount;
 }
+
+
+// Update local database when fetching...
+portionsById.subscribe(
+  ($portions)=>{
+    console.log('update $portions',$portions)
+    Object.values($portions).forEach(
+      (p)=>{
+        if (!p.storedLocally) {
+          console.log('add portion!',p)
+          dexieApi.addPortion(p);
+        }
+      }
+    )
+  }
+)
+
+nutrients.subscribe(
+  ($nutrients)=>{
+    Object.values($nutrients).forEach(
+      (n)=>{
+        // Check for nutrients and such...
+        let densities = [];    
+        if (n.foodPortions) {
+          console.log('Update portions!')
+          portionsById.update(($portionsById) => {
+            n.foodPortions.forEach(
+              (p) => {
+                if (!$portionsById[p.id]) {
+                  p = {
+                    ...p,
+                    fdcId: n.fdcId,
+                    foodDescription: n.description,
+                    foodClass: n.foodClass,
+                    foodCode: n.foodCode,
+                    amount : getAmountFromPortion(p)
+                  }
+                  $portionsById[p.id] = p
+                  if (p.amount?.density) {
+                    densities.push(p);
+                  }
+                return p;
+                }
+              });
+            return $portionsById;
+          }); // end portionsById.update         
+        }
+        if (densities.length) {
+          $nutrients[n.fdcId].densities = densities;
+          $nutrients[n.fdcId].density = densities[0].amount.density;
+        }
+
+        // Store in dexie if not yet stored...
+        if (!n.storedLocally) {
+          console.log('store nutrient!',n)
+          dexieApi.addNutrient(n);
+        }
+      }
+    );
+    return $nutrients;
+  }
+)
