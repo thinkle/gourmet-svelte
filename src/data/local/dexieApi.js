@@ -10,11 +10,30 @@ import stopword from 'stopword'
 const dexieApi = {
     async connect () {
         dexieApi.db = new Dexie('Recipes');
-        dexieApi.db.version(7)
+        dexieApi.db.version(11)
             .stores({
-                recipes:'++id,&_id,*words,*ings,*categoryNames,*sourceNames,isShoppingList,deleted,savedRemote'
+                recipes:'++id,&_id,*words,*ings,*categoryNames,*sourceNames,isShoppingList,deleted,savedRemote',
+                nutrients:'&fdcId',
+                portions:'&id,amount.standardUnit,amount.unit,amount.unitModifier,amount.density,fdcId',
+                nutrientSearches:'++id,&search,*fdcId'
             });
         return true;
+    },
+
+    async addNutrient (nutrient) {
+        if (!dexieApi.db) {
+            await this.connect();
+        }
+        nutrient.storedLocally = true;
+        return await dexieApi.db.nutrients.put(nutrient);
+    },
+
+    async addPortion (portion) {
+        if (!dexieApi.db) {
+            await this.connect();
+        }
+        portion.storedLocally = true;
+        return await dexieApi.db.portions.put(portion);
     },
 
     addRecipe (recipe) {
