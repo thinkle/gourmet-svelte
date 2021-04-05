@@ -17,6 +17,7 @@ export {default as Recipe} from "../recDisplay/rec/Recipe.demo.svelte";
 export {default as TimeSummary} from "../recDisplay/rec/TimeSummary.demo.svelte";
 export {default as RecipeText} from "../recDisplay/text/RecipeText.demo.svelte";
 export {default as Button} from "../widgets/controls/Button.demo.svelte";
+export {default as Select} from "../widgets/controls/Select.demo.svelte";
 export {default as Timer} from "../widgets/controls/Timer.demo.svelte";
 export {default as Tooltip} from "../widgets/controls/Tooltip.demo.svelte";
 export {default as OneLiner} from "../widgets/display/OneLiner.demo.svelte";

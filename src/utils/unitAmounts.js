@@ -419,7 +419,7 @@ export function addAmounts (amounts, item) {
     )
 }
 
-export function getML (amount, unit) {
+export function getML (amount) {
     let standardUnit = amount.standardUnit||getStandardUnit(amount.unit)
     if (toMilliliters[standardUnit]) {
         let ml = toMilliliters[standardUnit] * amount.amount;
