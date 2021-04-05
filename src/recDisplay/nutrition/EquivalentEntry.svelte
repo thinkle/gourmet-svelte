@@ -7,6 +7,7 @@
     AmountInput,
     Select,
   } from "../../widgets/index";
+  import { scorePortion } from "../../utils/portionUtils";
   export let ing;
   let nutrient;
   $: nutrient = $nutrients[ing.fdcId || ing.inferred_fdcId];
@@ -20,42 +21,49 @@
   };
   function handleChange() {
     console.log("Equivalent change!");
-    onChange({
-      ...ing,
-      amount: {
-        ...ing.amount,
-        gramWeight: count * portion.amount.gramWeight,
-      },
-    });
-    lastOne.count = count;
-    lastOne.id = portion.id;
+    if (portion && portion.amount) {
+      onChange({
+        ...ing,
+        amount: {
+          ...ing.amount,
+          gramWeight: count * portion.amount.gramWeight,
+        },
+      });
+      lastOne.count = count;
+      lastOne.id = portion.id;
+    } else {
+      console.log("No amount on", portion);
+    }
   }
   $: if (portion && count && count != lastOne.count) {
     handleChange();
   }
+
+  function getPortions($portions, fdcId) {
+    portionScores = {};
+    $portions.forEach((p) => {
+      portionScores[p.id] = scorePortion(p, ing);
+    });
+    myPortions = [...$portions];
+    myPortions.sort((a, b) => portionScores[b.id] - portionScores[a.id]);
+    myPortions = myPortions;
+  }
+  let portionScores = {};
+  let myPortions = [];
+  $: getPortions($portions, ing.fdcId);
 </script>
 
 <NumberUnitDisplay value={ing.amount} />
 =
 <AmountInput bind:value={count} />
 <Select bind:value={portion} on:blur={handleChange}>
-  {#each $portions as portion}
-    {#if portion.fdcId == nutrient.fdcId && !portion?.amount?.density}
-      <option value={portion}>
-        <Portion {portion} />
-      </option>
-    {/if}
-  {/each}
-  <option>--Other items--</option>
-  {#each $portions as portion}
-    {#if portion.fdcId != nutrient.fdcId && !portion?.amount?.density}
-      <option value={portion}>
-        <Portion {portion} />
-      </option>
-    {/if}
+  {#each myPortions as portion}
+    <option value={portion}>
+      ({portionScores[portion.id]}) <Portion {portion} />
+    </option>
   {/each}
 </Select>
 {#if portion}
   Selected: {count} x
-  {JSON.stringify(portion.amount.gramWeight)} (id: {portion.id})
+  {JSON.stringify(portion.amount?.gramWeight)} (id: {portion.id})
 {/if}

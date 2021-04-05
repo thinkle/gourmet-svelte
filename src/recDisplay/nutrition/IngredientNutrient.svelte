@@ -1,7 +1,8 @@
 <script type="ts">
   import { nutrientMatches, nutrients } from "../../stores/nutritionStores";
-  import { Button, Bar } from "../../widgets/";
+  import { Button, Bar, Select } from "../../widgets/";
   import { NutrientQueryResult, Nutrient } from "../../types/nutrientTypes";
+  import NutrientDisplay from "./NutrientDisplay.svelte";
   import { Ingredient } from "../../types/ingredientTypes";
   export let ing: Ingredient;
   //export let gramWeight = 100;
@@ -70,14 +71,13 @@
     </label>
     <div slot="right">
       {#if queryResponse && queryResponse.foods}
-        <select bind:value={nutrient}>
+        <Select bind:value={nutrient}>
           {#each queryResponse.foods as food}
             <option value={food}>
-              {food.description}
-              {(food.brandOwner && food.brandOwner) || ""} ({food.dataType})</option
-            >
+              <NutrientDisplay nutrient={food} />
+            </option>
           {/each}
-        </select>
+        </Select>
         <Button on:click={getMore}>Fetch more options...</Button>
       {/if}
     </div>

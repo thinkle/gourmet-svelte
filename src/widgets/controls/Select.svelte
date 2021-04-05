@@ -1,4 +1,5 @@
-<script>
+<script type="ts">
+  import { clickOutside, keepOnScreen } from "../actions/";
   import { fly, fade } from "svelte/transition";
   import SelectOption from "./SelectOption.svelte";
   import { onMount } from "svelte";
@@ -31,22 +32,26 @@
   let items = [{ html: "", original: {} }];
   let show = false;
   const dummyVal = "DucksFlyTogether";
+  let selectHeight = 0;
 </script>
 
-<div class="select">
+<div class="select" style={`--selectHeight:${selectHeight}px`}>
   <div
     class="current"
+    bind:clientHeight={selectHeight}
     on:click={() => {
       show = !show;
     }}
   >
     {#each items.filter((i) => i.original.__value == value) as item, n}
-      <SelectOption
-        selectedValue={dummyVal}
-        optionHtml={item.html}
-        original={item.original}
-        hoverable={false}
-      />
+      {#if n == 0}
+        <SelectOption
+          selectedValue={dummyVal}
+          optionHtml={item.html}
+          original={item.original}
+          hoverable={false}
+        />
+      {/if}
     {:else}
       <SelectOption
         selectedValue={dummyVal}
@@ -58,7 +63,16 @@
     <i class="material-icons"> expand_more </i>
   </div>
   {#if show}
-    <ul in:fly={{ x: 0, y: -10 }} out:fade>
+    <ul
+      in:fly={{ x: 0, y: -1 * selectHeight }}
+      out:fade
+      use:clickOutside
+      use:keepOnScreen
+      on:click_outside={() => {
+        console.log("Click outside!");
+        show = false;
+      }}
+    >
       {#each items as item, n}
         <SelectOption
           key={item.html}
@@ -69,8 +83,10 @@
             value = e.detail.value;
             show = false;
             setTimeout(() => {
-              selectElement.dispatchEvent(new Event("change"));
-              selectElement.dispatchEvent(new Event("blur"));
+              if (selectElement) {
+                selectElement.dispatchEvent(new Event("change"));
+                selectElement.dispatchEvent(new Event("blur"));
+              }
             }, 200);
           }}
         />
@@ -96,10 +112,12 @@
     flex-direction: column;
     position: absolute;
     z-index: 99;
-    top: var(--bar-height);
+    top: var(--selectHeight, --bar-height, 30px);
     left: 0;
     border: var(--inputBorder);
     border-radius: 0px 0px var(--inputRadius) var(--inputRadius);
+    overflow-y: scroll;
+    max-height: 100vh;
   }
   ul > :global(li) {
     list-style: none;
@@ -110,5 +128,6 @@
   }
   .select {
     position: relative;
+    display: inline-block;
   }
 </style>

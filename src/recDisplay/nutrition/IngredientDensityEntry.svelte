@@ -2,11 +2,8 @@
   import { Ingredient } from "../../types/ingredientTypes";
   import DensityIndicator from "./DensityIndicator.svelte";
   export let ing: Ingredient;
-  import {
-    getGramWeight,
-    getML,
-    getStandardUnit,
-  } from "../../utils/unitAmounts";
+  import { getML } from "../../utils/unitAmounts";
+  import { scorePortion } from "../../utils/portionUtils";
   import { portions } from "../../stores/nutritionStores";
   import Portion from "./Portion.svelte";
   import { Select, Button, NumberUnitDisplay } from "../../widgets/index";
@@ -30,39 +27,10 @@
   let portionScores = {};
   $: getPortions($portions, ing.fdcId);
 
-  function scorePortion(portion) {
-    let score = 0;
-    if (portion.fdcId == fdcId) {
-      score += 1000;
-    }
-    if (ing.text) {
-      for (let word of ing.text.split(/\s/)) {
-        if (portion.foodDescription.indexOf(word) > -1) {
-          score += 20;
-        }
-        if (
-          portion.amount?.unitModifier &&
-          portion.amount.unitModifier.indexOf(word) > -1
-        ) {
-          score += 10;
-        }
-      }
-    }
-
-    if (ing.amount?.unit) {
-      if (
-        getStandardUnit(ing.amount.unit) == getStandardUnit(portion.amount.unit)
-      ) {
-        score += 100;
-      }
-    }
-    return score;
-  }
-
-  function getPortions($portions, ing) {
+  function getPortions($portions, id) {
     console.log("Get portions!", $portions);
     myPortions = $portions.filter((p) => p?.amount?.density);
-    myPortions.forEach((p) => (portionScores[p.id] = scorePortion(p)));
+    myPortions.forEach((p) => (portionScores[p.id] = scorePortion(p, ing)));
     myPortions.sort((a, b) => portionScores[b.id] - portionScores[a.id]);
     myPortions = myPortions;
     portionKey = myPortions.map((p) => p.id).join("-");
@@ -156,9 +124,5 @@ Portion Selected : {selectedPortion?.id}
       }}>Use</Button
     >
   {/each} -->
-<style>
-  div {
-    border: 3px solid blue;
-    padding: 12px;
-  }
+<style>  
 </style>
