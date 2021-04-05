@@ -3,7 +3,6 @@
   export let multiplier=1;
   export let unitName;
   import {MACRO_RDI,NUTRIENTS_RDI,RDI_BY_NUTRIENT} from './rdi';
-  $: console.log(nutrients)
   const KCAL = 1008; // kcal
   const UNSATFAT = 1293; // polyunsaturated fatty acids
   const CARBS = 2039; // total carbs
@@ -52,8 +51,7 @@
       percentDV[id] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
       percentDV[name] = Math.round(100 * multiplier * amount / RDI_BY_NUTRIENT[id].RDI).toFixed()+'%'
       return `${Math.round(amount*multiplier)}${RDI_BY_NUTRIENT[id].unit}`     
-    }
-    console.log(id,'no RDI... amount is',amount)
+    }    
     return (multiplier*amount).toFixed()
   }
 

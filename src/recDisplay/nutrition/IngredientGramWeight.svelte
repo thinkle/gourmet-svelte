@@ -1,107 +1,95 @@
 <script>
-
+  import IngredientDensityEntry from "./IngredientDensityEntry.svelte";
+  import EquivalentEntry from "./EquivalentEntry.svelte";
   export let ing;
-  import Portion from './Portion.svelte';
-  import {getNutritionQuery,extractItems} from '../../utils/ingredientUtils';
-  import {queryNutrientRequest, getNutrientInfoRequest} from '../../data/requests/'
-  import {user} from '../../stores/userStore'
-  import {getGramWeight} from '../../utils/unitAmounts'
-  import {nutrients,portions} from '../../stores/nutritionStores'
-  let inferenceInfo
-  let density = 1;
+  import Portion from "./Portion.svelte";
+  import { getGramWeight, getML } from "../../utils/unitAmounts";
+  import { nutrients, portions } from "../../stores/nutritionStores";
+  import { Button, IconButton, NumberUnitDisplay } from "../../widgets/index";
+  export let onSave = (i) => console.log("Save! ", i, "(but not really)");
 
-  $: checkWeight(ing);
-  export let onChange
+  // Let's simplify...
+  //
+  // Amount -> Unit -> Ingredient (already exists)
+  // -> We have volume. Set density to get weight (density mode)
+  // -> We have weight. We already have weight (no change needed!)
+  // -> We have nothing. Select unit equivalent to get weight.
+  // -> We have nothing. Just enter in weight to get weight.
+  const DENSITY_MODE = 1;
+  const EQUIVALENT_MODE = 2;
+  const MANUAL_ENTRY_MODE = 3;
+  let mode = DENSITY_MODE;
 
-  $: if (inferenceInfo && density != inferenceInfo?.density) {
-    checkWeight(ing);
-  }
-
-  function checkWeight (ing) {
-    if (ing?.amount?.gramWeight) {
-      inferenceInfo = null;
+  async function maybeFetchDetails(id) {
+    if (!id) {
+      console.log("No nutrient id?");
       return;
+    }
+    let nutrient = $nutrients[id];
+    if (!nutrient) {
+      console.log("No nutrient :(");
+      return;
+    }
+    if (!nutrient.detailed) {
+      console.log("Fetch those details");
+      await nutrients.fetchDetails(nutrient);
     } else {
-      inferenceInfo = getGramWeight(ing.amount, density);
-      //ing.inferred_gramWeight = inferenceInfo.gramWeight;
-      console.log('Assigning inferred gramWeight',
-          inferenceInfo
-        )
-        if (onChange && inferenceInfo.gramWeight != ing.inferred_gramWeight) {
-          onChange(
-            {...ing,
-            inferred_gramWeight:inferenceInfo.gramWeight}
-          );
-        }      
+      console.log("Already got details!", nutrient);
     }
   }
+  let id;
+  $: id = ing.fdcId || ing.inferred_fdcId;
+  $: maybeFetchDetails(id);
 
-  $: nutrient = $nutrients[ing.fdcId||ing.inferred_fdcId]
-
-  $: if (nutrient && (ing.fdcId || ing.inferred_fdcId) && inferenceInfo && !inferenceInfo.isWeight) {
-    nutrients.fetchDetails(nutrient);
+  function save() {
+    console.log("Save!", ing);
+    onSave(ing);
+    return ing;
   }
-
-  let densities = [];
-
-  $: if (nutrient && !nutrient.detailed) {
-    densities = [];
-  }
-
-  $: if (nutrient && nutrient.detailed && !inferenceInfo?.isWeight && nutrient.density) {
-    console.log('I should do some work with all this information...',nutrient.foodPortions,'...');
-    density = nutrient.density;
-    densities = nutrient.densities;
-  }
-
 </script>
 
 <div>
-  {#if ing.gramWeight}
-    Ingredient weight: <input type="number" bind:value={ing.gramWeight}> grams.
-  {:else}
-    Inferred weight:
-    {ing.inferred_gramWeight}g
-    <br>
-    {JSON.stringify(inferenceInfo)}
-    <br>
-    {#if !inferenceInfo?.isWeight}
-      Flour 
-      <input 
-      bind:value={density} 
-      type="range" 
-      min="0.5" 
-      max="1.4"
-      step="0.05"
-      > Salt
-      <input type="number" bind:value={density}>
-    {/if}
-    <hr>
-    Nutrient: {ing.fdcId || ing.inferred_fdcId}
-    <hr>
-    <h4>Densities for this ingredient:</h4>
-    {#each densities as portion}
-      <Portion {portion}/>
-    {/each}
-    <h4>Other portions for this ingredient:</h4>
-    {#each $portions as portion}
-      {#if portion.fdcId==nutrient.fdcId && densities.indexOf(portion)==-1}
-        <Portion {portion}/>
-      {/if}
-    {/each}
-    <h4>All densities for other ingredients...:</h4>
-    {#each $portions as portion}
-      {#if portion?.amount?.density && portion.fdcId!=nutrient.fdcId}
-        <Portion {portion}/>
-      {/if}
-    {/each}
-    <h4>All portions for all ingredients...:</h4>
-    {#each $portions as portion}
-      {#if !portion?.amount?.density && portion.cdcId!=nutrient.fdcId}
-        <Portion {portion}/>
-      {/if}
-    {/each}
+  <Button
+    on:click={() => (mode = DENSITY_MODE)}
+    inactive={mode == DENSITY_MODE}
+  >
+    By Density
+  </Button>
+  <Button
+    on:click={() => (mode = EQUIVALENT_MODE)}
+    inactive={mode == EQUIVALENT_MODE}
+  >
+    By Equivalent
+  </Button>
+  <Button
+    on:click={() => (mode = MANUAL_ENTRY_MODE)}
+    inactive={mode == MANUAL_ENTRY_MODE}
+  >
+    Enter weight manually
+  </Button>
+  <IconButton icon="save" on:click={save} />
+
+  {#if mode == DENSITY_MODE}
+    <IngredientDensityEntry
+      {ing}
+      onChange={(i) => {
+        ing = i;
+      }}
+    />
+  {:else if mode == EQUIVALENT_MODE}
+    <EquivalentEntry
+      {ing}
+      onChange={(i) => {
+        ing = i;
+      }}
+    />
+  {:else if mode == MANUAL_ENTRY_MODE}
+    <NumberUnitDisplay value={ing.amount} /> is
+    <input type="number" bind:value={ing.amount.gramWeight} /> grams.
   {/if}
+</div>
+<div>
+  GramWeight : {ing.amount.gramWeight || ing.amount.inferred_gramWeight}
 </div>
 
 <style>
