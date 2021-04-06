@@ -67,6 +67,7 @@ export interface UsdaFoodNutrient {
   };
   type: string;
   amount?: number;
+  brandOwner?: string;
 }
 
 export interface UsdaFoodAttribute {
@@ -95,6 +96,7 @@ export interface UsdaFood {
 
 export interface Nutrient {
   detailed: true;
+  brandOwner?: string;
   wweiaFoodCategory: {
     wweiaFoodCategoryCode: number;
     wweiaFoodCategoryDescription: string;
