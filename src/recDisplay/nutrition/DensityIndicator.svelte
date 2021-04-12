@@ -19,44 +19,46 @@
 </script>
 
 <svg width="100" height="100" viewBox="0 0 100 100">
-  <!-- Center -->
-  <circle cx={50} cy={50} {r} {fill} />
-  <!-- Crosshairs -->
-  {#each [1, -1] as offset}
-    {#each [...l] as i}
-      <circle cx={50} cy={50 + wiggle() + offset * i * (50 / n)} {r} {fill} />
-      <circle
-        cy={50}
-        cx={50 + wiggle() + offset * i * (50 / n)}
-        {r}
-        fill="#121212"
-      />
+  {#if density}
+    <!-- Center -->
+    <circle cx={50} cy={50} {r} {fill} />
+    <!-- Crosshairs -->
+    {#each [1, -1] as offset}
+      {#each [...l] as i}
+        <circle cx={50} cy={50 + wiggle() + offset * i * (50 / n)} {r} {fill} />
+        <circle
+          cy={50}
+          cx={50 + wiggle() + offset * i * (50 / n)}
+          {r}
+          fill="#121212"
+        />
+      {/each}
     {/each}
-  {/each}
-  <!-- Four quadrants out from center -->
-  {#each [1, -1] as xoffset}
-    {#each [-1, 1] as yoffset}
-      <g>
-        {#each l as x}
-          {#each l as y}
-            <circle
-              cx={50 + wiggle() + xoffset * x * (50 / n)}
-              cy={50 + wiggle() + yoffset * y * (50 / n)}
-              {r}
-            />
-          {/each}
-        {/each}</g
-      >
+    <!-- Four quadrants out from center -->
+    {#each [1, -1] as xoffset}
+      {#each [-1, 1] as yoffset}
+        <g>
+          {#each l as x}
+            {#each l as y}
+              <circle
+                cx={50 + wiggle() + xoffset * x * (50 / n)}
+                cy={50 + wiggle() + yoffset * y * (50 / n)}
+                {r}
+              />
+            {/each}
+          {/each}</g
+        >
+      {/each}
     {/each}
-  {/each}
-  <text
-    x="50"
-    y="50"
-    font-size="50"
-    text-anchor="middle"
-    dominant-baseline="middle"
-    >{density.toFixed(2)}
-  </text>
+    <text
+      x="50"
+      y="50"
+      font-size="50"
+      text-anchor="middle"
+      dominant-baseline="middle"
+      >{density.toFixed(2)}
+    </text>
+  {/if}
 </svg>
 
 <style>
