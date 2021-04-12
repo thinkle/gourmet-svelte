@@ -93,8 +93,7 @@
 </div>
 
 <style>
-  div {
-    border: 3px solid blue;
-    padding: 12px;
+  td {
+    vertical-align: top;
   }
 </style>
