@@ -1,6 +1,6 @@
 <script>
   import Ingredient from "../ing/IngredientEditor.svelte";
-  import IngredientNutrient from "./IngredientNutrient.svelte";
+  import IngredientNutrientQuery from "./IngredientNutrientQuery.svelte";
   import IngredientGramWeight from "./IngredientGramWeight.svelte";
   import { standard } from "../../common/mocks/recipes";
   let ingredient = standard.ingredients[0].ingredients[0];
@@ -16,7 +16,7 @@
   }}
 />
 {JSON.stringify(ingredient)}
-<IngredientNutrient bind:ing={ingredient} />
+<IngredientNutrientQuery bind:ing={ingredient} />
 <pre>
   <button on:click={()=>{showi=!showi}}>ingredient</button>: {JSON.stringify(ingredient)}
   {#if showi && ingredient}
