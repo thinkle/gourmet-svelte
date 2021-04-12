@@ -1,15 +1,19 @@
 <script type="ts">
+  export let ing; //: Ingredient;
+  export let unitName;
+  export let onSave;
+
   import { nutrientMatches, nutrients } from "../../stores/nutritionStores";
-  import { Button, Bar, Select } from "../../widgets/";
-  import { NutrientQueryResult, Nutrient } from "../../types/nutrientTypes";
+  import { Button, Bar, IconButton, Select } from "../../widgets/";
+  //import { NutrientQueryResult, Nutrient } from "../../types/nutrientTypes";
   import NutrientDisplay from "./NutrientDisplay.svelte";
   import { Ingredient } from "../../types/ingredientTypes";
-  export let ing: Ingredient;
+
   //export let gramWeight = 100;
   let gramWeight = 100;
   $: gramWeight =
     ing.amount.gramWeight || ing.amount.inferred_gramWeight || 100;
-  export let unitName;
+
   import NutritionLabel from "./NutritionLabel.svelte";
   import { user } from "../../stores/userStore";
   import { getNutritionQuery, extractItems } from "../../utils/ingredientUtils";
@@ -30,8 +34,8 @@
       doSearch();
     }
   }
-  let queryResponse: NutrientQueryResult = { foods: [] };
-  let nutrient: Nutrient | null;
+  let queryResponse; // : NutrientQueryResult = { foods: [] };
+  let nutrient; //: Nutrient | null;
 
   function doSearch() {
     nutrientMatches.search(searchTerms);
@@ -80,6 +84,14 @@
         </Select>
         <Button on:click={getMore}>Fetch more options...</Button>
       {/if}
+      <IconButton
+        icon="save"
+        on:click={() => {
+          if (onSave) {
+            onSave({ ...ing, fdcId: nutrient?.fdcId });
+          }
+        }}
+      />
     </div>
   </Bar>
 
