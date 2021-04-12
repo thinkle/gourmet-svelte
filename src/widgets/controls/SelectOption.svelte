@@ -28,12 +28,17 @@
   class:hoverable
 >
   {@html html}
-  {#if hoverable && selectedValue == value}
-    <i class="material-icons"> check </i>
+  {#if hoverable}
+    <i class:invisible={selectedValue != value} class="material-icons">
+      check
+    </i>
   {/if}
 </li>
 
 <style>
+  .invisible {
+    visibility: hidden;
+  }
   li {
     list-style: none;
     background-color: var(--white);
