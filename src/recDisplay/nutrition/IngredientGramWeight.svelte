@@ -3,10 +3,17 @@
   import EquivalentEntry from "./EquivalentEntry.svelte";
   export let ing;
   import Portion from "./Portion.svelte";
-  import { getGramWeight, getML } from "../../utils/unitAmounts";
+  import {
+    getGramWeight,
+    getML,
+    getInAConversion,
+  } from "../../utils/unitAmounts";
   import { nutrients, portions } from "../../stores/nutritionStores";
   import { Button, IconButton, NumberUnitDisplay } from "../../widgets/index";
   export let onSave = (i) => console.log("Save! ", i, "(but not really)");
+  const gramsPerOunce = getInAConversion("g", "ounce");
+  let ounceWeight;
+  $: ounceWeight = ing.amount.gramWeight / gramsPerOunce;
 
   // Let's simplify...
   //
@@ -38,6 +45,9 @@
     }
   }
   let id;
+  const GRAM = "gram";
+  const OUNCE = "ounce";
+  let manualMode = GRAM;
   $: id = ing.fdcId || ing.inferred_fdcId;
   $: maybeFetchDetails(id);
 
@@ -85,7 +95,22 @@
     />
   {:else if mode == MANUAL_ENTRY_MODE}
     <NumberUnitDisplay value={ing.amount} /> is
-    <input type="number" bind:value={ing.amount.gramWeight} /> grams.
+    {#if manualMode == GRAM}
+      <input type="number" bind:value={ing.amount.gramWeight} />
+    {:else}
+      <input
+        type="number"
+        value={ounceWeight}
+        on:change={(e) => {
+          let ounces = Number(e.target.value);
+          ing.amount.gramWeight = ounces * gramsPerOunce;
+        }}
+      />
+    {/if}
+    <select bind:value={manualMode}>
+      <option value={GRAM}>grams</option>
+      <option value={OUNCE}>ounces</option>
+    </select>
   {/if}
 </div>
 <div>

@@ -68,10 +68,6 @@
     inferNutrients(flatIngredients);
     inferWeights(flatIngredients);
   }
-
-  function crawlIngForNutrition() {
-    $nutrients[ing.fdcId || ing.inferred_fdcId];
-  }
 </script>
 
 <div>

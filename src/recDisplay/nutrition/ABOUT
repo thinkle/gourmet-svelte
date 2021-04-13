@@ -95,9 +95,31 @@ Implementation Process:
    > Check if we are a known volume unit already, if so offer some kind of density conversion
    > Fetch complete USDA density/item info... allow picking all those weird things 
 
-NEXT STEP...
-  Do we want a store for nutrition info? Figure out how we store that 
-  info and handle fetching e.g. portion info if we need it. Probably don't actually want to stick it on the ing object...
+
+  > NOTES: I am in the middle of removing the "Cached Search" in dexie, which seemed awfully annoying...
+   why store specific search results instead of enabling search of nutrients we've already downloaded, right? 
+   So we've got a lot to improve...
+
+   The UI probably shouldn't just get one bucket of results... it potentially needs 3 buckets...
+   => local database
+   => USDA fetches (main)
+   => USDA fetches (branded)
+
+   We had a store per search type, but that seems like maybe the wrong model...
+   Maybe our search widget has EXPLICIT searches...
+   -> Get local foods (start?)
+   -> Get USDA foods (user action)
+   -> Include branded foods (user action)
+   
+   And our inference does EXPLICIT searches...
+   -> get local foods (inferred => 1)
+   -> Get USDA foods (inferred => 2) (only does this if our match isn't good enough)
+   -> get branded foods (inferred ->3) (only does this if our match isn't good enough)
+
+  This would mean that our nutrition STORE consists only of nutrients themselves (?)
+  We then write expicit query methods to grab stuff we need.
+
+
 
 
 2. Modify nutrition label to take a list of ingredients.
