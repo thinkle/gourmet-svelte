@@ -1,4 +1,4 @@
-import { Amount } from "./ingredientTypes";
+import type { Amount } from "./ingredientTypes";
 
 export interface NutrientQueryResult {
   foods: Nutrient[];
@@ -57,6 +57,14 @@ export interface Portion {
   storedLocally: true;
 }
 
+export interface UsdaAbbreviatedFoodNutrient {
+  nutrientId: number;
+  nutrientName: string;
+  nutrientNumber: string;
+  unitName: string;
+  value: number;
+}
+
 export interface UsdaFoodNutrient {
   nutrient: {
     id: number;
@@ -111,10 +119,13 @@ export interface Nutrient {
   foodClass: "Survey";
   fdcId: 1102881;
   publicationDate: "10/30/2020";
-  foodNutrients: UsdaFoodNutrient[];
+  foodNutrients: UsdaFoodNutrient[] | UsdaAbbreviatedFoodNutrient[];
   foodPortions?: UsdaPortion[];
   dataType: string;
   densities: Portion[];
   density: number;
   storedLocally: boolean;
+  indexWords?: string[];
+  commonNames?: string;
+  additionalDescriptions?: string;
 }
