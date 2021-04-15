@@ -27,12 +27,12 @@
       ing = ing;
     }
   }
-  async function updateWeightInference(amount, unit) {
+  async function updateWeightInference(amount, unit, nutrient) {
     if (!amount || !unit) {
       return;
     }
-    if (inferredWeight !== amount + unit) {
-      inferredWeight = amount + unit;
+    if (inferredWeight !== amount + unit + nutrient) {
+      inferredWeight = amount + unit + nutrient;
       let amountUpdate = await inferGramWeightForIngredient(ing);
       if (amountUpdate) {
         ing.amount = {
@@ -45,7 +45,12 @@
   }
 
   $: ing?.text && updateNutritionInference(ing.text);
-  $: ing?.amount && updateWeightInference(ing.amount.amount, ing.amount.unit);
+  $: ing?.amount &&
+    updateWeightInference(
+      ing.amount.amount,
+      ing.amount.unit,
+      ing.fdcId || ing.inferred_fdcId
+    );
   let mode = NONE;
 </script>
 

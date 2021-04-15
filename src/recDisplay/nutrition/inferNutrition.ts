@@ -1,3 +1,4 @@
+import { get } from "svelte/store";
 import type { Ingredient, Amount } from "../../types/ingredientTypes";
 import type { Nutrient, NutrientQueryResult } from "../../types/nutrientTypes";
 import { getGramWeight, getML } from "../../utils/unitAmounts";
@@ -163,13 +164,32 @@ export async function inferGramWeightForIngredient(
   if (i.amount.gramWeight) {
     return null;
   } else {
-    let inferred = getGramWeight(i.amount);
-    if (inferred != i.amount.inferred_gramWeight) {
+    let inferred: {
+      gramWeight: number;
+      density?: number;
+      isWeight: boolean;
+    } | null = getGramWeight(i.amount);
+    if (inferred) {
       if (inferred.isWeight) {
         return {
           gramWeight: inferred.inferred_gramWeight,
         };
       } else {
+        let fdcId = i.fdcId || i.inferred_fdcId;
+        if (fdcId) {
+          await nutrients.fetchDetails({ fdcId: fdcId });
+          let $nutrients = get(nutrients);
+          let nutrient = $nutrients[fdcId];
+          if (nutrient.densities?.length) {
+            let nutrientBasedWeight = getGramWeight(
+              i.amount,
+              nutrient.densities[0].amount.density
+            );
+            return {
+              inferred_gramWeight: nutrientBasedWeight.gramWeight,
+            };
+          }
+        }
         return {
           inferred_gramWeight: inferred.gramWeight,
         };
