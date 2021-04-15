@@ -2,7 +2,7 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "scripts": {
-    "netlify":"netlify dev",
+    "netlify": "netlify dev",
     "debug": "netlify dev --inspect",
     "build": "rollup -c",
     "dev": "rollup -c -w",
