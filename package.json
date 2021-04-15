@@ -4,7 +4,7 @@
   "scripts": {
     "netlify": "netlify dev",
     "debug": "netlify dev --inspect",
-     "build": "ROLLUP_TARGET=ALL rollup -c",
+    "build": "ROLLUP_TARGET=ALL rollup -c",
     "extension": "ROLLUP_TARGET=EXTENSION rollup -c",
     "extension-dev": "ROLLUP_TARGET=EXTENSION rollup -c -w",
     "dev": "ROLLUP_TARGET=WEBAPP rollup -c -w",
