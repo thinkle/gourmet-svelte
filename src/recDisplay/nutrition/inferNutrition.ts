@@ -3,6 +3,7 @@ import type { Nutrient, NutrientQueryResult } from "../../types/nutrientTypes";
 import { getGramWeight, getML } from "../../utils/unitAmounts";
 import { getNutritionQuery, extractItems } from "../../utils/ingredientUtils";
 import { getNutrientById } from "./nutrientUtils";
+import { nutrients } from "../../stores/nutritionStores";
 import prepWords from "../../utils/ingPrepWords";
 import stopword from "stopword";
 import { unique } from "../../utils/uniq.js";
@@ -194,6 +195,10 @@ async function getUSDAItemForIngredient(
   let best = 0;
   let result: Nutrient | null;
   for (let food of response.foods) {
+    nutrients.update(($nutrients) => {
+      $nutrients[food.fdcId] = food;
+      return $nutrients;
+    });
     let score = rankNutrientMatch(food, i);
     if (score > 0 && score > best) {
       best = score;

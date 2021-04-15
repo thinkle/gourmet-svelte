@@ -220,6 +220,10 @@ nutrients.fetchCached = async function ({ fdcId }) {
   console.log("Check for cached nutrient", fdcId);
   let result = await dexieApi.db.nutrients.get({ fdcId });
   console.log("Got cached: ", result);
+  nutrients.update(($nutrients) => {
+    $nutrients[fdcId] = result;
+    return $nutrients;
+  });
   return result;
 };
 

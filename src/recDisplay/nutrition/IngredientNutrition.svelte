@@ -2,7 +2,8 @@
   //import { Ingredient } from "../../types/IngredientTypes";
   export let ing; //: Ingredient;
   export let onChange; //: Function;
-
+  import { nutrients } from "../../stores/nutritionStores";
+  import NutrientDisplay from "./NutrientDisplay.svelte";
   import IngredientDisplay from "../ing/Ingredient.svelte";
   import IngredientNutrientQuery from "./IngredientNutrientQuery.svelte";
   import IngredientGramWeight from "./IngredientGramWeight.svelte";
@@ -65,9 +66,17 @@
     </span>
     <span class="nutritionInfo">
       {#if ing.fdcId}
-        N
+        {#if $nutrients[ing.fdcId]}
+          <NutrientDisplay nutrient={$nutrients[ing.fdcId]} />
+        {:else}
+          Nutrient {ing.fdcId}
+        {/if}
       {:else if ing.inferred_fdcId}
-        N?
+        {#if $nutrients[ing.inferred_fdcId]}
+          <NutrientDisplay nutrient={$nutrients[ing.inferred_fdcId]} />
+        {:else}
+          Nutrient {ing.inferred_fdcId}
+        {/if}
       {:else}
         No Nutrient :(
       {/if}
