@@ -1,4 +1,6 @@
-<script>
+<script type="ts">
+  import RecipeNutrition from "../nutrition/RecipeNutrition.svelte";
+
   import { registerBuild } from "../../stores/debugStore.js";
   registerBuild(Number("BUILD_MS"));
   export let editOnOpen = undefined;
@@ -84,13 +86,13 @@
   /* Set ingredient list to pop down in mobile view if highlighted ingredient changes so user can
   click word in recipe to see that item pop up on the ingredient list. */
   $: {
-      if ($highlightedIngredient) {
-          if  ($highlightedIngredient.highlighted) {
-            popupIngPanel = $highlightedIngredient.highlighted; // $highlightedIngredient.highlighted;
-          } else {
-            popupIngPanel = false;
-          }
+    if ($highlightedIngredient) {
+      if ($highlightedIngredient.highlighted) {
+        popupIngPanel = $highlightedIngredient.highlighted; // $highlightedIngredient.highlighted;
+      } else {
+        popupIngPanel = false;
       }
+    }
   }
 
   $: if (rec && rec.ingredients) {
@@ -216,14 +218,10 @@
         </h2>
       </div>
       <div slot="right">
-        <!-- <div class="status"> -->
+        <div class="status">
           {#if rec && editable}
-            <StatusIcon 
-              icon="offline_pin"
-              tt="Saved to browser"
-            />
+            <StatusIcon icon="offline_pin" tt="Saved to browser" />
             {#if rec.savedRemote}
-
               <StatusIcon icon="cloud_done" tooltip="true" tooltipLeft={true}>
                 Saved to browser and in the cloud. Last saved at {new Date(
                   $recipeState[rec.id].last_modified
@@ -262,7 +260,7 @@
                   on:click={() => recipeActions.getRecipe(rec.id)}
                 />
               </StatusIcon>
-            {/if}            
+            {/if}
             <StatusIcon
               icon="share"
               bare="true"
@@ -272,38 +270,50 @@
             >
               {#if rec.share}
                 <Stack>
-                  <a class="underline" target="_blank" href={`/share/${rec._id}/`}>
+                  <a
+                    class="underline"
+                    target="_blank"
+                    href={`/share/${rec._id}/`}
+                  >
                     Sharing Link
                   </a>
-                  <IconButton 
+                  <IconButton
                     bare="true"
-                    icon="content_copy" 
+                    icon="content_copy"
                     inverse="true"
-                    on:click={()=>navigator.clipboard.writeText(
-                      new URL(`/share/${rec._id}/`,location.origin).toString()
-                      )
-                    }>
+                    on:click={() =>
+                      navigator.clipboard.writeText(
+                        new URL(
+                          `/share/${rec._id}/`,
+                          location.origin
+                        ).toString()
+                      )}
+                  >
                     Copy Link
                   </IconButton>
-                  <IconButton 
+                  <IconButton
                     bare="true"
-                    icon="lock" 
+                    icon="lock"
                     inverse="true"
-                    on:click={()=>recipeActions.setRecipeSharing({_id:rec._id},false)}
+                    on:click={() =>
+                      recipeActions.setRecipeSharing({ _id: rec._id }, false)}
                     tt="People you shared the recipe with will no longer be able to access it."
-                    >
+                  >
                     Unshare
                   </IconButton>
                 </Stack>
               {:else}
-                <IconButton icon="share" on:click={()=>recipeActions.setRecipeSharing({_id:rec._id},true)}
+                <IconButton
+                  icon="share"
+                  on:click={() =>
+                    recipeActions.setRecipeSharing({ _id: rec._id }, true)}
                   tt="This will allow you to share a link which lets other users see or copy your recipe."
-                >Make Recipe Shareable
+                  >Make Recipe Shareable
                 </IconButton>
               {/if}
             </StatusIcon>
           {/if}
-       <!--  </div> -->
+        </div>
         <NavActions forceHide={hideMenu}>
           {#if showShopping}
             <li>
@@ -325,7 +335,10 @@
                 icon="edit"
                 toggle={true}
                 toggled={editMode}
-                on:click={() => {editMode = !editMode; hideMenu = true}}
+                on:click={() => {
+                  editMode = !editMode;
+                  hideMenu = true;
+                }}
               >
                 Edit{#if editMode}ing{/if}
                 Recipe{#if !editMode}&nbsp;&nbsp;&nbsp;{/if}
@@ -335,7 +348,10 @@
               <li>
                 <IconButton
                   icon="undo"
-                  on:click={() => {recipeActions.revertRecipe(rec.id); hideMenu = true;}}
+                  on:click={() => {
+                    recipeActions.revertRecipe(rec.id);
+                    hideMenu = true;
+                  }}
                   busy={$recipeState[rec.id].updating}
                 >
                   Revert Changes
@@ -350,7 +366,8 @@
                     hideMenu = true;
                     recipeActions.updateRecipe(rec).then(() => {
                       editMode = false;
-                    })}}
+                    });
+                  }}
                 >
                   Save
                 </IconButton>
@@ -360,7 +377,10 @@
                 <IconButton
                   busy={$recipeState[rec.id].updating}
                   icon="cloud_upload"
-                  on:click={() => {recipeActions.updateRecipe(rec); hideMenu = true}}
+                  on:click={() => {
+                    recipeActions.updateRecipe(rec);
+                    hideMenu = true;
+                  }}
                 >
                   Save to Cloud
                 </IconButton>
@@ -501,21 +521,27 @@
                 />
               </div>
             {/each}
+
             <!-- end block props -->
           </div>
           <!-- close props -->
+          <RecipeNutrition
+            onChange={triggerChange}
+            ingredients={rec.ingredients}
+          />
         </div>
         <!-- close topblock -->
       </div>
       <!-- close right slot -->
     </SideBySide>
-    </div>
+  </div>
 {:else if !rec}
   Loading recipe...
 {:else}
   Invalid Recipe: {JSON.stringify(rec)}
 {/if}
 
+<!-- svelte-ignore missing-declaration -->
 {#if DEV}
   <ModalLauncher key="rec-debug" modalVisible={debug}>
     <Button on:click={() => (debug = !debug)}>DEBUG</Button>
@@ -546,7 +572,8 @@
     </Modal>
   {/if}
 {/if}
-<style>  
+
+<style>
   h2 {
     flex-grow: 2;
     font-weight: bold;
@@ -596,7 +623,7 @@
 
   @media screen and (max-width: 420px) {
     h2 {
-      font-size: .7rem;
+      font-size: 0.7rem;
     }
   }
 
