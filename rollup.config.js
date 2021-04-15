@@ -6,18 +6,15 @@ import livereload from "rollup-plugin-livereload";
 import json from "rollup-plugin-json";
 import replace from "rollup-plugin-replace";
 import { terser } from "rollup-plugin-terser";
-// import { scss, coffeescript, pug } from 'svelte-preprocess'
-// import { sass } from 'svelte-preprocess-sass';
 import css from "rollup-plugin-css-only";
 import autoPreprocess from "svelte-preprocess";
-//import typescript from '@rollup/plugin-typescript';
-
+import typescript from "@rollup/plugin-typescript";
 
 //import smelte from "smelte/rollup-plugin-smelte"; //
 
 const production = !process.env.ROLLUP_WATCH;
-
-export default [
+console.log("Production?", production);
+let webAppTarget = [
   // Main App
   {
     input: "src/webapp/main.js",
@@ -38,11 +35,13 @@ export default [
         BUILD_TIME: () => new Date() + "",
         BUILD_MS: () => new Date().getTime(),
       }),
-      //typescript(),
       //css({ output: "public/build/extra.css" }),
       svelte({
         // enable run-time checks when not in production
         preprocess: autoPreprocess(),
+      }),
+      typescript({
+        sourceMap: !production,
       }),
       css({ output: "public/build/bundle.css" }),
 
@@ -55,10 +54,6 @@ export default [
         browser: true,
         dedupe: ["svelte"],
       }),
-      // babel({
-      //     // exclude: 'node_modules/**', // only transpile our source code
-      //     // plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
-      // }),
       commonjs(),
       builtins(),
       !production && serve(),
@@ -68,7 +63,7 @@ export default [
       production && terser(),
     ],
     watch: {
-      clearScreen: false,
+      clearScreen: true,
     },
   },
   // Functions...
@@ -87,10 +82,19 @@ export default [
         replace({
           MONGO_DB_NAME: "devtest",
         }),
+      /* resolve({
+        browser: false,
+      }), 
+      builtins(),*/
       commonjs(),
-      //typescript(),
+      typescript({
+        exclude: ["node_modules/*", "mongodb"],
+        allowJs: true,
+      }),
     ],
   },
+];
+let extensionTarget = [
   {
     input: "src/extension/background.js",
     output: {
@@ -131,6 +135,7 @@ export default [
         browser: true,
         dedupe: ["svelte"],
       }),
+      typescript(),
       // babel({
       //     // exclude: 'node_modules/**', // only transpile our source code
       //     // plugins: ["@babel/plugin-transform-named-capturing-groups-regex"]
@@ -173,19 +178,46 @@ export default [
         browser: true,
         dedupe: ["svelte"],
       }),
+      typescript(),
       commonjs(),
     ],
   },
 ];
 
 function serve() {
+  let server;
+
+  function toExit() {
+    if (server) server.kill(0);
+  }
+
+  return {
+    writeBundle() {
+      if (server) return;
+      server = require("child_process").spawn(
+        "npm",
+        ["run", "start", "--", "--dev"],
+        {
+          stdio: ["ignore", "inherit", "inherit"],
+          shell: true,
+        }
+      );
+
+      process.on("SIGTERM", toExit);
+      process.on("exit", toExit);
+    },
+  };
+}
+function serveOld() {
+  console.log("Time to serve!");
   let started = false;
 
   return {
     writeBundle() {
+      console.log("writeBundle! inside serve");
       if (!started) {
         started = true;
-
+        console.log("Let's run npm run start -- --dev");
         require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
           stdio: ["ignore", "inherit", "inherit"],
           shell: true,
@@ -239,3 +271,17 @@ export default {
     },
   };
 }
+
+let mainExport = [];
+if (process.env.ROLLUP_TARGET == "EXTENSION") {
+  console.log("Extension!");
+  mainExport = extensionTarget;
+} else if (process.env.ROLLUP_TARGET == "WEBAPP") {
+  console.log("Web App!");
+  mainExport = webAppTarget;
+} else {
+  console.log("The Whole Nine Yards!");
+  mainExport = [...webAppTarget, ...extensionTarget];
+}
+
+export default mainExport;
