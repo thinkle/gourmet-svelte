@@ -6,6 +6,10 @@ import querystring from "querystring";
 import fetch from "node-fetch";
 
 const API_KEY = process.env.USDA_KEY;
+/* Test function to test typescript in functions */
+/* function add(a: number, b: number): number {
+  return a + b;
+} */
 
 queryNutrientRequest.setRequestHandler(async (u, params) => {
   let q = { ...params, api_key: API_KEY };
