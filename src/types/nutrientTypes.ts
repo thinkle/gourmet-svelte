@@ -114,11 +114,11 @@ export interface Nutrient {
   foodCode: string;
   inputFoods: UsdaFood[];
   startDate: string;
-  endDate: "12/31/2018";
+  endDate: string;
   foodComponents: [];
-  foodClass: "Survey";
-  fdcId: 1102881;
-  publicationDate: "10/30/2020";
+  foodClass: string;
+  fdcId: number;
+  publicationDate: string;
   foodNutrients: UsdaFoodNutrient[] | UsdaAbbreviatedFoodNutrient[];
   foodPortions?: UsdaPortion[];
   dataType: string;

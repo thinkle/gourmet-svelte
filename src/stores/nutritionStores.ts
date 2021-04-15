@@ -48,7 +48,7 @@ interface NutrientMatchesStore
   extends Writable<{
     [key: string]: NutrientQueryResult;
   }> {
-  cachedSearch(searchTerms: string): Promise<NutrientQueryResult>;
+  localSearch(searchTerms: string): Promise<NutrientQueryResult>;
   usdaSearch(searchTerms: string, page?: number): Promise<NutrientQueryResult>;
   search(searchTerms: string): Promise<NutrientQueryResult>;
   fetchMore(searchTerms: string): Promise<NutrientQueryResult>;
@@ -56,7 +56,9 @@ interface NutrientMatchesStore
 
 export let nutrientMatches: NutrientMatchesStore = writable({});
 
-nutrientMatches.cachedSearch = async (searchTerms) => {
+nutrientMatches.localSearch = async (searchTerms) => {
+  // nevermind for now
+  return;
   let result = await dexieApi.db.nutrientSearches.get({ search: searchTerms });
   if (result) {
     console.log("Got result, now fetch foods...", result);
@@ -78,7 +80,10 @@ nutrientMatches.usdaSearch = async (searchTerms, page = 1) => {
   try {
     queryResponse = await queryNutrientRequest.makeRequest({
       user: $user,
-      params: { query: searchTerms },
+      params: {
+        query: searchTerms,
+        //dataType: ["SR Legacy", "Survey(FNDDS)"]
+      },
     });
   } catch (err) {
     fetching = false;
@@ -89,36 +94,37 @@ nutrientMatches.usdaSearch = async (searchTerms, page = 1) => {
     page: page,
     ...queryResponse,
   };
-  console.log("Store nutrientSearches in dexie");
-  dexieApi.db.nutrientSearches.put({
+  //console.log("Store nutrientSearches in dexie");
+  /* dexieApi.db.nutrientSearches.put({
     search: searchTerms,
     page,
     foodSearchCriteria: queryResponse.foodSearchCriteria,
     foods: queryResponse.foods.map((f) => ({ fdcId: f.fdcId })),
-  });
+  }); */
   return result;
 };
 
-nutrientMatches.search = async (searchTerms) => {
+nutrientMatches.search = async (searchTerms, branded = false) => {
   console.log("Store is searching!");
   let $matches = get(nutrientMatches);
   // check store...
   if ($matches[searchTerms]) {
     return $matches[searchTerms];
   } else {
-    let queryResponse = await nutrientMatches.cachedSearch(searchTerms);
+    let queryResponse = await nutrientMatches.localSearch(searchTerms, branded);
     console.log("Cached result: ", queryResponse);
     if (!queryResponse) {
-      queryResponse = await nutrientMatches.usdaSearch(searchTerms);
+      queryResponse = await nutrientMatches.usdaSearch(searchTerms, branded);
+      nutrientMatches.storeResult(queryResponse, branded);
     }
-    nutrientMatches.storeResult(queryResponse);
     return queryResponse;
   }
 };
 interface NutrientMatchesStore {
   storeResult(queryResponse: NutrientQueryResult): void;
 }
-nutrientMatches.storeResult = function (queryResponse) {
+nutrientMatches.storeResult = function (queryResponse, branded) {
+  console.log("Store result", queryResponse);
   let searchTerms = queryResponse.foodSearchCriteria.query;
   if (queryResponse.foods) {
     nutrients.update(($nutrients) => {
@@ -329,8 +335,27 @@ nutrients.subscribe(($nutrients) => {
     // Store in dexie if not yet stored...
     if (!n.storedLocally) {
       console.log("store nutrient!", n);
+      indexNutrient(n);
       dexieApi.addNutrient(n);
     }
   });
   return $nutrients;
 });
+
+function indexNutrient(n: Nutrient) {
+  n.indexWords = [];
+  addWordAndWords(n.description);
+  addWordAndWords(n.commonNames);
+  addWordAndWords(n.additionalDescriptions);
+
+  function addWordAndWords(w: string): void {
+    if (w) {
+      let hasSpaces = w.search(/\s+/);
+      if (hasSpaces > -1) {
+        n.indexWords = [...n.indexWords, w, ...w.split(/\s+/)];
+      } else {
+        n.indexWords.push(w);
+      }
+    }
+  }
+}
