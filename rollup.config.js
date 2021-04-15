@@ -82,15 +82,12 @@ let webAppTarget = [
         replace({
           MONGO_DB_NAME: "devtest",
         }),
-      /* resolve({
-        browser: false,
-      }), 
-      builtins(),*/
+      builtins(),
       commonjs(),
-      typescript({
+      /* typescript({
         exclude: ["node_modules/*", "mongodb"],
         allowJs: true,
-      }),
+      }), */
     ],
   },
 ];
@@ -205,24 +202,6 @@ function serve() {
 
       process.on("SIGTERM", toExit);
       process.on("exit", toExit);
-    },
-  };
-}
-function serveOld() {
-  console.log("Time to serve!");
-  let started = false;
-
-  return {
-    writeBundle() {
-      console.log("writeBundle! inside serve");
-      if (!started) {
-        started = true;
-        console.log("Let's run npm run start -- --dev");
-        require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
-          stdio: ["ignore", "inherit", "inherit"],
-          shell: true,
-        });
-      }
     },
   };
 }
