@@ -42,6 +42,7 @@ let webAppTarget = [
       }),
       typescript({
         sourceMap: !production,
+        inlineSources: !production,
       }),
       css({ output: "public/build/bundle.css" }),
 
@@ -57,7 +58,7 @@ let webAppTarget = [
       commonjs(),
       builtins(),
       !production && serve(),
-      !production && livereload("public"),
+      //!production && livereload("public"),
       // If we're building for production (npm run build
       // instead of npm run dev), minify
       production && terser(),
@@ -183,6 +184,7 @@ let extensionTarget = [
 
 function serve() {
   let server;
+  console.log("Serve!");
 
   function toExit() {
     if (server) server.kill(0);
@@ -190,7 +192,9 @@ function serve() {
 
   return {
     writeBundle() {
+      console.log("Already got a server?", server);
       if (server) return;
+      console.log("Spawn!");
       server = require("child_process").spawn(
         "npm",
         ["run", "start", "--", "--dev"],
