@@ -1,8 +1,8 @@
 <script type="ts">
-  import { PortionAmount } from "../../types/nutrientTypes";
+  import type { PortionAmount, Portion } from "../../types/nutrientTypes";
   import { JsonDebug } from "../../widgets/index";
   import DensityIndicator from "./DensityIndicator.svelte";
-  export let portion;
+  export let portion: Portion;
   let amount = portion.amount;
   $: if (portion) {
     amount = portion.amount;

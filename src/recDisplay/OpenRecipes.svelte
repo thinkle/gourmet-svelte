@@ -1,6 +1,6 @@
 <script>
   import router from "page";
-  import { registerBuild } from "../stores/debugStore.js";
+  import { registerBuild } from "../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
 
   export function open(id, editMode = false) {
@@ -30,7 +30,7 @@
   $: console.log("OpenRecipes got openIDs", openIDs);
   $: console.log("OpenRecipes got activeID", activeID);
 
-  import { shoppingList } from "../stores/shoppingStores.js";
+  import { shoppingList } from "../stores/shoppingStores";
   import { getContext, onMount } from "svelte";
   import { fade, slide } from "svelte/transition";
   import { flip } from "svelte/animate";
@@ -52,9 +52,9 @@
     localRecipes,
     recipeState,
     recipeActions,
-    activeRecipeId
+    activeRecipeId,
   } from "../stores/recipeStores.js";
-  import { getStyle } from "./rec/colors.js";
+  import { getStyle } from "./rec/colors";
   function getTabTitle(id) {
     return (
       ($localRecipes[id].title && $localRecipes[id].title.substr(0, 30)) ||
@@ -161,7 +161,6 @@
           bind:this={recComponents[id]}
           bind:rec={$localRecipes[id]}
           {onOpenSubRec}
-          
           onEditToggle={(val) => (editOnOpen[id] = val)}
           editOnOpen={editOnOpen[id]}
         />
@@ -170,7 +169,7 @@
           $localRecipes[id] = rec;
         }} -->
       </LazyIf>
-    {/each}    
+    {/each}
     {#if showCloseModalFor !== undefined}
       <div class="modal">
         {$localRecipes[showCloseModalFor] &&

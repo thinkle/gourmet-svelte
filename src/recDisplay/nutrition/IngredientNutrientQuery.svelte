@@ -51,6 +51,9 @@
       lastSearch.queryType == queryType
     ) {
       page = lastSearch.page + 1;
+    } else {
+      // reset search
+      allResponses = [];
     }
     fetching = true;
     try {
@@ -113,7 +116,7 @@
         <Select bind:value={nutrient} update={sortedResults}>
           {#each sortedResults as food}
             <option value={food}>
-              <NutrientDisplay nutrient={food} />
+              ({food.rank}) <NutrientDisplay nutrient={food} />
             </option>
           {/each}
         </Select>

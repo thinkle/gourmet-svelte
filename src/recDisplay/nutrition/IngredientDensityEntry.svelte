@@ -1,5 +1,5 @@
 <script type="ts">
-  import { Ingredient } from "../../types/ingredientTypes";
+  import type { Ingredient } from "../../types/ingredientTypes";
   import DensityIndicator from "./DensityIndicator.svelte";
   export let ing: Ingredient;
   import { getML } from "../../utils/unitAmounts";
@@ -85,7 +85,7 @@ Density
   }}
   bind:value={density}
   type="range"
-  min="0.5"
+  min="0.01"
   max="1.4"
   step="0.05"
 />
@@ -124,5 +124,5 @@ Portion Selected : {selectedPortion?.id}
       }}>Use</Button
     >
   {/each} -->
-<style>  
+<style>
 </style>

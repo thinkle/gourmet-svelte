@@ -4,8 +4,8 @@
   import IngredientNutrientQuery from "./IngredientNutrientQuery.svelte";
   import IngredientGramWeight from "./IngredientGramWeight.svelte";
   import { standard } from "../../common/mocks/recipes";
-  let n = 0;
-  let m = 0;
+  let n = 5;
+  let m = 1;
   let ingredient = standard.ingredients[m].ingredients[n];
   function updateIngredient() {
     ingredient = standard.ingredients[m].ingredients[n];
@@ -26,10 +26,14 @@ Group :
 <input bind:value={m} min={0} max={standard.ingredients.length} step={1} />
 <br />
 <br />
-<IngredientNutrition
-  ing={ingredient}
-  onChange={(i) => {
-    console.log("Got new ingredient info", i);
-    ingredient = i;
-  }}
-/>
+{#key m}
+  {#key n}
+    <IngredientNutrition
+      ing={ingredient}
+      onChange={(i) => {
+        console.log("Got new ingredient info", i);
+        ingredient = i;
+      }}
+    />
+  {/key}
+{/key}

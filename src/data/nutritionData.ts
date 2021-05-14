@@ -6,7 +6,7 @@ import {
   queryNutrientRequest,
   getNutrientInfoRequest,
 } from "./requests/nutritionRequests";
-
+import dexieApi from "./local/dexieApi";
 export enum QueryTypes {
   GENERAL,
   BRANDED,
@@ -45,11 +45,16 @@ export function queryMongoNutrients(
   };
 }
 
-export function queryLocalNutrients(
+export async function queryLocalNutrients(
   queryString: string,
   queryType: QueryTypes = QueryTypes.GENERAL
-): NutrientQueryResult {
+): Promise<NutrientQueryResult> {
+  let results = await dexieApi.queryNutrientRelations(queryString);
+  console.log("Got results:", results);
   return {
-    foods: [],
-  };
+    foods: results.map((r) => ({
+      ...r.nutrient,
+      matchInfo : r.match        
+    })
+  }
 }

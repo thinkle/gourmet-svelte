@@ -16,6 +16,7 @@
   import {
     inferNutrientForIngredient,
     inferGramWeightForIngredient,
+    saveNutrientLocally,
   } from "./inferNutrition";
 
   let inferredNut: any = false;
@@ -72,13 +73,19 @@
     <span class="nutritionInfo">
       {#if ing.fdcId}
         {#if $nutrients[ing.fdcId]}
-          <NutrientDisplay nutrient={$nutrients[ing.fdcId]} />
+          <NutrientDisplay
+            nutrient={$nutrients[ing.fdcId]}
+            grams={ing.amount?.gramWeight || ing.amount?.inferred_gramWeight}
+          />
         {:else}
           Nutrient {ing.fdcId}
         {/if}
       {:else if ing.inferred_fdcId}
         {#if $nutrients[ing.inferred_fdcId]}
-          <NutrientDisplay nutrient={$nutrients[ing.inferred_fdcId]} />
+          <NutrientDisplay
+            grams={ing.amount?.gramWeight || ing.amount?.inferred_gramWeight}
+            nutrient={$nutrients[ing.inferred_fdcId]}
+          />
         {:else}
           Nutrient {ing.inferred_fdcId}
         {/if}
@@ -128,7 +135,11 @@
       <IngredientNutrientQuery
         {ing}
         onSave={(i) => {
+          console.log("INQ Save!");
           Object.assign(ing, i);
+          let nutrient = $nutrients[i.fdcId || i.inferred_fdcId];
+          console.log("INQ Save nutrient!", nutrient);
+          saveNutrientLocally(nutrient, i, false);
           ing = ing;
           onChange(ing);
         }}

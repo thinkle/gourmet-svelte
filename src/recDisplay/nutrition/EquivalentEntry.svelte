@@ -1,5 +1,10 @@
-<script>
+<script type="ts">
   import Portion from "./Portion.svelte";
+  import type {
+    Portion as PortionType,
+    Nutrient as NutrientType,
+  } from "../../types/nutrientTypes";
+  import type { Ingredient as IngredientType } from "../../types/ingredientTypes";
   import { nutrients, portions } from "../../stores/nutritionStores";
   import {
     Button,
@@ -8,8 +13,8 @@
     Select,
   } from "../../widgets/index";
   import { scorePortion } from "../../utils/portionUtils";
-  export let ing;
-  let nutrient;
+  export let ing: IngredientType | null;
+  let nutrient: NutrientType | null;
   $: nutrient = $nutrients[ing.fdcId || ing.inferred_fdcId];
   let count = ing?.amount?.amount || 1;
   export let onChange;
@@ -54,12 +59,12 @@
 </script>
 
 <NumberUnitDisplay value={ing.amount} />
-=
+
 <AmountInput bind:value={count} />
 <Select bind:value={portion} on:blur={handleChange}>
   {#each myPortions as portion}
     <option value={portion}>
-      ({portionScores[portion.id]}) <Portion {portion} />
+      <Portion {portion} />
     </option>
   {/each}
 </Select>

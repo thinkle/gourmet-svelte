@@ -2,68 +2,67 @@
   import type { Nutrient } from "../../types/nutrientTypes";
   import { getNutrientById } from "./nutrientUtils";
   export let nutrient: Nutrient;
-  export let width: number = 50;
+  export let width: number = 75;
+  export let grams: number = 100;
+  const height = 75;
   const KCAL = 1008;
   let kcal = 0;
-  $: kcal = getNutrientById(nutrient, KCAL).amount;
+  $: kcal = getNutrientById(nutrient, KCAL).amount * (grams / 100);
   const macros = [
-    { id: 1004, name: "fat", color: "#FFC525", multiplier: 9 },
-    { id: 1005, name: "carbs", color: "#A68461", multiplier: 4 },
-    { id: 1003, name: "protein", color: "#E87D1D", multiplier: 4 },
+    //{ id: 1008, name: "kc", color: "red", max: 900, amount: 0 },
+    { id: 1004, name: "F", color: "#FFC525", max: 100, amount: 0 },
+    { id: 1005, name: "C", color: "#A68461", max: 100, amount: 0 },
+    { id: 2000, name: "S", color: "#AB3232", max: 100, amount: 0 },
+    { id: 1003, name: "P", color: "#E87D1D", max: 100, amount: 0 },
+    { id: 1079, name: "Fiber", color: "#239823", max: 20, amount: 0 },
+    { id: 1051, name: "Water", color: "#232398", max: 100, amount: 0 },
   ];
 
-  /* const foodDensityItems = [
-    { id: 1079, name: "Dietary Fiber", color: "green", multiplier: 10 },
-    { id: 1051, name: "Water", color: "blue", multiplier: 1 },
-  ]; */
-
-  function getMacros(nutrient) {
+  function getMacros(nutrient, grams) {
     let total = getNutrientById(nutrient, KCAL).amount;
+    total = total * (grams / 100);
     let lastPercentage = 0;
     macros.forEach((macro) => {
-      macro.amount = getNutrientById(nutrient, macro.id).amount;
-      macro.kcal = macro.amount * macro.multiplier;
-      macro.percentage = macro.kcal / total;
-      macro.previousMacrosPercentage = lastPercentage;
-      lastPercentage = macro.percentage + lastPercentage;
-    });
-    /* foodDensityItems.forEach((item, n) => {
-      item.amount = getNutrientById(nutrient, item.id).amount;
-      item.percentage = (item.amount * item.multiplier) / 100;
-      if (n) {
-        item.x = width - item.percentage * width;
-      } else {
-        item.x = 0;
+      let amt = getNutrientById(nutrient, macro.id).amount;
+      amt = amt * (grams / 100);
+      if (amt) {
+        macro.amount = amt;
       }
-    }); */
+    });
   }
 
-  $: getMacros(nutrient);
+  $: getMacros(nutrient, grams);
+  let myMacros = [];
+  $: if (nutrient) {
+    myMacros = macros.filter((m) => m.amount);
+  }
 </script>
 
 <div>
-  <div class="kcal" style={`width:${width}px`}>
+  <div class="kcal" style={`width:${width}px;--height:${height}px`}>
     <svg {width}>
-      {#each macros as macro}
+      {#each myMacros as macro, n}
         <rect
-          x={width * macro.previousMacrosPercentage}
-          y={0}
-          width={width * macro.percentage}
-          height={200}
+          x={0}
+          y={n * (height / myMacros.length)}
+          width={(width * macro.amount) / macro.max}
+          height={height / myMacros.length}
           fill={macro.color}
         />
+        <text
+          x={width - 6}
+          y={n * (height / myMacros.length) + height / (myMacros.length * 2)}
+          fill="black"
+          stroke="white"
+          text-anchor="end"
+          font-family="Futura"
+          font-weight="bold"
+        >
+          {macro.name}
+        </text>
       {/each}
-      <rect x={0} y={50 / 2 - 10} height={20} {width} fill="blue" />
-      <!-- Calorie bar... let's assume 8 cals / gram is maximum density... -->
-      <rect
-        x={0}
-        y={50 / 2 - 10}
-        width={width * (kcal / 800)}
-        height={20}
-        fill="black"
-      />
     </svg>
-    <div>{kcal}</div>
+    <div>{Math.round(kcal)}</div>
   </div>
 </div>
 
@@ -71,15 +70,15 @@
   .kcal {
     display: flex;
     flex-direction: row;
-    border: 2px solid black;
     position: relative;
-    height: var(--bar-height);
+    height: var(--height);
     justify-content: center;
   }
   .kcal div {
     font-weight: bold;
-    text-shadow: var(--black, black);
-    color: var(--white, white);
+    font-size: calc(var(--height) * 0.5);
+    text-shadow: 1px 1px 1px white;
+    color: #2227;
     text-align: center;
     align-self: center;
     z-index: 2;
@@ -89,8 +88,7 @@
     border: 1px solid pink;
   }
   svg {
-    height: var(--bar-height);
-    border-radius: 10px;
+    height: var(--height);
     position: absolute;
     top: 0;
     left: 0;

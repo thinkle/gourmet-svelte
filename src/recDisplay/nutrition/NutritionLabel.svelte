@@ -2,6 +2,10 @@
   export let nutrients;
   export let multiplier = 1;
   export let unitName;
+  export let baseUnit = {
+    amount: 100,
+    unit: "g",
+  };
   import { MACRO_RDI, NUTRIENTS_RDI, RDI_BY_NUTRIENT } from "./rdi";
   const KCAL = 1008; // kcal
   const UNSATFAT = 1293; // polyunsaturated fatty acids
@@ -70,7 +74,8 @@
     <div class="vertical">
       <b class="small">
         Amount per {unitName || ""}
-        {#if unitName}({/if}{100 * multiplier}g{#if unitName}){/if}
+        {#if unitName}({/if}{baseUnit.amount *
+          multiplier}{baseUnit.unit}{#if unitName}){/if}
       </b>
       <b>Calories</b>
     </div>

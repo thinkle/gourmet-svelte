@@ -1,7 +1,7 @@
 <script type="ts">
   import RecipeNutrition from "../nutrition/RecipeNutrition.svelte";
 
-  import { registerBuild } from "../../stores/debugStore.js";
+  import { registerBuild } from "../../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
   export let editOnOpen = undefined;
   export let rec = undefined;
@@ -18,7 +18,7 @@
 
   let editMode = editOnOpen;
 
-  import { getStyle, getColor } from "./colors.js";
+  import { getStyle, getColor } from "./colors";
 
   import {
     Bar,
@@ -41,15 +41,15 @@
   import TimeSummary from "./TimeSummary.svelte";
   import RecProp from "../props/RecProp.svelte";
 
-  import RecDef from "../../common/RecDef.js";
+  import RecDef from "../../common/RecDef";
 
-  import { recipeState, recipeActions } from "../../stores/recipeStores.js";
-  import { shoppingList } from "../../stores/shoppingStores.js";
+  import { recipeState, recipeActions } from "../../stores/recipeStores";
+  import { shoppingList } from "../../stores/shoppingStores";
   import { onMount, setContext, getContext } from "svelte";
   import { writable } from "svelte/store";
   import { watchResize } from "svelte-watch-resize";
   // import deepcopy from 'deepcopy';
-  import { deepcopy } from "./libraries.js";
+  import { deepcopy } from "./libraries";
 
   $: {
     if (rec && !rec.title && editable) {
@@ -63,6 +63,7 @@
   }
 
   function triggerChange() {
+    console.log("Recipe change!", rec);
     if (onChange) {
       onChange(rec);
     }
@@ -528,6 +529,7 @@
           <RecipeNutrition
             onChange={triggerChange}
             ingredients={rec.ingredients}
+            yields={rec.yields}
           />
         </div>
         <!-- close topblock -->

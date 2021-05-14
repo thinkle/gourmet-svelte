@@ -1,12 +1,12 @@
 // Our "glue" layer between local data and remote data.
 // This layer will handle syncing of data between remote and local storage
 
-import localRecipeData from "./local/dexieApi.js";
-import { RecipeData as RemoteRecipeData } from "./remoteRecipeData.js";
-import { user } from "../stores/userStore.js";
-import status from "../stores/statusStore.js";
-import { prepRecLocal,isLocalID } from "./utils/validate.js";
-import { jsonConcisify } from "../utils/textUtils.js";
+import localRecipeData from "./local/dexieApi";
+import { RecipeData as RemoteRecipeData } from "./remoteRecipeData";
+import { user } from "../stores/userStore";
+import status from "../stores/statusStore";
+import { prepRecLocal, isLocalID } from "./utils/validate";
+import { jsonConcisify } from "../utils/textUtils";
 import { writable, get } from "svelte/store";
 import { getContext } from "svelte";
 import { crawlForReferences } from "./utils/crawlForReferences";
@@ -54,7 +54,9 @@ async function checkForReferences(recipe) {
         }
       }
     } else {
-      let targetRec = await localRecipeData.getRecipe(undefined, { mongoId: ing.reference });
+      let targetRec = await localRecipeData.getRecipe(undefined, {
+        mongoId: ing.reference,
+      });
       if (targetRec) {
         ing.referenceExists = true;
       } else {
@@ -142,62 +144,62 @@ const recipeData = {
     await localRecipeData.updateRecipe(recipe);
     return recipe;
   },
-  
+
   async updateRecipes(recipes) {
     recipes.map(this.updateRecipe); // lazy & bad -- fixme if we actually implement features that use this
   },
 
   // Sharing code
-  async getSharedRecipe () {
-    return await remoteRecipeData.getSharedRecipe(...arguments)
+  async getSharedRecipe() {
+    return await remoteRecipeData.getSharedRecipe(...arguments);
   },
-  async setRecipeSharing () {
+  async setRecipeSharing() {
     let updated = await remoteRecipeData.setRecipeSharing(...arguments);
     localRecipeData.updateRecipe(updated);
     return updated;
   },
-  
+
   /* Copy a list of shared recipes. This will crawl the recipe recursively for
   references and copy those as well... intended to be called with a single
   recipe, but has other signature to allow recursively crawling linked recipes.
 
   Call with IDs if we don't already have the recipes.
   */
-  async getSharedRecipes ({recipes=[], ids=[]}) { 
+  async getSharedRecipes({ recipes = [], ids = [] }) {
     if (ids) {
-      console.log('Grab recipes from IDs...',ids)
-      recipes.push(...await remoteRecipeData.exportRecipes({ids}));
+      console.log("Grab recipes from IDs...", ids);
+      recipes.push(...(await remoteRecipeData.exportRecipes({ ids })));
     }
-    let alreadyImported = new Set(recipes.map((r)=>r._id));
+    let alreadyImported = new Set(recipes.map((r) => r._id));
     // fetch any recipes linked within ingredient list....
-    let newIds = new Set()
+    let newIds = new Set();
     for (let r of recipes) {
       if (r.ingredients) {
-        let references = crawlForReferences(r.ingredients)
+        let references = crawlForReferences(r.ingredients);
         for (let i of references) {
           if (!alreadyImported.has(i.reference)) {
-            newIds.add(i.reference)
+            newIds.add(i.reference);
           }
         }
       }
     }
     if (newIds.size) {
-      console.log('Recursive call to grab new IDs')
-      return await this.copySharedRecipes(
-        {recipes, ids:Array.from(newIds)}
-      );
+      console.log("Recursive call to grab new IDs");
+      return await this.copySharedRecipes({ recipes, ids: Array.from(newIds) });
     } else {
-      return recipes
+      return recipes;
     }
   },
 
-  async copySharedRecipes ({recipes=[],ids=[]}) {
-    let theRecipes = await this.getSharedRecipes({recipes,ids});
-    return this.importRecipes({recipes:theRecipes});
+  async copySharedRecipes({ recipes = [], ids = [] }) {
+    let theRecipes = await this.getSharedRecipes({ recipes, ids });
+    return this.importRecipes({ recipes: theRecipes });
   },
 
-  async copyRecipe (recipe) {
-    if (recipe._id) {recipe.copyOf = recipe._id}
+  async copyRecipe(recipe) {
+    if (recipe._id) {
+      recipe.copyOf = recipe._id;
+    }
     recipe.id = undefined;
     recipe._id = undefined;
     return await this.addRecipe(recipe);
@@ -211,7 +213,7 @@ const recipeData = {
       let json = batches.pop();
       console.log("Processing batch...", json);
       var recipes = await remoteRecipeData.importRecipes(json); // push to remote DB...
-      console.log('Remote process resulted in',recipes)
+      console.log("Remote process resulted in", recipes);
       await this.updateRecipes(recipes); // lazy lazy... - now push to local DB
     }
     return recipes;
@@ -221,7 +223,9 @@ const recipeData = {
     if (!localRecipeData.db) {
       await localRecipeData.connect();
     }
-    let unsynced = await localRecipeData.getRecipes({ query: { savedRemote: 0 } });
+    let unsynced = await localRecipeData.getRecipes({
+      query: { savedRemote: 0 },
+    });
     if (unsynced.count) {
       let uploadStatus = status.createStatus("Syncing recipes to database");
       status.start(uploadStatus);
