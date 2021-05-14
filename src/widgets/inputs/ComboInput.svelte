@@ -3,8 +3,8 @@
   import { fly, slide, fade } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { quintOut } from "svelte/easing";
-  import { IconButton, Underline } from "../index.js";
-  import { unique } from "../../utils/uniq.js";
+  import { IconButton, Underline } from "../index";
+  import { unique } from "../../utils/uniq";
 
   export let value;
   export let onSelect;

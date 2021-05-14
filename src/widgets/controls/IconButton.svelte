@@ -1,5 +1,5 @@
 <script>
-  import { registerBuild } from "../../stores/debugStore.js";
+  import { registerBuild } from "../../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
   import Button from "./Button.svelte";
   let b;

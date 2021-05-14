@@ -8,8 +8,8 @@ import {
   queryCollection,
 } from "./mongoConnect";
 import recs from "../recs.json";
-import { validateRec, prepRecsRemote } from "../utils/validate.js";
-import { AdminSetupRequest } from "../requests/index.js";
+import { validateRec, prepRecsRemote } from "../utils/validate";
+import { AdminSetupRequest } from "../requests/index";
 
 const functions = {
   mongoConnect: runTest,

@@ -1,7 +1,7 @@
 import stopword from "stopword";
-import { reToString } from "./regExpUtil.js";
-import prepWords from "./ingPrepWords.js";
-import { inTag, titleCase } from "./textUtils.js";
+import { reToString } from "./regExpUtil";
+import prepWords from "./ingPrepWords";
+import { inTag, titleCase } from "./textUtils";
 
 export function mergeAmounts(a1, a2) {
   if (!a1 && a2) {

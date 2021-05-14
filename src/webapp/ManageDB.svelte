@@ -1,62 +1,64 @@
 <script>
- import {connected} from '../stores/recipeStores.js';
- import dexieApi from '../data/local/dexieApi.js';
- import {JsonDebug,Button} from '../widgets/';
+  import { connected } from "../stores/recipeStores";
+  import dexieApi from "../data/local/dexieApi";
+  import { JsonDebug, Button } from "../widgets/";
 
- let action
- let subAction
- let actionPage
- async function fixRecipes (page=undefined) {
-     // We just get the recipes and then update... this passes them all through
-     // whatever our current validate code is, so if recipes are somehow invalid,
-     // this will "fix" them.
-     let response = await dexieApi.getRecipes({page});
-     if (response.result) {
-         subAction = await(dexieApi.updateRecipes(response.result))
-         if (!response.last) {
-             actionPage = response.nextPage
-             fixRecipes(response.nextPage)
-         }
-     }
- }
- 
+  let action;
+  let subAction;
+  let actionPage;
+  async function fixRecipes(page = undefined) {
+    // We just get the recipes and then update... this passes them all through
+    // whatever our current validate code is, so if recipes are somehow invalid,
+    // this will "fix" them.
+    let response = await dexieApi.getRecipes({ page });
+    if (response.result) {
+      subAction = await dexieApi.updateRecipes(response.result);
+      if (!response.last) {
+        actionPage = response.nextPage;
+        fixRecipes(response.nextPage);
+      }
+    }
+  }
 </script>
+
 <div>
-{#if $connected}
+  {#if $connected}
     <div>
-        <Button on:click="{()=>action=fixRecipes()}">Validate All Recipes</Button>
+      <Button on:click={() => (action = fixRecipes())}
+        >Validate All Recipes</Button
+      >
     </div>
-{:else}
+  {:else}
     Still connecting...
-{/if}
-{#if actionPage}
+  {/if}
+  {#if actionPage}
     On page {actionPage}
-{/if}
-{#if action}
+  {/if}
+  {#if action}
     {#await action}
-        Doing something...
-        {:then data}
-        Action complete!
-        <JsonDebug data="{data}"/>
-    {:catch err}
-        <JsonDebug data="{err}"/>
-    {/await}
-{/if}
-{#if subAction}
-    {#await subAction}
-        Doing something...
+      Doing something...
     {:then data}
-        Action complete!
-            <JsonDebug data="{data}"/>
+      Action complete!
+      <JsonDebug {data} />
     {:catch err}
-            <JsonDebug data="{err}"/>
+      <JsonDebug data={err} />
     {/await}
-{/if}
+  {/if}
+  {#if subAction}
+    {#await subAction}
+      Doing something...
+    {:then data}
+      Action complete!
+      <JsonDebug {data} />
+    {:catch err}
+      <JsonDebug data={err} />
+    {/await}
+  {/if}
 </div>
 
-    <style>
-     div {
-         width: 30em;
-         margin: auto;
-     }
-    </style>
+<style>
+  div {
+    width: 30em;
+    margin: auto;
+  }
+</style>

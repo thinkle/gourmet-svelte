@@ -1,6 +1,6 @@
 import { readable, writable, get, derived } from "svelte/store";
-import { makeLocalRecipeStore, recipeActions } from "./recipeStores.js";
-import api from "../data/recipeData.js";
+import { makeLocalRecipeStore, recipeActions } from "./recipeStores";
+import api from "../data/recipeData";
 import deepcopy from "deepcopy";
 
 const { localRecipes, recipeState, openLocalRecipes } = makeLocalRecipeStore();
@@ -16,7 +16,7 @@ let sl = derived(
   async ([$localShopRec, $localRecipes], set) => {
     if (!$localShopRec) {
       set([]);
-    } else if (!crawlingShoppingList) {      
+    } else if (!crawlingShoppingList) {
       let allItems = [];
       crawlingShoppingList = true;
       await crawlIngredients(

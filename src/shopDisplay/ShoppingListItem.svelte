@@ -1,214 +1,231 @@
 <script>
- export let item
- export let ignored=false
- import {floatToFrac} from '../utils/numbers.js';
- import {crossfade} from 'svelte/transition'
- import {
-     Button,IconButton,Checkbox,
-     PlainInput,NumberUnitDisplay,
- } from '../widgets/';
-  import Ingredient from '../recDisplay/ing/Ingredient.svelte'
-  import {shoppingList} from '../stores/shoppingStores.js';
- import {titleCase} from '../utils/textUtils.js';
+  export let item;
+  export let ignored = false;
+  import { floatToFrac } from "../utils/numbers";
+  import { crossfade } from "svelte/transition";
+  import {
+    Button,
+    IconButton,
+    Checkbox,
+    PlainInput,
+    NumberUnitDisplay,
+  } from "../widgets/";
+  import Ingredient from "../recDisplay/ing/Ingredient.svelte";
+  import { shoppingList } from "../stores/shoppingStores";
+  import { titleCase } from "../utils/textUtils";
 
- let [send,receive] = crossfade({duration:300});
+  let [send, receive] = crossfade({ duration: 300 });
 
- export let showSubItems=true;
+  export let showSubItems = true;
 
- let editingItem
+  let editingItem;
 
- 
- function setShopItem () {
-     for (let itm of item.items) {
-         if (itm.source.isTheShoppingList) {
-             // special case when we are a custom item
-             if (arguments[0]) {
-                 // i.e. changing item
-                 itm.ingredient.text = arguments[0];
-                 itm.ingredient.shopItem = arguments[0];
-                 shoppingList.updateItem(itm.ingredient);
-             } else {
-                 // i.e. removing item
-                 shoppingList.removeItem(itm.ingredient.id);
-             }
-         } else { 
-                shoppingList.setShopItem(itm,...arguments)
-                }
-     }
- }
- 
- function onItemChanged (event) {
-     setShopItem(newShopItem.replace(/^\s+|\s+$/g,''));
-     editingItem = false
- }
+  function setShopItem() {
+    for (let itm of item.items) {
+      if (itm.source.isTheShoppingList) {
+        // special case when we are a custom item
+        if (arguments[0]) {
+          // i.e. changing item
+          itm.ingredient.text = arguments[0];
+          itm.ingredient.shopItem = arguments[0];
+          shoppingList.updateItem(itm.ingredient);
+        } else {
+          // i.e. removing item
+          shoppingList.removeItem(itm.ingredient.id);
+        }
+      } else {
+        shoppingList.setShopItem(itm, ...arguments);
+      }
+    }
+  }
 
- function onItemIgnore (event) {
-     setShopItem(undefined,true)
- }
- function onItemDontIgnore (event) {
-     setShopItem(undefined,false)
- }
+  function onItemChanged(event) {
+    setShopItem(newShopItem.replace(/^\s+|\s+$/g, ""));
+    editingItem = false;
+  }
 
- function setPurchased (event) {
-     if (event.target.checked) {
-         console.log('We should make it purchased!');
-     } else {
-         console.log('We should make it not purchased!');
+  function onItemIgnore(event) {
+    setShopItem(undefined, true);
+  }
+  function onItemDontIgnore(event) {
+    setShopItem(undefined, false);
+  }
 
-     }
- }
+  function setPurchased(event) {
+    if (event.target.checked) {
+      console.log("We should make it purchased!");
+    } else {
+      console.log("We should make it not purchased!");
+    }
+  }
 
- let newShopItem = item && item.item || '';
-
+  let newShopItem = (item && item.item) || "";
 </script>
+
 <tr class:ignored>
-    <td>
-        <table class="amounts">
-            {#each item.amounts as amount,n (amount)}
-                <tr>
-                    <td>{#if n}+{/if}</td><NumberUnitDisplay mode="table" multipliable="{false}" value="{amount}"/>
-                </tr>
-            {/each}
-        </table>
-    </td>
-    <td>
-        {#if !editingItem}
-            <div                     class="full">
-                <div
-                    on:click="{()=>editingItem=true}"
-
-                >
-                    {item.item}
-                    <IconButton
-                        small="true"
-                        icon="edit"
-                        bare="true"/>
-                </div>
-                <small class="right" on:click="{()=>showSubItems=!showSubItems}">
-                    ({item.items.length}
-                    {#if item.items.length==1}
-                        item
-                    {:else}
-                        separate items
-                    {/if})
-                    {#if !showSubItems}
-                        <span class="origin"
-                             in:receive|local="{{key:item.item+'display'}}" out:send|local="{{key:item.item+'display'}}"
-                             >
-                             </span>
-                    {/if}
-                </small>
-                
-
-                {#if !ignored}
-                    <IconButton
-                        small="true"
-                        icon="remove_shopping_cart"
-                        bare="true"
-                        on:click={()=>onItemIgnore()}/>
-                {:else}
-                    <IconButton
-                        small="true"
-                        icon="add_shopping_cart"
-                        bare="true"
-                        on:click={()=>onItemDontIgnore()}/>
-                {/if}
-            </div>
-        {:else}
-            <div>
-                <PlainInput bind:value="{newShopItem}"/>
-                <IconButton small="true"
-                            icon="done"
-                            bare="true"
-                            on:click={()=>onItemChanged()}/>
-            </div>
-        {/if}
-        
-        {#if showSubItems}
-            <div class="break" in:receive|local="{{key:item.item+'display'}}" out:send|local="{{key:item.item+'display'}}">
-                {#each item.items as subitem,n (n)}
-                    <div in:receive|local={{key:subitem.ingredient}} out:send|local={{key:subitem.ingredient}}>
-                         <small>
-                             <!-- <Ingredient ing={subitem.ingredient} edit="{false}" /> -->
-                             <NumberUnitDisplay
-                                 value="{subitem.ingredient.amount}"
-                                 multiplyBy="{subitem.multiplier}"/>
-                             {subitem.ingredient.text}
-                             {#if titleCase(subitem.ingredient.text) !== item.item && item.items.length > 1}
-                                 <Button on:click={()=>shoppingList.setShopItem(subitem,titleCase(subitem.ingredient.text))}>
-                                     Separate
-                                 </Button>
-                             {/if}
-                             from
-                             <i>{subitem.source.title}</i>
-                             {#if subitem.multiplier}
-                                 &times;{floatToFrac(subitem.multiplier)}
-                             {/if}
-                         </small>
-                     </div>
-                 {/each}
-            </div> 
-        {/if}
-    </td>
-    <td>
-        {#if !ignored}
-            <!-- checked="{item.purchased}" -->
-            <Checkbox size="36"
-                      on:change="{setPurchased}"
+  <td>
+    <table class="amounts">
+      {#each item.amounts as amount, n (amount)}
+        <tr>
+          <td
+            >{#if n}+{/if}</td
+          ><NumberUnitDisplay
+            mode="table"
+            multipliable={false}
+            value={amount}
+          />
+        </tr>
+      {/each}
+    </table>
+  </td>
+  <td>
+    {#if !editingItem}
+      <div class="full">
+        <div on:click={() => (editingItem = true)}>
+          {item.item}
+          <IconButton small="true" icon="edit" bare="true" />
+        </div>
+        <small class="right" on:click={() => (showSubItems = !showSubItems)}>
+          ({item.items.length}
+          {#if item.items.length == 1}
+            item
+          {:else}
+            separate items
+          {/if})
+          {#if !showSubItems}
+            <span
+              class="origin"
+              in:receive|local={{ key: item.item + "display" }}
+              out:send|local={{ key: item.item + "display" }}
             />
+          {/if}
+        </small>
+
+        {#if !ignored}
+          <IconButton
+            small="true"
+            icon="remove_shopping_cart"
+            bare="true"
+            on:click={() => onItemIgnore()}
+          />
+        {:else}
+          <IconButton
+            small="true"
+            icon="add_shopping_cart"
+            bare="true"
+            on:click={() => onItemDontIgnore()}
+          />
         {/if}
-    </td>
+      </div>
+    {:else}
+      <div>
+        <PlainInput bind:value={newShopItem} />
+        <IconButton
+          small="true"
+          icon="done"
+          bare="true"
+          on:click={() => onItemChanged()}
+        />
+      </div>
+    {/if}
+
+    {#if showSubItems}
+      <div
+        class="break"
+        in:receive|local={{ key: item.item + "display" }}
+        out:send|local={{ key: item.item + "display" }}
+      >
+        {#each item.items as subitem, n (n)}
+          <div
+            in:receive|local={{ key: subitem.ingredient }}
+            out:send|local={{ key: subitem.ingredient }}
+          >
+            <small>
+              <!-- <Ingredient ing={subitem.ingredient} edit="{false}" /> -->
+              <NumberUnitDisplay
+                value={subitem.ingredient.amount}
+                multiplyBy={subitem.multiplier}
+              />
+              {subitem.ingredient.text}
+              {#if titleCase(subitem.ingredient.text) !== item.item && item.items.length > 1}
+                <Button
+                  on:click={() =>
+                    shoppingList.setShopItem(
+                      subitem,
+                      titleCase(subitem.ingredient.text)
+                    )}
+                >
+                  Separate
+                </Button>
+              {/if}
+              from
+              <i>{subitem.source.title}</i>
+              {#if subitem.multiplier}
+                &times;{floatToFrac(subitem.multiplier)}
+              {/if}
+            </small>
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </td>
+  <td>
+    {#if !ignored}
+      <!-- checked="{item.purchased}" -->
+      <Checkbox size="36" on:change={setPurchased} />
+    {/if}
+  </td>
 </tr>
 
 <style>
- .origin {
-     position: relative;
-     width: 6em;
-     height: 1em;
-     left: -6em;
- }
- tr:last-child td {
-     border-bottom: none;
- }
- td {
-     border-bottom: 1px solid var(--light-underline);
-     padding-top: 10px;
-     padding-bottom: 10px;
- }
- td td {
-     padding: 0; /* Not on nested ones though */
- }
- small {
-     font-size: var(--small);
- }
- .right {
-     margin-left: auto;
- }
- .full {
-     width: 100%;
- }
- i {
-     font-style: italic;
- }
- table :global(td) {
-     text-align: center;
- }
- td {
-     padding-right: 1em;
-     vertical-align: top;
- }
- td div {
-     display: inline-flex;
- }
- td div.break,
- td div.break div {
-     display: block
- }
- 
- .ignored {
-     font-style: italic;
- }
- .amounts {
-     margin-left: auto;
- }
+  .origin {
+    position: relative;
+    width: 6em;
+    height: 1em;
+    left: -6em;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  td {
+    border-bottom: 1px solid var(--light-underline);
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  td td {
+    padding: 0; /* Not on nested ones though */
+  }
+  small {
+    font-size: var(--small);
+  }
+  .right {
+    margin-left: auto;
+  }
+  .full {
+    width: 100%;
+  }
+  i {
+    font-style: italic;
+  }
+  table :global(td) {
+    text-align: center;
+  }
+  td {
+    padding-right: 1em;
+    vertical-align: top;
+  }
+  td div {
+    display: inline-flex;
+  }
+  td div.break,
+  td div.break div {
+    display: block;
+  }
+
+  .ignored {
+    font-style: italic;
+  }
+  .amounts {
+    margin-left: auto;
+  }
 </style>

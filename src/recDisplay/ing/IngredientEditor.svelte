@@ -1,5 +1,5 @@
 <script>
-  import { registerBuild } from "../../stores/debugStore.js";
+  import { registerBuild } from "../../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
   import { slide, fade } from "svelte/transition";
   import {
@@ -13,7 +13,7 @@
   } from "../../widgets/";
 
   import RecipePickerLauncher from "../picker/RecipePickerLauncher.svelte";
-  import { storedRecipes } from "../../stores/recipeStores.js";
+  import { storedRecipes } from "../../stores/recipeStores";
   export let ing;
   export let onChange;
   export let onEnter;

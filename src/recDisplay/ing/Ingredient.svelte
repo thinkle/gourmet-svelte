@@ -1,5 +1,5 @@
 <script>
-  import { registerBuild } from "../../stores/debugStore.js";
+  import { registerBuild } from "../../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
   export let ing;
   export let edit;
@@ -31,8 +31,8 @@
   }
 
   /* Magic Highlighting Code */
-  import { scrollIntoView } from "../../utils/scrolling.js";
-  import { highlightItem } from "../../utils/ingredientUtils.js";
+  import { scrollIntoView } from "../../utils/scrolling";
+  import { highlightItem } from "../../utils/ingredientUtils";
   let highlightedIngredient = getContext("highlightedIngredient");
   let highlightersActive;
   $: highlightersActive =

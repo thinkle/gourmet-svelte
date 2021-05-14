@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
-import { floatToFrac, numMatchString, parseAmount } from "./numbers.js";
-import { reToString } from "./regExpUtil.js";
-import { getSurroundingSentence, htmlToSentences } from "./textUtils.js";
+import { floatToFrac, numMatchString, parseAmount } from "./numbers";
+import { reToString } from "./regExpUtil";
+import { getSurroundingSentence, htmlToSentences } from "./textUtils";
 
 let M = 60;
 let H = 60 * 60;

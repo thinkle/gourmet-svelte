@@ -119,6 +119,14 @@ Implementation Process:
   This would mean that our nutrition STORE consists only of nutrients themselves (?)
   We then write expicit query methods to grab stuff we need.
 
+  So now... how does a local query work...
+  Can we find similar ingredients?
+
+  --> We know the USDA description of the ingredient
+  --> We know the USDA alternate description of the ingredient
+  --> We know *our* description of the ingredient wherever we have matched it (?)
+
+  So maybe we make our own "Search index" using ingredient data that has nutrients stored...
 
 
 

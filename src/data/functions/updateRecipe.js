@@ -1,6 +1,6 @@
 import deepcopy from "deepcopy";
 import { updateOne } from "./mongoConnect";
-import { prepRecRemote } from "../utils/validate.js";
+import { prepRecRemote } from "../utils/validate";
 
 export async function updateRecipe(user, params) {
   let { recipe, forceMerge } = params;

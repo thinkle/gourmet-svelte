@@ -1,16 +1,16 @@
-import { registerHandlerObject } from "../requests/remoteRequest.js";
-import "./recipeFunctions.js";
-import "./importRecipeFunction.js";
+import { registerHandlerObject } from "../requests/remoteRequest";
+import "./recipeFunctions";
+import "./importRecipeFunction";
 import "./nutritionFunctions";
 import "./shareRecipeFunctions";
 import "./exportRecipeFunctions";
 const requestHandlers = {};
 registerHandlerObject(requestHandlers);
 
-import { DB } from "./mongoConnect.js";
-import "./setupDB.js";
-import { getFakeUser } from "./netlifyDevUserMock.js";
-import { userCache, getUser } from "./userFunctions.js";
+import { DB } from "./mongoConnect";
+import "./setupDB";
+import { getFakeUser } from "./netlifyDevUserMock";
+import { userCache, getUser } from "./userFunctions";
 
 const handler = async (event, context) => {
   console.log("Calling handler, we have cached users: ", userCache);
@@ -89,7 +89,7 @@ const handler = async (event, context) => {
 };
 
 // A couple of utility functions
-import { EchoRequest, ThrowErrorRequest } from "../requests/index.js";
+import { EchoRequest, ThrowErrorRequest } from "../requests/index";
 
 EchoRequest.setRequestHandler((user, params) => {
   return { params, DB, user: user };

@@ -1,5 +1,5 @@
-import { setFakeUserRequest, getFakeUserRequest } from "../requests/index.js";
-import { getUser } from "./userFunctions.js";
+import { setFakeUserRequest, getFakeUserRequest } from "../requests/index";
+import { getUser } from "./userFunctions";
 import { insertOne, getOne, updateOne } from "./mongoConnect";
 export const fakeUser = {
   name: "Fake Local User",

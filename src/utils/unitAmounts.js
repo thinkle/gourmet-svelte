@@ -1,5 +1,5 @@
-import { cleanupWhitespace } from "./textUtils.js";
-import { reEscape } from "./regExpUtil.js";
+import { cleanupWhitespace } from "./textUtils";
+import { reEscape } from "./regExpUtil";
 
 const UNIT_CONVERSIONS = [
   // American volume

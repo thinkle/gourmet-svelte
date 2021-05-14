@@ -1,3 +1,4 @@
+import stopword from "stopword";
 import {
   Nutrient,
   NutrientLookup,
@@ -220,6 +221,14 @@ nutrients.fetchCached = async function ({ fdcId }) {
   console.log("Check for cached nutrient", fdcId);
   let result = await dexieApi.db.nutrients.get({ fdcId });
   console.log("Got cached: ", result);
+  let portions = await dexieApi.db.portions
+    .where("fdcId")
+    .equals(fdcId)
+    .toArray();
+  if (portions.length) {
+    result.portions = portions;
+    result.detailed = true;
+  }
   nutrients.update(($nutrients) => {
     $nutrients[fdcId] = result;
     return $nutrients;
@@ -235,12 +244,13 @@ nutrients.fetchDetails = async function ({ fdcId }) {
   let currentNutrient = get(nutrients)[fdcId];
   if (currentNutrient?.detailed) {
     return currentNutrient;
-  } else if (!currentNutrient) {
+  } else {
     currentNutrient = await nutrients.fetchCached({ fdcId });
   }
   if (!currentNutrient?.detailed) {
     currentNutrient = await nutrients.fetchFromUsda({ fdcId });
-    currentNutrient.storedLocally = false;
+    // Store it?
+    dexieApi.db.nutrients.put(currentNutrient, currentNutrient.fdcId);
   }
   if (currentNutrient) {
     nutrients.update(($nutrients) => {
@@ -304,16 +314,20 @@ portionsById.subscribe(($portions) => {
   });
 });
 
-nutrients.subscribe(($nutrients) => {
-  Object.values($nutrients).forEach((n) => {
+nutrients.subscribe(async ($nutrients) => {
+  for (let n of Object.values($nutrients)) {
+    if (typeof n == "number") {
+      console.log("WTF NUTRIENT IS A NUMBER", n);
+    }
     // Check for nutrients and such...
     let densities = [];
+    let portions = [];
     if (n.foodPortions) {
       console.log("Update portions!");
       portionsById.update(($portionsById) => {
-        n.foodPortions.forEach((p) => {
+        portions = n.foodPortions.map((p) => {
           if (!$portionsById[p.id]) {
-            p = {
+            let portion: Portion = {
               ...p,
               fdcId: n.fdcId,
               foodDescription: n.description,
@@ -321,11 +335,11 @@ nutrients.subscribe(($nutrients) => {
               foodCode: n.foodCode,
               amount: getAmountFromPortion(p),
             };
-            $portionsById[p.id] = p;
-            if (p.amount?.density) {
-              densities.push(p);
+            $portionsById[p.id] = portion;
+            if (portion.amount?.density) {
+              densities.push(portion);
             }
-            return p;
+            return portion;
           }
         });
         return $portionsById;
@@ -335,15 +349,7 @@ nutrients.subscribe(($nutrients) => {
       $nutrients[n.fdcId].densities = densities;
       $nutrients[n.fdcId].density = densities[0].amount.density;
     }
-
-    // Store in dexie if not yet stored...
-    if (!n.storedLocally) {
-      console.log("store nutrient!", n);
-      indexNutrient(n);
-      dexieApi.addNutrient(n);
-    }
-  });
-  return $nutrients;
+  }
 });
 
 function indexNutrient(n: Nutrient) {
@@ -362,4 +368,6 @@ function indexNutrient(n: Nutrient) {
       }
     }
   }
+  n.indexWords = n.indexWords.map((w) => w.replace(/[,.;:+]/g, ""));
+  n.indexWords = stopword.removeStopwords(n.indexWords);
 }

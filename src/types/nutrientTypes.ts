@@ -54,7 +54,9 @@ export interface Portion {
   fdcId: number;
   foodDescription: string;
   foodClass: string;
+  foodCode: string;
   storedLocally: true;
+  ingredientWords?: string[];
 }
 
 export interface UsdaAbbreviatedFoodNutrient {
@@ -123,6 +125,7 @@ export interface Nutrient {
   foodPortions?: UsdaPortion[];
   dataType: string;
   densities: Portion[];
+  portions: Portion[];
   density: number;
   storedLocally: boolean;
   indexWords?: string[];

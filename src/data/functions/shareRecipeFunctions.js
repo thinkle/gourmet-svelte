@@ -1,5 +1,5 @@
 import { getOne, updateOne } from "./mongoConnect";
-import { getReferencedIDs } from "../utils/validate.js";
+import { getReferencedIDs } from "../utils/validate";
 import {
   getSharedRecipeRequest,
   setRecipeSharingRequest,

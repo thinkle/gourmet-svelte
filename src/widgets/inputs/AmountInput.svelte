@@ -9,7 +9,7 @@
     increment,
     decrement,
   } from "../../utils/numbers.js";
-  import { IconButton, Underline } from "../index.js";
+  import { IconButton, Underline } from "../index";
   const DOWNCODES = [40, 189];
   const UPCODES = [38, 187];
   let useUnicode = true;
@@ -98,7 +98,7 @@
           icon="keyboard_arrow_up"
           ariaLabel={`Increase ${ariaLabel}`}
           on:click={doIncrement}
-        />     
+        />
         <IconButton
           bare={true}
           compact={true}
@@ -119,12 +119,12 @@
     height: 1.25rem;
   }
   .amountInput {
-      display: inline-flex;
+    display: inline-flex;
   }
   .minibuttons {
-      display: flex;
-      flex-direction: column;
-      height: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: 1.25rem;
   }
   span {
     position: relative;

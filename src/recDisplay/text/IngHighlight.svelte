@@ -1,5 +1,5 @@
 <script>
-  import { scrollIntoView } from "../../utils/scrolling.js";
+  import { scrollIntoView } from "../../utils/scrolling";
   export let target;
   import { getContext } from "svelte";
   import { writable } from "svelte/store";

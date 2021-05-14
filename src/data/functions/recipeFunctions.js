@@ -1,5 +1,5 @@
-import { require } from "../../utils/requireParams.js";
-import { jsonConcisify } from "../../utils/textUtils.js";
+import { require } from "../../utils/requireParams";
+import { jsonConcisify } from "../../utils/textUtils";
 import {
   loadDB,
   DB,
@@ -11,7 +11,7 @@ import {
   replaceOne,
   deleteOne,
 } from "./mongoConnect";
-import { prepRecRemote } from "../utils/validate.js";
+import { prepRecRemote } from "../utils/validate";
 import {
   addRecipeRequest,
   deleteRecipeRequest,

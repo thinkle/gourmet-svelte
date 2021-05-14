@@ -8,7 +8,7 @@
 
   import FullHeight from "./FullHeight.svelte";
   import { IconButton } from "../";
-  import { registerBuild } from "../../stores/debugStore.js";
+  import { registerBuild } from "../../stores/debugStore";
   registerBuild(Number("BUILD_MS"));
   import { onMount } from "svelte";
   import { Resizer } from "../";
@@ -53,16 +53,16 @@
   let flyDistance = 0;
   let extraFlyInPad = 55;
 
-  $: !stackMode && leftSideRef && resetLeftSide()
+  $: !stackMode && leftSideRef && resetLeftSide();
 
-  function resetLeftSide () {
+  function resetLeftSide() {
     leftSideFlyIn = false;
-    leftSideRef.style = '';
+    leftSideRef.style = "";
   }
 
   function toggleLeftSideFlyIn() {
     if (!leftSideRef || !leftSideRef.parentElement) {
-      return
+      return;
     }
     leftSideFlyIn = !leftSideFlyIn;
     flyDistance = leftSideRef.parentElement.scrollTop;
@@ -127,7 +127,7 @@
           initialLeftWidth = leftSideRef.clientWidth;
         }}
         onDrag={(dx) => {
-          leftWidth = initialLeftWidth - dx
+          leftWidth = initialLeftWidth - dx;
         }}
       />
     {/if}
@@ -136,8 +136,9 @@
         <IconButton
           icon="arrow_drop_down_circle"
           on:click={toggleLeftSideFlyIn}
-          tooltip="Pop down content">
-            <slot name="leftHandle" />
+          tooltip="Pop down content"
+        >
+          <slot name="leftHandle" />
         </IconButton>
       {:else}
         <IconButton icon="close" on:click={toggleLeftSideFlyIn} />
@@ -153,6 +154,7 @@
     </div>
   </div>
 </FullHeight>
+
 <style>
   /* First child of head gets bottom border - whatever element they put in slot */
   .head > :global(*) {
@@ -178,14 +180,14 @@
   .sidebyside.stackMode {
     display: block;
     overflow-y: scroll;
-  } 
+  }
   .scrollBox {
     overflow-y: scroll;
   }
   .stackMode .scrollBox {
     overflow-y: unset;
   }
-  
+
   .scrollBox::-webkit-scrollbar {
     width: 5px;
   }
