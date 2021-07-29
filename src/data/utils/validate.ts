@@ -7,7 +7,8 @@
 // Validate and prepare our recipe for insertion...
 // This may do DB-specific things to the recipe to make life easier...
 import stopword from "stopword";
-import type { UsdaPortion } from "../../types/nutrientTypes";
+import pluralize from "pluralize";
+import type { Portion } from "../../types/nutrientTypes";
 const salt = new Date().getTime().toString(36);
 
 function quickHash(s) {
@@ -138,7 +139,7 @@ export function getWordsFromIng(i) {
   if (i.ingkey) {
     words.push(i.ingkey.toLowerCase());
   }
-  words = stopword.removeStopwords(rec.words);
+  words = stopword.removeStopwords(words);
   return words;
 }
 
@@ -151,7 +152,6 @@ export function prepRecLocal(rec) {
   rec.flatIngredients.forEach((i) => {
     rec.ings = [...rec.ings, ...getWordsFromIng(i)];
   });
-  rec.ings = stopword.removeStopwords(rec.words);
   delete rec.flatIngredients; // not keeping this either
   if (rec.categories) {
     rec.categoryNames = rec.categories.map((c) => c.name);
@@ -162,12 +162,19 @@ export function prepRecLocal(rec) {
   return rec;
 }
 
-export function prepPortionLocal(portion: UsdaPortion): UsdaPortion {
-  portion.ingredientWords = [portion.foodDescription];
-  let words = portion.foodDescription.split(" ");
+export function prepPortionLocal(portion: Portion): Portion {
+  portion.ingredientWords = [portion.foodDescription.toLowerCase()];
+  if (pluralize.isPlural(portion.foodDescription)) {
+    portion.ingredientWords.push(pluralize.singular(portion.foodDescription));
+  }
+  let words = portion.foodDescription.split(/[,:;.]*\s+/);
   if (words.length > 1) {
     for (let word of words) {
+      word = word.toLowerCase();
       portion.ingredientWords.push(word);
+      if (pluralize.isPlural(word)) {
+        portion.ingredientWords.push(pluralize.singular(word));
+      }
     }
   }
   return portion;

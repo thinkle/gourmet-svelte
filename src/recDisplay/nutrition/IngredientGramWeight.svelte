@@ -9,7 +9,13 @@
     getInAConversion,
   } from "../../utils/unitAmounts";
   import { nutrients, portions } from "../../stores/nutritionStores";
-  import { Button, IconButton, NumberUnitDisplay } from "../../widgets/index";
+  import {
+    Tabs,
+    Tab,
+    Button,
+    IconButton,
+    NumberUnitDisplay,
+  } from "../../widgets/index";
   export let onSave = (i) => console.log("Save! ", i, "(but not really)");
   const gramsPerOunce = getInAConversion("g", "ounce");
   let ounceWeight;
@@ -56,27 +62,43 @@
     onSave(ing);
     return ing;
   }
+
+  let userChangedMode = false;
+  $: if (ing && !userChangedMode) {
+    let inferredGW = getGramWeight(ing.amount);
+    if (inferredGW && !inferredGW.isWeight) {
+      console.log("Initial set to density", inferredGW);
+      mode = DENSITY_MODE;
+    } else {
+      console.log("Initial set to equiv", inferredGW);
+      mode = EQUIVALENT_MODE;
+    }
+  }
+
+  function setMode(newMode) {
+    userChangedMode = true;
+    mode = newMode;
+  }
 </script>
 
 <div>
-  <Button
-    on:click={() => (mode = DENSITY_MODE)}
-    inactive={mode == DENSITY_MODE}
-  >
-    By Density
-  </Button>
-  <Button
-    on:click={() => (mode = EQUIVALENT_MODE)}
-    inactive={mode == EQUIVALENT_MODE}
-  >
-    By Equivalent
-  </Button>
-  <Button
-    on:click={() => (mode = MANUAL_ENTRY_MODE)}
-    inactive={mode == MANUAL_ENTRY_MODE}
-  >
-    Enter weight manually
-  </Button>
+  <Tabs>
+    <Tab on:click={() => setMode(DENSITY_MODE)} active={mode == DENSITY_MODE}>
+      By Density
+    </Tab>
+    <Tab
+      on:click={() => setMode(EQUIVALENT_MODE)}
+      active={mode == EQUIVALENT_MODE}
+    >
+      By Equivalent
+    </Tab>
+    <Tab
+      on:click={() => setMode(MANUAL_ENTRY_MODE)}
+      active={mode == MANUAL_ENTRY_MODE}
+    >
+      Enter weight manually
+    </Tab>
+  </Tabs>
   <IconButton icon="save" on:click={save} />
 
   {#if mode == DENSITY_MODE}

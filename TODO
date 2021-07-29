@@ -10,11 +10,11 @@
 - Look into FF extension/other browser extensions
 - Consider moving more work to webworkers? e.g. recipe parsing?
 - **Nutritional Information**
-  -> Connect to USDA API
-  -> Demo fetching USDA info for an ingredient
+  -> Connect to USDA API (x)
+  -> Demo fetching USDA info for an ingredient (x)
   -> How does Nutritional Info work?
-     -> Local DB has USDA info per nutrient fetched (USDA key)
-     -> Ingredient has weight in grams for nutritional info
+     -> Local DB has USDA info per nutrient fetched (USDA key) (x)
+     -> Ingredient has weight in grams for nutritional info  (x)
      -> We calculate nutritional info from grams + nutrient item
      -> Display of nutritional info will work like Gourmet w/ indicator per ingredient
 
@@ -27,6 +27,10 @@
       -> "detail" mode shows what the calculations are based on and lets you edit those associations/weights
       -> nutritonal label updates in real time w/ changes.
 
+  >> NUTRITION TO-DO ITEMS
+    - Make gramweight picker automatically select density or equivalent depending.
+    - Make gramweight inferrer + picker automatically fetch detailed data as needed.
+    - Create a list of basic "foods" we want unit amounts for "out of the box"
 
 **Extension**
 - Make chrome extension notice when we've already imported a page. 

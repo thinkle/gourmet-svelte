@@ -1,5 +1,5 @@
 import stopword from "stopword";
-import {
+import type {
   Nutrient,
   NutrientLookup,
   NutrientQueryResult,
@@ -28,7 +28,6 @@ if (!dexieApi.db) {
 function waitMyTurn() {
   return new Promise((resolve, reject) => {
     if (fetching) {
-      console.log("waiting...");
       setTimeout(() => waitMyTurn().then(resolve).catch(reject), 1000);
     } else {
       resolve(true);
@@ -62,8 +61,6 @@ nutrientMatches.localSearch = async (searchTerms) => {
   return;
   let result = await dexieApi.db.nutrientSearches.get({ search: searchTerms });
   if (result) {
-    console.log("Got result, now fetch foods...", result);
-    console.log("Result of type", typeof result, JSON.stringify(result));
     let foods = await dexieApi.db.nutrients.bulkGet(
       result.foods.map((o) => o.fdcId)
     );
@@ -106,14 +103,12 @@ nutrientMatches.usdaSearch = async (searchTerms, page = 1) => {
 };
 
 nutrientMatches.search = async (searchTerms, branded = false) => {
-  console.log("Store is searching!");
   let $matches = get(nutrientMatches);
   // check store...
   if ($matches[searchTerms]) {
     return $matches[searchTerms];
   } else {
     let queryResponse = await nutrientMatches.localSearch(searchTerms, branded);
-    console.log("Cached result: ", queryResponse);
     if (!queryResponse) {
       queryResponse = await nutrientMatches.usdaSearch(searchTerms, branded);
       nutrientMatches.storeResult(queryResponse, branded);
@@ -125,7 +120,6 @@ interface NutrientMatchesStore {
   storeResult(queryResponse: NutrientQueryResult): void;
 }
 nutrientMatches.storeResult = function (queryResponse, branded) {
-  console.log("Store result", queryResponse);
   let searchTerms = queryResponse.foodSearchCriteria.query;
   if (queryResponse.foods) {
     nutrients.update(($nutrients) => {
@@ -139,7 +133,6 @@ nutrientMatches.storeResult = function (queryResponse, branded) {
           $nutrients[food.fdcId] = food;
         }
       }
-      console.log("Updated nutrients store: ", $nutrients);
       return $nutrients;
     });
   }
@@ -157,7 +150,6 @@ nutrientMatches.fetchMore = async function (searchTerms) {
     return;
   } else {
     let page = currentResults.foodSearchCriteria.pageNumber + 1;
-    console.log("Fetch page ", page, currentResults, searchTerms);
     let $user = get(user);
     let queryResponse = await queryNutrientRequest.makeRequest({
       user: $user,
@@ -194,9 +186,7 @@ export let nutrients: NutrientsStore = writable(
 ); /* Eventually will be in local storage */
 
 nutrients.fetchFromUsda = async function ({ fdcId }) {
-  console.log("Fetch from USDA");
   await waitMyTurn();
-  console.log("Done waiting, let us fetch!");
   fetching = true;
   let response;
   let $user = get(user);
@@ -210,7 +200,6 @@ nutrients.fetchFromUsda = async function ({ fdcId }) {
     console.log("Pity, an error", err);
     throw err;
   }
-  console.log("Success", response);
   fetching = false;
   if (response) {
     return response.result;
@@ -218,9 +207,7 @@ nutrients.fetchFromUsda = async function ({ fdcId }) {
 };
 
 nutrients.fetchCached = async function ({ fdcId }) {
-  console.log("Check for cached nutrient", fdcId);
   let result = await dexieApi.db.nutrients.get({ fdcId });
-  console.log("Got cached: ", result);
   let portions = await dexieApi.db.portions
     .where("fdcId")
     .equals(fdcId)
@@ -237,7 +224,6 @@ nutrients.fetchCached = async function ({ fdcId }) {
 };
 
 nutrients.fetchDetails = async function ({ fdcId }) {
-  console.log("Fetch details!");
   if (!fdcId) {
     return;
   }
@@ -305,10 +291,8 @@ export function getAmountFromPortion(portion: UsdaPortion): PortionAmount {
 
 // Update local database when fetching...
 portionsById.subscribe(($portions) => {
-  console.log("update $portions", $portions);
   Object.values($portions).forEach((p) => {
     if (!p.storedLocally) {
-      console.log("add portion!", p);
       dexieApi.addPortion(p);
     }
   });
@@ -323,7 +307,6 @@ nutrients.subscribe(async ($nutrients) => {
     let densities = [];
     let portions = [];
     if (n.foodPortions) {
-      console.log("Update portions!");
       portionsById.update(($portionsById) => {
         portions = n.foodPortions.map((p) => {
           if (!$portionsById[p.id]) {

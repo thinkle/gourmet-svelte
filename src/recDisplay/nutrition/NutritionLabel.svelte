@@ -7,6 +7,7 @@
     unit: "g",
   };
   import { MACRO_RDI, NUTRIENTS_RDI, RDI_BY_NUTRIENT } from "./rdi";
+  import pluralize from "pluralize";
   const KCAL = 1008; // kcal
   const UNSATFAT = 1293; // polyunsaturated fatty acids
   const CARBS = 2039; // total carbs
@@ -73,9 +74,12 @@
   <div class="cal">
     <div class="vertical">
       <b class="small">
-        Amount per {unitName || ""}
-        {#if unitName}({/if}{baseUnit.amount *
-          multiplier}{baseUnit.unit}{#if unitName}){/if}
+        Amount per {pluralize.singular(unitName) || ""}
+        {#if unitName}({/if}{baseUnit.amount * multiplier}
+        {pluralize(
+          baseUnit.unit,
+          baseUnit.amount * multiplier
+        )}{#if unitName}){/if}
       </b>
       <b>Calories</b>
     </div>

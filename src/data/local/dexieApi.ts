@@ -55,15 +55,7 @@ const dexieApi = {
     if (!dexieApi.db) {
       await this.connect();
     }
-    let ingredientWords = [
-      getShopItem(ingredient),
-      ingredient.text,
-      ...extractItems(ingredient.text),
-    ];
-    ingredientWords = ingredientWords.map((w) => w.toLowerCase());
-    if (ingredient.ingKey) {
-      ingredientWords.push(ingredient.ingKey);
-    }
+    let ingredientWords = getIngredientIndexWords(ingredient);
     dexieApi.db.nutrientRelations.put({
       fdcId,
       ingredient,
@@ -290,6 +282,19 @@ const dexieApi = {
 };
 
 
+
+export function getIngredientIndexWords(ingredient: any) {
+  let ingredientWords = [
+    getShopItem(ingredient),
+    ingredient.text,
+    ...extractItems(ingredient.text),
+  ];
+  ingredientWords = ingredientWords.map((w) => w.toLowerCase());
+  if (ingredient.ingKey) {
+    ingredientWords.push(ingredient.ingKey);
+  }
+  return ingredientWords;
+}
 
 function getSortFunction(sort) {
   if (typeof sort == "function") {

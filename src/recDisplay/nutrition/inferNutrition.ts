@@ -1,12 +1,10 @@
-import { get } from "svelte/store";
-import type { Ingredient, Amount } from "../../types/ingredientTypes";
+import type { Ingredient } from "../../types/ingredientTypes";
 import type {
   Nutrient,
-  Portion,
   UsdaPortion,
   NutrientQueryResult,
 } from "../../types/nutrientTypes";
-import { getGramWeight, getML } from "../../utils/unitAmounts";
+import { getML } from "../../utils/unitAmounts";
 import { getNutritionQuery, extractItems } from "../../utils/ingredientUtils";
 import { getNutrientById } from "./nutrientUtils";
 import { nutrients } from "../../stores/nutritionStores";
@@ -15,7 +13,7 @@ import stopword from "stopword";
 import { unique } from "../../utils/uniq";
 import { areSimilar } from "../../utils/textUtils";
 import dexieApi from "../../data/local/dexieApi";
-
+export { inferGramWeightForIngredient } from "./inferGramWeight";
 import {
   queryUSDANutrients,
   queryMongoNutrients,
@@ -26,15 +24,16 @@ import {
 const KCAL = 1008;
 
 const ingredientWordScores = [
-  { match: /\braw/i, score: 150 },
-  { match: /\bflesh/i, score: 100 },
-  { match: /\bprepared/i, score: -200 },
+  { match: /\braw|fresh\b/i, score: 500 },
+  { match: /\bflesh\b/i, score: 100 },
+  { match: /\bprepared\b/i, score: -200 },
   { match: /\bsnack/i, score: -200 },
   { match: /\b(fri|bak|cook|boil)ed/i, score: -200 },
   { match: /\bmix/i, score: -200 },
   { match: /\bbabyfoo/i, score: -500 },
   { match: /\brestaurant/i, score: -300 },
   { match: /\bfast\s+food/i, score: -500 },
+  { match: /\bsweets\b/i, score: -100 },
 ];
 
 function rankNutrientMatch(
@@ -42,32 +41,42 @@ function rankNutrientMatch(
   ing: Ingredient
 ): number {
   let rank = 0;
-  for (let word of unique(
-    stopword.removeStopwords(
-      nutrient.description.toLowerCase().split(/[,.;:]*\s+[,.;:]*/)
-    )
-  )) {
-    let similarity = areSimilar(word, ing.text);
-    let unitSimilarity = areSimilar(word, ing.amount?.unit);
-    if (similarity) {
-      if (prepWords.indexOf(word) > -1) {
-        rank += similarity * 10;
-      } else {
-        rank += similarity * 100;
-      }
+  for (let desc of [
+    nutrient.description,
+    nutrient.commonNames,
+    nutrient.additionalDescriptions,
+  ]) {
+    if (desc) {
+      for (let word of unique(
+        stopword.removeStopwords(desc.toLowerCase().split(/[,.;:]*\s+[,.;:]*/))
+      )) {
+        let similarity = areSimilar(word, ing.text);
+        let unitSimilarity = 0;
+        if (ing?.amount?.unit && ing.amount.unit.length > 3) {
+          // ignore things like "g" and "c" and "tsp"
+          unitSimilarity = areSimilar(word, ing.amount?.unit);
+        }
+        if (similarity) {
+          if (prepWords.indexOf(word) > -1) {
+            rank += similarity * 10;
+          } else {
+            rank += similarity * 100;
+          }
+        }
+        if (unitSimilarity) {
+          rank += unitSimilarity * 10;
+        }
+        if (!similarity && !unitSimilarity && desc == nutrient.description) {
+          // non matching words are bad...
+          if (prepWords.indexOf(word) > -1) {
+            rank -= 15;
+          } else {
+            rank -= 50;
+          }
+        }
+      } // end each description word
     }
-    if (unitSimilarity) {
-      rank += unitSimilarity * 10;
-    }
-    if (!similarity && !unitSimilarity) {
-      // non matching words are bad...
-      if (prepWords.indexOf(word) > -1) {
-        rank -= 15;
-      } else {
-        rank -= 50;
-      }
-    }
-  } // end each description word
+  }
   // If we have words in our ingredient and they are nowhere, that is bad
   let ingWords = unique(
     ing.text.split(/[,.;:]*\s+/).map((w) => w.toLowerCase())
@@ -78,10 +87,8 @@ function rankNutrientMatch(
     let matchesSomething = false;
     if (areSimilar(nutrient.commonNames, word)) {
       matchesSomething = true;
-      rank += 100;
     } else if (areSimilar(nutrient.additionalDescriptions, word)) {
       matchesSomething = true;
-      rank += 100;
     } else if (areSimilar(nutrient.description, word)) {
       matchesSomething = true;
     }
@@ -91,15 +98,29 @@ function rankNutrientMatch(
   }
 
   for (let ingredientWord of ingredientWordScores) {
-    if (
-      ((nutrient.description &&
-        nutrient.description.search(ingredientWord.match) > -1) ||
-        (nutrient.foodCategory?.description &&
-          nutrient.foodCategory?.description.search(ingredientWord.match) >
-            -1)) &&
-      ing.text?.search(ingredientWord.match) == -1
-    ) {
+    let match = false;
+    if (nutrient.description) {
+      match = nutrient.description.search(ingredientWord.match) > -1;
+    }
+    if (!match && nutrient.foodCategory) {
+      let fc = nutrient.foodCategory;
+      if (fc.description) {
+        fc = fc.description;
+      } // on "detailed" ingredients we have an object, otherwise not.
+      match = fc.search(ingredientWord.match) > -1;
+    }
+    let ingMatch = ing.text?.search(ingredientWord.match) > -1;
+    if (match && !ingMatch) {
       rank += ingredientWord.score;
+    } else if (match) {
+      console.log(
+        "Ignoring match",
+        ingredientWord,
+        nutrient,
+        ing,
+        ingMatch,
+        match
+      );
     }
   }
   if (nutrient.matchInfo) {
@@ -167,91 +188,6 @@ export async function inferNutrientForIngredient(
     }
   }
   return i;
-}
-
-export async function inferGramWeightForIngredient(
-  i: Ingredient
-): Promise<Amount | { gramWeight?: number; inferred_gramWeight?: number }> {
-  if (i.amount.gramWeight) {
-    return null;
-  } else {
-    let inferred: {
-      gramWeight: number;
-      density?: number;
-      isWeight: boolean;
-    } | null = getGramWeight(i.amount);
-    if (inferred) {
-      if (inferred.isWeight) {
-        // already a weight, nothing to do
-        return {
-          gramWeight: inferred.inferred_gramWeight,
-        };
-      } else {
-        // we need density
-        let fdcId = i.fdcId || i.inferred_fdcId;
-        if (fdcId) {
-          let nutrient = await getDetailedNutrient(fdcId);
-          if (nutrient.densities?.length) {
-            let nutrientBasedWeight = getGramWeight(
-              i.amount,
-              nutrient.densities[0].amount.density
-            );
-            return {
-              inferred_gramWeight: nutrientBasedWeight.gramWeight,
-            };
-          }
-        }
-        return {
-          inferred_gramWeight: inferred.gramWeight,
-        };
-      }
-    } else if (i.fdcId || i.inferred_fdcId) {
-      // not a weight or volume...
-      let nutrient = await getDetailedNutrient(i.fdcId || i.inferred_fdcId);
-      if (nutrient.foodPortions) {
-        let portion = pickBestPortion(nutrient.foodPortions, i);
-        if (portion) {
-          let portionNumber = portion.amount?.amount || 1;
-          let ingredientNumber = i?.amount?.amount || 1;
-          let multiplier = ingredientNumber / portionNumber;
-          return {
-            inferred_gramWeight: portion.gramWeight * multiplier,
-          };
-        }
-      }
-    }
-  }
-}
-
-/* NOTE TO SELF: Figure out how we populate the $nutrients store in the first place and somehow
-miss the portions when we do so :) */
-
-function pickBestPortion(
-  portions: UsdaPortion[],
-  i: Ingredient
-): UsdaPortion | void {
-  if (portions.length == 1) {
-    return portions[0]; // just pick the only one if there is only one...
-  }
-  let bestScore = -10;
-  let bestMatch = undefined;
-  for (let portion of portions) {
-    let score = 0;
-    score += 10 * areSimilar(portion.modifier, i.amount?.unit);
-    score += 10 * areSimilar(i.text, portion.modifier);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = portion;
-    }
-  }
-  return bestMatch;
-}
-
-async function getDetailedNutrient(fdcId: number): Promise<Nutrient> {
-  await nutrients.fetchDetails({ fdcId: fdcId });
-  let $nutrients = get(nutrients);
-  let nutrient = $nutrients[fdcId];
-  return nutrient;
 }
 
 async function getLocalNutrientForIngredient(

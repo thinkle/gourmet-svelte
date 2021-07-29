@@ -1,4 +1,5 @@
 <script type="ts">
+  import pluralize from "pluralize";
   import { Button } from "../../widgets/";
   import { nutrients } from "../../stores/nutritionStores";
   import type { Ingredient } from "../../types/IngredientTypes";
@@ -153,9 +154,11 @@
 <div>
   <h3>Nutritional Information</h3>
   By {#each yields as yld}
-    <Button on:click={() => (defaultYield = yld)}>{yld.unit}</Button>
+    <Button on:click={() => (defaultYield = yld)}
+      >{pluralize(yld.unit, 1)}</Button
+    >
   {/each}
-  <Button on:click={() => (defaultYield = { unitName: "recipe", amount: 1 })}>
+  <Button on:click={() => (defaultYield = { unit: "recipe", amount: 1 })}>
     Recipe
   </Button>
 
@@ -169,7 +172,8 @@
     }}
   />
   <p>
-    Nutritional Information for {flatIngredients.length} ingredients.
+    Nutritional Information for {flatIngredients.length}
+    {pluralize("ingredients", flatIngredients.length)}.
   </p>
   <ul>
     {#each flatIngredients as ing (ing.amount + ing.unit + ing.text)}

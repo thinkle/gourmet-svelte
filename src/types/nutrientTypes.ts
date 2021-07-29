@@ -131,4 +131,10 @@ export interface Nutrient {
   indexWords?: string[];
   commonNames?: string;
   additionalDescriptions?: string;
+  foodCategory?:
+    | string
+    | {
+        description: string;
+        code: number;
+      };
 }

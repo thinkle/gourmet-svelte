@@ -4,8 +4,8 @@
   import IngredientNutrientQuery from "./IngredientNutrientQuery.svelte";
   import IngredientGramWeight from "./IngredientGramWeight.svelte";
   import { standard } from "../../common/mocks/recipes";
-  let n = 5;
-  let m = 1;
+  let n = 0;
+  let m = 2;
   let ingredient = standard.ingredients[m].ingredients[n];
   function updateIngredient() {
     ingredient = standard.ingredients[m].ingredients[n];

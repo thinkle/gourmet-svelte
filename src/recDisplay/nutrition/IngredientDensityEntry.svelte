@@ -1,4 +1,8 @@
 <script type="ts">
+  import {
+    getLocalPortionsForIngredient,
+    getDetailedNutrient,
+  } from "./inferGramWeight";
   import type { Ingredient } from "../../types/ingredientTypes";
   import DensityIndicator from "./DensityIndicator.svelte";
   export let ing: Ingredient;
@@ -25,16 +29,42 @@
 
   let myPortions = [];
   let portionScores = {};
-  $: getPortions($portions, ing.fdcId);
+  $: getPortions(ing.text, ing.fdcId, ing.inferred_fdcId);
 
-  function getPortions($portions, id) {
-    console.log("Get portions!", $portions);
+  function getPortions(text, fdcId, inferred_fdcId) {
+    console.log("getPortions again", text, fdcId, inferred_fdcId);
+    if (ing.fdcId || ing.inferred_fdcId) {
+      getDetailedNutrient(ing.fdcId || ing.inferred_fdcId).then((nutrient) => {
+        console.log("Got fdcId densities", nutrient);
+        if (nutrient.foodPortions) {
+          myPortions = [
+            ...myPortions,
+            ...nutrient.foodPortions.filter((p) => p?.amount?.density),
+          ];
+          myPortions.forEach(
+            (p) => (portionScores[p.id] = scorePortion(p, ing))
+          );
+          myPortions.sort((a, b) => portionScores[b.id] - portionScores[a.id]);
+        }
+      });
+    }
+    getLocalPortionsForIngredient(ing).then((results) => {
+      console.log("Got text-based densities", results);
+      myPortions = [
+        ...myPortions,
+        ...results.filter((p) => p?.amount?.density),
+      ];
+      myPortions.forEach((p) => (portionScores[p.id] = scorePortion(p, ing)));
+      myPortions.sort((a, b) => portionScores[b.id] - portionScores[a.id]);
+    });
+    /* console.log("Get portions!", $portions);
     myPortions = $portions.filter((p) => p?.amount?.density);
     myPortions.forEach((p) => (portionScores[p.id] = scorePortion(p, ing)));
     myPortions.sort((a, b) => portionScores[b.id] - portionScores[a.id]);
     myPortions = myPortions;
     portionKey = myPortions.map((p) => p.id).join("-");
-    console.log("Got portions!", myPortions);
+    console.log("Got portions!", myPortions); */
+    portionKey = portionKey + "-";
   }
   let portionKey = "";
   let selectedPortion = null;
@@ -98,14 +128,8 @@ Density
 />
 
 Portion Selected : {selectedPortion?.id}
-{#each [portionKey] as pk (portionKey)}
-  <Select bind:value={selectedPortion} update={myPortions} key={pk}>
-    <!-- on:blur={(e) => {
-    console.log("select", e);
-    if (e.target.value) {
-      density = e.target.value;
-    }
-  }} -->
+{#key myPortions}
+  <Select bind:value={selectedPortion} update={myPortions}>
     <option value={null}>--</option>
     {#each myPortions as portion}
       <option value={portion}>
@@ -113,7 +137,7 @@ Portion Selected : {selectedPortion?.id}
       </option>
     {/each}
   </Select>
-{/each}
+{/key}
 
 <!-- 
     {#each densities as portion}
