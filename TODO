@@ -2,6 +2,8 @@
 - Fix sorting in firefox?
 
 *New Features*
+- Import .grmt files
+- Import gourmet datbases?
 - Bring "copy recipe" button into main recipe interface
 - Simple export to file functionality (back-up) (part-way...)
 - Improve full-app layout on mobile to save screen space
