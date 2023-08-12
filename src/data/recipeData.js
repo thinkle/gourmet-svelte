@@ -76,6 +76,8 @@ const recipeData = {
     recipe.last_modified = new Date().getTime();
     let recid = await localRecipeData.addRecipe(recipe);
     recipe.id = recid;
+    // Remove any alternatives stuck on from importer...
+    delete recipe.alternatives
     await checkForReferences(recipe);
     try {
       let remoteRec = await remoteRecipeData.addRecipe(recipe);
