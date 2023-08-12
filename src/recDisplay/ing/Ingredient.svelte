@@ -143,7 +143,9 @@
     padding-top: 3px;
     padding-bottom: 3px;
     } */
- .ing :global(.amount,.unit,.item) {
+ .ing :global(.amount),
+ .ing :global(.unit),
+ .ing :global(.item) {
      font-family: var(--recipeFont);     
  }
 

@@ -2,6 +2,7 @@ export function cleanupWhitespace (text, condenseMiddleSpaces=true) {
     text = text
         .replace(/^\s+/,'') // leading whitespace
         .replace(/\s+$/,'') // trailing whitespace
+        .replace(/^[,.;]\s*/,'') // leading punctuation
     if (text.match(/stick/)) {
         console.log('cleaned-up ',text)
     }
