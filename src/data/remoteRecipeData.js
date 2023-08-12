@@ -24,7 +24,10 @@ function RecipeData (user) {
                 return true;
             }
         },
-        addRecipe (recipe) {            
+        addRecipe (recipe) {   
+            if (recipe.alternatives) {
+                delete recipe.alternatives;
+            }
             return addRecipeRequest.makeRequest(
                 {user,params:{recipe}}
             );
