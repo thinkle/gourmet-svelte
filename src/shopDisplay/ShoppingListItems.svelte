@@ -136,9 +136,10 @@
         {/each}
     </table>
 {/if}
-
-Items:<JsonDebug data="{uniqueItems}"/>
-Unique Items:<JsonDebug data="{uniqueItems}"/>
+{#if DEV}
+    Items:<JsonDebug data="{uniqueItems}"/>
+    Unique Items:<JsonDebug data="{uniqueItems}"/>
+{/if}
 
 <style>
  table {
