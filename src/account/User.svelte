@@ -2,6 +2,7 @@
  export let onClose
 
  import {getContext} from 'svelte';
+ import router from 'page';
  import api from '../data/recipeData.js';
  import {user} from '../stores/userStore.js';
  import {
@@ -25,6 +26,13 @@
  let {doLogin,doLogout} = getContext('login')
  let linkedAccounts;
  let invites=undefined
+
+ function openApiAccess () {
+     if (onClose) {
+         onClose();
+     }
+     router('/account/api');
+ }
 </script>
 
 <div class="block">
@@ -46,6 +54,12 @@
             {#if !$user.remoteUser.dbUser.linked}
                 <ShareAccountBlock/>
             {/if}
+
+            <h3>API Access</h3>
+            <div>
+                Create an API token for GPT or other tools to access your recipes.
+                <Button on:click="{openApiAccess}">Enable API Access</Button>
+            </div>
 
             <h3>Subscribe</h3>
             <div>

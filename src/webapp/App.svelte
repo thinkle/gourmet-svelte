@@ -12,6 +12,7 @@
  import ShoppingList from '../shopDisplay/ShoppingList.svelte';
  import Support from './static/Support.svelte';
  import Promo from './static/Promo.svelte';
+ import ApiAccess from '../account/ApiAccess.svelte';
  import {testRecs} from '../common/mocks/recipes.js'
 
  let name = 'Gourmet';
@@ -151,6 +152,13 @@
      page = Promo;
      params = ctx.params;
      noLanding = true;
+ });
+
+ router('/account/api', ()=>{
+     page = ApiAccess;
+     containerScrolls = true;
+     params = {};
+     noLanding = false;
  });
 
 

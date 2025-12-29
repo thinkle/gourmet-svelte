@@ -45,7 +45,7 @@
     "netlify-cli": "^3.13.5",
     "netlify-identity-widget": "^1.9.1",
     "node-fetch": "^2.6.1",
-    "node-sass": "^4.14.1",
+    "sass": "^1.69.5",
     "page": "^1.11.6",
     "pica": "^6.1.1",
     "querystring": "^0.2.1",

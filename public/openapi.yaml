@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: Gourmet Recipe API
+  version: 1.0.0
+  description: |
+    Manage a personal Gourmet recipe database. Authenticate with X-API-Key.
+    Minimal recipes can use simple arrays of ingredient strings and instruction
+    strings; the API will normalize them.
+servers:
+  - url: "/.netlify/functions/api"
+security:
+  - ApiKeyAuth: []
+paths:
+  /recipes:
+    get:
+      summary: List recipes
+      description: Search recipes by text or category.
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Full-text search across title, ingredients, and notes.
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Match a category name.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: A page of recipes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeListResponse"
+    post:
+      summary: Create a recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeInput"
+      responses:
+        "200":
+          description: The created recipe.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+  /recipes/{id}:
+    get:
+      summary: Get a recipe by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The recipe.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+    patch:
+      summary: Update a recipe by id
+      description: Partial updates are merged into the stored recipe.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeInput"
+      responses:
+        "200":
+          description: The updated recipe.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+    delete:
+      summary: Delete a recipe by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Delete result.
+          content:
+            application/json:
+              schema:
+                type: integer
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    RecipeListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recipe"
+    RecipeInput:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+        ingredients:
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                $ref: "#/components/schemas/Ingredient"
+        instructions:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        text:
+          type: array
+          description: Rich text blocks; body can be plain text or HTML.
+          items:
+            $ref: "#/components/schemas/TextBlock"
+        categories:
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                $ref: "#/components/schemas/Category"
+        sources:
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: array
+              items:
+                $ref: "#/components/schemas/Source"
+        yields:
+          type: array
+          items:
+            $ref: "#/components/schemas/Yield"
+        times:
+          type: array
+          items:
+            $ref: "#/components/schemas/Time"
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+    Recipe:
+      allOf:
+        - $ref: "#/components/schemas/RecipeInput"
+        - type: object
+          properties:
+            _id:
+              type: string
+            owner:
+              type: object
+              properties:
+                email:
+                  type: string
+                full_name:
+                  type: string
+    Ingredient:
+      type: object
+      properties:
+        text:
+          type: string
+        ingkey:
+          type: string
+        amount:
+          $ref: "#/components/schemas/Amount"
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/Ingredient"
+    Amount:
+      type: object
+      properties:
+        amount:
+          type: number
+        unit:
+          type: string
+    TextBlock:
+      type: object
+      properties:
+        header:
+          type: string
+        body:
+          type: string
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+    Source:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+    Yield:
+      type: object
+      properties:
+        amount:
+          type: number
+        unit:
+          type: string
+    Time:
+      type: object
+      properties:
+        name:
+          type: string
+        seconds:
+          type: number
+        text:
+          type: string
+    Image:
+      type: object
+      properties:
+        url:
+          type: string
+        caption:
+          type: string
+        width:
+          type: number
