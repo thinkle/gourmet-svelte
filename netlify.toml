@@ -8,6 +8,7 @@
   functions = "functions"
   publish = "public"
   port = 8888 
+  targetPort = 5000
 
 
   

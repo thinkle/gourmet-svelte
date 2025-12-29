@@ -24,14 +24,23 @@
  $: username = $user !== null ? $user.username : ' there!'
 
  let netlifyStarted = false
+ const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+ const identityApiUrl = isLocalhost ? 'http://localhost:8888/.netlify/identity' : undefined
+
+ function initNetlifyIdentity () {
+     if (netlifyStarted) {
+         return;
+     }
+     if (identityApiUrl) {
+         netlifyIdentity.init({ apiUrl: identityApiUrl })
+     } else {
+         netlifyIdentity.init()
+     }
+ }
 
  onMount(
      ()=>{
-         if (!netlifyStarted) {
-             if (!DEV) {
-                 netlifyIdentity.init()
-             }
-         }
+         initNetlifyIdentity()
      }
  );
 
@@ -157,7 +166,7 @@
  
 
  function checkForNetlifyToken () {
-     if (!netlifyStarted) {netlifyIdentity.init();}
+     initNetlifyIdentity()
  }
 
 </script>

@@ -77,7 +77,7 @@
 </article>
 
 
-<style type="text/scss">
+<style lang="scss">
 
  $sizes : (
      xs : 160px,

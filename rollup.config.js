@@ -1,14 +1,19 @@
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import glob from "glob";
+
 import svelte from "rollup-plugin-svelte";
 import builtins from "rollup-plugin-node-builtins";
-import resolve from "@rollup/plugin-node-resolve";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import livereload from "rollup-plugin-livereload";
-import json from "rollup-plugin-json";
-import replace from "rollup-plugin-replace";
-import { terser } from "rollup-plugin-terser";
+import json from "@rollup/plugin-json";
+import replace from "@rollup/plugin-replace";
+import terser from "@rollup/plugin-terser";
 // import { scss, coffeescript, pug } from 'svelte-preprocess'
 // import { sass } from 'svelte-preprocess-sass';
-import css from "rollup-plugin-css-only";
+import postcss from "rollup-plugin-postcss";
 import autoPreprocess from "svelte-preprocess";
 //import typescript from '@rollup/plugin-typescript';
 
@@ -34,6 +39,7 @@ export default [
         pathBase: "../",
       }),
       replace({
+        preventAssignment: true,
         DEV: !production,
         BUILD_TIME: () => new Date() + "",
         BUILD_MS: () => new Date().getTime(),
@@ -43,15 +49,21 @@ export default [
       svelte({
         // enable run-time checks when not in production
         preprocess: autoPreprocess(),
+        emitCss: false,
+        compilerOptions: { dev: !production },
       }),
-      css({ output: "public/build/bundle.css" }),
+      postcss({
+        extract: "public/build/bundle.css",
+        minimize: production,
+        sourceMap: !production,
+      }),
 
       // If you have external dependencies installed from
       // npm, you'll most likely need these plugins. In
       // some cases you'll need additional configuration
       // consult the documentation for details:
       // https://github.com/rollup/plugins/tree/master/packages/commonjs
-      resolve({
+      nodeResolve({
         browser: true,
         dedupe: ["svelte"],
       }),
@@ -82,9 +94,14 @@ export default [
     },
     plugins: [
       json(),
-      production && replace({ MONGO_DB_NAME: "Gourmet" }),
+      production &&
+        replace({
+          preventAssignment: true,
+          MONGO_DB_NAME: "Gourmet",
+        }),
       !production &&
         replace({
+          preventAssignment: true,
           MONGO_DB_NAME: "devtest",
         }),
       commonjs(),
@@ -101,6 +118,7 @@ export default [
     },
     plugins: [
       replace({
+        preventAssignment: true,
         BUILD_TIME: () => new Date() + "",
         BUILD_MS: () => new Date().getTime(),
         DEV: !production,
@@ -117,17 +135,19 @@ export default [
     },
     plugins: [
       replace({
+        preventAssignment: true,
         BUILD_TIME: () => new Date() + "",
         BUILD_MS: () => new Date().getTime(),
         DEV: !production,
       }),
       svelte({
         // enable run-time checks when not in production
-        dev: !production,
+        emitCss: false,
+        compilerOptions: { dev: !production },
         // we'll extract any component CSS out into
         // a separate file  better for performance
       }),
-      resolve({
+      nodeResolve({
         browser: true,
         dedupe: ["svelte"],
       }),
@@ -159,17 +179,19 @@ export default [
     },
     plugins: [
       replace({
+        preventAssignment: true,
         DEV: !production,
         BUILD_TIME: () => new Date() + "",
         BUILD_MS: () => new Date().getTime(),
       }),
       svelte({
         // enable run-time checks when not in production
-        dev: !production,
+        emitCss: false,
+        compilerOptions: { dev: !production },
         // we'll extract any component CSS out into
         // a separate file  better for performance
       }),
-      resolve({
+      nodeResolve({
         browser: true,
         dedupe: ["svelte"],
       }),
@@ -186,7 +208,7 @@ function serve() {
       if (!started) {
         started = true;
 
-        require("child_process").spawn("npm", ["run", "start", "--", "--dev"], {
+        spawn("npm", ["run", "start", "--", "--dev"], {
           stdio: ["ignore", "inherit", "inherit"],
           shell: true,
         });
@@ -194,10 +216,6 @@ function serve() {
     },
   };
 }
-
-import fs from "fs";
-import path from "path";
-import glob from "glob";
 
 function bundleDemos(options) {
   console.log("called bundle...");

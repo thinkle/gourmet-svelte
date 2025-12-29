@@ -8,3 +8,5 @@
 background.js
 /extension/*.map
 *graveyard*
+# Local Netlify folder
+.netlify

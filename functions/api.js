@@ -7,13 +7,6 @@ var deepcopy = require('deepcopy');
 var fetch$1 = require('node-fetch');
 var crypto = require('crypto');
 
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var querystring__default = /*#__PURE__*/_interopDefaultLegacy(querystring);
-var deepcopy__default = /*#__PURE__*/_interopDefaultLegacy(deepcopy);
-var fetch__default = /*#__PURE__*/_interopDefaultLegacy(fetch$1);
-var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
-
 /**
 An extremely simple validator. 
 
@@ -176,7 +169,7 @@ function registerHandlerObject (o) {
 const baseURL = "/.netlify/functions/api?";
 
 function requestURI (mode,params) {
-    return baseURL + querystring__default['default'].stringify(
+    return baseURL + querystring.stringify(
         {mode:mode,
          ...params}
     )
@@ -469,6 +462,8 @@ async function runTest () {
 // needs of front-end and back-end are different, so validate also does
 // some pruning of the JSON to only keep the stuff we care about.
 **************/
+// Validate and prepare our recipe for insertion...
+// This may do DB-specific things to the recipe to make life easier...
 
 const salt = new Date().getTime().toString(36);
 
@@ -603,6 +598,10 @@ function reEscape (s) {
         .replace(/[)]/g,'[)]')
         .replace(/[*]/g,'[*]')
         .replace(/[.]/g,'[.]');
+}
+
+function countGroupsInRegexp (s) {
+    return ' '.match(new RegExp(s+'||\\s')).length
 }
 
 const UNIT_CONVERSIONS = [
@@ -944,6 +943,7 @@ var Amounts = {
 
 //import numeral from 'numeral';
 
+
 var NUMBER_WORDS = [
     {matcher:/\b(one|a)\b/i,
      value:1},
@@ -1113,6 +1113,7 @@ var numMid = numBase + '|[,./⁄])';
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`;
 var fracMatchString = `(${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}|\\d[/⁄]\\d)`;
 numMatchString = `${numMatchString}(\\s+${fracMatchString})?`;
+countGroupsInRegexp(numMatchString);
 
 var timeUnits = undefined;
 var timeConversions = {}; // gets populated in getTimeUnits()
@@ -1254,6 +1255,7 @@ For each property type, we have:
   toString: , // how to get a simple string view of it
   editType: , // the edit types...
 */
+
 
 const TXT = 'text';
 const RCH = 'richText';
@@ -1727,7 +1729,7 @@ const revokeApiTokenRequest = Request({
 
 async function updateRecipe(user, params) {
     let { recipe, forceMerge } = params;
-    recipe = deepcopy__default['default'](recipe);
+    recipe = deepcopy(recipe);
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
@@ -2008,9 +2010,9 @@ const API_KEY = process.env.USDA_KEY;
 
 queryNutrientRequest.setRequestHandler(
     async (u,params) => {
-        let qs = querystring__default['default'].encode({query:params.query,api_key:API_KEY});
+        let qs = querystring.encode({query:params.query,api_key:API_KEY});
         console.log('QUERY! ',`https://api.nal.usda.gov/fdc/v1/foods/search?${qs}`);
-        let response = await fetch__default['default'](
+        let response = await fetch$1(
             `https://api.nal.usda.gov/fdc/v1/foods/search?${qs}`
         );
         let result = await response.json();
@@ -2022,8 +2024,8 @@ queryNutrientRequest.setRequestHandler(
 getNutrientInfoRequest.setRequestHandler(
     async (u,params) => {
         console.log('ID=',params.id);
-        let qs = querystring__default['default'].encode({api_key:API_KEY});
-        let response = await fetch__default['default'](
+        let qs = querystring.encode({api_key:API_KEY});
+        let response = await fetch$1(
             `https://api.nal.usda.gov/fdc/v1/food/${params.id}?${qs}`
         );
         let result = await response.json();
@@ -2102,20 +2104,19 @@ async function exportRecipes(
 
 const TOKEN_COLLECTION = 'api_tokens';
 const TOKEN_PREFIX_LENGTH = 6;
-const TOKEN_SUFFIX_LENGTH = 4;
 const DEFAULT_SCOPES = ['recipes:read', 'recipes:write'];
 
 function hashToken(token) {
-  return crypto__default['default'].createHash('sha256').update(token).digest('hex');
+  return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 function makeToken() {
-  return crypto__default['default'].randomBytes(32).toString('hex');
+  return crypto.randomBytes(32).toString('hex');
 }
 
 function makeTokenPreview(token) {
   const prefix = token.slice(0, TOKEN_PREFIX_LENGTH);
-  const suffix = token.slice(-TOKEN_SUFFIX_LENGTH);
+  const suffix = token.slice(-4);
   return `${prefix}...${suffix}`;
 }
 
@@ -2239,8 +2240,6 @@ async function touchApiToken(tokenId) {
   );
 }
 
-var nutrients = [
-];
 var recipes = [
 	{
 		localid: 1,
@@ -64126,17 +64125,11 @@ var recipes = [
 		]
 	}
 ];
-var metadata = {
-	date: "2020-05-28T12:46:25.067610",
-	user: "Gourmet Export"
-};
 var recs = {
-	nutrients: nutrients,
-	recipes: recipes,
-	metadata: metadata
-};
+	recipes: recipes};
 
 //import {fquery,q} from './faunaUtil.js';
+//import {runQuery,runImport} from './gql.js';
 
 const functions = {
     mongoConnect : runTest,
