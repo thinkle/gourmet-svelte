@@ -11,6 +11,32 @@ servers:
 security:
   - BearerAuth: []
 paths:
+  /.netlify/functions/api/authcheck:
+    get:
+      summary: Auth debug info
+      operationId: authCheck
+      description: Returns whether auth headers were received (no secrets).
+      security: []
+      responses:
+        "200":
+          description: Auth header diagnostics.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth:
+                    type: object
+                    properties:
+                      hasAuthorization:
+                        type: boolean
+                      hasApiKey:
+                        type: boolean
+                      scheme:
+                        type: string
+                        nullable: true
+                      tokenLength:
+                        type: integer
   /.netlify/functions/api/recipes:
     get:
       summary: List recipes

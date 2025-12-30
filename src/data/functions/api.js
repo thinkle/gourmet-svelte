@@ -89,6 +89,36 @@ function getPathParts(event) {
     return path.split('/').filter(Boolean);
 }
 
+function getAuthDebugInfo(headers = {}) {
+    const headerKeys = Object.keys(headers);
+    const lower = {};
+    headerKeys.forEach((k) => {
+        lower[k.toLowerCase()] = headers[k];
+    });
+    const apiKey = lower['x-api-key'];
+    const auth = lower['authorization'];
+    let scheme = null;
+    let tokenLength = 0;
+    if (auth && typeof auth === 'string') {
+        const parts = auth.trim().split(' ');
+        if (parts.length > 1) {
+            scheme = parts[0].toLowerCase();
+            tokenLength = parts.slice(1).join(' ').trim().length;
+        } else {
+            tokenLength = parts[0].trim().length;
+        }
+    } else if (apiKey && typeof apiKey === 'string') {
+        scheme = 'x-api-key';
+        tokenLength = apiKey.trim().length;
+    }
+    return {
+        hasAuthorization: Boolean(auth),
+        hasApiKey: Boolean(apiKey),
+        scheme,
+        tokenLength,
+    };
+}
+
 function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -251,6 +281,18 @@ const handler = async (event, context) => {
     }
     let body, error
     const pathParts = getPathParts(event);
+    if (pathParts[0] === 'recipes') {
+        console.log('Recipes request', {
+            method: (event.httpMethod || 'GET').toUpperCase(),
+            path: event.path || event.rawPath || '',
+            query: event.queryStringParameters || {},
+        });
+    }
+    if (pathParts[0] === 'authcheck') {
+        return jsonResponse(200, {
+            auth: getAuthDebugInfo(event.headers || {}),
+        });
+    }
     if (pathParts[0] === 'recipes') {
         try {
             if (!user) {
