@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { ObjectId } from 'mongodb';
 import { insertOne, queryCollection, updateOne, getOne } from './mongoConnect.js';
 import {
   createApiTokenRequest,
@@ -33,9 +34,10 @@ function sanitizeTokenDoc(tokenDoc) {
   if (!tokenDoc) {
     return tokenDoc;
   }
-  const { tokenHash, createdAt, lastUsedAt, revokedAt, ...rest } = tokenDoc;
+  const { tokenHash, createdAt, lastUsedAt, revokedAt, _id, ...rest } = tokenDoc;
   const safe = {
     ...rest,
+    _id: _id ? _id.toString() : '',
     createdAt: createdAt ? createdAt.toISOString() : '',
   };
   if (lastUsedAt) {
@@ -45,6 +47,16 @@ function sanitizeTokenDoc(tokenDoc) {
     safe.revokedAt = revokedAt.toISOString();
   }
   return safe;
+}
+
+function normalizeId(id) {
+  if (!id) {
+    return null;
+  }
+  if (typeof id === 'string') {
+    return new ObjectId(id);
+  }
+  return id;
 }
 
 export async function createApiToken(user, params = {}) {
@@ -100,9 +112,13 @@ export async function revokeApiToken(user, params = {}) {
   if (!params._id) {
     throw new Error('Missing token id.');
   }
+  const tokenId = normalizeId(params._id);
+  if (!tokenId) {
+    throw new Error('Invalid token id.');
+  }
   const revoked = await updateOne(
     TOKEN_COLLECTION,
-    { _id: params._id, ownerEmail },
+    { _id: tokenId, ownerEmail },
     { $set: { revokedAt: new Date() } }
   );
   return { token: sanitizeTokenDoc(revoked) };
@@ -135,12 +151,13 @@ export async function getUserFromApiToken(rawToken) {
 }
 
 export async function touchApiToken(tokenId) {
-  if (!tokenId) {
+  const normalizedId = normalizeId(tokenId);
+  if (!normalizedId) {
     return;
   }
   await updateOne(
     TOKEN_COLLECTION,
-    { _id: tokenId },
+    { _id: normalizedId },
     { $set: { lastUsedAt: new Date() } }
   );
 }

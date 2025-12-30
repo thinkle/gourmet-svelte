@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Gourmet Recipe API
   version: 1.0.0
@@ -7,13 +7,16 @@ info:
     Minimal recipes can use simple arrays of ingredient strings and instruction
     strings; the API will normalize them.
 servers:
-  - url: "/.netlify/functions/api"
+  - url: "https://www.gourmetrecipemanager.com/.netlify/functions/api"
+  - url: "https://dev--gourmet-svelte.netlify.app/.netlify/functions/api"
+  - url: "http://localhost:8888/.netlify/functions/api"
 security:
   - ApiKeyAuth: []
 paths:
   /recipes:
     get:
       summary: List recipes
+      operationId: listRecipes
       description: Search recipes by text or category.
       parameters:
         - in: query
@@ -45,6 +48,7 @@ paths:
                 $ref: "#/components/schemas/RecipeListResponse"
     post:
       summary: Create a recipe
+      operationId: createRecipe
       requestBody:
         required: true
         content:
@@ -61,6 +65,7 @@ paths:
   /recipes/{id}:
     get:
       summary: Get a recipe by id
+      operationId: getRecipe
       parameters:
         - in: path
           name: id
@@ -76,6 +81,7 @@ paths:
                 $ref: "#/components/schemas/Recipe"
     patch:
       summary: Update a recipe by id
+      operationId: updateRecipe
       description: Partial updates are merged into the stored recipe.
       parameters:
         - in: path
@@ -98,6 +104,7 @@ paths:
                 $ref: "#/components/schemas/Recipe"
     delete:
       summary: Delete a recipe by id
+      operationId: deleteRecipe
       parameters:
         - in: path
           name: id
@@ -210,10 +217,6 @@ components:
           type: string
         amount:
           $ref: "#/components/schemas/Amount"
-        ingredients:
-          type: array
-          items:
-            $ref: "#/components/schemas/Ingredient"
     Amount:
       type: object
       properties:

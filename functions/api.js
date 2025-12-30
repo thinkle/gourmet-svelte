@@ -312,7 +312,7 @@ function require$1 (required, params, mode=DEFINED) {
 const url = process.env.MONGO_URL;
 process.env.MONGO_PASSWORD;
 process.env.MONGO_USER;
-const DB = 'Gourmet';
+const DB = 'devtest';
 
 var lastResult = undefined;
 
@@ -2128,9 +2128,10 @@ function sanitizeTokenDoc(tokenDoc) {
   if (!tokenDoc) {
     return tokenDoc;
   }
-  const { tokenHash, createdAt, lastUsedAt, revokedAt, ...rest } = tokenDoc;
+  const { tokenHash, createdAt, lastUsedAt, revokedAt, _id, ...rest } = tokenDoc;
   const safe = {
     ...rest,
+    _id: _id ? _id.toString() : '',
     createdAt: createdAt ? createdAt.toISOString() : '',
   };
   if (lastUsedAt) {
@@ -2140,6 +2141,16 @@ function sanitizeTokenDoc(tokenDoc) {
     safe.revokedAt = revokedAt.toISOString();
   }
   return safe;
+}
+
+function normalizeId(id) {
+  if (!id) {
+    return null;
+  }
+  if (typeof id === 'string') {
+    return new mongodb.ObjectId(id);
+  }
+  return id;
 }
 
 async function createApiToken(user, params = {}) {
@@ -2195,9 +2206,13 @@ async function revokeApiToken(user, params = {}) {
   if (!params._id) {
     throw new Error('Missing token id.');
   }
+  const tokenId = normalizeId(params._id);
+  if (!tokenId) {
+    throw new Error('Invalid token id.');
+  }
   const revoked = await updateOne(
     TOKEN_COLLECTION,
-    { _id: params._id, ownerEmail },
+    { _id: tokenId, ownerEmail },
     { $set: { revokedAt: new Date() } }
   );
   return { token: sanitizeTokenDoc(revoked) };
@@ -2230,12 +2245,13 @@ async function getUserFromApiToken(rawToken) {
 }
 
 async function touchApiToken(tokenId) {
-  if (!tokenId) {
+  const normalizedId = normalizeId(tokenId);
+  if (!normalizedId) {
     return;
   }
   await updateOne(
     TOKEN_COLLECTION,
-    { _id: tokenId },
+    { _id: normalizedId },
     { $set: { lastUsedAt: new Date() } }
   );
 }
