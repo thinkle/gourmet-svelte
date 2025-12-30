@@ -45,8 +45,30 @@ function getApiTokenFromHeaders(headers = {}) {
         return null;
     }
     const parts = auth.split(' ');
-    if (parts.length === 2) {
-        return parts[1].trim();
+    if (parts.length === 1) {
+        return parts[0].trim();
+    }
+    if (parts.length >= 2) {
+        const scheme = parts[0].toLowerCase();
+        const value = parts.slice(1).join(' ').trim();
+        if (!value) {
+            return null;
+        }
+        if (scheme === 'bearer') {
+            return value;
+        }
+        if (scheme === 'basic') {
+            try {
+                const decoded = Buffer.from(value, 'base64').toString('utf8');
+                if (decoded.includes(':')) {
+                    return decoded.split(':').slice(1).join(':');
+                }
+                return decoded.trim();
+            } catch (err) {
+                return null;
+            }
+        }
+        return value;
     }
     return null;
 }

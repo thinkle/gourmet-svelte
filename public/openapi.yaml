@@ -7,13 +7,13 @@ info:
     Minimal recipes can use simple arrays of ingredient strings and instruction
     strings; the API will normalize them.
 servers:
-  - url: "https://www.gourmetrecipemanager.com/.netlify/functions/api"
-  - url: "https://dev--gourmet-svelte.netlify.app/.netlify/functions/api"
-  - url: "http://localhost:8888/.netlify/functions/api"
+  - url: "https://dev--gourmet-svelte.netlify.app"
 security:
   - ApiKeyAuth: []
+  - BearerAuth: []
+  - BasicAuth: []
 paths:
-  /recipes:
+  /.netlify/functions/api/recipes:
     get:
       summary: List recipes
       operationId: listRecipes
@@ -62,7 +62,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
-  /recipes/{id}:
+  /.netlify/functions/api/recipes/{id}:
     get:
       summary: Get a recipe by id
       operationId: getRecipe
@@ -124,6 +124,13 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API token
+    BasicAuth:
+      type: http
+      scheme: basic
   schemas:
     RecipeListResponse:
       type: object
