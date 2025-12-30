@@ -64433,10 +64433,12 @@ function getApiTokenFromHeaders(headers = {}) {
     });
     const apiKey = lower['x-api-key'];
     if (apiKey) {
+        console.log('Used api key header', apiKey.slice(0, 4) + '...');
         return apiKey.trim();
     }
     const auth = lower['authorization'];
     if (!auth) {
+        console.log('No authorization header');
         return null;
     }
     const parts = auth.split(' ');
@@ -64447,12 +64449,15 @@ function getApiTokenFromHeaders(headers = {}) {
         const scheme = parts[0].toLowerCase();
         const value = parts.slice(1).join(' ').trim();
         if (!value) {
+            console.log('No authorization value');
             return null;
         }
         if (scheme === 'bearer') {
+            console.log('Used bearer token', value.slice(0, 4) + '...');
             return value;
         }
         if (scheme === 'basic') {
+            console.log('Used basic auth token', value.slice(0, 4) + '...');
             try {
                 const decoded = Buffer.from(value, 'base64').toString('utf8');
                 if (decoded.includes(':')) {
@@ -64597,7 +64602,7 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
 }
 
 const handler = async (event, context) => {
-    console.log('Calling handler, we have cached users: ',userCache);
+    console.log('Calling handler, we have cached users: ', userCache);
     let params = event.queryStringParameters || {};
     let jsonBody = {};
     if (event.body) {
@@ -64609,19 +64614,19 @@ const handler = async (event, context) => {
             throw err;
         }
     }
-    params = {...jsonBody,...params};
+    params = { ...jsonBody, ...params };
     const clientContext = context && context.clientContext || {};
     var {
         // this magic documented here:
         // https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/#bonus-points-authenticated-lambda-functions-for-your-gatsby-app
         user, // actual user info you can use for your serverless functions
     } = clientContext;
-    if (!user && event.headers && event.headers.referer && event.headers.referer.indexOf('localhost')>-1) {
+    if (!user && event.headers && event.headers.referer && event.headers.referer.indexOf('localhost') > -1) {
         try {
-        user = JSON.parse(event.headers.localuser);
-        user.extraApiStuff = 'fakey fake fake stuff';
+            user = JSON.parse(event.headers.localuser);
+            user.extraApiStuff = 'fakey fake fake stuff';
         } catch (err) {
-            console.log('no good - headers were',event.headers,'use default fake');
+            console.log('no good - headers were', event.headers, 'use default fake');
             user = getFakeUser();
         }
     }
@@ -64647,6 +64652,7 @@ const handler = async (event, context) => {
                 const rawToken = getApiTokenFromHeaders(event.headers);
                 const tokenResult = await getUserFromApiToken(rawToken);
                 if (tokenResult) {
+                    console.log('Authenticated API token for user', tokenResult.user.email);
                     user = tokenResult.user;
                     await touchApiToken(tokenResult.user.apiTokenId);
                 }
@@ -64669,44 +64675,47 @@ const handler = async (event, context) => {
     if (requestHandlers[params.mode]) {
         let handler = requestHandlers[params.mode];
         try {
-            body = await handler(user,params);
+            body = await handler(user, params);
             //console.log('Got response',body);
         } catch (err) {
             error = err;
             //console.log('Got error',error);
         }
-    } 
+    }
     if (body) {
         //console.log('Return response');
         return {
-            statusCode:200,
-            body:JSON.stringify(body||'No return value')
+            statusCode: 200,
+            body: JSON.stringify(body || 'No return value')
         }
     } else { // error
         if (!error) {
             error = 'Function had no return value';
         }
+        console.log('Return error', error);
         return {
-            statusCode:400,
-            body:JSON.stringify({error: error.toString(),
-                                 params : params,
-                                 jsonRequst : jsonBody,
-                                 user : user,
-                                })
+            statusCode: 400,
+            body: JSON.stringify({
+                error: error.toString(),
+                params: params,
+                jsonRequst: jsonBody,
+                user: user,
+            })
         }
     }
 };
 
-EchoRequest.setRequestHandler((user,params) => {
-    return {params,
-            DB,
-            user:user,
-            }
+EchoRequest.setRequestHandler((user, params) => {
+    return {
+        params,
+        DB,
+        user: user,
     }
+}
 );
 
 ThrowErrorRequest.setRequestHandler(
-    ()=>{
+    () => {
         throw 'Big Error'
     }
 );
