@@ -9,7 +9,7 @@ info:
 servers:
   - url: "https://dev--gourmet-svelte.netlify.app"
 security:
-  - ApiKeyAuth: []
+  - BearerAuth: []
   - BearerAuth: []
   - BasicAuth: []
 paths:
@@ -46,6 +46,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RecipeListResponse"
+  /.netlify/functions/api/recipes/summary:
+    get:
+      summary: List recipe summaries
+      operationId: listRecipeSummaries
+      description: Lightweight list optimized for quick lookups.
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Full-text search across title, ingredients, and notes.
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Match a category name.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: A page of recipe summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeSummaryListResponse"
     post:
       summary: Create a recipe
       operationId: createRecipe
@@ -120,18 +153,22 @@ paths:
                 type: integer
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-API-Key
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: API token
-    BasicAuth:
-      type: http
-      scheme: basic
   schemas:
+    RecipeSummaryListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeSummary"
     RecipeListResponse:
       type: object
       properties:
@@ -143,6 +180,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Recipe"
+    RecipeSummary:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        rating:
+          type: number
+        last_modified:
+          type: number
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        yields:
+          type: array
+          items:
+            $ref: "#/components/schemas/Yield"
+        times:
+          type: array
+          items:
+            $ref: "#/components/schemas/Time"
+        owner:
+          type: object
+          properties:
+            email:
+              type: string
+            full_name:
+              type: string
     RecipeInput:
       type: object
       required:

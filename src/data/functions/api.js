@@ -88,6 +88,27 @@ function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function buildRecipeListParams(query) {
+    const params = {};
+    const queryObject = {};
+    if (query.search) {
+        queryObject.fullText = new RegExp(escapeRegex(query.search), 'i');
+    }
+    if (query.category) {
+        queryObject['categories.name'] = query.category;
+    }
+    if (Object.keys(queryObject).length) {
+        params.query = queryObject;
+    }
+    if (query.limit) {
+        params.limit = Number(query.limit);
+    }
+    if (query.page) {
+        params.page = Number(query.page);
+    }
+    return params;
+}
+
 function ensureScope(user, scope) {
     if (!user) {
         throw makeError(401, 'Unauthorized');
@@ -136,27 +157,25 @@ function normalizeRecipeInput(rawRecipe = {}) {
 async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query) {
     if (method === 'GET') {
         ensureScope(user, 'recipes:read');
+        if (pathParts[1] === 'summary') {
+            const params = buildRecipeListParams(query);
+            params.fields = [
+                '_id',
+                'title',
+                'rating',
+                'last_modified',
+                'categories',
+                'images',
+                'yields',
+                'times',
+                'owner',
+            ];
+            return await getRecipes(user, params);
+        }
         if (pathParts[1]) {
             return await getRecipe(user, { _id: pathParts[1] });
         }
-        const params = {};
-        const queryObject = {};
-        if (query.search) {
-            queryObject.fullText = new RegExp(escapeRegex(query.search), 'i');
-        }
-        if (query.category) {
-            queryObject['categories.name'] = query.category;
-        }
-        if (Object.keys(queryObject).length) {
-            params.query = queryObject;
-        }
-        if (query.limit) {
-            params.limit = Number(query.limit);
-        }
-        if (query.page) {
-            params.page = Number(query.page);
-        }
-        return await getRecipes(user, params);
+        return await getRecipes(user, buildRecipeListParams(query));
     }
     if (method === 'POST') {
         ensureScope(user, 'recipes:write');
