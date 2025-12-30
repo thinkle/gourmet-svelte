@@ -12,11 +12,12 @@ security:
   - BearerAuth: []
 paths:
   /.netlify/functions/api/authcheck:
-    get:
+    post:
       summary: Auth debug info
       operationId: authCheck
       description: Returns whether auth headers were received (no secrets).
-      security: []
+      security:
+        - BearerAuth: []
       responses:
         "200":
           description: Auth header diagnostics.
@@ -38,74 +39,11 @@ paths:
                       tokenLength:
                         type: integer
   /.netlify/functions/api/recipes:
-    get:
-      summary: List recipes
-      operationId: listRecipes
-      description: Search recipes by text or category.
-      parameters:
-        - in: query
-          name: search
-          schema:
-            type: string
-          description: Full-text search across title, ingredients, and notes.
-        - in: query
-          name: category
-          schema:
-            type: string
-          description: Match a category name.
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 50
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 0
-      responses:
-        "200":
-          description: A page of recipes.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecipeListResponse"
-  /.netlify/functions/api/recipes/summary:
-    get:
-      summary: List recipe summaries
-      operationId: listRecipeSummaries
-      description: Lightweight list optimized for quick lookups.
-      parameters:
-        - in: query
-          name: search
-          schema:
-            type: string
-          description: Full-text search across title, ingredients, and notes.
-        - in: query
-          name: category
-          schema:
-            type: string
-          description: Match a category name.
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 50
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 0
-      responses:
-        "200":
-          description: A page of recipe summaries.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecipeSummaryListResponse"
     post:
       summary: Create a recipe
       operationId: createRecipe
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -119,16 +57,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
-  /.netlify/functions/api/recipes/{id}:
-    get:
+  /.netlify/functions/api/recipes/query:
+    post:
+      summary: List recipes
+      operationId: listRecipes
+      description: Search recipes by text or category.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeQuery"
+      responses:
+        "200":
+          description: A page of recipes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeListResponse"
+  /.netlify/functions/api/recipes/summary/query:
+    post:
+      summary: List recipe summaries
+      operationId: listRecipeSummaries
+      description: Lightweight list optimized for quick lookups.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeQuery"
+      responses:
+        "200":
+          description: A page of recipe summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeSummaryListResponse"
+  /.netlify/functions/api/recipes/get:
+    post:
       summary: Get a recipe by id
       operationId: getRecipe
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeIdRequest"
       responses:
         "200":
           description: The recipe.
@@ -136,22 +116,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
-    patch:
+  /.netlify/functions/api/recipes/update:
+    post:
       summary: Update a recipe by id
       operationId: updateRecipe
       description: Partial updates are merged into the stored recipe.
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RecipeInput"
+              $ref: "#/components/schemas/RecipeUpdateRequest"
       responses:
         "200":
           description: The updated recipe.
@@ -159,15 +136,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
-    delete:
+  /.netlify/functions/api/recipes/delete:
+    post:
       summary: Delete a recipe by id
       operationId: deleteRecipe
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeIdRequest"
       responses:
         "200":
           description: Delete result.
@@ -182,6 +162,36 @@ components:
       scheme: bearer
       bearerFormat: API token
   schemas:
+    RecipeQuery:
+      type: object
+      properties:
+        search:
+          type: string
+        category:
+          type: string
+        limit:
+          type: integer
+          default: 50
+        page:
+          type: integer
+          default: 0
+    RecipeIdRequest:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+    RecipeUpdateRequest:
+      type: object
+      required:
+        - id
+        - recipe
+      properties:
+        id:
+          type: string
+        recipe:
+          $ref: "#/components/schemas/RecipeInput"
     RecipeSummaryListResponse:
       type: object
       properties:

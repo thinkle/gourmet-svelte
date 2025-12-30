@@ -64607,8 +64607,58 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         }
         return await getRecipes(user, buildRecipeListParams(query));
     }
+    if (method === 'POST' && pathParts[1] === 'query') {
+        ensureScope(user, 'recipes:read');
+        const params = buildRecipeListParams(jsonBody || {});
+        return await getRecipes(user, params);
+    }
+    if (method === 'POST' && pathParts[1] === 'summary' && pathParts[2] === 'query') {
+        ensureScope(user, 'recipes:read');
+        const params = buildRecipeListParams(jsonBody || {});
+        params.fields = [
+            '_id',
+            'title',
+            'rating',
+            'last_modified',
+            'categories',
+            'images',
+            'yields',
+            'times',
+            'owner',
+        ];
+        return await getRecipes(user, params);
+    }
+    if (method === 'POST' && pathParts[1] === 'get') {
+        ensureScope(user, 'recipes:read');
+        const recipeId = jsonBody && (jsonBody.id || jsonBody._id);
+        if (!recipeId) {
+            throw makeError(400, 'Missing recipe id');
+        }
+        return await getRecipe(user, { _id: recipeId });
+    }
+    if (method === 'POST' && pathParts[1] === 'update') {
+        ensureScope(user, 'recipes:write');
+        const recipeId = jsonBody && (jsonBody.id || jsonBody._id || (jsonBody.recipe && jsonBody.recipe._id));
+        if (!recipeId) {
+            throw makeError(400, 'Missing recipe id');
+        }
+        const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
+        recipe._id = recipeId;
+        return await updateRecipe(user, { recipe, forceMerge: true });
+    }
+    if (method === 'POST' && pathParts[1] === 'delete') {
+        ensureScope(user, 'recipes:write');
+        const recipeId = jsonBody && (jsonBody.id || jsonBody._id);
+        if (!recipeId) {
+            throw makeError(400, 'Missing recipe id');
+        }
+        return await deleteRecipe(user, { _id: recipeId });
+    }
     if (method === 'POST') {
         ensureScope(user, 'recipes:write');
+        if (pathParts[1]) {
+            throw makeError(405, 'Method not allowed');
+        }
         const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
         return await addRecipe(user, { recipe });
     }
