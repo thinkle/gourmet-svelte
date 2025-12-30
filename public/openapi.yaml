@@ -3,15 +3,13 @@ info:
   title: Gourmet Recipe API
   version: 1.0.0
   description: |
-    Manage a personal Gourmet recipe database. Authenticate with X-API-Key.
+    Manage a personal Gourmet recipe database. Authenticate with Bearer token.
     Minimal recipes can use simple arrays of ingredient strings and instruction
     strings; the API will normalize them.
 servers:
   - url: "https://dev--gourmet-svelte.netlify.app"
 security:
   - BearerAuth: []
-  - BearerAuth: []
-  - BasicAuth: []
 paths:
   /.netlify/functions/api/recipes:
     get:
