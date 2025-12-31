@@ -229,10 +229,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Category"
-        images:
-          type: array
-          items:
-            $ref: "#/components/schemas/Image"
         yields:
           type: array
           items:
@@ -298,10 +294,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Time"
-        images:
-          type: array
-          items:
-            $ref: "#/components/schemas/Image"
         rating:
           type: number
           minimum: 0

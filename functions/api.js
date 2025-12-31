@@ -64514,6 +64514,33 @@ function getAuthDebugInfo(headers = {}) {
     };
 }
 
+function stripImagesFromRecipe(recipe) {
+    if (!recipe || typeof recipe !== 'object') {
+        return recipe;
+    }
+    if (Array.isArray(recipe.images)) {
+        recipe.images = [];
+    } else if (recipe.images) {
+        delete recipe.images;
+    }
+    return recipe;
+}
+
+function stripImagesFromResponse(payload) {
+    if (!payload || typeof payload !== 'object') {
+        return payload;
+    }
+    if (Array.isArray(payload)) {
+        payload.forEach(stripImagesFromRecipe);
+        return payload;
+    }
+    if (Array.isArray(payload.result)) {
+        payload.result.forEach(stripImagesFromRecipe);
+        return payload;
+    }
+    return stripImagesFromRecipe(payload);
+}
+
 function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -64595,7 +64622,6 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
                 'rating',
                 'last_modified',
                 'categories',
-                'images',
                 'yields',
                 'times',
                 'owner',
@@ -64621,7 +64647,6 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
             'rating',
             'last_modified',
             'categories',
-            'images',
             'yields',
             'times',
             'owner',
@@ -64756,7 +64781,7 @@ const handler = async (event, context) => {
                 jsonBody,
                 params || {}
             );
-            return jsonResponse(200, responseBody);
+            return jsonResponse(200, stripImagesFromResponse(responseBody));
         } catch (err) {
             return jsonResponse(err.statusCode || 500, {
                 error: err.message || err.toString(),
