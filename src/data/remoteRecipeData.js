@@ -49,8 +49,8 @@ function RecipeData (user) {
                  params:{_id}}
             );
         },
-        getRecipes ({query,fields,limit,page}={}) {
-            let params = {query,fields,limit,page};
+        getRecipes ({query,fields,limit,page,sort}={}) {
+            let params = {query,fields,limit,page,sort};
             return getRecipesRequest.makeRequest(
                 {user,params}
             );

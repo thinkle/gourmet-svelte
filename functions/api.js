@@ -312,7 +312,7 @@ function require$1 (required, params, mode=DEFINED) {
 const url = process.env.MONGO_URL;
 process.env.MONGO_PASSWORD;
 process.env.MONGO_USER;
-const DB = 'devtest';
+const DB = 'Gourmet';
 
 var lastResult = undefined;
 
@@ -1531,7 +1531,8 @@ const getRecipesRequest = Request(
      requestDef:{page:optional(1),
                  query:optional({}),
                  fields:optional([]),
-                 limit:optional(1)
+                 limit:optional(1),
+                 sort:optional(undefined)
                 },
      responseDef:{
          count:optional(1),
@@ -1950,7 +1951,7 @@ async function getRecipe (user,params) {
 getRecipeRequest.setRequestHandler(getRecipe);
 
 async function getRecipes (user,params) {
-        let {page,query,fields,limit} = params;
+        let {page,query,fields,limit,sort} = params;
         // Enforce user only searches own recipes!
         if (!query) {
             query = {};
@@ -1962,7 +1963,7 @@ async function getRecipes (user,params) {
         query['owner.email'] = user.account;
         if (!limit) {
             limit = 100;
-            if (fields && !fields.contains('text') && !fields.contains('ingredients')) {
+            if (fields && !fields.includes('text') && !fields.includes('ingredients')) {
                 limit = 1000;
             }
         }
@@ -1974,13 +1975,29 @@ async function getRecipes (user,params) {
             'recipes',
             query,
             {fields, limit, page,
-            sort:{last_modified:-1},
+            sort:normalizeRecipeSort(sort),
             }
         );
         return result
 }
 
 getRecipesRequest.setRequestHandler(getRecipes);
+
+function normalizeRecipeSort (sort) {
+    if (!sort) {
+        return {last_modified:-1}
+    }
+    if (sort === 'title') {
+        return {title:1}
+    }
+    if (sort.prop === 'last_modified') {
+        return {last_modified:sort.reverse ? -1 : 1}
+    }
+    if (sort.prop === 'title') {
+        return {title:sort.reverse ? -1 : 1}
+    }
+    return {last_modified:-1}
+}
 
 async function deleteRecipe (user, params) {
     require$1(['_id'],params);

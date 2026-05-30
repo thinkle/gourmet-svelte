@@ -61,7 +61,7 @@ export async function getRecipe (user,params) {
 getRecipeRequest.setRequestHandler(getRecipe)
 
 export async function getRecipes (user,params) {
-        let {page,query,fields,limit} = params;
+        let {page,query,fields,limit,sort} = params;
         // Enforce user only searches own recipes!
         if (!query) {
             query = {}
@@ -73,7 +73,7 @@ export async function getRecipes (user,params) {
         query['owner.email'] = user.account;
         if (!limit) {
             limit = 100;
-            if (fields && !fields.contains('text') && !fields.contains('ingredients')) {
+            if (fields && !fields.includes('text') && !fields.includes('ingredients')) {
                 limit = 1000;
             }
         }
@@ -85,13 +85,29 @@ export async function getRecipes (user,params) {
             'recipes',
             query,
             {fields, limit, page,
-            sort:{last_modified:-1},
+            sort:normalizeRecipeSort(sort),
             }
         );
         return result
 }
 
 getRecipesRequest.setRequestHandler(getRecipes)
+
+function normalizeRecipeSort (sort) {
+    if (!sort) {
+        return {last_modified:-1}
+    }
+    if (sort === 'title') {
+        return {title:1}
+    }
+    if (sort.prop === 'last_modified') {
+        return {last_modified:sort.reverse ? -1 : 1}
+    }
+    if (sort.prop === 'title') {
+        return {title:sort.reverse ? -1 : 1}
+    }
+    return {last_modified:-1}
+}
 
 export async function deleteRecipe (user, params) {
     require(['_id'],params)

@@ -36,6 +36,23 @@ it('Store multiple recs',async () => {
     expect(resp.result.length).toBeGreaterThan(2);
 });
 
+it('Sorts recipes with missing timestamps as oldest',async () => {
+    await api.connect();
+    await api.db.recipes.clear();
+    await api.addRecipe({title:'No timestamp', deleted:0});
+    await api.addRecipe({title:'Recent timestamp', deleted:0, last_modified:200});
+    await api.addRecipe({title:'Older timestamp', deleted:0, last_modified:100});
+    let resp = await api.getRecipes({
+        query:{deleted:0},
+        sort:{prop:'last_modified', reverse:true}
+    });
+    expect(resp.result.map((rec)=>rec.title)).toEqual([
+        'Recent timestamp',
+        'Older timestamp',
+        'No timestamp',
+    ]);
+});
+
 it('Update recipe',async () => {
     await api.connect();
     let r = {...testRecs.standard}

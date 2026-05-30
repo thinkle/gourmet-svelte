@@ -219,13 +219,34 @@ function getSortFunction (sort) {
         return sort
     } else {
         if (typeof sort == 'string') {
-            return (a,b)=>a[sort]>b[sort]&&1||b[sort]>a[sort]&&-1||0
+            return compareByProp(sort)
         } else if (sort.prop && sort.reverse) {
-            return (a,b)=>b[sort.prop]>a[sort.prop]&&1||a[sort.prop]>b[sort.prop]&&-1||0
+            return compareByProp(sort.prop, true)
         } else if (sort.prop) {
             return getSortFunction(sort.prop)
         }
     }
+}
+
+function compareByProp (prop, reverse=false) {
+    return (a,b)=>{
+        let aVal = sortValue(a[prop])
+        let bVal = sortValue(b[prop])
+        if (aVal > bVal) {
+            return reverse ? -1 : 1
+        }
+        if (bVal > aVal) {
+            return reverse ? 1 : -1
+        }
+        return 0
+    }
+}
+
+function sortValue (value) {
+    if (value === undefined || value === null) {
+        return -Infinity
+    }
+    return value
 }
 
 export default dexieApi;

@@ -49,7 +49,8 @@ export const getRecipesRequest = Request(
      requestDef:{page:optional(1),
                  query:optional({}),
                  fields:optional([]),
-                 limit:optional(1)
+                 limit:optional(1),
+                 sort:optional(undefined)
                 },
      responseDef:{
          count:optional(1),
