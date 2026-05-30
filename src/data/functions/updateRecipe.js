@@ -5,6 +5,7 @@ import { prepRecRemote } from '../utils/validate.js';
 export async function updateRecipe(user, params) {
     let { recipe, forceMerge } = params;
     recipe = deepcopy(recipe);
+    recipe.last_modified = Date.now();
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
@@ -207,4 +208,3 @@ export function makeIngredientsExpression ({newIngs, oldIngs}) {
       }
   }
 }
-

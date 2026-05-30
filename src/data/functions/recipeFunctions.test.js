@@ -30,6 +30,7 @@ it(
         expect(recipe._id).toBeDefined();
         expect(recipe.owner.email).toBeDefined();
         expect(recipe.owner.email).toEqual(user.email)
+        expect(typeof recipe.last_modified).toBe('number');
         expect(recipe.title).toEqual(testRecs.standard.title);
         expect(recipe.ingredients.length).toEqual(testRecs.standard.ingredients.length);
         let fetchedRec = await getRecipe(
@@ -96,11 +97,13 @@ it(
             testRecs.standard.ingredients.length
         );
         let first_save_time = modifiedRecipe.last_remote_save;
+        let first_modified_time = modifiedRecipe.last_modified;
         modifiedRecipe.title += 'AGAIN!';
         modifiedRecipe.categories.push({name:'Other Category'});
         let modified2 = await updateRecipe(user,{recipe:modifiedRecipe});
         console.log('M1:',first_save_time,'M2:',modified2.last_remote_save)
         expect(modified2.last_remote_save).not.toEqual(first_save_time);
+        expect(modified2.last_modified).toBeGreaterThanOrEqual(first_modified_time);
         expect(modified2.merged).toBeFalsy()
         // Now let's merge one...
         oldCopy.ingredients.push({text:'Some new thing!',amount:{amount:2,unit:'TBS'}});

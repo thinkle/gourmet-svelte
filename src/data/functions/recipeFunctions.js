@@ -34,6 +34,9 @@ mostRecentRequest.setRequestHandler(getMostRecent);
 
 export async function addRecipe (user, params) {
     let {recipe} = params
+    if (!recipe.last_modified) {
+        recipe.last_modified = Date.now()
+    }
     prepRecRemote(recipe,user);
     //console.log('Add recipe',recipe.title,JSON.stringify(recipe.owner))
     let result = await insertOne('recipes',

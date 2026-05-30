@@ -1731,6 +1731,7 @@ const revokeApiTokenRequest = Request({
 async function updateRecipe(user, params) {
     let { recipe, forceMerge } = params;
     recipe = deepcopy(recipe);
+    recipe.last_modified = Date.now();
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
@@ -1924,6 +1925,9 @@ mostRecentRequest.setRequestHandler(getMostRecent);
 
 async function addRecipe (user, params) {
     let {recipe} = params;
+    if (!recipe.last_modified) {
+        recipe.last_modified = Date.now();
+    }
     prepRecRemote(recipe,user);
     //console.log('Add recipe',recipe.title,JSON.stringify(recipe.owner))
     let result = await insertOne('recipes',
