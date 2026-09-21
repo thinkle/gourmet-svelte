@@ -3,12 +3,29 @@ import { updateOne } from './mongoConnect.js';
 import { prepRecRemote } from '../utils/validate.js';
 
 export async function updateRecipe(user, params) {
-    let { recipe, forceMerge } = params;
+    let { recipe, forceMerge, replace } = params;
     recipe = deepcopy(recipe);
     recipe.last_modified = Date.now();
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
+    if (replace) {
+        // The caller has the whole recipe and means what it says: write it
+        // over the stored document instead of trying to reconcile two
+        // versions. The offline app uses the merge path below; API clients
+        // (which have just read the recipe) use this one, so that removing an
+        // ingredient or a category actually removes it.
+        return await updateOne(
+            'recipes',
+            { _id: recipe._id, 'owner.email': user.account },
+            [
+                // $literal so that a value which happens to start with '$'
+                // (an ingredient priced "$5", say) isn't read as a field path.
+                { $replaceWith: { $literal: { ...recipe, merged: false } } },
+                { $set: { last_remote_save: "$$NOW" } },
+            ]
+        );
+    }
     // let result = await replaceOne('recipes',
     //                               {_id:recipe._id,
     //                                'owner.email':user.account},

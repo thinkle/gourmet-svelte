@@ -16,6 +16,7 @@ import { userCache, getUser } from './userFunctions.js';
 import { addRecipe, getRecipe, getRecipes, deleteRecipe } from './recipeFunctions.js';
 import { updateRecipe } from './updateRecipe.js';
 import { getUserFromApiToken, touchApiToken } from './tokenFunctions.js';
+import { normalizeIngredients } from '../../utils/ingredientParsing.js';
 
 function jsonResponse(statusCode, body) {
     return {
@@ -185,10 +186,12 @@ function ensureScope(user, scope) {
 
 function normalizeRecipeInput(rawRecipe = {}) {
     const recipe = { ...rawRecipe };
-    if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
-        if (typeof recipe.ingredients[0] === 'string') {
-            recipe.ingredients = recipe.ingredients.map((text) => ({ text }));
-        }
+    if (recipe.ingredients) {
+        // Ingredients may arrive as plain text, as {amount, unit, ingredient},
+        // as groups with nested lists, or already canonical. Whatever we get,
+        // parse it here so the stored recipe always has structured amounts --
+        // API clients don't run the browser-side parser the editor uses.
+        recipe.ingredients = normalizeIngredients(recipe.ingredients);
     }
     if (Array.isArray(recipe.categories) && recipe.categories.length) {
         if (typeof recipe.categories[0] === 'string') {
@@ -216,7 +219,77 @@ function normalizeRecipeInput(rawRecipe = {}) {
     return recipe;
 }
 
+/**
+   What we tell API/MCP clients about the shapes we want. Served from
+   /recipes/schema so a client can ask instead of guessing.
+**/
+const RECIPE_SHAPE = {
+    ingredients: {
+        preferred: {
+            amount: 'number, or a string like "1 1/2" or "2-3" (optional)',
+            unit: 'string, e.g. "cups", "tbsp", "cloves" (optional)',
+            ingredient: 'the ingredient name and any prep, e.g. "flour, sifted"',
+        },
+        alsoAccepted: [
+            'a plain string like "1 1/2 cups flour, sifted" -- the server parses ' +
+            'the amount and unit out of it for you',
+            '{text, amount: {amount, rangeAmount, unit}} -- the canonical stored shape',
+            '{text, ingredients: [...]} -- a group heading with its own sub-list',
+        ],
+        stored: {
+            text: 'the ingredient name only, with the amount and unit removed',
+            amount: {
+                amount: 'number; the upper bound when the ingredient is a range',
+                rangeAmount: 'number; the lower bound of a range (omitted otherwise)',
+                unit: 'the unit as written',
+                standardUnit: 'our normalized unit, when we recognize it',
+            },
+        },
+        note: 'Send amount/unit/ingredient separately when you know them. If you ' +
+            'only have a line of text, send the text and we will parse it.',
+    },
+    categories: 'array of strings, or [{name}]',
+    sources: 'array of strings, or [{name, url}]',
+    instructions: 'a string (plain text or HTML), or an array of strings',
+    yields: '[{amount, unit}]',
+    times: '[{name, seconds, text}]',
+    rating: 'number, 0-5',
+    updateSemantics:
+        'Updates are partial at the field level: fields you omit keep their stored ' +
+        'value. Fields you send replace what is stored -- sending `ingredients` ' +
+        'replaces the entire ingredient list, it is not merged with the old one. ' +
+        'To add one ingredient, read the recipe first and send the full new list.',
+};
+
+/**
+   Apply a partial update to a stored recipe.
+
+   "Partial" means field-level: fields you don't mention keep their stored
+   value. Fields you *do* mention are replaced outright -- in particular,
+   sending `ingredients` or `categories` replaces the whole list rather than
+   unioning it with what's already there, which is what the docs promise and
+   what you need in order to delete an ingredient.
+**/
+async function applyRecipeUpdate(user, recipeId, rawUpdate) {
+    let existing;
+    try {
+        existing = await getRecipe(user, { _id: recipeId });
+    } catch (err) {
+        throw makeError(404, `No recipe found with id ${recipeId}`);
+    }
+    const update = normalizeRecipeInput(rawUpdate);
+    delete update._id;
+    delete update.owner;
+    delete update.last_remote_save;
+    const recipe = { ...existing, ...update, _id: recipeId };
+    return await updateRecipe(user, { recipe, replace: true });
+}
+
 async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query) {
+    if (pathParts[1] === 'schema') {
+        ensureScope(user, 'recipes:read');
+        return RECIPE_SHAPE;
+    }
     if (method === 'GET') {
         ensureScope(user, 'recipes:read');
         if (pathParts[1] === 'summary') {
@@ -272,9 +345,9 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         if (!recipeId) {
             throw makeError(400, 'Missing recipe id');
         }
-        const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
-        recipe._id = recipeId;
-        return await updateRecipe(user, { recipe, forceMerge: true });
+        const rawUpdate = { ...(jsonBody.recipe || jsonBody) };
+        delete rawUpdate.id;
+        return await applyRecipeUpdate(user, recipeId, rawUpdate);
     }
     if (method === 'POST' && pathParts[1] === 'delete') {
         ensureScope(user, 'recipes:write');
@@ -297,9 +370,7 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         if (!pathParts[1]) {
             throw makeError(400, 'Missing recipe id');
         }
-        const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
-        recipe._id = pathParts[1];
-        return await updateRecipe(user, { recipe, forceMerge: true });
+        return await applyRecipeUpdate(user, pathParts[1], jsonBody.recipe || jsonBody);
     }
     if (method === 'DELETE') {
         ensureScope(user, 'recipes:write');

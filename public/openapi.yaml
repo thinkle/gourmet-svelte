@@ -4,8 +4,19 @@ info:
   version: 1.0.0
   description: |
     Manage a personal Gourmet recipe database. Authenticate with Bearer token.
-    Minimal recipes can use simple arrays of ingredient strings and instruction
-    strings; the API will normalize them.
+
+    Ingredients: send `{amount, unit, ingredient}` when you know the parts
+    (e.g. `{"amount": 1.5, "unit": "cups", "ingredient": "flour, sifted"}`).
+    If all you have is a line of text ("1 1/2 cups flour, sifted"), send the
+    plain string and the server parses the amount and unit out of it. Groups
+    are `{"text": "FOR THE DOUGH:", "ingredients": [...]}`.
+
+    Updates are partial at the *field* level: fields you omit keep their stored
+    value, and fields you send replace what is stored. Sending `ingredients`
+    replaces the whole list -- it is not merged with the old one -- so to add a
+    single ingredient, GET the recipe first and send the full new list.
+
+    GET /recipes/schema returns this in machine-readable form.
 servers:
   - url: "https://dev--gourmet-svelte.netlify.app"
 security:
@@ -97,6 +108,22 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RecipeSummaryListResponse"
+  /.netlify/functions/api/recipes/schema:
+    get:
+      summary: Describe the shapes this API expects
+      operationId: getRecipeSchema
+      description: |
+        Returns the accepted ingredient shapes, the canonical stored shape, and
+        the update semantics. Ask here rather than guessing.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: A description of the recipe input shapes.
+          content:
+            application/json:
+              schema:
+                type: object
   /.netlify/functions/api/recipes/get:
     post:
       summary: Get a recipe by id
@@ -120,7 +147,11 @@ paths:
     post:
       summary: Update a recipe by id
       operationId: updateRecipe
-      description: Partial updates are merged into the stored recipe.
+      description: |
+        Partial at the field level: fields you omit keep their stored value.
+        Fields you send replace what is stored -- in particular, `ingredients`,
+        `categories` and `sources` replace the entire list rather than being
+        merged into it. Read the recipe first if you mean to append.
       security:
         - BearerAuth: []
       requestBody:
@@ -191,7 +222,7 @@ components:
         id:
           type: string
         recipe:
-          $ref: "#/components/schemas/RecipeInput"
+          $ref: "#/components/schemas/RecipePartial"
     RecipeSummaryListResponse:
       type: object
       properties:
@@ -245,20 +276,28 @@ components:
             full_name:
               type: string
     RecipeInput:
+      allOf:
+        - $ref: "#/components/schemas/RecipePartial"
+        - type: object
+          required:
+            - title
+    RecipePartial:
       type: object
-      required:
-        - title
+      description: |
+        Any subset of a recipe's fields. Every field you send replaces the
+        stored value for that field; arrays are replaced wholesale, not merged.
       properties:
         title:
           type: string
         ingredients:
-          oneOf:
-            - type: array
-              items:
-                type: string
-            - type: array
-              items:
-                $ref: "#/components/schemas/Ingredient"
+          type: array
+          description: |
+            Each entry is an ingredient, a group, or a plain string. Prefer
+            {amount, unit, ingredient} when you know the parts; send a plain
+            string when you only have a line of text and the server will parse
+            it. Groups keep their nested list as a real sub-list.
+          items:
+            $ref: "#/components/schemas/IngredientInput"
         instructions:
           oneOf:
             - type: string
@@ -312,22 +351,77 @@ components:
                   type: string
                 full_name:
                   type: string
-    Ingredient:
+    IngredientInput:
+      oneOf:
+        - type: string
+          description: A whole ingredient line, e.g. "1 1/2 cups flour, sifted".
+        - $ref: "#/components/schemas/StructuredIngredient"
+        - $ref: "#/components/schemas/IngredientGroup"
+    StructuredIngredient:
       type: object
+      description: |
+        The preferred shape. `ingredient` is the name and prep only -- keep the
+        amount and unit out of it.
+      properties:
+        ingredient:
+          type: string
+          description: Ingredient name and prep, e.g. "flour, sifted".
+        amount:
+          description: |
+            A number, or a string we can parse ("1 1/2", "2-3", "two"). Omit for
+            ingredients with no amount ("salt to taste").
+          oneOf:
+            - type: number
+            - type: string
+        unit:
+          type: string
+          description: e.g. "cups", "tbsp", "cloves".
+        rangeAmount:
+          type: number
+          description: The other end of a range, if you would rather not write "2-3".
+    IngredientGroup:
+      type: object
+      description: A heading with its own sub-list, kept as a real sub-list.
+      required:
+        - ingredients
       properties:
         text:
           type: string
+          description: The group heading, e.g. "FOR THE DOUGH:".
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/IngredientInput"
+    Ingredient:
+      type: object
+      description: The canonical stored shape, as returned by GET requests.
+      properties:
+        text:
+          type: string
+          description: The ingredient name only, with amount and unit removed.
         ingkey:
           type: string
         amount:
           $ref: "#/components/schemas/Amount"
+        ingredients:
+          type: array
+          description: Present only on groups.
+          items:
+            $ref: "#/components/schemas/Ingredient"
     Amount:
       type: object
       properties:
         amount:
           type: number
+          description: The upper bound when the ingredient is a range.
+        rangeAmount:
+          type: number
+          description: The lower bound of a range; absent otherwise.
         unit:
           type: string
+        standardUnit:
+          type: string
+          description: Our normalized unit, when we recognize it.
     TextBlock:
       type: object
       properties:

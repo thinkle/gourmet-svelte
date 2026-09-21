@@ -1113,7 +1113,62 @@ var numMid = numBase + '|[,./⁄])';
 var numMatchString = `${numNaked}+(${numMid}*${numNaked}+)?`;
 var fracMatchString = `(${NUMBER_FRACTIONS.map((f)=>f.word).join('|')}|\\d[/⁄]\\d)`;
 numMatchString = `${numMatchString}(\\s+${fracMatchString})?`;
-countGroupsInRegexp(numMatchString);
+var numberMatcher = new RegExp(numMatchString,'i');
+//var rangeMatcherString = `(?<first>${numMatchString})(?<rangeword>\\s*(to|or|-|:|–|—|―)\\s*)(?<second>${numMatchString})` // FF doesn't support named groups :(
+var rangeMatcherString = `(${numMatchString})(\\s*(to|or|-|:|–|—|―)\\s*)(${numMatchString})`;
+var rangeMatcher = new RegExp(rangeMatcherString,'i');
+
+const groupsInRangeExpression = 2;
+var groupsInNumMatcher = countGroupsInRegexp(numMatchString);
+//const groupsInRangeMatcher = countGroupsInRegexp(rangeMatcherString)
+const firstRangeGroup = 1; // 0 is the whole thing, 1 is next...
+// container group for first number + all the number groups for that number + range group + 1 + 1
+const secondRangeGroup = firstRangeGroup + groupsInNumMatcher + groupsInRangeExpression;
+
+let numberBeforeUnitMatcher = new RegExp(numMatchString+'(?=\\s+[^\\d/⁄])');
+
+function parseAmount (s) {
+    let amount = {};
+    let rangeMatch = s.match(rangeMatcher);
+    let numberMatch = s.match(numberMatcher);
+    let numberBeforeUnitMatch = s.match(numberBeforeUnitMatcher);
+    let match;
+    // If our rangeMatch is first in the string, use it...
+    if (rangeMatch && (!numberMatch || rangeMatch.index <= numberMatch.index)) {
+        // amount.rangeAmount = fracToFloat(rangeMatch.groups.first);
+        // amount.amount = fracToFloat(rangeMatch.groups.second);        
+        // amount.textAmount = rangeMatch.groups.second
+        // amount.textRangeAmount = rangeMatch.groups.first
+        amount.textRangeAmount = rangeMatch[firstRangeGroup];
+        amount.textAmount = rangeMatch[secondRangeGroup];
+        amount.rangeAmount = fracToFloat(amount.textRangeAmount);
+        amount.amount = fracToFloat(amount.textAmount);
+        match = rangeMatch;
+    } else if (numberBeforeUnitMatch) {
+        // maybe we should just use the first number -- but let's try a
+        // "number before unit" thing which tries to grab the number preferentially
+        // in front of a unit, but that can go badly it seems... when you have things like
+        // 1 14 oz can, what is right?
+        // maybe (14) (oz) (1 can...)
+        // or maybe (1) () (14 oz can)
+        // of course (1) (14 oz) (can) is never going to happen...
+        amount.amount = fracToFloat(numberBeforeUnitMatch[0]);
+        amount.textAmount = numberBeforeUnitMatch[0];
+        match = numberBeforeUnitMatch;        
+    } else if (numberMatch) {
+        amount.amount = fracToFloat(numberMatch[0]);
+        amount.textAmount = numberMatch[0];
+        match = numberMatch;
+    }
+    if (match) {
+        amount.pretext = s.substr(0,match.index);
+        amount.posttext = s.substr(match.index+match[0].length);
+    }
+    else {
+        amount.posttext = s;
+    }
+    return amount
+}
 
 var timeUnits = undefined;
 var timeConversions = {}; // gets populated in getTimeUnits()
@@ -1729,12 +1784,29 @@ const revokeApiTokenRequest = Request({
 });
 
 async function updateRecipe(user, params) {
-    let { recipe, forceMerge } = params;
+    let { recipe, forceMerge, replace } = params;
     recipe = deepcopy(recipe);
     recipe.last_modified = Date.now();
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
+    if (replace) {
+        // The caller has the whole recipe and means what it says: write it
+        // over the stored document instead of trying to reconcile two
+        // versions. The offline app uses the merge path below; API clients
+        // (which have just read the recipe) use this one, so that removing an
+        // ingredient or a category actually removes it.
+        return await updateOne(
+            'recipes',
+            { _id: recipe._id, 'owner.email': user.account },
+            [
+                // $literal so that a value which happens to start with '$'
+                // (an ingredient priced "$5", say) isn't read as a field path.
+                { $replaceWith: { $literal: { ...recipe, merged: false } } },
+                { $set: { last_remote_save: "$$NOW" } },
+            ]
+        );
+    }
     // let result = await replaceOne('recipes',
     //                               {_id:recipe._id,
     //                                'owner.email':user.account},
@@ -64429,6 +64501,232 @@ function setFakeUser (user, params) {
 }
 setFakeUserRequest.setRequestHandler(setFakeUser);
 
+/**
+   ingredientParsing.js
+
+   One canonical place to turn loosely-shaped ingredient input into the
+   shape the rest of Gourmet expects. The recipe editor parses ingredient
+   text in the browser (see widgets/inputs/IngredientInput.svelte); API and
+   MCP clients don't run that code, so they need the same parsing on the
+   server side.
+
+   The canonical ingredient looks like this:
+
+     {
+       text : 'flour, sifted',        // the ingredient *name* only, no amount
+       amount : {
+         amount : 1.5,                // number (upper bound when it's a range)
+         rangeAmount : 1,             // optional lower bound of a range
+         unit : 'cups',
+         standardUnit : 'c.',         // filled in for units we know how to convert
+       },
+       originalText : '1-1 1/2 cups flour, sifted', // only when we parsed from text
+     }
+
+   A group (sub-list) looks like this:
+
+     { text : 'FOR THE DOUGH:', ingredients : [ ...canonical ingredients... ] }
+
+   What we accept as *input* is deliberately generous:
+
+   - a plain string: '1 1/2 cups flour' -> parsed into amount/unit/text
+   - {amount, unit, ingredient} (the shape we ask API/MCP clients for)
+     where amount may be a number ('2') or a string ('1 1/2', '2-3', 'two')
+   - {text} alone -> we parse the text, since that's all we were given
+   - {text, amount:{...}} -> already canonical, left alone
+   - {text, ingredients:[...]} -> a group, normalized recursively
+**/
+
+
+// Keys we'll accept for the ingredient name, in order of preference. `text`
+// is our own canonical key; the rest are what an LLM tends to reach for.
+const NAME_KEYS = ['ingredient', 'item', 'food', 'name', 'text'];
+// Same idea for the numeric quantity.
+const AMOUNT_KEYS = ['amount', 'quantity', 'qty'];
+
+function firstDefined(object, keys) {
+    for (const key of keys) {
+        if (object[key] !== undefined && object[key] !== null && object[key] !== '') {
+            return object[key];
+        }
+    }
+    return undefined;
+}
+
+function toNumber(value) {
+    if (typeof value === 'number') {
+        return isNaN(value) ? undefined : value;
+    }
+    if (typeof value === 'string') {
+        const n = fracToFloat(value);
+        return typeof n === 'number' && !isNaN(n) ? n : undefined;
+    }
+    return undefined;
+}
+
+function cleanText(value) {
+    if (value === undefined || value === null) { return ''; }
+    return cleanupWhitespace(String(value));
+}
+
+// Take the loose pile of amount-ish properties we've gathered and produce a
+// canonical amount object (or undefined if there's nothing worth keeping).
+function finishAmount(raw) {
+    if (!raw) { return undefined; }
+    const amount = {};
+    const value = toNumber(raw.amount);
+    const rangeValue = toNumber(raw.rangeAmount);
+    if (value !== undefined) { amount.amount = value; }
+    if (rangeValue !== undefined) { amount.rangeAmount = rangeValue; }
+    // Gourmet stores ranges as rangeAmount–amount (low then high). Callers
+    // naturally write amount:2, rangeAmount:3 for "2 to 3", so put them back
+    // in the order formatAmount expects rather than printing "3–2".
+    if (amount.amount !== undefined && amount.rangeAmount !== undefined
+        && amount.rangeAmount > amount.amount) {
+        const low = amount.amount;
+        amount.amount = amount.rangeAmount;
+        amount.rangeAmount = low;
+    }
+    if (raw.textAmount) { amount.textAmount = raw.textAmount; }
+    if (raw.textRangeAmount) { amount.textRangeAmount = raw.textRangeAmount; }
+    const unit = cleanText(raw.unit);
+    if (unit) {
+        amount.unit = unit;
+        const standardUnit = raw.standardUnit || getStandardUnit(unit);
+        if (standardUnit) { amount.standardUnit = standardUnit; }
+    }
+    if (amount.amount === undefined && amount.rangeAmount === undefined && !amount.unit) {
+        return undefined;
+    }
+    return amount;
+}
+
+/**
+   Parse a single line of ingredient text ('1 1/2 cups flour, sifted') into a
+   canonical ingredient. This is the same split the editor does: find the
+   amount first, then look for a unit in whatever is left over.
+**/
+function parseIngredientText(rawText) {
+    const text = cleanText(rawText);
+    if (!text) { return { text: '' }; }
+    const parsedAmount = parseAmount(text);
+    // true means "require an ingredient": if the leftover text is *only* a
+    // unit ('2 eggs'), treat the word as the ingredient rather than the unit.
+    const unitAndText = parseUnit(parsedAmount.posttext || parsedAmount.pretext || '', true);
+    const ingredient = {
+        text: cleanText(unitAndText.text) || text,
+        originalText: text,
+    };
+    const amount = finishAmount({
+        amount: parsedAmount.amount,
+        rangeAmount: parsedAmount.rangeAmount,
+        textAmount: parsedAmount.textAmount,
+        textRangeAmount: parsedAmount.textRangeAmount,
+        unit: unitAndText.unit,
+        standardUnit: unitAndText.standardUnit,
+    });
+    if (amount) { ingredient.amount = amount; }
+    return ingredient;
+}
+
+// An amount handed to us as {amount, unit} rather than as free text. The
+// amount itself may still be a string ('1 1/2', '2-3', 'a couple'), and the
+// unit may still be hiding inside it ('2 cups' with no separate unit field).
+function parseStructuredAmount(rawAmount, rawUnit, rawRangeAmount) {
+    let unit = rawUnit;
+    let collected = { unit, rangeAmount: rawRangeAmount };
+    if (rawAmount && typeof rawAmount === 'object') {
+        // Already an amount object -- trust it, but let an outer unit win if
+        // the object didn't carry one.
+        return finishAmount({
+            ...rawAmount,
+            unit: cleanText(rawAmount.unit) || unit,
+            rangeAmount: rawAmount.rangeAmount !== undefined ? rawAmount.rangeAmount : rawRangeAmount,
+        });
+    }
+    if (typeof rawAmount === 'number') {
+        collected.amount = rawAmount;
+    } else if (typeof rawAmount === 'string' && rawAmount.trim()) {
+        const parsed = parseAmount(rawAmount);
+        collected.amount = parsed.amount;
+        if (parsed.rangeAmount !== undefined) { collected.rangeAmount = parsed.rangeAmount; }
+        collected.textAmount = parsed.textAmount;
+        collected.textRangeAmount = parsed.textRangeAmount;
+        if (!cleanText(unit)) {
+            // '2 cups' arrived as the amount with no unit field of its own.
+            const leftover = parsed.posttext || parsed.pretext || '';
+            const unitMatch = parseUnit(leftover);
+            if (unitMatch.unit) {
+                collected.unit = unitMatch.unit;
+                collected.standardUnit = unitMatch.standardUnit;
+            }
+        }
+    }
+    return finishAmount(collected);
+}
+
+/**
+   Normalize one ingredient entry (string, object, or group) into the
+   canonical shape. Returns null for entries with nothing in them.
+**/
+function normalizeIngredient(entry) {
+    if (entry === undefined || entry === null) { return null; }
+    if (typeof entry === 'string' || typeof entry === 'number') {
+        const parsed = parseIngredientText(entry);
+        return parsed.text ? parsed : null;
+    }
+    if (typeof entry !== 'object') { return null; }
+
+    // A group: keep the header text as-is (it's a label, not an ingredient)
+    // and normalize the sub-list.
+    if (Array.isArray(entry.ingredients)) {
+        const { ingredients, ...rest } = entry;
+        return {
+            ...rest,
+            text: cleanText(firstDefined(entry, ['text', 'name', 'header', 'group', 'title'])),
+            ingredients: normalizeIngredients(ingredients),
+        };
+    }
+
+    const {
+        text, ingredient, item, food, name,
+        amount, quantity, qty, unit, rangeAmount,
+        ...rest
+    } = entry;
+    const rawName = firstDefined(entry, NAME_KEYS);
+    const rawAmount = firstDefined(entry, AMOUNT_KEYS);
+    const hasStructure = rawAmount !== undefined
+        || (unit !== undefined && unit !== null && unit !== '')
+        || rangeAmount !== undefined;
+
+    if (!hasStructure) {
+        // All we were given is a name, so it may well be a whole ingredient
+        // line ('2 cups flour'). Parse it.
+        const parsed = parseIngredientText(rawName);
+        if (!parsed.text) { return null; }
+        return { ...rest, ...parsed };
+    }
+
+    const normalized = { ...rest, text: cleanText(rawName) };
+    const parsedAmount = parseStructuredAmount(rawAmount, unit, rangeAmount);
+    if (parsedAmount) { normalized.amount = parsedAmount; }
+    if (!normalized.text && !normalized.amount) { return null; }
+    return normalized;
+}
+
+/**
+   Normalize a whole ingredient list. Accepts a single string (split on
+   newlines) as a convenience, since that's a common way to paste a list.
+**/
+function normalizeIngredients(list) {
+    if (!list) { return []; }
+    if (typeof list === 'string') {
+        list = list.split(/\r?\n/);
+    }
+    if (!Array.isArray(list)) { return []; }
+    return list.map(normalizeIngredient).filter(Boolean);
+}
+
 const requestHandlers = {
 };
 registerHandlerObject(requestHandlers);
@@ -64601,10 +64899,12 @@ function ensureScope(user, scope) {
 
 function normalizeRecipeInput(rawRecipe = {}) {
     const recipe = { ...rawRecipe };
-    if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
-        if (typeof recipe.ingredients[0] === 'string') {
-            recipe.ingredients = recipe.ingredients.map((text) => ({ text }));
-        }
+    if (recipe.ingredients) {
+        // Ingredients may arrive as plain text, as {amount, unit, ingredient},
+        // as groups with nested lists, or already canonical. Whatever we get,
+        // parse it here so the stored recipe always has structured amounts --
+        // API clients don't run the browser-side parser the editor uses.
+        recipe.ingredients = normalizeIngredients(recipe.ingredients);
     }
     if (Array.isArray(recipe.categories) && recipe.categories.length) {
         if (typeof recipe.categories[0] === 'string') {
@@ -64632,7 +64932,77 @@ function normalizeRecipeInput(rawRecipe = {}) {
     return recipe;
 }
 
+/**
+   What we tell API/MCP clients about the shapes we want. Served from
+   /recipes/schema so a client can ask instead of guessing.
+**/
+const RECIPE_SHAPE = {
+    ingredients: {
+        preferred: {
+            amount: 'number, or a string like "1 1/2" or "2-3" (optional)',
+            unit: 'string, e.g. "cups", "tbsp", "cloves" (optional)',
+            ingredient: 'the ingredient name and any prep, e.g. "flour, sifted"',
+        },
+        alsoAccepted: [
+            'a plain string like "1 1/2 cups flour, sifted" -- the server parses ' +
+            'the amount and unit out of it for you',
+            '{text, amount: {amount, rangeAmount, unit}} -- the canonical stored shape',
+            '{text, ingredients: [...]} -- a group heading with its own sub-list',
+        ],
+        stored: {
+            text: 'the ingredient name only, with the amount and unit removed',
+            amount: {
+                amount: 'number; the upper bound when the ingredient is a range',
+                rangeAmount: 'number; the lower bound of a range (omitted otherwise)',
+                unit: 'the unit as written',
+                standardUnit: 'our normalized unit, when we recognize it',
+            },
+        },
+        note: 'Send amount/unit/ingredient separately when you know them. If you ' +
+            'only have a line of text, send the text and we will parse it.',
+    },
+    categories: 'array of strings, or [{name}]',
+    sources: 'array of strings, or [{name, url}]',
+    instructions: 'a string (plain text or HTML), or an array of strings',
+    yields: '[{amount, unit}]',
+    times: '[{name, seconds, text}]',
+    rating: 'number, 0-5',
+    updateSemantics:
+        'Updates are partial at the field level: fields you omit keep their stored ' +
+        'value. Fields you send replace what is stored -- sending `ingredients` ' +
+        'replaces the entire ingredient list, it is not merged with the old one. ' +
+        'To add one ingredient, read the recipe first and send the full new list.',
+};
+
+/**
+   Apply a partial update to a stored recipe.
+
+   "Partial" means field-level: fields you don't mention keep their stored
+   value. Fields you *do* mention are replaced outright -- in particular,
+   sending `ingredients` or `categories` replaces the whole list rather than
+   unioning it with what's already there, which is what the docs promise and
+   what you need in order to delete an ingredient.
+**/
+async function applyRecipeUpdate(user, recipeId, rawUpdate) {
+    let existing;
+    try {
+        existing = await getRecipe(user, { _id: recipeId });
+    } catch (err) {
+        throw makeError(404, `No recipe found with id ${recipeId}`);
+    }
+    const update = normalizeRecipeInput(rawUpdate);
+    delete update._id;
+    delete update.owner;
+    delete update.last_remote_save;
+    const recipe = { ...existing, ...update, _id: recipeId };
+    return await updateRecipe(user, { recipe, replace: true });
+}
+
 async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query) {
+    if (pathParts[1] === 'schema') {
+        ensureScope(user, 'recipes:read');
+        return RECIPE_SHAPE;
+    }
     if (method === 'GET') {
         ensureScope(user, 'recipes:read');
         if (pathParts[1] === 'summary') {
@@ -64688,9 +65058,9 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         if (!recipeId) {
             throw makeError(400, 'Missing recipe id');
         }
-        const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
-        recipe._id = recipeId;
-        return await updateRecipe(user, { recipe, forceMerge: true });
+        const rawUpdate = { ...(jsonBody.recipe || jsonBody) };
+        delete rawUpdate.id;
+        return await applyRecipeUpdate(user, recipeId, rawUpdate);
     }
     if (method === 'POST' && pathParts[1] === 'delete') {
         ensureScope(user, 'recipes:write');
@@ -64713,9 +65083,7 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         if (!pathParts[1]) {
             throw makeError(400, 'Missing recipe id');
         }
-        const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
-        recipe._id = pathParts[1];
-        return await updateRecipe(user, { recipe, forceMerge: true });
+        return await applyRecipeUpdate(user, pathParts[1], jsonBody.recipe || jsonBody);
     }
     if (method === 'DELETE') {
         ensureScope(user, 'recipes:write');
