@@ -1,4 +1,5 @@
-import {parseIngredientText, normalizeIngredient, normalizeIngredients} from './ingredientParsing.js';
+import {parseIngredientText, normalizeIngredient, normalizeIngredients,
+        reparseIngredients} from './ingredientParsing.js';
 
 test(
     'parseIngredientText pulls apart amount, unit and name',
@@ -102,5 +103,40 @@ test(
     () => {
         expect(normalizeIngredients('2 cups flour\n1 tsp salt\n').map((i) => i.text))
             .toEqual(['flour', 'salt']);
+    }
+);
+
+test(
+    'reparseIngredients repairs ingredients stored as unparsed text',
+    () => {
+        const {ingredients, changes} = reparseIngredients([
+            {text: '250g all-purpose flour'},
+            {text: 'FOR THE TOPPING:', ingredients: [{text: '2 cups flour'}]},
+        ]);
+        expect(changes.map((c) => c.at)).toEqual(['[0]', '[1][0]']);
+        expect(ingredients[0].text).toEqual('all-purpose flour');
+        expect(ingredients[0].amount).toEqual({
+            amount: 250, textAmount: '250', unit: 'g', standardUnit: 'g',
+        });
+        expect(ingredients[1].text).toEqual('FOR THE TOPPING:');
+        expect(ingredients[1].ingredients[0].text).toEqual('flour');
+    }
+);
+
+test(
+    'reparseIngredients leaves anything ambiguous alone',
+    () => {
+        const untouched = [
+            {text: '2% milk'},          // '%' would be stranded at the front
+            {text: '7-Up'},             // so would '-'
+            {text: '00 flour'},         // a zero amount is a misread
+            {text: '5-spice powder'},
+            {text: 'salt to taste'},    // no amount to find
+            {text: 'butter', amount: {amount: 3, unit: 'tbsp'}}, // already parsed
+            {text: 'eggs', amount: {amount: 2}},
+        ];
+        const {ingredients, changes} = reparseIngredients(untouched);
+        expect(changes).toEqual([]);
+        expect(ingredients).toEqual(untouched);
     }
 );

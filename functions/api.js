@@ -1784,9 +1784,14 @@ const revokeApiTokenRequest = Request({
 });
 
 async function updateRecipe(user, params) {
-    let { recipe, forceMerge, replace } = params;
+    let { recipe, forceMerge, replace, keepLastModified } = params;
     recipe = deepcopy(recipe);
-    recipe.last_modified = Date.now();
+    // keepLastModified is for maintenance passes that rewrite stored recipes
+    // without the user having edited anything -- bumping the timestamp on a
+    // few hundred recipes would scramble every sort-by-recently-modified list.
+    if (!keepLastModified) {
+        recipe.last_modified = Date.now();
+    }
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);
@@ -64727,6 +64732,163 @@ function normalizeIngredients(list) {
     return list.map(normalizeIngredient).filter(Boolean);
 }
 
+// ---------------------------------------------------------------------------
+// Repairing ingredients that were stored before the server parsed anything.
+// ---------------------------------------------------------------------------
+
+// An ingredient already has an amount worth keeping if it carries a number or
+// a unit. An empty {} doesn't count.
+function hasUsableAmount(ingredient) {
+    const amount = ingredient && ingredient.amount;
+    if (!amount || typeof amount !== 'object') { return false; }
+    return typeof amount.amount === 'number'
+        || typeof amount.rangeAmount === 'number'
+        || Boolean(amount.unit);
+}
+
+/**
+   Decide whether a stored ingredient looks like an unparsed line of text
+   ({text: '250g all-purpose flour'}) and, if so, return the repaired version.
+   Returns null when we should leave it alone.
+
+   This runs unattended over the whole collection, so it is deliberately shy:
+   anything the least bit odd is skipped rather than guessed at. The cost of
+   skipping is an ingredient that stays as it is; the cost of guessing wrong
+   is a mangled recipe.
+**/
+function reparseIngredient(ingredient) {
+    if (!ingredient || typeof ingredient !== 'object') { return null; }
+    if (Array.isArray(ingredient.ingredients)) { return null; } // a group heading
+    if (hasUsableAmount(ingredient)) { return null; }
+    const text = cleanText(ingredient.text);
+    if (!text) { return null; }
+
+    const parsed = parseIngredientText(text);
+    if (!parsed.amount) { return null; }
+    // A zero amount means we matched something like '00 flour'.
+    if (!parsed.amount.amount && !parsed.amount.rangeAmount) { return null; }
+    // If pulling the number out strands punctuation at the front ('2% milk'
+    // -> '% milk', '7-Up' -> '-Up') we misread a name as an amount.
+    if (!/^[\p{L}\p{N}]/u.test(parsed.text)) { return null; }
+    // Nothing actually moved out of the name.
+    if (parsed.text === text) { return null; }
+
+    return { ...ingredient, ...parsed };
+}
+
+/**
+   Walk a stored ingredient list (including groups) and repair what we can.
+   Returns the new list plus a description of every change, so a caller can
+   show its work before writing anything.
+**/
+function reparseIngredients(list, path = '') {
+    if (!Array.isArray(list)) { return { ingredients: list, changes: [] }; }
+    const changes = [];
+    const ingredients = list.map((ingredient, index) => {
+        const where = path ? `${path}[${index}]` : `[${index}]`;
+        if (ingredient && Array.isArray(ingredient.ingredients)) {
+            const nested = reparseIngredients(ingredient.ingredients, where);
+            changes.push(...nested.changes);
+            return { ...ingredient, ingredients: nested.ingredients };
+        }
+        const repaired = reparseIngredient(ingredient);
+        if (!repaired) { return ingredient; }
+        changes.push({
+            at: where,
+            from: ingredient.text,
+            to: {
+                text: repaired.text,
+                amount: repaired.amount.amount,
+                rangeAmount: repaired.amount.rangeAmount,
+                unit: repaired.amount.unit,
+            },
+        });
+        return repaired;
+    });
+    return { ingredients, changes };
+}
+
+/**
+   A one-off maintenance pass for recipes written before the API parsed
+   ingredients. Those recipes stored whole lines in the name field
+   ({text: '250g all-purpose flour'}) with no amount at all, so nothing that
+   reads amounts -- scaling, shopping lists -- works on them.
+
+   Runs in batches so a single invocation stays well inside the function
+   timeout: the caller pages with `offset` until `done`. Sorting is by _id
+   rather than last_modified so that rewriting recipes mid-scan can't shuffle
+   the pages underneath us.
+**/
+
+const DEFAULT_LIMIT = 25;
+const MAX_LIMIT = 100;
+
+// Leaf ingredients we still couldn't give an amount to, so a caller can see
+// what the pass is leaving behind rather than assuming it got everything.
+function collectUnparsed(list, into) {
+    if (!Array.isArray(list)) { return into; }
+    list.forEach((ingredient) => {
+        if (!ingredient || typeof ingredient !== 'object') { return; }
+        if (Array.isArray(ingredient.ingredients)) {
+            collectUnparsed(ingredient.ingredients, into);
+            return;
+        }
+        const amount = ingredient.amount;
+        const hasAmount = amount && typeof amount === 'object'
+            && (typeof amount.amount === 'number'
+                || typeof amount.rangeAmount === 'number'
+                || Boolean(amount.unit));
+        if (!hasAmount && ingredient.text) {
+            into.push(ingredient.text);
+        }
+    });
+    return into;
+}
+
+async function reparseRecipeIngredients(user, params = {}) {
+    const dryRun = params.dryRun !== false; // opt in to writing, never default to it
+    const limit = Math.min(Number(params.limit) || DEFAULT_LIMIT, MAX_LIMIT);
+    const offset = Number(params.offset) || 0;
+
+    const { count, result } = await queryCollection(
+        'recipes',
+        { 'owner.email': user.account, deleted: { $ne: 1 } },
+        { limit, page: offset, sort: { _id: 1 } }
+    );
+
+    const changedRecipes = [];
+    const stillUnparsed = [];
+    for (const recipe of result) {
+        const { ingredients, changes } = reparseIngredients(recipe.ingredients);
+        if (changes.length) {
+            changedRecipes.push({ _id: recipe._id, title: recipe.title, changes });
+            if (!dryRun) {
+                await updateRecipe(user, {
+                    recipe: { ...recipe, ingredients },
+                    replace: true,
+                    keepLastModified: true,
+                });
+            }
+        }
+        collectUnparsed(changes.length ? ingredients : recipe.ingredients, stillUnparsed);
+    }
+
+    const nextOffset = offset + result.length;
+    return {
+        dryRun,
+        total: count,
+        offset,
+        nextOffset,
+        scanned: result.length,
+        done: result.length === 0 || nextOffset >= count,
+        recipesChanged: changedRecipes.length,
+        ingredientsChanged: changedRecipes.reduce((n, r) => n + r.changes.length, 0),
+        stillUnparsedCount: stillUnparsed.length,
+        stillUnparsedSample: stillUnparsed.slice(0, 5),
+        recipes: changedRecipes,
+    };
+}
+
 const requestHandlers = {
 };
 registerHandlerObject(requestHandlers);
@@ -65061,6 +65223,10 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         const rawUpdate = { ...(jsonBody.recipe || jsonBody) };
         delete rawUpdate.id;
         return await applyRecipeUpdate(user, recipeId, rawUpdate);
+    }
+    if (method === 'POST' && pathParts[1] === 'reparse-ingredients') {
+        ensureScope(user, 'recipes:write');
+        return await reparseRecipeIngredients(user, jsonBody || {});
     }
     if (method === 'POST' && pathParts[1] === 'delete') {
         ensureScope(user, 'recipes:write');

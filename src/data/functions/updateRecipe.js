@@ -3,9 +3,14 @@ import { updateOne } from './mongoConnect.js';
 import { prepRecRemote } from '../utils/validate.js';
 
 export async function updateRecipe(user, params) {
-    let { recipe, forceMerge, replace } = params;
+    let { recipe, forceMerge, replace, keepLastModified } = params;
     recipe = deepcopy(recipe);
-    recipe.last_modified = Date.now();
+    // keepLastModified is for maintenance passes that rewrite stored recipes
+    // without the user having edited anything -- bumping the timestamp on a
+    // few hundred recipes would scramble every sort-by-recently-modified list.
+    if (!keepLastModified) {
+        recipe.last_modified = Date.now();
+    }
     let lastSave = recipe.last_remote_save;
     if (lastSave) { delete recipe.last_remote_save; }
     prepRecRemote(recipe, user);

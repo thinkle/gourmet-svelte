@@ -226,3 +226,79 @@ export function normalizeIngredients(list) {
     if (!Array.isArray(list)) { return []; }
     return list.map(normalizeIngredient).filter(Boolean);
 }
+
+// ---------------------------------------------------------------------------
+// Repairing ingredients that were stored before the server parsed anything.
+// ---------------------------------------------------------------------------
+
+// An ingredient already has an amount worth keeping if it carries a number or
+// a unit. An empty {} doesn't count.
+function hasUsableAmount(ingredient) {
+    const amount = ingredient && ingredient.amount;
+    if (!amount || typeof amount !== 'object') { return false; }
+    return typeof amount.amount === 'number'
+        || typeof amount.rangeAmount === 'number'
+        || Boolean(amount.unit);
+}
+
+/**
+   Decide whether a stored ingredient looks like an unparsed line of text
+   ({text: '250g all-purpose flour'}) and, if so, return the repaired version.
+   Returns null when we should leave it alone.
+
+   This runs unattended over the whole collection, so it is deliberately shy:
+   anything the least bit odd is skipped rather than guessed at. The cost of
+   skipping is an ingredient that stays as it is; the cost of guessing wrong
+   is a mangled recipe.
+**/
+export function reparseIngredient(ingredient) {
+    if (!ingredient || typeof ingredient !== 'object') { return null; }
+    if (Array.isArray(ingredient.ingredients)) { return null; } // a group heading
+    if (hasUsableAmount(ingredient)) { return null; }
+    const text = cleanText(ingredient.text);
+    if (!text) { return null; }
+
+    const parsed = parseIngredientText(text);
+    if (!parsed.amount) { return null; }
+    // A zero amount means we matched something like '00 flour'.
+    if (!parsed.amount.amount && !parsed.amount.rangeAmount) { return null; }
+    // If pulling the number out strands punctuation at the front ('2% milk'
+    // -> '% milk', '7-Up' -> '-Up') we misread a name as an amount.
+    if (!/^[\p{L}\p{N}]/u.test(parsed.text)) { return null; }
+    // Nothing actually moved out of the name.
+    if (parsed.text === text) { return null; }
+
+    return { ...ingredient, ...parsed };
+}
+
+/**
+   Walk a stored ingredient list (including groups) and repair what we can.
+   Returns the new list plus a description of every change, so a caller can
+   show its work before writing anything.
+**/
+export function reparseIngredients(list, path = '') {
+    if (!Array.isArray(list)) { return { ingredients: list, changes: [] }; }
+    const changes = [];
+    const ingredients = list.map((ingredient, index) => {
+        const where = path ? `${path}[${index}]` : `[${index}]`;
+        if (ingredient && Array.isArray(ingredient.ingredients)) {
+            const nested = reparseIngredients(ingredient.ingredients, where);
+            changes.push(...nested.changes);
+            return { ...ingredient, ingredients: nested.ingredients };
+        }
+        const repaired = reparseIngredient(ingredient);
+        if (!repaired) { return ingredient; }
+        changes.push({
+            at: where,
+            from: ingredient.text,
+            to: {
+                text: repaired.text,
+                amount: repaired.amount.amount,
+                rangeAmount: repaired.amount.rangeAmount,
+                unit: repaired.amount.unit,
+            },
+        });
+        return repaired;
+    });
+    return { ingredients, changes };
+}

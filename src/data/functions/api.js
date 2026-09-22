@@ -17,6 +17,7 @@ import { addRecipe, getRecipe, getRecipes, deleteRecipe } from './recipeFunction
 import { updateRecipe } from './updateRecipe.js';
 import { getUserFromApiToken, touchApiToken } from './tokenFunctions.js';
 import { normalizeIngredients } from '../../utils/ingredientParsing.js';
+import { reparseRecipeIngredients } from './reparseIngredientsFunction.js';
 
 function jsonResponse(statusCode, body) {
     return {
@@ -348,6 +349,10 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         const rawUpdate = { ...(jsonBody.recipe || jsonBody) };
         delete rawUpdate.id;
         return await applyRecipeUpdate(user, recipeId, rawUpdate);
+    }
+    if (method === 'POST' && pathParts[1] === 'reparse-ingredients') {
+        ensureScope(user, 'recipes:write');
+        return await reparseRecipeIngredients(user, jsonBody || {});
     }
     if (method === 'POST' && pathParts[1] === 'delete') {
         ensureScope(user, 'recipes:write');
