@@ -167,6 +167,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
+  /.netlify/functions/api/recipes/reparse-ingredients:
+    post:
+      summary: Re-parse ingredients stored as unparsed text (maintenance)
+      operationId: reparseRecipeIngredients
+      description: |
+        Maintenance pass for recipes saved before the API parsed ingredients
+        server-side, which stored a whole line in the name field with no
+        amount. Repairs what it can and skips anything ambiguous. Does not
+        change last_modified. Dry run unless `dryRun` is false; works in
+        batches, so page with `offset` until the reply says `done`.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dryRun:
+                  type: boolean
+                  default: true
+                  description: Report without writing. Defaults to true.
+                limit:
+                  type: integer
+                  default: 25
+                  description: Recipes per batch (max 100).
+                offset:
+                  type: integer
+                  default: 0
+      responses:
+        "200":
+          description: What changed, or would change, in this batch.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dryRun:
+                    type: boolean
+                  total:
+                    type: integer
+                  scanned:
+                    type: integer
+                  nextOffset:
+                    type: integer
+                  done:
+                    type: boolean
+                  recipesChanged:
+                    type: integer
+                  ingredientsChanged:
+                    type: integer
+                  stillUnparsedCount:
+                    type: integer
+                  recipes:
+                    type: array
+                    items:
+                      type: object
   /.netlify/functions/api/recipes/delete:
     post:
       summary: Delete a recipe by id
