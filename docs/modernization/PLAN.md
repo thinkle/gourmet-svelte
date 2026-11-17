@@ -56,39 +56,54 @@ and the MCP talks to it.
    the user comes from a client-supplied `localuser` header, falling back to a
    hard-coded fake user with Tom's email. Not gated on a dev build.
 2. **Every Netlify build uses the production database** (`!ROLLUP_WATCH` picks
-   `Gourmet`). The rebuild's branch deploy must not.
+   `Gourmet`). Decided 2026-11-16: that stays, on purpose, for the rebuild and
+   local dev too, so the new app is built against real recipes. The safety net
+   is backups (P0-8), tests that cannot reach the database, and the rules in
+   `/AGENTS.md`, not a separate database. It makes item 1 more urgent:
+   `Gourmet` holds 222 other people's recipes.
 3. **The 400 path echoes `user` and request params** back to the caller.
 
 ## How the old app keeps running
 
 ```
-master     prod site (confirm). Untouched until cutover.
-dev        what the MCP talks to today. Hotfixes only (P0).
-rebuild    the new app. Own branch deploy, devtest database.
-rb/<id>    one branch per task, PR into rebuild.
+master     the old app, in production (www). Same code as dev as of
+           2026-11-16 (413dfa1), REST API included. Hotfixes only.
+dev        the new app (dev.gourmetrecipemanager.com), same database. The
+           MCP talks to this deploy.
+rb/<id>    one branch per task, from dev, PR into dev.
 ```
 
-- `rebuild` starts from `dev`. The first task moves the old UI source to
-  `legacy/` (reference only, not compiled) and keeps the logic and function in
-  place. Old and new never have to compile together.
-- Fixes to shared logic or the function land on `dev` and merge forward the
-  same day. P0-5's contract tests run on both branches.
-- IndexedDB is per origin, so the `rebuild--…` deploy has its own local cache.
-- **Cutover:** merge `rebuild` into `dev`; the MCP URL does not change. Tag
-  `pre-rebuild` first; rollback is reverting the merge.
+Changed 2026-11-16: there is no separate `rebuild` branch. Tom develops and
+uses the MCP against `dev`; `master` now has the same API, so the MCP can be
+pointed at www if `dev` is unsettled.
+
+- P0 cards land on `dev` first, while it is still the old app. When P0 is
+  done, tag `pre-rebuild` and fast-forward `master` to `dev` once more, so
+  production gets the security fixes. Then R0 starts.
+- R0-1 moves the old UI source to `legacy/` (reference only, not compiled)
+  and keeps the logic and function in place. Old and new never have to
+  compile together.
+- From R0 on, `dev` has no working UI until R0-8, but its function and REST
+  API keep working at every commit: P0-5's contract tests gate every PR.
+- After R0 starts, a fix the old app needs branches from `master` and merges
+  to `master`; if it touches kept logic or the function, the same change also
+  goes to `dev`.
+- IndexedDB is per origin, so www and dev each have their own local cache.
+- **Cutover:** merge `dev` into `master`. Rollback is republishing the
+  previous production deploy in Netlify.
 
 ## Phases
 
 | # | Phase | Lands on | Outcome |
 | --- | --- | --- | --- |
-| P0 | Safety net | `dev` | Bypass closed, database by deploy context, backup, REST contract tests |
-| R0 | Foundation | `rebuild` | Vite + Svelte 5 + Contain + Vitest; logic tests green; function built by Netlify; theme; auth module; app shell you can sign in to |
-| R1 | Recipe list | `rebuild` | Search, filter, sort, open. Card vs data list decided from a real spike |
-| R2 | Recipe view | `rebuild` | Read a recipe, scale it, highlighting both ways, timers, usable on a phone at the counter |
-| R3 | Recipe editor | `rebuild` | Create and edit with groups; save/revert state under test; image upload |
-| R4 | Account | `rebuild` | API tokens; name; linked accounts |
-| R5 | Multiple measures | `rebuild` + API | Grams and cups on one ingredient; additive to the API |
-| R6 | Cutover | `dev`, then prod | You use the new app daily; MCP unaffected |
+| P0 | Safety net | `dev` | Bypass closed, one database named on purpose, backups, cache fix, REST contract tests |
+| R0 | Foundation | `dev` | Vite + Svelte 5 + Contain + Vitest; logic tests green; function built by Netlify; theme; auth module; app shell you can sign in to |
+| R1 | Recipe list | `dev` | Search, filter, sort, open. Card vs data list decided from a real spike |
+| R2 | Recipe view | `dev` | Read a recipe, scale it, highlighting both ways, timers, usable on a phone at the counter |
+| R3 | Recipe editor | `dev` | Create and edit with groups; save/revert state under test; image upload |
+| R4 | Account | `dev` | API tokens; name; linked accounts |
+| R5 | Multiple measures | `dev` + API | Grams and cups on one ingredient; additive to the API |
+| R6 | Cutover | `master` (prod) | You use the new app daily; MCP unaffected |
 | Later | — | — | Shopping list + MCP + family sharing, import/export UI, share links, extension |
 
 The new app is usable for reading recipes at the end of R2, which is the point

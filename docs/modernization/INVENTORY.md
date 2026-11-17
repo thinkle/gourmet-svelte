@@ -36,6 +36,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | Share | Public share link `/share/:id` | later | | Server handlers stay |
 | Data | Import / export file UI | later | | Server handlers stay; take a `mongodump` instead (P0-4) |
 | Shopping | Shopping list | later | | Future: with MCP endpoints and family sharing |
+| Nutrition | Ingredient-to-nutrition-database mapping and its UI | cut | | Superseded: an AI client can do the mapping. Server handlers left alone until after cutover |
 | Extension | Chrome importer + `/sidebar` | cut from build | | MV2; source kept in `legacy/` |
 | Dev | Demo pages, Admin, ManageDB, fake-user switcher | cut | | |
 | Static | Support, Promo pages | cut | | |

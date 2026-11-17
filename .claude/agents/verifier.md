@@ -11,13 +11,15 @@ screen tasks also read the spec.
 
 Check, with evidence for each:
 
-1. **Scope.** `git diff --stat <base>...HEAD` (base is `rebuild`, or `dev` for
-   P0 cards). Every changed file is one the card allows. Nothing under
+1. **Scope.** `git diff --stat <base>...HEAD` (base is `dev`). Every changed file is one the card allows. Nothing under
    `legacy/` edited. Kept logic (`src/utils`, `importer`, `stores`, `data`)
    unchanged unless the card names it. No editor backups, build output or `.env`.
 2. **Contract.** No existing contract test edited, skipped or deleted.
-3. **Database safety.** Search the diff for `Gourmet` as a database name,
-   `MONGO_`, and connection strings. None added outside deploy-context config.
+3. **Database safety.** Every environment uses the real `Gourmet` database.
+   Search the diff for `MONGO_` and connection strings: none added. No test
+   connects to anything but in-memory Mongo. No script, migration or bulk
+   write was run against the database by the agent. A change to stored recipe
+   shape or a function write path names the dump taken before it.
 4. **Checks.** Run the checks from `AGENTS.md` yourself; paste the tail of
    each. Test count has not gone down against the base branch.
 5. **Done-when / spec.** Go line by line through the card's done-when, and for

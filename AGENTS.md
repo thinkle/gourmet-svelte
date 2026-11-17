@@ -13,13 +13,23 @@ scratch on Svelte 5 + Contain while the logic and API are kept. Read
    use. Do not change request or response shapes, status codes or update
    semantics unless the card says to, and then only additively. Never edit an
    existing contract test to make it pass.
-2. **Never touch real data.** Local and branch builds use the `devtest`
-   database. Do not set, hard-code or default `MONGO_DB_NAME` to `Gourmet`. Do
-   not run scripts against a remote database. Do not print or commit `MONGO_*`
-   values or API tokens.
-3. **Branches.** Never commit to `master` or `dev`. Task work goes on
-   `rb/<task-id>-short-name` and merges by pull request into `rebuild` (`dev`
-   only for P0 cards). Do not push, merge or deploy unless asked.
+2. **There is one database and it is real.** Every deploy (prod, `dev`,
+   branch previews) and local `netlify dev` use `Gourmet`: Tom's
+   recipes and other people's. Tom decided this on 2026-11-16 so the app is
+   built against real use. So: automated tests never connect to it (in-memory
+   Mongo only). Do not run scripts, migrations or bulk writes against it; write
+   the script, Tom runs it. Do not create, edit or delete recipes in a deployed
+   or local app except a scratch recipe you made for the check and remove
+   afterwards. Any change to stored recipe shape or to
+   `netlify/functions` write paths needs a dump first
+   (`scripts/migrate/dump.mjs`). Do not print or commit `MONGO_*` values or
+   API tokens.
+3. **Branches.** `dev` is the rebuild (dev.gourmetrecipemanager.com); `master`
+   is the old app in production. Never commit to either. Task work goes on
+   `rb/<task-id>-short-name`, branched from `dev`, and merges by pull request
+   into `dev`. The MCP in daily use talks to the `dev` deploy, so `dev` must
+   always build and its REST API must always work (rule 1). Do not push, merge
+   or deploy unless asked.
 4. **One task, one PR.** Stay inside what the card names. If the task needs a
    change elsewhere, stop and report it.
 5. **`legacy/` is reference only.** It is the old UI. Never edit it, never
@@ -33,7 +43,7 @@ scratch on Svelte 5 + Contain while the logic and API are kept. Read
 8. **Do not delete tests.**
 9. Files ending in `~` or wrapped in `#…#` are editor backups. Ignore them.
 
-## Layout (on `rebuild`)
+## Layout (on `dev`, from R0 on)
 
 ```
 src/app/            shell, routes
@@ -60,8 +70,8 @@ Contain lacks something, log it in the gap log in `CONTAIN_NOTES.md`.
 ## Checks
 
 Run and paste the tail of each before reporting done: `npm run check`,
-`npm test -- --run`, `npm run build`. (On `dev`, for P0 cards: `npm run build`
-and `npm run test-one`.) If a check was failing before your change, show
+`npm test -- --run`, `npm run build`. (For P0 cards, and until R0-2 and R0-3 land: `npm run
+build` and `npm run test-one`.) If a check was failing before your change, show
 before and after.
 
 ## Reporting

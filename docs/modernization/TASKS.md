@@ -4,11 +4,13 @@ Order matters within a phase. `Agent` names a file in `/.claude/agents/`; "lead"
 the top model with Tom reviewing. Every card ends with `verifier` passing.
 `[ ]` open, `[~]` in progress, `[x]` done; update in the same PR as the work.
 
-## P0 — Safety net (branch from `dev`, merge to `dev`)
+## P0 — Safety net (on `dev`, before R0 changes it; then `master` is fast-forwarded to `dev`)
 
-- [ ] **P0-1 Confirm deploy topology** — Tom, 10 min
-  Netlify UI: production branch, which branches get branch deploys, previews
-  on/off, env vars present. Write the answers at the top of this file.
+- [x] **P0-1 Confirm deploy topology** — read from the Netlify API, 2026-11-16
+  One site, `gourmet-svelte`. Production branch `master` (www). Every other
+  branch gets a branch deploy at `<branch>--gourmet-svelte.netlify.app`;
+  `dev` is also dev.gourmetrecipemanager.com. `MONGO_URL` is the same in every
+  context. Netlify Identity is on the site, so all deploys share sign-in.
 - [ ] **P0-2 Close the localhost auth path and stop leaking** — lead
   `src/data/functions/api.js`: the `localuser` / `getFakeUser()` branch and the
   fake-user handlers exist only in a local dev build (compiled out, not a
@@ -16,21 +18,43 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   logging `userCache` and token prefixes. `remoteRequest.js` sends `localuser`
   only in a dev build. Done when: `Referer: http://localhost` with no token
   gets 401 from a production build; `netlify dev` still works; a test covers both.
-- [ ] **P0-3 Database by deploy context** — lead
-  Explicit `MONGO_DB_NAME`, default `devtest`; `Gourmet` only for the
-  production context and the `dev` branch. Build fails if unset. Done when the
-  build log prints the chosen name and a throwaway branch deploy reports `devtest`.
-- [ ] **P0-4 Backup** — Tom
-  `mongodump` of `Gourmet` or an Atlas snapshot, stored off Netlify.
+- [ ] **P0-3 One database, named on purpose** — lead
+  Decided 2026-11-16: prod, `dev`, previews and local dev all use
+  `Gourmet`. Make that explicit: one constant, no build-time text replacement
+  (the cluster has a stray database literally called `MONGO_DB_NAME` from when
+  the replacement did not run). The function logs the database name once at
+  cold start. Tests cannot reach it: `mongoConnect` refuses to connect under
+  the test runner unless the URL is the in-memory server. Done when a local
+  build, a branch deploy and prod all log `Gourmet` and a test proves the guard.
+- [x] **P0-4 First backup** — done 2026-11-16
+  `scripts/migrate/dump.mjs` wrote all three databases on the cluster to
+  `~/gourmet-dumps/cluster-20261117-013704` (outside the repo).
+- [ ] **P0-8 Backups as a habit** — lead + Tom
+  Sharing one database makes this the safety net. The free Atlas tier has no
+  snapshots (**verify**). Decide and set up: a scheduled dump (where it runs,
+  where the files go, how many are kept), plus a dump before merging any PR
+  that touches `netlify/functions` or stored recipe shape. Document a restore
+  of one recipe and of everything, and try each once against a scratch
+  database.
 - [ ] **P0-5 REST contract tests** — `contract-tester`
   Every path in `public/openapi.yaml`, driven through `handler()` against an
   in-memory Mongo. Done when green on `dev` and red if `applyRecipeUpdate` is
   switched back to merging.
 - [ ] **P0-6 Tag and branch** — Tom
-  Tag `pre-rebuild`. Create `rebuild` from `dev`, enable its branch deploy,
-  seed `devtest` with a copy of real recipes.
+  When P0-2, P0-3 and P0-5 are merged: tag `pre-rebuild` and fast-forward
+  `master` to `dev`, so production has the fixes before R0 changes `dev`.
+- [x] **P0-7 Local cache drops recipes on a fresh sync** — done 2026-11-16 (671adbf, on `dev` and `master`)
+  Found 2026-11-16: 33 of 727 recipes, every MCP-created one included, are
+  missing from a newly synced browser. Server recipes carry the local `id` of
+  the device that made them (or none), and the cache writes them to that slot,
+  overwriting other recipes. Fix in `src/data/recipeData.js` /
+  `local/dexieApi.js`: a recipe from the server reuses the local row that
+  already has its `_id`, otherwise gets a fresh local id; its stored `id` is
+  ignored. An approved exception to "kept logic is not yours to change". Done
+  when a test syncing id-less and id-colliding recipes into an empty cache
+  keeps them all. Branch `rb/p0-7-cache-id-collision`.
 
-## R0 — Foundation (`rebuild`)
+## R0 — Foundation (`dev`)
 
 - [ ] **R0-1 Clear the ground** — `janitor`
   Move UI source to `legacy/` (`src/webapp`, `recDisplay`, `shopDisplay`,
@@ -71,7 +95,7 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   `Page` with bar, routes registered (same URL shapes as today), states for
   signing in / signed in / session expired / error, new-user agreement, sync
   status indicator wired to `statusStore`. Done when you can sign in on the
-  `rebuild` deploy and see your recipe count.
+  `dev` deploy and see your recipe count.
 
 ## R1 — Recipe list
 
@@ -121,7 +145,8 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   Add, remove, group, reorder. Reorder with buttons and keyboard first; drag
   later if missed.
 - [ ] **R3-5 Text blocks** — lead decides approach, `screen-builder` builds
-  Round-trip test: every text body in the seeded `devtest` data loads and
+  Round-trip test: every text body in a dump of Tom's recipes
+  (`scripts/migrate/dump.mjs`, read from disk, never committed) loads and
   saves unchanged when untouched.
 - [ ] **R3-6 Screen + new recipe + delete** — `screen-builder`
 - [ ] **R3-7 Image upload** — spec by `legacy-reader`
@@ -162,10 +187,10 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
 
 ## R6 — Cutover
 
-- [ ] **R6-1** A week of daily use on the `rebuild` deploy against `devtest` — Tom
-- [ ] **R6-2** Point `rebuild` at `Gourmet`; run the MCP against its URL:
-  create, update, search, delete a scratch recipe — Tom
-- [ ] **R6-3** Merge `rebuild` -> `dev`. Watch function logs for a day.
+- [ ] **R6-1** A week of daily use on the `dev` deploy — Tom
+- [ ] **R6-2** Run the MCP against the `dev` URL: create, update, search,
+  delete a scratch recipe — Tom
+- [ ] **R6-3** Merge `dev` -> `master`. Watch function logs for a day.
 - [ ] **R6-4** Prod domain to the new build. Delete `legacy/` when nothing in
   `INVENTORY.md` marked `later` still needs it as reference.
 
