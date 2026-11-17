@@ -1,0 +1,143 @@
+/* Spike theme: the app-level look. Everything else is Contain's defaults. */
+:root {
+  /* Old Gourmet: warm paper, Noto Sans for the interface, Lora for recipes. */
+  --bg: #fefffa;
+  --fg: #2b2622;
+  --font-family: "Noto Sans", system-ui, sans-serif;
+  --recipe-font-family: Lora, Georgia, "Times New Roman", serif;
+  /* The brand pair is Gourmet's default recipe colour. */
+  --primary-bg: #6b411d;
+  --primary-fg: #fff0a3;
+  --primary-color: #6b411d;
+  --on-primary-heading-fg: var(--primary-fg);
+  --on-primary-link-text-fg: var(--primary-fg);
+  /* The highlighter, from old Gourmet. */
+  --note-bg: #ffffad;
+  --note-fg: #333;
+}
+
+/* ── App shell ─────────────────────────────────────────── */
+/* A recipe fills the space under the tabs; its panes scroll, the page does not. */
+.tab-panel { height: 100%; }
+.tab-panel[hidden] { display: none; }
+.tab-panel.search { height: auto; }
+.tab-chip {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-inline-end: 0.45em;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, var(--swatch-bg) 0 61.8%, var(--swatch-fg) 61.8% 100%);
+  box-shadow: 0 0 0 1px color-mix(in oklab, currentColor 25%, transparent);
+}
+
+/* ── Recipe list ───────────────────────────────────────── */
+.recipe-list h4 { font-family: var(--recipe-font-family); font-weight: 600; font-size: 1.1rem; text-wrap: balance; }
+.stars { color: #b7791f; letter-spacing: 0.05em; white-space: nowrap; margin-inline-end: 0.75rem; }
+
+/* ── One recipe: two panes that scroll on their own ────── */
+.recipe-view { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.recipe-view .pane { overflow-y: auto; overscroll-behavior: contain; min-height: 0; height: 100%; }
+.recipe-view .ingredients-pane { padding: 0 0.75rem 2rem; font-family: var(--recipe-font-family); font-size: 1.02rem; }
+.recipe-view .text-pane { padding: 1rem clamp(1rem, 4cqi, 3rem) 4rem; container-type: inline-size; flex: 1; }
+.pane-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.75rem 0.25rem 0.6rem;
+  margin-block-end: 0.25rem;
+  background: var(--bg);
+  border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+.pane-head h2 {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+/* SplitPane takes a height but lets its panes grow past it; hold them to it. */
+.recipe-view .split-pane { flex: 1; min-height: 0; height: 100%; grid-template-rows: minmax(0, 1fr); }
+.recipe-view .split-pane > .left, .recipe-view .split-pane > .right { min-height: 0; overflow: hidden; }
+/* ── Phone: one column, and a sheet that brings the ingredients back ── */
+.recipe-view { position: relative; }
+.recipe-view .column { height: 100%; padding: 0.75rem 1rem 6rem; container-type: inline-size; }
+/* Room to read the last lines above the sheet. */
+.recipe-view .column.sheet-up { padding-block-end: 52dvh; }
+.ingredients-inline { margin-block-start: 1.25rem; font-family: var(--recipe-font-family); font-size: 1.02rem; }
+.ingredients-inline .pane-head { position: static; }
+.recipe-view .fab {
+  position: absolute; inset-inline-end: 1rem; inset-block-end: 1.25rem; z-index: 3;
+  width: 3.5rem; height: 3.5rem; border-radius: 50%; border: 0;
+  display: grid; place-items: center;
+  background: var(--recipe-bg); color: var(--recipe-fg);
+  box-shadow: 0 0 0 2px var(--recipe-fg), 0 0.4rem 1.2rem rgb(0 0 0 / 0.35);
+  cursor: pointer;
+}
+.recipe-view .fab:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+.recipe-view .sheet {
+  position: absolute; inset-inline: 0; inset-block-end: 0; z-index: 4;
+  max-height: 48dvh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 0 0.75rem 1.25rem;
+  background: var(--bg);
+  border-block-start: 0.3rem solid var(--recipe-bg);
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -0.5rem 1.5rem rgb(0 0 0 / 0.2);
+  font-family: var(--recipe-font-family); font-size: 1.02rem;
+}
+.sheet-close {
+  width: 2.25rem; height: 2.25rem; border: 0; border-radius: 50%;
+  background: color-mix(in oklab, currentColor 8%, transparent); color: inherit;
+  font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+
+/* ── Recipe prose ──────────────────────────────────────── */
+.recipe-prose {
+  max-width: 38rem;
+  margin: 1.75rem auto 0;
+  font-family: var(--recipe-font-family);
+  font-size: clamp(1.05rem, 0.98rem + 0.4cqi, 1.2rem);
+  line-height: 1.65;
+  hanging-punctuation: first;
+}
+.recipe-prose h2 {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin: 2.25rem 0 0.9rem;
+  font-family: var(--font-family);
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.recipe-prose h2::after { content: ""; flex: 1; height: 1px; background: color-mix(in oklab, currentColor 18%, transparent); }
+.recipe-prose p { margin: 0 0 1em; text-wrap: pretty; }
+.recipe-prose ul { padding-inline-start: 1.2em; }
+.recipe-prose li { margin-block-end: 0.5em; }
+/* Steps: numbered in the recipe's own colour pair. */
+.recipe-prose ol { list-style: none; counter-reset: step; margin: 0; padding: 0; }
+.recipe-prose ol > li {
+  counter-increment: step;
+  position: relative;
+  padding-inline-start: 2.9rem;
+  margin-block-end: 1.15em;
+  min-height: 2rem;
+}
+.recipe-prose ol > li::before {
+  content: counter(step);
+  position: absolute; inset-inline-start: 0; top: 0.1em;
+  width: 2rem; height: 2rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--recipe-bg); color: var(--recipe-fg);
+  font-family: var(--font-family); font-size: 0.9rem; font-weight: 700; line-height: 1;
+}
+/* An ingredient named in the text: tap it to find it in the list. */
+.recipe-prose ing {
+  cursor: pointer;
+  text-decoration: underline 1px color-mix(in oklab, currentColor 22%, transparent);
+  text-underline-offset: 0.22em;
+  border-radius: 0.2em;
+  scroll-margin-block: 6rem;
+}
+.recipe-prose ing:hover { background: color-mix(in oklab, var(--note-bg) 55%, transparent); }
+.recipe-prose ing.active { background: var(--note-bg); color: var(--note-fg); text-decoration: none; box-shadow: 0 0 0 0.15em var(--note-bg); }
+
+/* Facts in the recipe header stay whole. */
+.hero .bottom .tag, .hero .bottom span { white-space: nowrap; }
+.recipe-prose h3 { font-family: var(--recipe-font-family); font-size: 1.15em; font-weight: 700; margin: 1.6em 0 0.6em; }
+.recipe-prose a { overflow-wrap: anywhere; }
+.hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }

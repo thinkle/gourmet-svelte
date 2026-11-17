@@ -10,3 +10,9 @@ background.js
 *graveyard*
 # Local Netlify folder
 .netlify
+/dist/
+*.local.json
+/legacy/extension/*.js
+/legacy/extension/*.map
+/legacy/public/build/
+.claude/worktrees/

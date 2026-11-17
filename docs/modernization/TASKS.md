@@ -56,13 +56,35 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
 
 ## R0 — Foundation (`dev`)
 
-- [ ] **R0-1 Clear the ground** — `janitor`
+Changed 2026-11-17: the UI spike was good enough to keep, so it was promoted
+instead of rebuilt from specs. `rb/r0-promote-spike` did R0-1 and R0-2 and
+part of R0-4, R0-7 and R0-8 in one go, and brought working first versions of
+R1-3, R2-2, R2-3 and R2-4 with it:
+
+- The API function is `netlify/functions/api.js`, bundled by Netlify with
+  esbuild; the built `functions/api.js` is no longer committed. Still to do
+  from R0-4: the MongoDB driver upgrade.
+- `src/auth/session.js` is a thin bridge from the Netlify Identity widget to
+  the kept `userStore`. R0-7 (token refresh per request, 401 retry) is still
+  to do behind that file. Local sign-in under `netlify dev` does not work
+  until then; use `/?fixtures` with a local `src/app/fixtures.local.json`.
+- `src/app/library.svelte.js` reads the kept local cache and runs the kept
+  sync. The shell has signed-out, signing-in, loading, error and ready
+  states. Still to do from R0-8: routes (URL per recipe), the new-user
+  agreement, a proper sync indicator.
+- The list, recipe view, highlighting and amounts came over as built in the
+  spike. They have no tests and no specs yet: R1 and R2 cards now mean
+  "bring this up to the card's done-when", not "build from nothing".
+- Tests: only `npm run test:api` (Jest, contract tests) runs. R0-3 (Vitest
+  for kept logic) is next and unblocks everything else.
+
+- [x] **R0-1 Clear the ground** — `janitor` — done 2026-11-17 (`rb/r0-promote-spike`)
   Move UI source to `legacy/` (`src/webapp`, `recDisplay`, `shopDisplay`,
   `account`, `widgets`, `extension`, all `*.demo.svelte`), preserving paths.
   Leave `src/utils`, `importer`, `stores`, `data`, `common`,
   `recDisplay/rec/colors.js` (move to `src/common/`). `shoppingStores.js` goes
   to `legacy/` with its test. Exclude `legacy/` from build, lint and tests.
-- [ ] **R0-2 Scaffold** — lead
+- [x] **R0-2 Scaffold** — lead — done 2026-11-17, from the UI spike
   Vite + `@sveltejs/vite-plugin-svelte`, `svelte@5`, `contain-css-svelte`,
   `page`. Remove Rollup, Babel, SCSS. `DEV`/`BUILD_*` via `define`. `netlify
   dev` proxies to Vite. Blank page renders a Contain `Page`.

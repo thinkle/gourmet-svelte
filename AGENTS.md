@@ -69,9 +69,9 @@ Contain lacks something, log it in the gap log in `CONTAIN_NOTES.md`.
 
 ## Checks
 
-Run and paste the tail of each before reporting done: `npm run check`,
-`npm test -- --run`, `npm run build`. (For P0 cards, and until R0-2 and R0-3 land: `npm run
-build` and `npm run test-one`.) If a check was failing before your change, show
+Run and paste the tail of each before reporting done: `npm run build` and
+`npm run test:api` (the REST contract tests). When R0-3 lands, add `npm run
+check` and `npm test -- --run`. If a check was failing before your change, show
 before and after.
 
 ## Reporting

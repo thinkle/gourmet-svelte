@@ -513,4 +513,4 @@ ThrowErrorRequest.setRequestHandler(
 );
 
 
-exports.handler = handler;
+export { handler };

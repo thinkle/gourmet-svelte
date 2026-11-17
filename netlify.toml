@@ -1,14 +1,14 @@
 [build]
   command = "npm run build"
-  functions = "functions"
-  publish = "public"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  # The MongoDB driver loads optional native modules at run time; ship it as it is.
+  external_node_modules = ["mongodb"]
 
 [dev]
   command = "npm run dev"
-  functions = "functions"
-  publish = "public"
-  port = 8888 
-  targetPort = 5000
-
-
-  
+  targetPort = 5173
+  port = 8888
