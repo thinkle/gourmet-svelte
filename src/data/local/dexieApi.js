@@ -196,14 +196,45 @@ const dexieApi = {
         
     },
 
+    // Records that came from the server must never pick their own cache slot:
+    // the server's stored `id` is some other device's local number. The local
+    // row is found by _id; failing that we use knownId (a row the caller just
+    // created locally) or let Dexie assign a fresh id.
+    async assignLocalId (recipe, knownId) {
+        let rec = recipe; // mutate in place, like prepRecLocal does
+        let existing = rec._id
+            ? await dexieApi.db.recipes.get({_id:rec._id})
+            : undefined;
+        if (existing) {
+            rec.id = existing.id;
+        } else if (knownId !== undefined && knownId !== null) {
+            rec.id = knownId;
+        } else {
+            delete rec.id;
+        }
+        return rec;
+    },
+    // Write a single record received from the server (optionally to a known local row).
+    async updateServerRecipe (recipe, knownId) {
+        return await dexieApi.db.recipes.put(
+            prepRecLocal(await dexieApi.assignLocalId(recipe, knownId))
+        );
+    },
     async updateRecipe (recipe) {
         return await dexieApi.db.recipes.put(prepRecLocal(recipe))
     },
+    // Bulk write of records received from the server (sync/import).
     async updateRecipes (recipes) {
-        return await dexieApi.db.recipes
-            .bulkPut(
-                recipes.map(prepRecLocal)
-            );
+        // later duplicates of the same _id win, so one batch never fights over a slot
+        let byId = new Map();
+        let noId = [];
+        for (let r of recipes) {
+            if (r._id) { byId.set(r._id, r) } else { noId.push(r) }
+        }
+        let withIds = await Promise.all(
+            [...byId.values(), ...noId].map((r)=>dexieApi.assignLocalId(r))
+        );
+        return await dexieApi.db.recipes.bulkPut(withIds.map(prepRecLocal));
     },
     async deleteRecipe (id) {
         if (id.id) {

@@ -83,7 +83,7 @@ const recipeData = {
       let remoteRec = await remoteRecipeData.addRecipe(recipe);
       remoteRec.savedRemote = true;
       recipe.savedRemote = true; // update the object we were handed in case it sticks around...
-      await localRecipeData.updateRecipe(remoteRec);
+      await localRecipeData.updateServerRecipe(remoteRec, recid);
       return remoteRec;
     } catch (err) {
       console.log("Error saving remotely", err.toString());
@@ -106,7 +106,7 @@ const recipeData = {
     try {
       updatedRec = await remoteRecipeData.addToRecipe(changes);
       updatedRec.savedRemote = true;
-      await localRecipeData.updateRecipe(updatedRec);
+      await localRecipeData.updateServerRecipe(updatedRec, changes.id);
     } catch (err) {
       updatedRec = localRecipeData.addToRecipe(changes); // only works for simple adding ingredients to list
     }
@@ -141,7 +141,11 @@ const recipeData = {
         console.log("Error adding remote recipe", recipe, err);
       }
     }
-    await localRecipeData.updateRecipe(recipe);
+    if (recipe !== origRec && recipe.savedRemote) {
+      await localRecipeData.updateServerRecipe(recipe, origRec.id); // keep our local row
+    } else {
+      await localRecipeData.updateRecipe(recipe);
+    }
     return recipe;
   },
   
@@ -155,7 +159,7 @@ const recipeData = {
   },
   async setRecipeSharing () {
     let updated = await remoteRecipeData.setRecipeSharing(...arguments);
-    localRecipeData.updateRecipe(updated);
+    localRecipeData.updateServerRecipe(updated);
     return updated;
   },
   
