@@ -46,6 +46,7 @@
 
   article {
     height: 100vh;
+    height: -webkit-fill-available;
     width: 100vw;
     display: flex;
     flex-direction: column;
