@@ -71,7 +71,7 @@
         <TabItem active={tab === "search"} onclick={() => (tab = "search")}>Recipes</TabItem>
         {#each openRecipes as r (r.id)}
           <TabItem active={tab === r.id} onclick={() => (tab = r.id)} onclose={() => closeRecipe(r)}
-            closeLabel="Close {r.title}" title={r.title}>
+            closeLabel="Close {r.title}" title={r.title} style="--tab-indicator-color: {r.color.bg}">
             <span class="tab-chip" style="--swatch-bg: {r.color.bg}; --swatch-fg: {r.color.fg};"></span>{shortTitle(r.title)}
           </TabItem>
         {/each}
