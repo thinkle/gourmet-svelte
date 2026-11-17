@@ -12,6 +12,7 @@ registerHandlerObject(requestHandlers);
 import { DB } from './mongoConnect.js';
 import './setupDB.js';
 import { getFakeUser } from './netlifyDevUserMock.js';
+import { getLocalDevUser } from './localDevAuth.js';
 import { userCache, getUser } from './userFunctions.js';
 import { addRecipe, getRecipe, getRecipes, deleteRecipe } from './recipeFunctions.js';
 import { updateRecipe } from './updateRecipe.js';
@@ -40,7 +41,6 @@ function getApiTokenFromHeaders(headers = {}) {
     });
     const apiKey = lower['x-api-key'];
     if (apiKey) {
-        console.log('Used api key header', apiKey.slice(0, 4) + '...')
         return apiKey.trim();
     }
     const auth = lower['authorization'];
@@ -60,11 +60,9 @@ function getApiTokenFromHeaders(headers = {}) {
             return null;
         }
         if (scheme === 'bearer') {
-            console.log('Used bearer token', value.slice(0, 4) + '...');
             return value;
         }
         if (scheme === 'basic') {
-            console.log('Used basic auth token', value.slice(0, 4) + '...');
             try {
                 const decoded = Buffer.from(value, 'base64').toString('utf8');
                 if (decoded.includes(':')) {
@@ -388,7 +386,6 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
 }
 
 const handler = async (event, context) => {
-    console.log('Calling handler, we have cached users: ', userCache)
     let params = event.queryStringParameters || {};
     let jsonBody = {}
     if (event.body) {
@@ -407,14 +404,9 @@ const handler = async (event, context) => {
         // https://www.gatsbyjs.org/blog/2018-12-17-turning-the-static-dynamic/#bonus-points-authenticated-lambda-functions-for-your-gatsby-app
         user, // actual user info you can use for your serverless functions
     } = clientContext
-    if (!user && event.headers && event.headers.referer && event.headers.referer.indexOf('localhost') > -1) {
-        try {
-            user = JSON.parse(event.headers.localuser)
-            user.extraApiStuff = 'fakey fake fake stuff'
-        } catch (err) {
-            console.log('no good - headers were', event.headers, 'use default fake')
-            user = getFakeUser();
-        }
+    if (!user) {
+        // Local development only; always undefined on a deployed build.
+        user = getLocalDevUser(event, getFakeUser);
     }
     if (user && userCache[user.email]) {
         //console.log('Got cached user',user.email)
@@ -491,13 +483,12 @@ const handler = async (event, context) => {
             error = 'Function had no return value';
         }
         console.log('Return error', error);
+        // The body carries the error only: echoing the request and the user
+        // record back handed session details to whoever asked.
         return {
-            statusCode: 400,
+            statusCode: user ? 400 : 401,
             body: JSON.stringify({
-                error: error.toString(),
-                params: params,
-                jsonRequst: jsonBody,
-                user: user,
+                error: user ? error.toString() : 'Not signed in',
             })
         }
     }

@@ -98,11 +98,13 @@ export default [
         replace({
           preventAssignment: true,
           MONGO_DB_NAME: "Gourmet",
+          LOCAL_DEV_BUILD: false,
         }),
       !production &&
         replace({
           preventAssignment: true,
           MONGO_DB_NAME: "devtest",
+          LOCAL_DEV_BUILD: true,
         }),
       commonjs(),
       //typescript(),

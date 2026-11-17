@@ -11,7 +11,7 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   branch gets a branch deploy at `<branch>--gourmet-svelte.netlify.app`;
   `dev` is also dev.gourmetrecipemanager.com. `MONGO_URL` is the same in every
   context. Netlify Identity is on the site, so all deploys share sign-in.
-- [ ] **P0-2 Close the localhost auth path and stop leaking** — lead
+- [x] **P0-2 Close the localhost auth path and stop leaking** — lead, done 2026-11-16 (`rb/p0-2-close-localhost-auth`)
   `src/data/functions/api.js`: the `localuser` / `getFakeUser()` branch and the
   fake-user handlers exist only in a local dev build (compiled out, not a
   header test). Remove `user`, `params`, `jsonRequst` from the 400 body. Stop

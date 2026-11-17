@@ -4,11 +4,11 @@ import {
 } from '../requests/index.js';
 import {getUser} from './userFunctions.js'
 import {insertOne,getOne,updateOne} from './mongoConnect.js';
+import {localDevAuthAllowed} from './localDevAuth.js';
 export const fakeUser = {
     name:'Fake Local User',
     email:'tmhinkle@gmail.com',
 }/* This stuff seems kind of useless -- oops - probably delete this file */
-console.log('Initialize mock fakeUser=>',fakeUser)
 
 
 export function getFakeUser () {
@@ -20,7 +20,11 @@ export function getFakeUser () {
         return fake.user
     } */
 }
-getFakeUserRequest.setRequestHandler(getFakeUser);
+// The fake-user requests exist only under local development: on a deployed
+// site nobody may read or change who the fake user is.
+if (localDevAuthAllowed()) {
+    getFakeUserRequest.setRequestHandler(getFakeUser);
+}
 
 export function setFakeUser (user, params) {
     console.log('setFakeUser',user,params)
@@ -30,4 +34,6 @@ export function setFakeUser (user, params) {
     console.log('Set fake user =>',fakeUser)
     return fakeUser;
 }
-setFakeUserRequest.setRequestHandler(setFakeUser);
+if (localDevAuthAllowed()) {
+    setFakeUserRequest.setRequestHandler(setFakeUser);
+}

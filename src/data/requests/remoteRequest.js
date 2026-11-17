@@ -75,14 +75,19 @@ export function Request ({
                 err.context = this;
                 throw err;
             }
+            let headers = {
+                Accept : 'application/json',
+                'Content-Type':'application/json',
+                Authorization : 'Bearer ' + (user && user.access_token || ''),
+            }
+            if (typeof DEV !== 'undefined' && DEV === true) {
+                // Local development only (see functions/localDevAuth.js). A
+                // deployed build must not send the user record in a header.
+                headers.localuser = user && JSON.stringify(user) || '';
+            }
             let result = await fetch(u(name),{
                 method : 'post',
-                headers : {
-                    Accept : 'application/json',
-                    'Content-Type':'application/json',
-                    Authorization : 'Bearer ' + (user && user.access_token || ''),
-                    localuser : user && JSON.stringify(user) || '',
-                },
+                headers,
                 body : JSON.stringify(params)
             });
             if (result.status==200) {
