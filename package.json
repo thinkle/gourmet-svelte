@@ -6,6 +6,7 @@
     "dev": "rollup -c -w",
     "start": "sirv public --single",
     "test-one": "jest",
+    "test:api": "jest -c jest.api.config.js --runInBand --forceExit",
     "test": "jest --watch",
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand ",
     "test:debug-brk": "node --inspect-brk node_modules/.bin/jest --runInBand "

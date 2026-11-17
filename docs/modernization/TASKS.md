@@ -36,7 +36,7 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   that touches `netlify/functions` or stored recipe shape. Document a restore
   of one recipe and of everything, and try each once against a scratch
   database.
-- [ ] **P0-5 REST contract tests** — `contract-tester`
+- [x] **P0-5 REST contract tests** — `contract-tester`
   Every path in `public/openapi.yaml`, driven through `handler()` against an
   in-memory Mongo. Done when green on `dev` and red if `applyRecipeUpdate` is
   switched back to merging.
