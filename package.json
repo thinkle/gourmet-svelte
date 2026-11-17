@@ -13,6 +13,7 @@
     "contain-css-svelte": "^1.9.1",
     "deepcopy": "^2.1.0",
     "dexie": "^3.0.3",
+    "dompurify": "^3.4.18",
     "iso8601-duration": "^1.3.0",
     "mongodb": "^3.6.5",
     "netlify-identity-widget": "^1.9.1",

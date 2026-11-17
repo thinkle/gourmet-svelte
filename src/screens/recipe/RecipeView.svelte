@@ -11,6 +11,7 @@
   import Ingredients from "./Ingredients.svelte";
   import RecipeHero from "./RecipeHero.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
+  import { bodyHtml } from "../../app/recipeText.js";
   let { recipe } = $props();
 
   let mult = $state(1);
@@ -35,7 +36,7 @@
   // Scrolling back up to the list itself puts the sheet away.
   $effect(() => { if (wide || listOnScreen) sheetOpen = false; });
 
-  const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(t.body, recipe.ingredients) })));
+  const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(bodyHtml(t.body), recipe.ingredients) })));
   const count = $derived(recipe.flat.length);
 
   // Keep the marked-up mentions in the text in step with `active`.
