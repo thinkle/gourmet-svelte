@@ -1,12 +1,11 @@
 <script>
   import Ingredients from "./Ingredients.svelte";
-  import { fmtAmount } from "../../app/lib.js";
+  // Gourmet's own natural-number display: 1 ⅓, 2–3, ⅛.
+  import { formatAmount } from "../../utils/numbers.js";
   let { list, mult = 1, active = null, onpick } = $props();
   const amt = (a) => {
     if (!a || a.amount == null) return "";
-    const hi = fmtAmount(a.amount * mult);
-    const lo = a.rangeAmount ? fmtAmount(a.rangeAmount * mult) + "–" : "";
-    return [lo + hi, a.unit].filter(Boolean).join(" ");
+    return [formatAmount(a, { multiplier: mult }), a.unit].filter(Boolean).join(" ");
   };
 </script>
 
@@ -21,7 +20,7 @@
       <li>
         <button type="button" class="ingredient" class:active={active === ing.text}
           data-ingredient={ing.text} aria-pressed={active === ing.text} onclick={() => onpick?.(ing.text)}>
-          <span class="amount">{amt(ing.amount)}</span>
+          <span class="amount" class:scaled={mult !== 1}>{amt(ing.amount)}</span>
           <span class="item">{ing.text}</span>
         </button>
       </li>
@@ -60,4 +59,6 @@
   .ingredient:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
   .ingredient.active { background: var(--note-bg); color: var(--note-fg); }
   .amount { font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
+  /* Scaled amounts take the recipe's colour, so you can see the multiplier is on. */
+  .amount.scaled { color: var(--recipe-bg); }
 </style>

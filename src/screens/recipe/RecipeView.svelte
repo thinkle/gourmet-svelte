@@ -6,14 +6,14 @@
   // lower part of the screen, wherever you are in the text.
   import { tick } from "svelte";
   import { fly, scale } from "svelte/transition";
-  import { SplitPane, GroupedRadioItem, GroupedToggle, Text } from "contain-css-svelte";
+  import { SplitPane, Text } from "contain-css-svelte";
+  import AmountInput from "../../components/AmountInput.svelte";
   import Ingredients from "./Ingredients.svelte";
   import RecipeHero from "./RecipeHero.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
   let { recipe } = $props();
 
   let mult = $state(1);
-  const presets = [0.5, 1, 2, 3];
   let width = $state(1000);
   const wide = $derived(width >= 720);
 
@@ -66,11 +66,7 @@
 {#snippet head(onclose)}
   <header class="pane-head">
     <h2>Ingredients</h2>
-    <GroupedToggle role="radiogroup" aria-label="Multiply the recipe">
-      {#each presets as p}
-        <GroupedRadioItem group={mult} value={p} onclick={() => (mult = p)}>{p === 0.5 ? "½" : p}×</GroupedRadioItem>
-      {/each}
-    </GroupedToggle>
+    <AmountInput bind:value={mult} label="Multiply the recipe by" />
     {#if onclose}<button type="button" class="sheet-close" aria-label="Hide ingredients" onclick={onclose}>×</button>{/if}
   </header>
 {/snippet}

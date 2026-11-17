@@ -37,15 +37,6 @@ export function fmtTime(sec) {
   const h = Math.floor(m / 60), rest = m % 60;
   return rest ? `${h} h ${rest} min` : `${h} h`;
 }
-export function fmtAmount(n) {
-  if (n == null || Number.isNaN(n)) return "";
-  const fr = [[1 / 8, "⅛"], [1 / 4, "¼"], [1 / 3, "⅓"], [3 / 8, "⅜"], [1 / 2, "½"], [5 / 8, "⅝"], [2 / 3, "⅔"], [3 / 4, "¾"], [7 / 8, "⅞"]];
-  const whole = Math.floor(n + 0.02), frac = n - whole;
-  if (n < 0.1) return String(Math.round(n * 100) / 100);
-  for (const [v, s] of fr) if (Math.abs(frac - v) < 0.03) return (whole ? whole : "") + s;
-  if (Math.abs(frac) < 0.03 || Math.abs(frac - 1) < 0.03) return String(Math.round(n));
-  return String(Math.round(n * 100) / 100);
-}
 
 const text = (html) => (html ?? "").replace(/<[^>]*>/g, " ");
 /** A stored recipe, with what the screens need worked out once. */
