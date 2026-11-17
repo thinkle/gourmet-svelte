@@ -1,9 +1,62 @@
-const url = process.env.MONGO_URL;
-const mongopw = process.env.MONGO_PASSWORD;
-const mongouser = process.env.MONGO_USER;
 import {MongoClient,Server} from 'mongodb';
 import {testRecs} from '../../common/mocks/recipes.js'
-export const DB = 'MONGO_DB_NAME'
+
+// One database, on purpose. Production, the dev deploy, branch previews and
+// local development all use it (decided 2026-11-16), so the app is always
+// built and used against real recipes. It used to be a placeholder swapped in
+// by the build; when the swap did not run, the app quietly wrote to a
+// database literally named after the placeholder.
+export const DB = 'Gourmet'
+
+/** True only for a connection string whose every host is this machine. */
+export function isLocalMongoUrl (url) {
+    if (typeof url !== 'string' || !/^mongodb:\/\//i.test(url)) {
+        return false; // includes mongodb+srv://, which is never local
+    }
+    let rest = url.replace(/^mongodb:\/\//i, '');
+    rest = rest.slice(rest.lastIndexOf('@') + 1); // drop credentials
+    const hosts = rest.split(/[/?]/)[0].split(',');
+    return hosts.length > 0 && hosts.every((host) => {
+        const name = host.replace(/:\d+$/, '').toLowerCase();
+        return name === '127.0.0.1' || name === 'localhost' || name === '[::1]';
+    });
+}
+
+function runningUnderTest () {
+    return process.env.JEST_WORKER_ID !== undefined
+        || process.env.VITEST !== undefined
+        || process.env.NODE_ENV === 'test';
+}
+
+/**
+   The connection string, read when we connect rather than when this file is
+   loaded. Because the one database is the real one, a test run may only ever
+   connect to an in-memory server on this machine.
+*/
+function mongoUrl () {
+    const url = process.env.MONGO_URL;
+    if (runningUnderTest() && !isLocalMongoUrl(url)) {
+        throw new Error(
+            'Refusing to connect to MongoDB from a test run: MONGO_URL is not a local in-memory server.'
+        );
+    }
+    return url;
+}
+
+let announcedDatabase = false;
+
+/**
+   For actions that drop a collection (the test seeding in setupDB.js). They
+   were written for a throwaway database; now that every environment uses the
+   real one they may only run against an in-memory server on this machine.
+*/
+export function assertDisposableDatabase (action) {
+    if (!isLocalMongoUrl(process.env.MONGO_URL)) {
+        throw new Error(
+            `${action} drops a collection and is disabled: this is the real database.`
+        );
+    }
+}
 
 var lastResult = undefined
 
@@ -24,11 +77,22 @@ export function loadDB (name=DB) {
                 console.log('Trouble with cache?',cachedDB)
             }
         }
+        let url;
+        try {
+            url = mongoUrl();
+        } catch (err) {
+            reject(err);
+            return;
+        }
         const client = new MongoClient(url, { useNewUrlParser: true });
         client.connect(err => {
             if (err) {
                 console.log('Error?',err);
                 reject(err)
+            }
+            if (!announcedDatabase) {
+                console.log('MongoDB: using database', name);
+                announcedDatabase = true;
             }
             const db = client.db(name);
             cachedDB = {client,db}
@@ -163,7 +227,7 @@ export async function runTest () {
 
 function runTestOrig () {
     return new Promise ((resolve,reject)=>{
-    const client = new MongoClient(url, { useNewUrlParser: true });
+    const client = new MongoClient(mongoUrl(), { useNewUrlParser: true });
         client.connect(err => {
             if (err) {
                 //console.log('Error?',err);

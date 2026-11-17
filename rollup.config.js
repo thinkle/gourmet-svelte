@@ -94,18 +94,11 @@ export default [
     },
     plugins: [
       json(),
-      production &&
-        replace({
-          preventAssignment: true,
-          MONGO_DB_NAME: "Gourmet",
-          LOCAL_DEV_BUILD: false,
-        }),
-      !production &&
-        replace({
-          preventAssignment: true,
-          MONGO_DB_NAME: "devtest",
-          LOCAL_DEV_BUILD: true,
-        }),
+      // The database name is a constant in mongoConnect.js, not set here.
+      replace({
+        preventAssignment: true,
+        LOCAL_DEV_BUILD: !production,
+      }),
       commonjs(),
       //typescript(),
     ],

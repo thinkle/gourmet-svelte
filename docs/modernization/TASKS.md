@@ -18,7 +18,7 @@ the top model with Tom reviewing. Every card ends with `verifier` passing.
   logging `userCache` and token prefixes. `remoteRequest.js` sends `localuser`
   only in a dev build. Done when: `Referer: http://localhost` with no token
   gets 401 from a production build; `netlify dev` still works; a test covers both.
-- [ ] **P0-3 One database, named on purpose** — lead
+- [x] **P0-3 One database, named on purpose** — lead, done 2026-11-16 (`rb/p0-3-one-database`)
   Decided 2026-11-16: prod, `dev`, previews and local dev all use
   `Gourmet`. Make that explicit: one constant, no build-time text replacement
   (the cluster has a stray database literally called `MONGO_DB_NAME` from when

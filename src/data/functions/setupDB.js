@@ -1,6 +1,6 @@
 //import {fquery,q} from './faunaUtil.js';
 //import {runQuery,runImport} from './gql.js';
-import {loadDB,runTest,insertOne,insertMany,queryCollection} from './mongoConnect.js';
+import {loadDB,runTest,insertOne,insertMany,queryCollection,assertDisposableDatabase} from './mongoConnect.js';
 import recs from '../recs.json'
 import {validateRec,prepRecsRemote} from '../utils/validate.js'
 import {AdminSetupRequest} from '../requests/index.js'
@@ -37,11 +37,13 @@ const functions = {
             {});
     },
     create_users : async (user, params)=>{
+        assertDisposableDatabase('create_users');
         let {client,db} = await loadDB();
         let result = await db.collection('users').drop();
     },
 
     create_recipes : async (user,params)=>{
+        assertDisposableDatabase('create_recipes');
         if (params.user) {
             user = params.user // set up for user
         }
