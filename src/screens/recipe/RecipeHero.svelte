@@ -4,12 +4,13 @@
   // the title. The recipe's colour is the title band; below it the facts are
   // labelled (Prep, Cook, Makes ...) and the categories get a row of their own.
   import { Surface, Text } from "contain-css-svelte";
+  import AmountInput from "../../components/AmountInput.svelte";
   import CategoryTag from "../../components/CategoryTag.svelte";
   import { fmtTime, stars, recipeRole, sourceItems } from "../../app/lib.js";
   import { floatToFrac } from "../../utils/numbers.js";
   // A yield scaled by the multiplier: "24 cookies" x 2 -> "48 cookies".
   const scaled = (n) => (Number(n) > 0 ? floatToFrac(Number(n) * mult) : (n ?? ""));
-  let { recipe, mult = 1 } = $props();
+  let { recipe, mult = $bindable(1) } = $props();
 
   // "preptime", "Cook time", "total" -> "Prep", "Cook", "Total"
   const label = (n) => {
@@ -47,7 +48,14 @@
       <dl class="facts">
         {#if recipe.rating}<div><dt>Rating</dt><dd class="stars">{stars(recipe.rating)}</dd></div>{/if}
         {#each times as t}<div><dt>{t.label}</dt><dd>{t.value}</dd></div>{/each}
-        {#each yields as y}<div><dt>Makes</dt><dd>{scaled(y.amount)} {y.unit ?? ""}</dd></div>{/each}
+        {#each yields as y}
+          <div><dt>Makes</dt>
+            <!-- A yield with a number scales the recipe: "for 30 empanadas" is x 1 1/4. -->
+            <dd>{#if Number(y.amount) > 0}
+              <AmountInput times={false} unit={y.unit ?? ""} label="Scale the recipe to this many {y.unit || 'servings'}"
+                bind:value={() => Number(y.amount) * mult, (v) => (mult = v / Number(y.amount))} />
+            {:else}{scaled(y.amount)} {y.unit ?? ""}{/if}</dd></div>
+        {/each}
       </dl>
     {/if}
     {#if sources.length}
