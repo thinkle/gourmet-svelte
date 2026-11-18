@@ -4,15 +4,33 @@
   // Phone: one column that reads top to bottom; once the ingredients have
   // scrolled away, a floating button brings them back as a sheet over the
   // lower part of the screen, wherever you are in the text.
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
   import { fly, scale } from "svelte/transition";
-  import { SplitPane, Text } from "contain-css-svelte";
+  import { Button, SplitPane, Text } from "contain-css-svelte";
   import AmountInput from "../../components/AmountInput.svelte";
   import Ingredients from "./Ingredients.svelte";
   import RecipeHero from "./RecipeHero.svelte";
+  import RecipeEditor from "./RecipeEditor.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
   import { bodyHtml } from "../../app/recipeText.js";
-  let { recipe } = $props();
+  import { RecipeEdit } from "../../app/editState.svelte.js";
+  /**
+     recipe       the screen's prepared copy (for showing)
+     stored       the stored record to edit (the raw row; a blank one for a new recipe)
+     startEditing open straight into edit mode (a new recipe)
+  */
+  let { recipe, stored, startEditing = false, suggestions = [], data, onsaved, ondeleted, onclose, ondirty } = $props();
+
+  // Edit mode, in place: the editor replaces the view in this same tab.
+  let edit = $state(null);
+  const beginEdit = () => (edit = new RecipeEdit(stored(), { data }));
+  if (untrack(() => startEditing)) beginEdit();
+  $effect(() => ondirty?.(Boolean(edit?.dirty)));
+  function endEdit() {
+    edit = null;
+    // A new recipe never saved has nothing to show: close its tab.
+    if (startEditing && recipe.id == null) onclose?.();
+  }
 
   let mult = $state(1);
   let width = $state(1000);
@@ -87,6 +105,12 @@
   </div>
 {/snippet}
 
+{#if edit}
+  <RecipeEditor {edit} color={recipe.color} {suggestions}
+    onsaved={(row) => { onsaved?.(row); edit = null; }}
+    onclose={endEdit}
+    ondeleted={(row) => { edit = null; ondeleted?.(row); }} />
+{:else}
 <div class="recipe-view" class:wide bind:clientWidth={width} style={recipeRole(recipe.color)}>
   {#if wide}
     <SplitPane leftWidth="22rem" height="100%" resizerLabel="Resize the ingredients" resizeBehavior="preserve-left">
@@ -98,6 +122,7 @@
       {#snippet right()}
         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
         <article class="pane text-pane" bind:this={textEl} onclick={pickMention}>
+          <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
           <RecipeHero {recipe} />
           {@render prose()}
         </article>
@@ -106,6 +131,7 @@
   {:else}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <article class="pane column" class:sheet-up={sheetOpen} bind:this={textEl} onclick={pickMention}>
+      <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
       <RecipeHero {recipe} />
       <section class="ingredients-inline" bind:this={listEl} aria-label="Ingredients">
         {@render head()}{@render list()}
@@ -128,3 +154,4 @@
     {/if}
   {/if}
 </div>
+{/if}

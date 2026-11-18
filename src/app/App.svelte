@@ -1,11 +1,14 @@
 <script>
   import { onMount } from "svelte";
   import { Page, Bar, Container, Input, Select, Option, Text, Inline, TabBar, TabItem, Button } from "contain-css-svelte";
-  import { library, reload, loadFixtures } from "./library.svelte.js";
+  import { library, reload, loadFixtures, storedRecipe, putRecipe, editorData } from "./library.svelte.js";
   import { startSession, signIn, signOut } from "../auth/session.js";
-  import { search, categoriesOf } from "./lib.js";
+  import { search, categoriesOf, prepare } from "./lib.js";
+  import { blankRecipe } from "./recipeEdit.js";
+  import { ask } from "./confirm.svelte.js";
   import RecipeList from "../screens/list/RecipeList.svelte";
   import RecipeView from "../screens/recipe/RecipeView.svelte";
+  import ConfirmHost from "../components/ConfirmHost.svelte";
 
   let usingFixtures = $state(false);
   onMount(async () => {
@@ -19,22 +22,55 @@
   let viewport = $state(1000);
   const phone = $derived(viewport < 720);
 
-  // Several recipes can be open at once, each in its own closeable tab.
+  // Several recipes can be open at once, each in its own closeable tab. A
+  // tab's key is the recipe's local id, or "new-N" for a recipe not yet saved.
   let openIds = $state([]);
-  let tab = $state("search"); // "search" or a recipe's local id
+  let tab = $state("search"); // "search" or a tab key
+  let drafts = $state({}); // "new-N" -> the prepared blank shown while it is new
+  let dirty = $state({}); // tab key -> has unsaved edits
+  let newCount = 0;
   // Open tabs follow the library, so a recipe that syncs in again stays current.
-  const openRecipes = $derived(openIds.map((id) => library.recipes.find((r) => r.id === id)).filter(Boolean));
-  $effect(() => { if (tab !== "search" && !openRecipes.some((r) => r.id === tab)) tab = "search"; });
+  const openTabs = $derived(openIds
+    .map((key) => ({ key, recipe: drafts[key] ?? library.recipes.find((r) => r.id === key) }))
+    .filter((t) => t.recipe));
+  $effect(() => { if (tab !== "search" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
 
   function openRecipe(r) {
     if (!openIds.includes(r.id)) openIds.push(r.id);
     tab = r.id;
   }
-  function closeRecipe(r) {
-    const i = openIds.indexOf(r.id);
+  function newRecipe() {
+    const key = `new-${++newCount}`;
+    drafts[key] = { ...prepare(blankRecipe()), title: "New recipe" };
+    openIds.push(key);
+    tab = key;
+  }
+  function forget(key) {
+    const i = openIds.indexOf(key);
     if (i < 0) return;
     openIds.splice(i, 1);
-    if (tab === r.id) tab = openIds[i] ?? openIds[i - 1] ?? "search";
+    delete drafts[key];
+    delete dirty[key];
+    if (tab === key) tab = openIds[i] ?? openIds[i - 1] ?? "search";
+  }
+  async function closeRecipe(key) {
+    if (dirty[key] && !(await ask({ title: "Close without saving?", body: "Your unsaved changes to this recipe will be lost.", yes: "Discard changes", no: "Keep editing", danger: true }))) return;
+    forget(key);
+  }
+  // Saved: the tab now shows the stored recipe (a new one gets its real id).
+  function saved(key, row) {
+    putRecipe(row);
+    dirty[key] = false;
+    if (key !== row.id) {
+      openIds[openIds.indexOf(key)] = row.id;
+      delete drafts[key];
+      delete dirty[key];
+      if (tab === key) tab = row.id;
+    }
+  }
+  function deleted(key, row) {
+    putRecipe(row);
+    forget(key);
   }
   const shortTitle = (t) => (t.length > 26 ? t.slice(0, 25).trimEnd() + "…" : t);
 
@@ -69,10 +105,10 @@
     {#if library.status === "ready"}
       <TabBar>
         <TabItem active={tab === "search"} onclick={() => (tab = "search")}>Recipes</TabItem>
-        {#each openRecipes as r (r.id)}
-          <TabItem active={tab === r.id} onclick={() => (tab = r.id)} onclose={() => closeRecipe(r)}
-            closeLabel="Close {r.title}" title={r.title}>
-            <span class="tab-chip" style="--swatch-bg: {r.color.bg}; --swatch-fg: {r.color.fg};"></span>{shortTitle(r.title)}
+        {#each openTabs as { key, recipe: r } (key)}
+          <TabItem active={tab === key} onclick={() => (tab = key)} onclose={() => closeRecipe(key)}
+            closeLabel="Close {r.title}" title={dirty[key] ? `${r.title} (unsaved changes)` : r.title}>
+            <span class="tab-chip" style="--swatch-bg: {r.color.bg}; --swatch-fg: {r.color.fg};"></span>{shortTitle(r.title)}{#if dirty[key]}<span class="tab-dirty" aria-label="unsaved changes">•</span>{/if}
           </TabItem>
         {/each}
       </TabBar>
@@ -97,8 +133,18 @@
     </Container>
   {:else}
     <!-- Every open recipe stays mounted, so each keeps its scroll position and multiplier. -->
-    {#each openRecipes as r (r.id)}
-      <div class="tab-panel" hidden={tab !== r.id}><RecipeView recipe={r} /></div>
+    {#each openTabs as { key, recipe: r } (key)}
+      <div class="tab-panel" hidden={tab !== key}>
+        <RecipeView recipe={r}
+          stored={() => (key in drafts ? blankRecipe() : storedRecipe(key))}
+          startEditing={key in drafts}
+          suggestions={categories}
+          data={editorData}
+          onsaved={(row) => saved(key, row)}
+          ondeleted={(row) => deleted(key, row)}
+          onclose={() => forget(key)}
+          ondirty={(d) => (dirty[key] = d)} />
+      </div>
     {/each}
 
     <div class="tab-panel search" hidden={tab !== "search"}>
@@ -114,6 +160,7 @@
             <Option value="title">Title</Option>
           </Select>
           <Text muted>{results.length} of {library.recipes.length}</Text>
+          <Button primary onclick={newRecipe}>New recipe</Button>
         </Inline>
         {#if library.error}<p><Text warning>Showing saved recipes. Sync failed: {library.error}</Text></p>{/if}
       </Container>
@@ -123,3 +170,5 @@
     </div>
   {/if}
 </Page>
+
+<ConfirmHost />

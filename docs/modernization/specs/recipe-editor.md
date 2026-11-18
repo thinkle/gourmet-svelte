@@ -139,8 +139,9 @@ Kept-logic issues found while reading (reported, not changed, rule 6):
   top-level fields differ.
 - `save()` hands a copy of the draft to the kept data layer: the same call
   the old app used, `recipeData.updateRecipe` for an existing recipe;
-  `recipeData.addRecipe` for a new one (followed by `updateRecipe(…, false)`
-  when the server was not reached, so `sync()` uploads it later). On success
+  `recipeData.addRecipe` for a new one, handed `savedRemote: 0` so that if
+  the server is not reached `sync()` uploads it later (addRecipe sets it true
+  on success). On success
   original and draft become copies of what the data layer returned. If the
   user typed during the save, their newer draft is kept (still dirty).
 - Save failure: the draft stays as it was and dirty; `status` is `"error"`
@@ -198,6 +199,16 @@ right; stacked on a phone). Save, Revert (confirm when dirty), Cancel
 being edited shows that it has unsaved changes. "New recipe" on the recipe
 list opens an unsaved recipe in edit mode; it is written on first Save.
 Delete (in edit mode) asks for confirmation, soft-deletes, and closes the tab.
+
+**Fixtures mode** (`/?fixtures`, design work without signing in). Saves go
+through the same kept `recipeData`; with no signed-in user it has no remote
+object, so a save can only reach this browser's IndexedDB. `editorData` in
+`library.svelte.js` also refuses to save in fixtures mode if anyone is signed
+in, and marks the origin (`localStorage gourmet.fixtureWrites`); if that
+origin later signs in for real, the library deletes the local cache before
+its first sync, so fixture edits are never uploaded. Fixture ids are not in
+the cache, so a new recipe made in fixtures mode can take an id that a
+fixture also uses (display only; it does not happen with a real cache).
 
 ## Later
 

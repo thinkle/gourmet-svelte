@@ -141,3 +141,33 @@
 .recipe-prose h3 { font-family: var(--recipe-font-family); font-size: 1.15em; font-weight: 700; margin: 1.6em 0 0.6em; }
 .recipe-prose a { overflow-wrap: anywhere; }
 .hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }
+
+/* ── Recipe editor ─────────────────────────────────────── */
+.tab-dirty { margin-inline-start: 0.35em; font-weight: 700; }
+.recipe-actions { display: flex; justify-content: flex-end; margin: 0 0 0.5rem; }
+.recipe-editor .text-pane, .recipe-editor .column { display: grid; align-content: start; gap: 1rem; }
+.recipe-editor .bar { position: sticky; top: 0; z-index: 2; background: var(--bg); }
+.details-editor { display: grid; gap: 0.75rem; }
+.ingredients-editor ul { list-style: none; margin: 0; padding: 0; }
+.ingredients-editor .edit-line, .ingredients-editor .group-head { display: flex; align-items: flex-start; gap: 0.35rem; margin-block: 0.3rem; }
+.ingredients-editor .edit-group { margin-block: 0.9rem; padding-inline-start: 0.6rem; border-inline-start: 0.2rem solid var(--recipe-bg); }
+.ingredients-editor .group-head input { font-weight: 700; }
+.ingredient-line { flex: 1; min-width: 0; display: grid; gap: 0.15rem; }
+.ingredient-line input { width: 100%; }
+.line-tools { display: inline-flex; gap: 0.1rem; flex: none; }
+/* What the parser understood: the amount and unit, set apart from the name. */
+.understood { font-size: 0.85rem; opacity: 0.85; font-family: var(--font-family); }
+.understood .amount, .understood .unit {
+  display: inline-block; margin-inline-end: 0.3em; padding: 0 0.35em; border-radius: 0.3em;
+  background: var(--note-bg); color: var(--note-fg); font-weight: 700;
+}
+.understood .unit { font-weight: 400; }
+.star-input { display: inline-flex; gap: 0.1rem; border-radius: 0.3rem; }
+.star-input .star { border: 0; background: none; padding: 0 0.1rem; font-size: 1.6rem; line-height: 1; cursor: pointer; color: color-mix(in oklab, currentColor 25%, transparent); }
+.star-input .star.lit { color: #b7791f; }
+.star-input:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.text-block-editor { display: grid; gap: 0.4rem; margin-block-end: 1rem; }
+.text-block-editor .rich-text { display: grid; gap: 0.4rem; }
+.rich-text-body.recipe-prose { margin: 0; max-width: none; min-height: 6rem; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in oklab, currentColor 25%, transparent); border-radius: 0.4rem; }
+.rich-text-body:focus { outline: 2px solid var(--recipe-bg, currentColor); outline-offset: 1px; }
+.rich-text-body:empty::before { content: attr(data-placeholder); opacity: 0.5; }
