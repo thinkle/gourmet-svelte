@@ -14,7 +14,17 @@ info:
     Updates are partial at the *field* level: fields you omit keep their stored
     value, and fields you send replace what is stored. Sending `ingredients`
     replaces the whole list -- it is not merged with the old one -- so to add a
-    single ingredient, GET the recipe first and send the full new list.
+    single ingredient, GET the recipe first and send the full new list. Send
+    each ingredient back as GET returned it (with its `altAmounts`, `shopItem`
+    and `originalText`), or send a changed line as a plain string such as
+    "butter (2 sticks)" for the server to parse: an ingredient object sent
+    without its `altAmounts` loses them.
+
+    Recipe text: sending `instructions` on an update REPLACES ALL stored text
+    blocks with one block (or one per array entry). To keep several blocks,
+    GET the recipe, edit its `text` array and send it back whole as
+    `text: [{"header": "Dough", "body": "..."}, ...]`. See TextBlock for the
+    body format, the HTML subset and scalable `<amount>` markup.
 
     GET /recipes/schema returns this in machine-readable form.
 servers:
@@ -357,6 +367,11 @@ components:
           items:
             $ref: "#/components/schemas/IngredientInput"
         instructions:
+          description: |
+            Shorthand for `text`. A string is stored as one block headed
+            "Instructions"; an array as one block per string. On update this
+            REPLACES ALL stored text blocks -- send `text` instead to keep
+            several blocks. Ignored when `text` is also sent.
           oneOf:
             - type: string
             - type: array
@@ -364,7 +379,10 @@ components:
                 type: string
         text:
           type: array
-          description: Rich text blocks; body can be plain text or HTML.
+          description: |
+            The recipe text as blocks, each with its own header ("Dough",
+            "Filling"). This is the stored shape GET returns; send the whole
+            array back to change one block without collapsing the others.
           items:
             $ref: "#/components/schemas/TextBlock"
         categories:
@@ -439,6 +457,13 @@ components:
           description: The other end of a range, if you would rather not write "2-3".
         altAmounts:
           $ref: "#/components/schemas/AltAmountsInput"
+        shopItem:
+          type: string
+          description: |
+            Optional. The bare item for a shopping list ("eggs" for "large
+            eggs, beaten"). Omit it and the server fills it from the text. A
+            shopItem you send is stored as is, so drop it (or send a new one)
+            when you change an ingredient's text.
     AltAmountsInput:
       type: array
       description: |
@@ -482,6 +507,16 @@ components:
           description: The ingredient name only, with amount and unit removed.
         ingkey:
           type: string
+          description: |
+            Older ingredients only: the bare item as the desktop app stored
+            it. Same meaning as shopItem.
+        shopItem:
+          type: string
+          description: |
+            The bare item, lower case ("eggs", "butter", "diced tomatoes"):
+            what a shopping list shows and merges on. Filled by the server on
+            API writes when the client sent neither shopItem nor ingkey; older
+            ingredients may have none.
         amount:
           $ref: "#/components/schemas/Amount"
         altAmounts:
@@ -518,8 +553,33 @@ components:
       properties:
         header:
           type: string
+          description: The block heading, e.g. "Instructions", "Dough". May be empty.
         body:
           type: string
+          description: |
+            Plain text or HTML, stored exactly as sent.
+
+            Plain text: a blank line starts a new paragraph; lines starting
+            "1." or "-" become a list; a short first line ending in ":" becomes
+            a subheading.
+
+            HTML: the app shows only these tags (others are removed and their
+            text kept): p br h2 h3 h4 h5 h6 ol ul li b strong i em u a
+            blockquote hr sub sup small span div table thead tbody tr th td img
+            amount. Attributes kept: href title src alt colspan rowspan (no
+            class, style, on* or data-*).
+
+            Scalable amounts: wrap an ingredient quantity in `<amount>...</amount>`
+            and the app multiplies it when the reader scales the recipe:
+            `Beat in <amount>2</amount> eggs, then <amount>1 1/2 cups</amount>
+            milk. Bake for 20 minutes.` reads "Beat in 4 eggs, then 3 cups milk.
+            Bake for 20 minutes." at x2; the unwrapped 20 minutes never scales.
+            Inside the tag: a number, fraction, mixed number or range ("2",
+            "1/2", "1 1/2", "2-3", "2 to 3"), optionally followed by its unit
+            ("200 g", "1 cup"). No attributes. Works in plain-text bodies too.
+            Wrap only ingredient quantities, never times, temperatures, pan
+            sizes or step numbers. Clients that do not know the tag show its
+            text unchanged.
     Category:
       type: object
       properties:

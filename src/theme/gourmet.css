@@ -157,6 +157,10 @@
 }
 .recipe-prose ing:hover { background: color-mix(in oklab, var(--note-bg) 55%, transparent); }
 .recipe-prose ing.active { background: var(--note-bg); color: var(--note-fg); text-decoration: none; box-shadow: 0 0 0 0.15em var(--note-bg); }
+/* An amount marked in the text (<amount>): it scales with the recipe and,
+   once scaled, takes the recipe's colour like the ingredient list does. */
+.recipe-prose amount { white-space: nowrap; }
+.recipe-prose amount.scaled { color: var(--recipe-bg); font-weight: 700; }
 
 /* Facts in the recipe header stay whole. */
 .hero .bottom .tag, .hero .bottom span { white-space: nowrap; }
