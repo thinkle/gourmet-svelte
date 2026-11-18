@@ -76,7 +76,7 @@
   .info :global(.band) {
     padding: 0.9rem 1.25rem 1rem;
     border-radius: 0.75rem;
-    border-inline-start: 0.5rem solid color-mix(in oklab, var(--recipe-fg) 55%, transparent);
+    border-inline-start: 0.5rem solid var(--recipe-accent);
   }
   h1 {
     margin: 0;

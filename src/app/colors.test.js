@@ -35,3 +35,20 @@ describe("getColor: title, then categories, then ingredients", () => {
     expect(getColor(r("Vanilla Frosting")).bg).toBe("#7a4443");
   });
 });
+
+describe("accent and the new fixes", () => {
+  it("an accent defaults to the text colour; a palette can set its own", () => {
+    expect(getColor(r("Beef Stew")).accent).toBe(getColor(r("Beef Stew")).fg);
+    expect(getColor(r("Christmas Cookies")).accent).toBe("#c8102e");
+    expect(getColor(r("Scrambled Eggs")).accent).toBe("#ffb800");
+  });
+  it("white cheeses are white, cheddar is not", () => {
+    for (const t of ["Mozzarella Sticks", "Feta Wrap", "Pecorino Crisps", "Parmesan Crisps"]) expect(getColor(r(t)).bg).toBe("#f6f1e3");
+    expect(getColor(r("Cheddar Biscuit")).bg).toBe("#ffa62b");
+  });
+  it("milk counts, Milk Street does not", () => {
+    expect(getColor(r("Milk Toast")).bg).toBe("#eef2f7");
+    expect(getColor(r("Lomo Saltado | Milk Street")).bg).toBe("#7a4443");
+  });
+  it("birthday is bubblegum", () => expect(getColor(r("Birthday Cake")).bg).toBe("#ff9ecb"));
+});

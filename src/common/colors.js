@@ -14,6 +14,7 @@ let color
      {matcher:/christmas/i, color : {
          bg : '#2b3d0a',
          fg: '#e3f2d9',
+         accent: '#c8102e',
      }},
 
      // some whimsical ingredient matchers
@@ -27,6 +28,8 @@ let color
      {matcher:/orange/i,color:{fg:'#ffeed6',bg:'#f69813'}},
      {matcher:/pumpkin/i,color:{fg:'#5c3f00',bg:'#e19005'}, ingredient:true},
      {matcher:/avocado/i,color:{fg:'#181E10',bg:'#d7e869'}, ingredient:true},
+     {matcher:/\bbirthday/i, color:{bg:'#ff9ecb',fg:'#5a0a35'}}, // bubblegum
+     {matcher:/\beggs?\b|frittata|quiche|omelet/i, color:{bg:'#fffdf5',fg:'#3d2b00',accent:'#ffb800'}, ingredient:true}, // yolk on white
      {matcher:/blueberr|blackberr|\bberry\b|\bberries\b/i, color:{bg:'#3f3a8c',fg:'#e8e6ff'}}, // dusk
      {matcher:/strawberr|raspberr|cranberr|cherr/i, color:{bg:'#a4133c',fg:'#ffe1ea'}}, // crimson
      {matcher:/coffee|espresso/i, color:{bg:'#3b2a20',fg:'#f1d9b5'}}, // dark roast
@@ -83,11 +86,12 @@ let color
      {matcher:/soup|stew|chowder|bisque/i, color:{bg:'#a24936',fg:'#ffe8d9'}},
      {matcher:/\bpies?\b|galette|\btarts?\b|pastry|crust/i, color:{bg:'#e8b86d',fg:'#5a1f00'}},
      {matcher:/\bcakes?\b|cupcake|muffin|scone/i, color:{bg:'#c9b8f0',fg:'#2d1a5c'}},
-     {matcher:/breakfast|pancake|waffle|crepe|\beggs?\b|\boats?\b|frittata|quiche/i, color:{bg:'#ffe5b4',fg:'#7a2e00'}},
+     {matcher:/breakfast|pancake|waffle|crepe|\boats?\b/i, color:{bg:'#ffe5b4',fg:'#7a2e00'}},
      {matcher:/beef|steak|\bribs?\b|brisket|lamb|pork|sausage|bacon|\bham\b|roast/i, color:{bg:'#7b1e2b',fg:'#ffe3d6'}},
      {matcher:/chicken|turkey|poultry/i, color:{bg:'#fbe8c3',fg:'#7a3e00'}},
-     {matcher:/cheese|queso|feta|pecorino|parmesan|mozzarella/i, color:{bg:'#f5b83d',fg:'#3a2200'}},
-     {matcher:/yogurt|cream|dairy/i, color:{bg:'#eef2f7',fg:'#25405f'}},
+     {matcher:/mozzarella|parmesan|parmigiano|feta|pecorino|ricotta|burrata|queso fresco|goat cheese|chevre|\bbrie\b/i, color:{bg:'#f6f1e3',fg:'#2e5e3a'}},
+     {matcher:/cheese|queso|cheddar|gouda|swiss|gruyere/i, color:{bg:'#ffa62b',fg:'#4a2200'}}, // cheddar
+     {matcher:/yogurt|cream|dairy|\bmilk\b(?! street)/i, color:{bg:'#eef2f7',fg:'#25405f'}},
      {matcher:/pilaf|bulgur|quinoa|\brice\b|couscous|grain|risotto/i, color:{bg:'#f0dc9c',fg:'#4a3a10'}},
      {matcher:/winter|\bsnow|\bfrost(?!ing)/i, color:{bg:'#a8c5da',fg:'#0f2a3f'}},
      
@@ -99,6 +103,7 @@ wordColors.forEach(
         } else if (!wc.color.bg) {
             wc.color.bg = generateContrast(wc.color.fg)
         }
+        wc.color.accent ??= wc.color.fg;
         wc.contrast = Color(wc.color.fg).contrast(Color(wc.color.bg))
     }
 );
@@ -142,7 +147,8 @@ export function getColor (recipe) {
     // generic...
     return {
         fg: '#fff0a3',
-        bg : '#7a4443'
+        bg : '#7a4443',
+        accent: '#fff0a3'
     }
 }
 

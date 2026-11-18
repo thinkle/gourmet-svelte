@@ -66,7 +66,7 @@ export { text };
 // The per-recipe colour as an app-defined Contain role: its pair and its pins,
 // written where the role is applied (a pin at :root cannot see --recipe-fg).
 export const recipeRole = (c) =>
-  `--recipe-bg: ${c.bg}; --recipe-fg: ${c.fg}; --recipe-color: ${c.bg}; ` +
+  `--recipe-bg: ${c.bg}; --recipe-fg: ${c.fg}; --recipe-accent: ${c.accent ?? c.fg}; --recipe-color: ${c.bg}; ` +
   `--on-recipe-link-text-fg: ${c.fg}; --on-recipe-link-hover-text-fg: ${c.fg}; --on-recipe-heading-fg: ${c.fg};`;
 export const roleStyle = (c, prefix) => recipeRole(c) + " " + surfaceVars("recipe", prefix);
 
