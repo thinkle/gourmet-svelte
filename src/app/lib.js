@@ -70,21 +70,30 @@ export const recipeRole = (c) =>
   `--on-recipe-link-text-fg: ${c.fg}; --on-recipe-link-hover-text-fg: ${c.fg}; --on-recipe-heading-fg: ${c.fg};`;
 export const roleStyle = (c, prefix) => recipeRole(c) + " " + surfaceVars("recipe", prefix);
 
+/** A source as one short string: its name, else the site it links to. */
+export function sourceLabel(s) {
+  if (s?.name) return s.name;
+  try { return new URL(s?.url).hostname.replace(/^www\./, ""); } catch { return s?.url ?? ""; }
+}
+/** The recipe's sources worth showing, first one first. */
+export const sourceLabels = (r) => (r.sources ?? []).map(sourceLabel).filter(Boolean);
+
 const startsWord = (hay, term) => new RegExp(`(^|[^\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(hay);
 
 /**
    One search box over everything. Every word must match somewhere; where it
    matches decides the order: a recipe called "Sugar Cookies" comes before one
    tagged with the word, which comes before one that merely uses sugar.
-   Returns [{recipe, score, cats, ingredient, inText}], best first.
+   Sources (name or link) count too. Returns [{recipe, score, cats, source, ingredient, inText}], best first.
 */
 export function search(list, query) {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (!terms.length) return list.map((recipe) => ({ recipe, score: 0, cats: [], ingredient: null, inText: false }));
+  if (!terms.length) return list.map((recipe) => ({ recipe, score: 0, cats: [], source: null, ingredient: null, inText: false }));
   const out = [];
   for (const recipe of list) {
     const title = recipe.title.toLowerCase();
-    let score = 0, ok = true, ingredient = null, inText = false;
+    let score = 0, ok = true, ingredient = null, inText = false, source = null;
+    const srcs = (recipe.sources ?? []).flatMap((x) => [x?.name, x?.url].filter(Boolean).map((t) => ({ label: sourceLabel(x), hay: t.toLowerCase() })));
     const cats = new Set();
     for (const term of terms) {
       let best = 0;
@@ -95,6 +104,8 @@ export function search(list, query) {
         cats.add(c);
         best = Math.max(best, lc === term ? 65 : startsWord(lc, term) ? 55 : 45);
       }
+      const sh = srcs.find((x) => x.hay.includes(term));
+      if (sh) { source ??= sh.label; best = Math.max(best, startsWord(sh.hay, term) ? 50 : 40); }
       if (best < 30) {
         const hit = recipe.flat.find((i) => (i.text ?? "").toLowerCase().includes(term));
         if (hit) { best = Math.max(best, 30); ingredient ??= hit.text; }
@@ -103,7 +114,7 @@ export function search(list, query) {
       if (!best) { ok = false; break; }
       score += best;
     }
-    if (ok) out.push({ recipe, score, cats: [...cats], ingredient, inText });
+    if (ok) out.push({ recipe, score, cats: [...cats], source, ingredient, inText });
   }
   return out;
 }

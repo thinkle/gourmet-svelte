@@ -55,6 +55,9 @@
 
 /* ── Recipe list ───────────────────────────────────────── */
 .recipe-list h4 { font-family: var(--recipe-font-family); font-weight: 600; font-size: 1.1rem; text-wrap: balance; }
+.recipe-list .source { display: flex; min-width: 0; max-width: 11rem; gap: 0.3rem; margin-inline-end: 0.75rem; font-size: 0.85rem; font-style: italic; color: var(--muted-fg, color-mix(in oklab, currentColor 60%, transparent)); }
+.recipe-list .source .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.recipe-list .source .more { flex: none; }
 .stars { color: #b7791f; letter-spacing: 0.05em; white-space: nowrap; margin-inline-end: 0.75rem; }
 
 /* ── One recipe: two panes that scroll on their own ────── */

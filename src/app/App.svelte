@@ -174,7 +174,7 @@
     <div class="tab-panel search" hidden={tab !== "search"}>
       <Container maxWidth="56rem" height="auto">
         <Inline wrap>
-          <Input type="search" placeholder="Search recipes, categories, ingredients" bind:value={q} aria-label="Search" />
+          <Input type="search" placeholder="Search recipes, categories, sources, ingredients" bind:value={q} aria-label="Search" />
           <Select bind:value={cat} aria-label="Category">
             <Option value="">All categories</Option>
             {#each categories as c}<Option value={c}>{c}</Option>{/each}
