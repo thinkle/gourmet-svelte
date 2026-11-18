@@ -17,6 +17,9 @@
          unit : 'cups',
          standardUnit : 'c.',         // filled in for units we know how to convert
        },
+       altAmounts : [                 // optional: further measures of the same
+         { amount : 240, unit : 'g', standardUnit : 'g' }, // quantity (R5)
+       ],
        originalText : '1-1 1/2 cups flour, sifted', // only when we parsed from text
      }
 
@@ -37,6 +40,7 @@
 import { parseAmount, fracToFloat } from './numbers.js';
 import { parseUnit, getStandardUnit } from './unitAmounts.js';
 import { cleanupWhitespace } from './textUtils.js';
+import { findMeasureParens, parseMeasure, primaryAllowsAlt, slashToParen } from './altAmounts.js';
 
 // Keys we'll accept for the ingredient name, in order of preference. `text`
 // is our own canonical key; the rest are what an LLM tends to reach for.
@@ -109,6 +113,31 @@ function finishAmount(raw) {
 export function parseIngredientText(rawText) {
     const text = cleanText(rawText);
     if (!text) { return { text: '' }; }
+    return parseWithAltAmounts(text) || parsePlainIngredientText(text);
+}
+
+// '240 g (2 cups) flour', 'flour (2 cups)', '2 cups / 240 g flour': the
+// extra measure becomes altAmounts and leaves the name. Returns undefined
+// when the line has no clean extra measure (or its first measure is a
+// container: '1 can (14 oz) tomatoes'), so the caller parses as it always did.
+function parseWithAltAmounts(text) {
+    const found = findMeasureParens(slashToParen(text));
+    if (!found || !found.text) { return undefined; }
+    const inner = parsePlainIngredientText(found.text);
+    if (inner.amount) {
+        if (!primaryAllowsAlt(inner.amount)) { return undefined; }
+        return { ...inner, originalText: text, altAmounts: found.altAmounts };
+    }
+    // Nothing but the parenthetical carried a measure ('flour (2 cups)'):
+    // the first one is the primary amount.
+    const [primary, ...alts] = found.altAmounts;
+    const result = { text: inner.text, originalText: text, amount: finishAmount(primary) };
+    if (alts.length) { result.altAmounts = alts.map(finishAmount); }
+    return result;
+}
+
+// The original line parser, unchanged.
+function parsePlainIngredientText(text) {
     const parsedAmount = parseAmount(text);
     // true means "require an ingredient": if the leftover text is *only* a
     // unit ('2 eggs'), treat the word as the ingredient rather than the unit.
@@ -165,6 +194,33 @@ function parseStructuredAmount(rawAmount, rawUnit, rawRangeAmount) {
     return finishAmount(collected);
 }
 
+// altAmounts as a caller may send it: an array of {amount, unit, rangeAmount}
+// objects or of strings ('225 g'). Returns undefined when the caller did not
+// send the field at all, otherwise a (possibly empty) array of canonical
+// amounts: an explicit [] means "no extra measures, do not look in the text".
+function normalizeAltAmounts(raw) {
+    if (raw === undefined || raw === null) { return undefined; }
+    const list = Array.isArray(raw) ? raw : [raw];
+    return list.map((item) => {
+        // A string must be one clean measure ('225 g'); 'a lot' is dropped.
+        if (typeof item === 'string') { return parseMeasure(item) || undefined; }
+        if (item && typeof item === 'object') {
+            return parseStructuredAmount(item.amount !== undefined ? item.amount : item.quantity,
+                                         item.unit, item.rangeAmount);
+        }
+        return undefined;
+    }).filter(Boolean);
+}
+
+// Pull clean extra measures out of the text of an ingredient that already has
+// its primary amount. Returns {text, altAmounts} or null.
+export function extractAltAmounts(text, primary) {
+    if (!primaryAllowsAlt(primary)) { return null; }
+    const found = findMeasureParens(slashToParen(cleanText(text)));
+    if (!found || !found.text) { return null; }
+    return found;
+}
+
 /**
    Normalize one ingredient entry (string, object, or group) into the
    canonical shape. Returns null for entries with nothing in them.
@@ -191,8 +247,11 @@ export function normalizeIngredient(entry) {
     const {
         text, ingredient, item, food, name,
         amount, quantity, qty, unit, rangeAmount,
+        altAmounts,
         ...rest
     } = entry;
+    // Explicit altAmounts from the caller win over anything in the text.
+    const explicitAlts = normalizeAltAmounts(altAmounts);
     const rawName = firstDefined(entry, NAME_KEYS);
     const rawAmount = firstDefined(entry, AMOUNT_KEYS);
     const hasStructure = rawAmount !== undefined
@@ -202,14 +261,29 @@ export function normalizeIngredient(entry) {
     if (!hasStructure) {
         // All we were given is a name, so it may well be a whole ingredient
         // line ('2 cups flour'). Parse it.
-        const parsed = parseIngredientText(rawName);
+        const parsed = explicitAlts
+            ? parsePlainIngredientText(cleanText(rawName))
+            : parseIngredientText(rawName);
         if (!parsed.text) { return null; }
-        return { ...rest, ...parsed };
+        const result = { ...rest, ...parsed };
+        if (explicitAlts && explicitAlts.length) { result.altAmounts = explicitAlts; }
+        return result;
     }
 
     const normalized = { ...rest, text: cleanText(rawName) };
     const parsedAmount = parseStructuredAmount(rawAmount, unit, rangeAmount);
     if (parsedAmount) { normalized.amount = parsedAmount; }
+    if (explicitAlts) {
+        if (explicitAlts.length) { normalized.altAmounts = explicitAlts; }
+    } else if (parsedAmount) {
+        // {amount:285, unit:'g', ingredient:'butter (2 1/2 sticks)'}
+        const found = extractAltAmounts(normalized.text, parsedAmount);
+        if (found) {
+            normalized.originalText = rest.originalText || normalized.text;
+            normalized.text = found.text;
+            normalized.altAmounts = found.altAmounts;
+        }
+    }
     if (!normalized.text && !normalized.amount) { return null; }
     return normalized;
 }
@@ -301,4 +375,26 @@ export function reparseIngredients(list, path = '') {
         return repaired;
     });
     return { ingredients, changes };
+}
+
+/**
+   The maintenance counterpart for stored ingredients that already have a
+   primary amount and a second measure written into the text
+   ({amount:{285,'g'}, text:'butter (2 1/2 sticks)'}). Returns the repaired
+   ingredient, or null to leave it alone. Never runs by itself: the dry-run
+   script (scripts/migrate/alt-measures-dry-run.mjs) reports what it would do.
+**/
+export function reparseAltAmounts(ingredient) {
+    if (!ingredient || typeof ingredient !== 'object') { return null; }
+    if (Array.isArray(ingredient.ingredients)) { return null; }
+    if (ingredient.altAmounts !== undefined) { return null; }
+    if (!hasUsableAmount(ingredient)) { return null; }
+    const found = extractAltAmounts(ingredient.text, ingredient.amount);
+    if (!found) { return null; }
+    return {
+        ...ingredient,
+        text: found.text,
+        originalText: ingredient.originalText || cleanText(ingredient.text),
+        altAmounts: found.altAmounts,
+    };
 }

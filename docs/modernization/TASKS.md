@@ -196,15 +196,15 @@ R1-3, R2-2, R2-3 and R2-4 with it:
 
 ## R5 — Multiple measures
 
-- [ ] **R5-1 Design note** — lead + Tom
+- [x] **R5-1 Design note** — lead + Tom, drafted 2026-11-17: `docs/modernization/multiple-measures.md` (open decisions for Tom at its top)
   Field name and shape, how the parser reads "240 g (2 cups) flour", which
   measure is primary, display rule (both, or preferred with the other on
   demand), how the multiplier and `standardUnit` apply. One page in `docs/`.
-- [ ] **R5-2 Parser + normalization + tests** — mid model
-- [ ] **R5-3 API** — lead
+- [x] **R5-2 Parser + normalization + tests** — `altAmounts` from `(...)` and `/` in `src/utils/altAmounts.js`; tests in `altAmounts.test.js`; dry-run script `scripts/migrate/alt-measures-dry-run.mjs`
+- [x] **R5-3 API** — lead; field accepted, parsed and returned; new tests in `api.altAmounts.contract.test.js`, existing ones untouched
   Accept and return the new optional field; `RECIPE_SHAPE`, `openapi.yaml`,
   contract tests extended, existing tests untouched and green.
-- [ ] **R5-4 View and editor** — `screen-builder`
+- [~] **R5-4 View and editor** — `screen-builder`; view done (`Measures.svelte` in `Ingredients.svelte`), editor input still to do
 - [ ] **R5-5 MCP worker** (separate repo): pass the field through; update the tool description.
 
 ## R6 — Cutover

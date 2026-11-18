@@ -437,6 +437,29 @@ components:
         rangeAmount:
           type: number
           description: The other end of a range, if you would rather not write "2-3".
+        altAmounts:
+          $ref: "#/components/schemas/AltAmountsInput"
+    AltAmountsInput:
+      type: array
+      description: |
+        Optional. Further measures of the same quantity, e.g. `amount: 2,
+        unit: "sticks"` with `altAmounts: [{"amount": 225, "unit": "g"}]`, which
+        is shown as "2 sticks (225 g) butter". Each entry is an object like
+        `amount` or a string like "225 g". Sending `[]` means "no further
+        measures" and stops the server looking for one in the text.
+
+        If you do not send it, the server looks for one in the ingredient text
+        and, when a parenthetical (or a part after a slash) is a plain number
+        and a mass, volume or stick unit, moves it here and out of the text:
+        `{"amount": 285, "unit": "g", "ingredient": "butter (2 1/2 sticks)"}`
+        is stored as text "butter" with altAmounts [2 1/2 sticks]. Anything
+        else in parentheses ("(optional)", "(about 3 lemons)", "(14 oz can)")
+        stays in the text. When the server moves one out, the original text is
+        kept in `originalText`.
+      items:
+        oneOf:
+          - type: string
+          - $ref: "#/components/schemas/Amount"
     IngredientGroup:
       type: object
       description: A heading with its own sub-list, kept as a real sub-list.
@@ -461,6 +484,16 @@ components:
           type: string
         amount:
           $ref: "#/components/schemas/Amount"
+        altAmounts:
+          type: array
+          description: |
+            Present only when the ingredient has further measures of the same
+            quantity. Each is shaped like `amount`; `amount` stays the primary.
+          items:
+            $ref: "#/components/schemas/Amount"
+        originalText:
+          type: string
+          description: The line as first written, when the server parsed it.
         ingredients:
           type: array
           description: Present only on groups.
