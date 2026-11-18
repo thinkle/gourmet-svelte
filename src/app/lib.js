@@ -70,13 +70,34 @@ export const recipeRole = (c) =>
   `--on-recipe-link-text-fg: ${c.fg}; --on-recipe-link-hover-text-fg: ${c.fg}; --on-recipe-heading-fg: ${c.fg};`;
 export const roleStyle = (c, prefix) => recipeRole(c) + " " + surfaceVars("recipe", prefix);
 
-/** A source as one short string: its name, else the site it links to. */
+const isLink = (t) => /^https?:\/\//i.test((t ?? "").trim());
+const site = (t) => { try { return new URL(t.trim()).hostname.replace(/^www\./, ""); } catch { return t ?? ""; } };
+/** A source as one short string: its name; if that is a link (or there is no name), the site. */
 export function sourceLabel(s) {
-  if (s?.name) return s.name;
-  try { return new URL(s?.url).hostname.replace(/^www\./, ""); } catch { return s?.url ?? ""; }
+  const n = (s?.name ?? "").trim();
+  if (n && !isLink(n)) return n;
+  const u = n || (s?.url ?? "").trim();
+  return u ? site(u) : "";
 }
-/** The recipe's sources worth showing, first one first. */
-export const sourceLabels = (r) => (r.sources ?? []).map(sourceLabel).filter(Boolean);
+/**
+   The sources worth showing, best first: [{label, url}]. The importer often
+   stores the link as one entry and the publication's name as another
+   ([{url}, {name}]), so real names come first, a bare link is attached to a
+   name that has none, and any leftover link shows as its site.
+*/
+export function sourceItems(r) {
+  const named = [], links = [];
+  for (const s of r.sources ?? []) {
+    const n = (s?.name ?? "").trim(), u = (s?.url ?? "").trim() || (isLink(n) ? n : "");
+    if (n && !isLink(n)) named.push({ label: n, url: u });
+    else if (u) links.push({ label: site(u), url: u });
+  }
+  const bare = named.filter((x) => !x.url);
+  if (bare.length === 1 && links.length) bare[0].url = links.shift().url;
+  const seen = new Set();
+  return [...named, ...links].filter((x) => !seen.has(x.label) && seen.add(x.label));
+}
+export const sourceLabels = (r) => sourceItems(r).map((x) => x.label);
 
 const startsWord = (hay, term) => new RegExp(`(^|[^\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u").test(hay);
 
@@ -94,6 +115,7 @@ export function search(list, query) {
     const title = recipe.title.toLowerCase();
     let score = 0, ok = true, ingredient = null, inText = false, source = null;
     const srcs = (recipe.sources ?? []).flatMap((x) => [x?.name, x?.url].filter(Boolean).map((t) => ({ label: sourceLabel(x), hay: t.toLowerCase() })));
+    const bestSource = sourceLabels(recipe)[0];
     const cats = new Set();
     for (const term of terms) {
       let best = 0;
@@ -105,7 +127,7 @@ export function search(list, query) {
         best = Math.max(best, lc === term ? 65 : startsWord(lc, term) ? 55 : 45);
       }
       const sh = srcs.find((x) => x.hay.includes(term));
-      if (sh) { source ??= sh.label; best = Math.max(best, startsWord(sh.hay, term) ? 50 : 40); }
+      if (sh) { source ??= isLink(sh.hay) ? bestSource ?? sh.label : sh.label; best = Math.max(best, startsWord(sh.hay, term) ? 50 : 40); }
       if (best < 30) {
         const hit = recipe.flat.find((i) => (i.text ?? "").toLowerCase().includes(term));
         if (hit) { best = Math.max(best, 30); ingredient ??= hit.text; }

@@ -5,7 +5,7 @@
   // labelled (Prep, Cook, Makes ...) and the categories get a row of their own.
   import { Surface, Text } from "contain-css-svelte";
   import CategoryTag from "../../components/CategoryTag.svelte";
-  import { fmtTime, stars, recipeRole } from "../../app/lib.js";
+  import { fmtTime, stars, recipeRole, sourceItems } from "../../app/lib.js";
   let { recipe } = $props();
 
   // "preptime", "Cook time", "total" -> "Prep", "Cook", "Total"
@@ -19,7 +19,7 @@
       .filter((t) => t.value),
   );
   const yields = $derived((recipe.yields ?? []).filter((y) => y?.amount || y?.unit));
-  const sources = $derived((recipe.sources ?? []).filter((s) => s?.name || s?.url));
+  const sources = $derived(sourceItems(recipe));
   const cats = $derived(recipe.tidyCats.slice(0, 8));
   const hasFacts = $derived(Boolean(recipe.rating || times.length || yields.length));
 
@@ -49,7 +49,7 @@
     {/if}
     {#if sources.length}
       <p class="sources"><Text muted>From</Text>
-        {#each sources as s, i}{#if i}, {/if}{#if s.url}<a href={s.url}>{s.name || s.url}</a>{:else}{s.name}{/if}{/each}
+        {#each sources as s, i}{#if i}, {/if}{#if s.url}<a href={s.url}>{s.label}</a>{:else}{s.label}{/if}{/each}
       </p>
     {/if}
   </div>

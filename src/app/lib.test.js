@@ -19,3 +19,19 @@ describe("search by source", () => {
     expect(sourceLabels(b)).toEqual(["seriouseats.com"]);
   });
 });
+
+describe("importer-style sources: [{url}, {name}]", () => {
+  const r = rec({ title: "Salad", sources: [
+    { url: "http://www.americastestkitchen.com/recipes/1-salad?ref=x", name: "" },
+    { "@type": "Organization", name: "America's Test Kitchen", url: "" },
+  ] });
+  it("puts the name first and joins it to the link", () => {
+    expect(sourceLabels(r)).toEqual(["America's Test Kitchen"]);
+  });
+  it("is found by name or by site, and shows the name", () => {
+    for (const q of ["america", "testkitchen"]) expect(search([r], q)[0].source).toBe("America's Test Kitchen");
+  });
+  it("shows the site for a name that is a link", () => {
+    expect(sourceLabels(rec({ sources: [{ name: "https://www.bethcato.com/x/" }] }))).toEqual(["bethcato.com"]);
+  });
+});
