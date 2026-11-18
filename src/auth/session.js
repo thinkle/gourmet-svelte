@@ -19,5 +19,6 @@ export function startSession() {
 }
 
 export const signIn = () => netlifyIdentity.open("login");
+export const signUp = () => netlifyIdentity.open("signup");
 export const signOut = () => netlifyIdentity.logout();
 export { user };

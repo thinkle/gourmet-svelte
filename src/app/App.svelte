@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import { Page, Bar, Container, Input, Select, Option, Text, Inline, TabBar, TabItem, Button } from "contain-css-svelte";
   import { library, reload, loadFixtures } from "./library.svelte.js";
-  import { startSession, signIn, signOut } from "../auth/session.js";
+  import { startSession, signIn, signUp, signOut } from "../auth/session.js";
+  import WhiskLogo from "../components/WhiskLogo.svelte";
   import { search, categoriesOf } from "./lib.js";
   import RecipeList from "../screens/list/RecipeList.svelte";
   import RecipeView from "../screens/recipe/RecipeView.svelte";
@@ -57,7 +58,7 @@
     <!-- On a phone an open recipe gets the whole screen: the brand bar steps aside. -->
     {#if !(phone && tab !== "search")}
       <Bar primary>
-        <h1>Gourmet</h1>
+        <h1 class="brand"><img src="/images/cookie.png" alt="" />Gourmet</h1>
         {#if library.status !== "signed-out" && !usingFixtures}
           <Inline>
             {#if library.syncing}<Text>Syncing…</Text>{/if}
@@ -82,13 +83,21 @@
 
   {#if library.status === "signed-out"}
     <Container maxWidth="32rem" height="auto">
-      <h2>Your recipes, wherever you cook</h2>
-      <p>Sign in to see them.</p>
-      <Button primary onclick={signIn}>Sign in</Button>
+      <div class="welcome">
+        <img src="/images/cookie.png" alt="" />
+        <h2>Gourmet <small>Web Edition</small></h2>
+        <blockquote>
+          Keep all your favorite recipes together,<br />no matter where they come from,<br />no matter what device you use.
+        </blockquote>
+        <Inline><Button primary onclick={signIn}>Log in</Button><Button onclick={signUp}>Sign up</Button></Inline>
+      </div>
     </Container>
   {:else if library.status === "signing-in" || library.status === "loading"}
     <Container maxWidth="32rem" height="auto">
-      <p><Text muted>{library.status === "signing-in" ? "Signing in…" : "Fetching your recipes…"}</Text></p>
+      <div class="loading">
+        <WhiskLogo size={220} loop label={library.status === "signing-in" ? "Signing in" : "Fetching your recipes"} />
+        <p><Text muted>{library.status === "signing-in" ? "Signing in…" : "Fetching your recipes…"}</Text></p>
+      </div>
     </Container>
   {:else if library.status === "error"}
     <Container maxWidth="32rem" height="auto">
