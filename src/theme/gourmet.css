@@ -141,3 +141,9 @@
 .recipe-prose h3 { font-family: var(--recipe-font-family); font-size: 1.15em; font-weight: 700; margin: 1.6em 0 0.6em; }
 .recipe-prose a { overflow-wrap: anywhere; }
 .hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }
+
+/* ── Shopping list ─────────────────────────────────────── */
+/* A recipe on the list: its title on its own line, then multiplier and a remove button. */
+.on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
+.on-list > :not(.title) { grid-row: 2; }
+.on-list .title { grid-row: 1; grid-column: 1 / -1; font-family: var(--recipe-font-family); font-weight: 600; text-wrap: balance; }

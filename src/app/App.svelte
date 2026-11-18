@@ -6,10 +6,16 @@
   import { search, categoriesOf } from "./lib.js";
   import RecipeList from "../screens/list/RecipeList.svelte";
   import RecipeView from "../screens/recipe/RecipeView.svelte";
+  import ShoppingList from "../screens/shopping/ShoppingList.svelte";
+  import { shopping, loadShopping, useLocalOnly } from "./shopping.svelte.js";
+  import { buildList } from "./shoppingList.js";
 
   let usingFixtures = $state(false);
   onMount(async () => {
-    if (new URLSearchParams(location.search).has("fixtures")) usingFixtures = await loadFixtures();
+    if (new URLSearchParams(location.search).has("fixtures")) {
+      useLocalOnly(); // fixtures mode never reaches the server, whatever else happens
+      usingFixtures = await loadFixtures();
+    }
     if (!usingFixtures) startSession();
   });
 
@@ -21,10 +27,10 @@
 
   // Several recipes can be open at once, each in its own closeable tab.
   let openIds = $state([]);
-  let tab = $state("search"); // "search" or a recipe's local id
+  let tab = $state("search"); // "search", "shopping" or a recipe's local id
   // Open tabs follow the library, so a recipe that syncs in again stays current.
   const openRecipes = $derived(openIds.map((id) => library.recipes.find((r) => r.id === id)).filter(Boolean));
-  $effect(() => { if (tab !== "search" && !openRecipes.some((r) => r.id === tab)) tab = "search"; });
+  $effect(() => { if (tab !== "search" && tab !== "shopping" && !openRecipes.some((r) => r.id === tab)) tab = "search"; });
 
   function openRecipe(r) {
     if (!openIds.includes(r.id)) openIds.push(r.id);
@@ -36,6 +42,9 @@
     openIds.splice(i, 1);
     if (tab === r.id) tab = openIds[i] ?? openIds[i - 1] ?? "search";
   }
+  // The shopping list is read from the cache once recipes are ready and again after each sync.
+  $effect(() => { if (library.status === "ready" && !library.syncing) loadShopping(); });
+  const shopCount = $derived(buildList(shopping.rec, library.recipes).items.filter((i) => !i.checked).length);
   const shortTitle = (t) => (t.length > 26 ? t.slice(0, 25).trimEnd() + "…" : t);
 
   const categories = $derived(categoriesOf(library.recipes));
@@ -55,7 +64,7 @@
 <Page>
   {#snippet header()}
     <!-- On a phone an open recipe gets the whole screen: the brand bar steps aside. -->
-    {#if !(phone && tab !== "search")}
+    {#if !(phone && tab !== "search" && tab !== "shopping")}
       <Bar primary>
         <h1>Gourmet</h1>
         {#if library.status !== "signed-out" && !usingFixtures}
@@ -69,6 +78,7 @@
     {#if library.status === "ready"}
       <TabBar>
         <TabItem active={tab === "search"} onclick={() => (tab = "search")}>Recipes</TabItem>
+        <TabItem active={tab === "shopping"} onclick={() => (tab = "shopping")}>Shopping list{shopCount ? ` (${shopCount})` : ""}</TabItem>
         {#each openRecipes as r (r.id)}
           <TabItem active={tab === r.id} onclick={() => (tab = r.id)} onclose={() => closeRecipe(r)}
             closeLabel="Close {r.title}" title={r.title}>
@@ -100,6 +110,8 @@
     {#each openRecipes as r (r.id)}
       <div class="tab-panel" hidden={tab !== r.id}><RecipeView recipe={r} /></div>
     {/each}
+
+    <div class="tab-panel search" hidden={tab !== "shopping"}><ShoppingList /></div>
 
     <div class="tab-panel search" hidden={tab !== "search"}>
       <Container maxWidth="56rem" height="auto">
