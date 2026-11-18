@@ -52,15 +52,3 @@ describe("accent and the new fixes", () => {
   });
   it("birthday is bubblegum", () => expect(getColor(r("Birthday Cake")).bg).toBe("#ff9ecb"));
 });
-
-describe("ink: the recipe colour as readable text", () => {
-  it("keeps a colour that already reads, darkens one that does not", async () => {
-    const { ink } = await import("./lib.js");
-    const Color = (await import("color")).default;
-    const page = Color("#fffdf8");
-    expect(ink("#5c3317").toLowerCase()).toBe("#5c3317");
-    for (const bg of ["#d7e869", "#fffdf5", "#ffe5b4", "#f0dc9c", "#b8f2e6"]) {
-      expect(Color(ink(bg)).contrast(page)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-});

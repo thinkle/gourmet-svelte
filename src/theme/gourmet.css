@@ -177,7 +177,7 @@
 /* An amount marked in the text (<amount>): it scales with the recipe and,
    once scaled, takes the recipe's colour like the ingredient list does. */
 .recipe-prose amount { white-space: nowrap; }
-.recipe-prose amount.scaled { color: var(--recipe-ink); font-weight: 700; }
+.recipe-prose amount.scaled { color: var(--recipe-bg); font-weight: 700; }
 
 /* Facts in the recipe header stay whole. */
 .hero .bottom .tag, .hero .bottom span { white-space: nowrap; }
