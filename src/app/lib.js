@@ -1,4 +1,5 @@
 import { surfaceVars } from "contain-css-svelte";
+import Color from "color";
 
 // Gourmet's own colour logic: chocolate is brown, lemon is yellow, Halloween is black and orange.
 import { getColor, wordColors } from "../common/colors.js";
@@ -65,8 +66,21 @@ export { text };
 
 // The per-recipe colour as an app-defined Contain role: its pair and its pins,
 // written where the role is applied (a pin at :root cannot see --recipe-fg).
+/**
+   The recipe's colour as text on the page: itself if it reads (4.5:1 on the
+   page's near-white), else the same hue darkened until it does. Lime avocado
+   becomes olive; a white egg palette becomes a deep warm grey.
+*/
+const PAGE = Color("#fffdf8");
+export function ink(bg) {
+  try {
+    let c = Color(bg);
+    for (let i = 0; i < 40 && c.contrast(PAGE) < 4.5; i++) c = c.darken(0.08);
+    return c.hex();
+  } catch { return bg; }
+}
 export const recipeRole = (c) =>
-  `--recipe-bg: ${c.bg}; --recipe-fg: ${c.fg}; --recipe-accent: ${c.accent ?? c.fg}; --recipe-color: ${c.bg}; ` +
+  `--recipe-bg: ${c.bg}; --recipe-fg: ${c.fg}; --recipe-ink: ${ink(c.bg)}; --recipe-accent: ${c.accent ?? c.fg}; --recipe-color: ${ink(c.bg)}; ` +
   `--on-recipe-link-text-fg: ${c.fg}; --on-recipe-link-hover-text-fg: ${c.fg}; --on-recipe-heading-fg: ${c.fg};`;
 export const roleStyle = (c, prefix) => recipeRole(c) + " " + surfaceVars("recipe", prefix);
 
