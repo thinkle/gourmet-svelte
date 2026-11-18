@@ -107,6 +107,47 @@ Stored-shape note (AGENTS rule 2): `checked` is a new field on shopping-list
 documents only. Take a dump (`scripts/migrate/dump.mjs`) before the first real
 save of a list from this build.
 
+## Pantry ("I already have this")
+
+What the earlier versions did, as far as this repo shows:
+
+- Old PyGTK Gourmet: the owner recalls a pantry list that remembered items you
+  said you already had, so "water" or "salt" stopped appearing on every list.
+  No GTK source is in this repo, so this is the owner's description only.
+- Web version (`legacy/`): partial. `setShopItem(item, shopItem, shopIgnore)` in
+  `shoppingStores.js` set `shopIgnore` on the ingredient inside the source
+  recipe, and `ShoppingListItems.svelte` showed an "Ignored Items" section
+  ("You removed these from the list -- maybe you already have them?"), with a
+  button to restore. It was remembered per recipe line, not across recipes, and
+  it edited the recipes. Git history (`git log -S shopIgnore`) shows it added
+  as "ignoring ... things we can change about items" and never extended. A
+  fixtures dump has 55 ingredients with `shopIgnore: true`, so it was used.
+
+New behaviour:
+
+- Per item, two choices: tick = "Have it" (this list only); "Always have it" =
+  add the item key to the pantry.
+- Stored as a top-level `pantry: [itemKey]` array on the shopping-list document,
+  same pattern as `checked`: it syncs with the list, applies to every recipe, and
+  nothing is written into recipes. (It could live in a separate document, but
+  that needs a second saved document and a way to find it; the list document is
+  already found, saved and synced. Cost: the pantry follows whichever list
+  document is chosen.)
+- Pantry items are not counted as to-buy and not in the tab count, but are shown
+  in "In your pantry" with their merged amounts, so you can see what recipes use.
+  "Put back" puts one on the list for this trip (key added to `trip: [itemKey]`,
+  and its tick cleared); "Always have it" again or removing it clears that.
+- "Edit pantry" shows the full pantry, including entries no recipe on the list
+  uses right now, with remove (x) and an "Add to pantry" box (name parsed the
+  same way, so "Olive oil" matches "extra-virgin olive oil" only as far as the
+  kept `getShopItem` agrees).
+- Old `shopIgnore: true` on recipe ingredients is read, never written, as a
+  pantry hint: an item with any such ingredient counts as in the pantry. Removing
+  it from the pantry records its key in `pantryOff: [itemKey]` on the list, so
+  the hint is overridden without touching the recipe.
+- Stored-shape note: `pantry`, `trip` and `pantryOff` are new optional fields on
+  shopping-list documents only; dump before the first real save (as for `checked`).
+
 ## Old features: keep, drop, defer
 
 | Old feature | Decision |
@@ -120,7 +161,7 @@ save of a list from this build.
 | Remove a loose item | keep |
 | Clear list | keep as "Clear ticked" only; clearing everything is remove-per-recipe |
 | Rename an item (`shopItem`) / "Separate" an ingredient from a merge | defer |
-| "Ignore" (already have it) | defer (replaced by checking off) |
+| "Ignore" (already have it) | keep, as the pantry (see above) |
 | Recipe picker dialog on the list screen | drop; add from the recipe view |
 | Add from the recipe list (bulk) | defer |
 | Aisles / categories | defer |

@@ -56,6 +56,9 @@ function walk(list, mult, source, recipes, seen, out, missing) {
 export function buildList(rec, recipes) {
   const entries = rec?.ingredients ?? [];
   const checked = new Set(rec?.checked ?? []);
+  const pantry = new Set(rec?.pantry ?? []);
+  const pantryOff = new Set(rec?.pantryOff ?? []); // removed from the pantry although old recipes say "ignore"
+  const trip = new Set(rec?.trip ?? []); // pantry items put back on the list for this trip
   const onList = [];
   const leaves = [];
   const missing = [];
@@ -78,9 +81,15 @@ export function buildList(rec, recipes) {
   const items = [...byKey.entries()].map(([key, ls]) => {
     const scaled = ls.map((l) => scale(l.ing.amount, l.mult)).filter(Boolean);
     const amounts = scaled.length ? addAmounts(scaled, key).map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") })) : [];
+    // Old recipes carry shopIgnore on ingredients (the web app's "ignore"). Read only, as a pantry hint.
+    const hint = ls.some((l) => l.ing.shopIgnore === true);
+    const inPantryList = pantry.has(key) || (hint && !pantryOff.has(key));
     return {
       key,
       name: itemName(ls[0].ing),
+      hint,
+      inPantryList,
+      inPantry: inPantryList && !trip.has(key),
       amounts,
       checked: checked.has(key),
       from: ls.map((l) => ({
@@ -91,7 +100,9 @@ export function buildList(rec, recipes) {
       looseIds: ls.filter((l) => l.loose).map((l) => l.ing.id),
     };
   }).sort((a, b) => a.name.localeCompare(b.name));
-  return { recipes: onList, items, keys: new Set(byKey.keys()) };
+  // Pantry entries no recipe on the list uses right now, so the pantry can be viewed and edited on its own.
+  const pantryOnly = [...pantry].filter((k) => !byKey.has(k)).sort();
+  return { recipes: onList, items, keys: new Set(byKey.keys()), pantryOnly };
 }
 
 /** Pick the document to use when there are several. */

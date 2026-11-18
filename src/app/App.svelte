@@ -44,7 +44,7 @@
   }
   // The shopping list is read from the cache once recipes are ready and again after each sync.
   $effect(() => { if (library.status === "ready" && !library.syncing) loadShopping(); });
-  const shopCount = $derived(buildList(shopping.rec, library.recipes).items.filter((i) => !i.checked).length);
+  const shopCount = $derived(buildList(shopping.rec, library.recipes).items.filter((i) => !i.checked && !i.inPantry).length);
   const shortTitle = (t) => (t.length > 26 ? t.slice(0, 25).trimEnd() + "…" : t);
 
   const categories = $derived(categoriesOf(library.recipes));

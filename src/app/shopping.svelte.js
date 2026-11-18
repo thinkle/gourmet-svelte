@@ -115,6 +115,28 @@ export const setChecked = (key, on, liveKeys) => change((rec) => {
   rec.checked = [...keep];
 });
 
+const without = (arr, k) => (arr ?? []).filter((x) => x !== k);
+const withKey = (arr, k) => [...new Set([...(arr ?? []), k])];
+
+// "Always have it": into the pantry (stored on the list document, so it syncs
+// and applies to every recipe), or out of it. `hint` is true when old recipes
+// mark the item "ignore": removing it then also records pantryOff, because
+// the recipes themselves are never written.
+export const setPantry = (key, on, hint = false) => change((rec) => {
+  rec.trip = without(rec.trip, key);
+  if (on) { rec.pantry = withKey(rec.pantry, key); rec.pantryOff = without(rec.pantryOff, key); }
+  else { rec.pantry = without(rec.pantry, key); if (hint) rec.pantryOff = withKey(rec.pantryOff, key); }
+});
+
+/** Put a pantry item back on the list for this trip only. */
+export const putBack = (key) => change((rec) => { rec.trip = withKey(rec.trip, key); rec.checked = without(rec.checked, key); });
+
+/** Add something to the pantry by name ("olive oil"). */
+export const addToPantry = (text) => {
+  const t = (text ?? "").trim();
+  return t ? setPantry(itemKey({ text: t }), true) : Promise.resolve();
+};
+
 export const clearChecked = () => change((rec) => { rec.checked = []; });
 
 export { itemKey };
