@@ -1,0 +1,54 @@
+<!doctype html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gourmet palettes</title>
+<style>
+  :root { --ink:#2b1d14; --paper:#fffdf7; --line:#e6dccb; --muted:#7a6a5a; }
+  body { margin:0; font:15px/1.4 system-ui,sans-serif; color:var(--ink); background:var(--paper); }
+  main { max-width:56rem; margin:0 auto; padding:1.5rem 1rem 4rem; }
+  h1 { margin:0 0 .25rem; font-family:Georgia,serif; }
+  p.lead { margin:0 0 1rem; color:var(--muted); }
+  .try { position:sticky; top:0; background:var(--paper); padding:.75rem 0; border-bottom:1px solid var(--line); z-index:2; }
+  .try input { width:100%; box-sizing:border-box; font:inherit; font-size:1.1rem; padding:.55rem .75rem; border:2px solid var(--line); border-radius:.5rem; }
+  .result { display:flex; align-items:center; gap:.75rem; margin-top:.6rem; min-height:3rem; }
+  .chip { display:inline-flex; align-items:center; padding:.45rem .9rem; border-radius:.6rem; font-family:Georgia,serif; font-weight:600; }
+  .row { display:grid; grid-template-columns:2rem 5rem 1fr auto; gap:.75rem; align-items:center; padding:.4rem .25rem; border-bottom:1px solid var(--line); }
+  .row.hit { outline:3px solid var(--ink); outline-offset:-2px; border-radius:.4rem; background:#fff7dc; }
+  .row.out { opacity:.4; }
+  .n { color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
+  .sw { height:2.4rem; border-radius:.45rem; display:grid; place-items:center; font:700 1rem Georgia,serif; }
+  code { font:13px ui-monospace,monospace; word-break:break-word; }
+  .c { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .c.low { color:#b3261e; font-weight:600; }
+  .tier { margin:1.2rem 0 .2rem; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+</style>
+<main>
+  <h1>Recipe palettes</h1>
+  <p class="lead">Top to bottom is priority: the first rule that matches a recipe's title or one of its categories wins. Type below to see which one a recipe would get.</p>
+  <div class="try">
+    <input id="q" placeholder="Try a title or category: &quot;Moroccan Chickpea Stew&quot;" autofocus>
+    <div class="result" id="result"></div>
+  </div>
+  <div id="rows"></div>
+</main>
+<script>
+const rows = [{"src":"easter\\b","flags":"i","bg":"#dcf9a8","fg":"#6434b2","contrast":6.8},{"src":"halloween","flags":"i","bg":"#000000","fg":"#f97306","contrast":7.5},{"src":"christmas","flags":"i","bg":"#2b3d0a","fg":"#e3f2d9","contrast":10.1},{"src":"eggplant|aubergine|gh?anou","flags":"i","bg":"#614051","fg":"#ffdcff","contrast":7.2},{"src":"chocolate|brownie|cocoa|\\bfudge","flags":"i","bg":"#5c3317","fg":"#e3cbb5","contrast":6.9},{"src":"asparagus","flags":"i","bg":"#87a96b","fg":"#edfdef","contrast":2.5},{"src":"spinach","flags":"i","bg":"#455439","fg":"#deffcd","contrast":7.5},{"src":"apple","flags":"i","bg":"#ff0800","fg":"#ffdfee","contrast":3.2},{"src":"tomato","flags":"i","bg":"#9f0404","fg":"#ffd4c2","contrast":6.2},{"src":"lemon","flags":"i","bg":"#fff04d","fg":"#368321","contrast":4},{"src":"orange","flags":"i","bg":"#f69813","fg":"#ffeed6","contrast":2},{"src":"pumpkin","flags":"i","bg":"#e19005","fg":"#5c3f00","contrast":3.8},{"src":"avocado","flags":"i","bg":"#d7e869","fg":"#181E10","contrast":12.7},{"src":"blueberr|blackberr|\\bberry\\b|\\bberries\\b","flags":"i","bg":"#3f3a8c","fg":"#e8e6ff","contrast":7.8},{"src":"strawberr|raspberr|cranberr|cherr","flags":"i","bg":"#a4133c","fg":"#ffe1ea","contrast":6.3},{"src":"coffee|espresso","flags":"i","bg":"#3b2a20","fg":"#f1d9b5","contrast":10},{"src":"caramel|butterscotch|toffee|maple","flags":"i","bg":"#c68e17","fg":"#2c1b00","contrast":5.8},{"src":"coconut","flags":"i","bg":"#f7f3e8","fg":"#5a3a22","contrast":9.2},{"src":"\\blime|mango|pineapple|citrus","flags":"i","bg":"#9acd32","fg":"#1d2d00","contrast":7.8},{"src":"peppermint|\\bmint\\b","flags":"i","bg":"#b8f2e6","fg":"#0b4f43","contrast":7.6},{"src":"chile|jalape|chipotle|harissa|sriracha|sizzl|fajita","flags":"i","bg":"#c8401a","fg":"#fff4e8","contrast":4.6},{"src":"chickpea|chana|lentil|\\bbeans?\\b|hummus|falafel","flags":"i","bg":"#c8a165","fg":"#2f1d05","contrast":6.7},{"src":"squash|sweet potato|carrot|turmeric","flags":"i","bg":"#a8500f","fg":"#fff0dc","contrast":4.9},{"src":"chard|kale|cabbage|brussels|bok choy|collard|broccoli|sprouts","flags":"i","bg":"#2a7d4f","fg":"#e9ffe9","contrast":4.8},{"src":"basil|thyme|parsley|cilantro|fennel|herb|pesto|scallion|celery|cucumber","flags":"i","bg":"#8fb339","fg":"#1b2d00","contrast":6.1},{"src":"mushroom|potato|leek|onion|garlic|\\broot\\b","flags":"i","bg":"#6f5a4b","fg":"#fff4e6","contrast":6},{"src":"peanut|pecan|walnut|almond|pistachio|hazelnut","flags":"i","bg":"#8c5a36","fg":"#fff3e6","contrast":5.3},{"src":"\\bsea\\b|fish|salmon|crab|lobster|squid|calamar","flags":"i","bg":"#0077BE","fg":"#dedefe","contrast":3.6},{"src":"cookie|bread|\\brolls?\\b","flags":"i","bg":"#eed9a0","fg":"#4c2307","contrast":9.7},{"src":"dessert","flags":"i","bg":"#FF3366","fg":"#ffdede","contrast":2.8},{"src":"salad","flags":"i","bg":"#bdeabd","fg":"#133f13","contrast":9},{"src":"greek|greece|mediterr","flags":"i","bg":"#0154C7","fg":"#ebf1ff","contrast":6},{"src":"pasta|italy|italian","flags":"i","bg":"#ce2b37","fg":"#fedeed","contrast":4.2},{"src":"india","flags":"i","bg":"#FEB200","fg":"black","contrast":11.6},{"src":"thai","flags":"i","bg":"#fff194","fg":"#db5800","contrast":3.4},{"src":"china|chinese|asian","flags":"i","bg":"#c51015","fg":"#F8D803","contrast":4.3},{"src":"french|france","flags":"i","bg":"#456990","fg":"#ffc501","contrast":3.6},{"src":"mexic","flags":"i","bg":"#a55409","fg":"#ffe294","contrast":4.3},{"src":"spanish|spain","flags":"i","bg":"#FED76A","fg":"#6A1410","contrast":8.8},{"src":"vietnam|\\bpho\\b|b[aá]nh|lemongrass","flags":"i","bg":"#587a12","fg":"#f6ffd9","contrast":4.8},{"src":"moroccan|tagine|african|ethiopia|berbere","flags":"i","bg":"#b5451b","fg":"#fff1de","contrast":4.9},{"src":"lebanes|middle eastern|turkish|israel|tabbouleh|shawarma|persian","flags":"i","bg":"#1f6f6b","fg":"#e6fffb","contrast":5.7},{"src":"cuban|venezuel|peru|brazil|colombia|cachapa|arroz|latin|caribbean","flags":"i","bg":"#ff7f50","fg":"#3b0d00","contrast":6.8},{"src":"korea|japan|ramen|udon|sushi|miso|teriyaki|noodle","flags":"i","bg":"#1f1f2e","fg":"#ff9966","contrast":7.7},{"src":"swed|scandinav|norweg|danish|german|polish|pepparkakor","flags":"i","bg":"#00508a","fg":"#fecc02","contrast":5.5},{"src":"soup|stew|chili|chowder|curry|korma|biryani|\\bdal\\b","flags":"i","bg":"#a24936","fg":"#ffe8d9","contrast":5},{"src":"\\bpies?\\b|galette|\\btart|pastry|crust","flags":"i","bg":"#8a5522","fg":"#fff1dc","contrast":5.5},{"src":"\\bcakes?\\b|cupcake|muffin|scone","flags":"i","bg":"#c9b8f0","fg":"#2d1a5c","contrast":8.2},{"src":"breakfast|pancake|waffle|crepe|\\beggs?\\b|\\boats?\\b|frittata|quiche","flags":"i","bg":"#ffe5b4","fg":"#7a2e00","contrast":7.7},{"src":"beef|steak|\\bribs?\\b|brisket|lamb|pork|sausage|bacon|\\bham\\b|roast","flags":"i","bg":"#5e2a2a","fg":"#ffe3d6","contrast":9.4},{"src":"chicken|turkey|poultry","flags":"i","bg":"#fbe8c3","fg":"#7a3e00","contrast":6.9},{"src":"shrimp|\\bcod\\b|prawn|scallop|seafood","flags":"i","bg":"#ff8b6a","fg":"#3d0f00","contrast":7.2},{"src":"cheese|queso|feta|pecorino|parmesan|mozzarella","flags":"i","bg":"#f5b83d","fg":"#3a2200","contrast":8.4},{"src":"yogurt|cream|dairy","flags":"i","bg":"#eef2f7","fg":"#25405f","contrast":9.4},{"src":"pilaf|bulgur|quinoa|\\brice\\b|couscous|grain|risotto","flags":"i","bg":"#d8c3a5","fg":"#3a2a14","contrast":8.1},{"src":"winter|snow|frost","flags":"i","bg":"#a8c5da","fg":"#0f2a3f","contrast":8.2}].map((r) => ({ ...r, re: new RegExp(r.src, r.flags) }));
+const el = document.getElementById("rows");
+rows.forEach((r, i) => {
+  const d = document.createElement("div"); d.className = "row"; r.el = d;
+  d.innerHTML = '<span class="n">' + (i + 1) + '</span><div class="sw" style="background:' + r.bg + ';color:' + r.fg + '">Aa</div><code>/' + r.src.replace(/</g, "&lt;") + '/' + r.flags + '</code><span class="c' + (r.contrast < 4.5 ? " low" : "") + '" title="text contrast (below 4.5 is flagged)">' + r.contrast + ':1</span>';
+  el.append(d);
+});
+const q = document.getElementById("q"), out = document.getElementById("result");
+function run() {
+  const t = q.value.trim();
+  rows.forEach((r) => r.el.classList.remove("hit", "out"));
+  if (!t) { out.innerHTML = ""; return; }
+  const win = rows.find((r) => r.re.test(t));
+  rows.forEach((r) => { if (r !== win) r.el.classList.add("out"); });
+  if (win) { win.el.classList.add("hit"); win.el.scrollIntoView({ block: "center", behavior: "smooth" });
+    out.innerHTML = '<span class="chip" style="background:' + win.bg + ';color:' + win.fg + '"></span> <span>matches rule #' + (rows.indexOf(win) + 1) + '</span>';
+    out.firstChild.textContent = t; }
+  else out.innerHTML = '<span class="chip" style="background:#7a4443;color:#fff0a3"></span> <span>no rule: the plain brown</span>', out.firstChild.textContent = t;
+}
+q.addEventListener("input", run);
+</script>
