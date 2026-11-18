@@ -13,6 +13,9 @@
   import RecipeEditor from "./RecipeEditor.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
   import { bodyHtml } from "../../app/recipeText.js";
+  import { shopping, addRecipe } from "../../app/shopping.svelte.js";
+  import { refFor, isRef } from "../../app/shoppingList.js";
+  import { floatToFrac } from "../../utils/numbers.js";
   import { RecipeEdit } from "../../app/editState.svelte.js";
   /**
      recipe       the screen's prepared copy (for showing)
@@ -33,6 +36,8 @@
   }
 
   let mult = $state(1);
+  // How many times this recipe is on the shopping list already (0 if not).
+  const onList = $derived(shopping.rec?.ingredients?.find((i) => isRef(i) && i.reference === refFor(recipe))?.amount?.amount ?? 0);
   let width = $state(1000);
   const wide = $derived(width >= 720);
 
@@ -86,6 +91,10 @@
   <header class="pane-head">
     <h2>Ingredients</h2>
     <AmountInput bind:value={mult} label="Multiply the recipe by" />
+    {#if !onclose}
+      <Button onclick={() => addRecipe(recipe, mult)}>Add to shopping list</Button>
+      {#if onList}<Text muted>On the list ×{floatToFrac(onList)}</Text>{/if}
+    {/if}
     {#if onclose}<button type="button" class="sheet-close" aria-label="Hide ingredients" onclick={onclose}>×</button>{/if}
   </header>
 {/snippet}

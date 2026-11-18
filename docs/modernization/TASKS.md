@@ -213,6 +213,35 @@ R1-3, R2-2, R2-3 and R2-4 with it:
 - [~] **R5-4 View and editor** — `screen-builder`; view done (`Measures.svelte` in `Ingredients.svelte`), editor input still to do
 - [ ] **R5-5 MCP worker** (separate repo): pass the field through; update the tool description.
 
+## S — Shopping list
+
+Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
+
+- [x] **S-1 Spec** from the old store, `shopDisplay` and `Recipe.svelte`.
+- [x] **S-2 First version.** "Add to shopping list" in the recipe view (at the
+  current multiplier); a "Shopping list" tab (phone too) with merged items
+  (kept `getShopItem`, `addAmounts`, `formatAmount`), tick-off, recipes on the
+  list with editable multiplier and remove, loose items. Stored as the
+  `isShoppingList` recipe document and saved through `recipeData` (fixtures mode
+  and signed-out sessions save to the local row only). `legacy/` store not
+  reused: it is bound to the old stores; new code is `src/app/shopping*.js`.
+- [x] **S-2b Desktop structure.** Three sections (To buy by aisle, In the
+  cart with "Done shopping", Already have seeded from the desktop
+  `default_pantry` and old `shopIgnore`), aisles with a two-tap chip picker,
+  editable aisle order, guessed default aisles (curated keywords plus the
+  desktop's default table), rename/merge by key alias. Stored on the list
+  document: `cart`, `alreadyHave`, `alreadyHaveOff`, `trip`, `aisles`,
+  `aisleOrder`, `keyAliases`. Stored `ingkey`/`shopItem` is the item key when
+  present. No pantry editor (the pantry was a metaphor). See the spec.
+- [ ] **S-3 Tom checks it against real data**: dump first
+  (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
+  what to do about the spare empty shopping-list documents.
+- [ ] **S-4 Tests**: unit tests for `buildList` and the save path once `npm test`
+  exists (R0-3); none added now because the only runner is the API one.
+- [ ] **S-5 Later**: aisles; rename or split a merged item; multi-select aisle assigning; add from the recipe list; list as MCP endpoints (see the spec's last section);
+  family sharing; item names from `getShopItem` can read oddly ("Purpose Flour"
+  for "all-purpose flour": kept logic, reported, not patched).
+
 ## R6 — Cutover
 
 - [ ] **R6-1** A week of daily use on the `dev` deploy — Tom

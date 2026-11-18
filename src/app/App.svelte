@@ -10,10 +10,16 @@
   import RecipeList from "../screens/list/RecipeList.svelte";
   import RecipeView from "../screens/recipe/RecipeView.svelte";
   import ConfirmHost from "../components/ConfirmHost.svelte";
+  import ShoppingList from "../screens/shopping/ShoppingList.svelte";
+  import { shopping, loadShopping, useLocalOnly } from "./shopping.svelte.js";
+  import { buildList } from "./shoppingList.js";
 
   let usingFixtures = $state(false);
   onMount(async () => {
-    if (new URLSearchParams(location.search).has("fixtures")) usingFixtures = await loadFixtures();
+    if (new URLSearchParams(location.search).has("fixtures")) {
+      useLocalOnly(); // fixtures mode never reaches the server, whatever else happens
+      usingFixtures = await loadFixtures();
+    }
     if (!usingFixtures) startSession();
   });
 
@@ -26,7 +32,7 @@
   // Several recipes can be open at once, each in its own closeable tab. A
   // tab's key is the recipe's local id, or "new-N" for a recipe not yet saved.
   let openIds = $state([]);
-  let tab = $state("search"); // "search" or a tab key
+  let tab = $state("search"); // "search", "shopping" or a tab key
   let drafts = $state({}); // "new-N" -> the prepared blank shown while it is new
   let dirty = $state({}); // tab key -> has unsaved edits
   let newCount = 0;
@@ -34,7 +40,7 @@
   const openTabs = $derived(openIds
     .map((key) => ({ key, recipe: drafts[key] ?? library.recipes.find((r) => r.id === key) }))
     .filter((t) => t.recipe));
-  $effect(() => { if (tab !== "search" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
+  $effect(() => { if (tab !== "search" && tab !== "shopping" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
 
   function openRecipe(r) {
     if (!openIds.includes(r.id)) openIds.push(r.id);
@@ -73,6 +79,9 @@
     putRecipe(row);
     forget(key);
   }
+  // The shopping list is read from the cache once recipes are ready and again after each sync.
+  $effect(() => { if (library.status === "ready" && !library.syncing) loadShopping(); });
+  const shopCount = $derived(buildList(shopping.rec, library.recipes).buyCount);
   const shortTitle = (t) => (t.length > 26 ? t.slice(0, 25).trimEnd() + "…" : t);
 
   const categories = $derived(categoriesOf(library.recipes));
@@ -92,7 +101,7 @@
 <Page>
   {#snippet header()}
     <!-- On a phone an open recipe gets the whole screen: the brand bar steps aside. -->
-    {#if !(phone && tab !== "search")}
+    {#if !(phone && tab !== "search" && tab !== "shopping")}
       <Bar primary>
         <h1 class="brand"><img src="/images/cookie.png" alt="" />Gourmet</h1>
         {#if library.status !== "signed-out" && !usingFixtures}
@@ -107,6 +116,8 @@
       <TabBar class="gourmet-tabs">
         <TabItem active={tab === "search"} onclick={() => (tab = "search")}
           style="--tab-indicator-color: var(--primary-bg)">Recipes</TabItem>
+        <TabItem active={tab === "shopping"} onclick={() => (tab = "shopping")}
+          style="--tab-indicator-color: var(--primary-bg)">Shopping list{shopCount ? ` (${shopCount})` : ""}</TabItem>
         {#each openTabs as { key, recipe: r } (key)}
           <TabItem active={tab === key} onclick={() => (tab = key)} onclose={() => closeRecipe(key)}
             closeLabel="Close {r.title}" title={dirty[key] ? `${r.title} (unsaved changes)` : r.title}
@@ -157,6 +168,8 @@
           ondirty={(d) => (dirty[key] = d)} />
       </div>
     {/each}
+
+    <div class="tab-panel search" hidden={tab !== "shopping"}><ShoppingList /></div>
 
     <div class="tab-panel search" hidden={tab !== "search"}>
       <Container maxWidth="56rem" height="auto">

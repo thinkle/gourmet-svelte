@@ -193,3 +193,10 @@
 .rich-text-body.recipe-prose { margin: 0; max-width: none; min-height: 6rem; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in oklab, currentColor 25%, transparent); border-radius: 0.4rem; }
 .rich-text-body:focus { outline: 2px solid var(--recipe-bg, currentColor); outline-offset: 1px; }
 .rich-text-body:empty::before { content: attr(data-placeholder); opacity: 0.5; }
+/* ── Shopping list ─────────────────────────────────────── */
+/* An aisle that is only a guess (nothing chosen yet) reads quieter. */
+.guess { opacity: 0.6; }
+/* A recipe on the list: its title on its own line, then multiplier and a remove button. */
+.on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
+.on-list > :not(.title) { grid-row: 2; }
+.on-list .title { grid-row: 1; grid-column: 1 / -1; font-family: var(--recipe-font-family); font-weight: 600; text-wrap: balance; }
