@@ -16,7 +16,7 @@
       <li>
         <button type="button" class="ingredient" class:active={active === ing.text}
           data-ingredient={ing.text} aria-pressed={active === ing.text} onclick={() => onpick?.(ing.text)}>
-          <span class="amount" class:scaled={mult !== 1}><Measures amount={ing.amount} altAmounts={ing.altAmounts} {mult} /></span>
+          <span class="amount"><Measures amount={ing.amount} altAmounts={ing.altAmounts} {mult} /></span>
           <span class="item">{ing.text}</span>
         </button>
       </li>
@@ -55,6 +55,4 @@
   .ingredient:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
   .ingredient.active { background: var(--note-bg); color: var(--note-fg); }
   .amount { min-inline-size: 4.75rem; font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
-  /* Scaled amounts take the recipe's colour, so you can see the multiplier is on. */
-  .amount.scaled { color: var(--recipe-bg); }
 </style>

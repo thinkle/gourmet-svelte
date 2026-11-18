@@ -7,7 +7,8 @@
   import { Input, Button } from "contain-css-svelte";
   import { floatToFrac, fracToFloat, increment, decrement } from "../utils/numbers.js";
 
-  let { value = $bindable(1), label = "Amount", min = 0 } = $props();
+  // `times` shows the "×" (a multiplier); `unit` follows the box ("Makes [30] cookies").
+  let { value = $bindable(1), label = "Amount", min = 0, times = true, unit = "" } = $props();
 
   let editing = $state(false);
   let text = $state("");
@@ -50,8 +51,8 @@
   }
 </script>
 
-<span class="amount-input" class:changed={value !== 1}>
-  <span class="times" aria-hidden="true">×</span>
+<span class="amount-input">
+  {#if times}<span class="times" aria-hidden="true">×</span>{/if}
   <Input
     aria-label={label}
     value={editing ? text : pretty}
@@ -66,18 +67,19 @@
     <Button aria-label="Less" onclick={() => step(-1)}>−</Button>
     <Button aria-label="More" onclick={() => step(1)}>+</Button>
   </span>
+  {#if unit}<span class="unit">{unit}</span>{/if}
 </span>
 
 <style>
   .amount-input { display: inline-flex; align-items: center; gap: 0.35rem; }
   .times { font-weight: 700; opacity: 0.7; }
+  .unit { opacity: 0.8; }
   .amount-input :global(input) {
     inline-size: 4.75rem;
     text-align: center;
     font-variant-numeric: tabular-nums;
     font-weight: 700;
   }
-  .changed :global(input) { color: var(--recipe-bg, currentColor); }
   .steps { display: inline-flex; gap: 0.15rem; }
   .steps :global(button) { min-inline-size: 2rem; padding-inline: 0.4rem; }
 </style>

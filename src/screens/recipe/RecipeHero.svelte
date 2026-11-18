@@ -6,7 +6,10 @@
   import { Surface, Text } from "contain-css-svelte";
   import CategoryTag from "../../components/CategoryTag.svelte";
   import { fmtTime, stars, recipeRole, sourceItems } from "../../app/lib.js";
-  let { recipe } = $props();
+  import { floatToFrac } from "../../utils/numbers.js";
+  // A yield scaled by the multiplier: "24 cookies" x 2 -> "48 cookies".
+  const scaled = (n) => (Number(n) > 0 ? floatToFrac(Number(n) * mult) : (n ?? ""));
+  let { recipe, mult = 1 } = $props();
 
   // "preptime", "Cook time", "total" -> "Prep", "Cook", "Total"
   const label = (n) => {
@@ -44,7 +47,7 @@
       <dl class="facts">
         {#if recipe.rating}<div><dt>Rating</dt><dd class="stars">{stars(recipe.rating)}</dd></div>{/if}
         {#each times as t}<div><dt>{t.label}</dt><dd>{t.value}</dd></div>{/each}
-        {#each yields as y}<div><dt>Makes</dt><dd>{y.amount ?? ""} {y.unit ?? ""}</dd></div>{/each}
+        {#each yields as y}<div><dt>Makes</dt><dd>{scaled(y.amount)} {y.unit ?? ""}</dd></div>{/each}
       </dl>
     {/if}
     {#if sources.length}
@@ -96,7 +99,7 @@
     color: var(--muted-fg, color-mix(in oklab, currentColor 60%, transparent));
   }
   dd { margin: 0; font-size: 1.1rem; font-weight: 500; }
-  .stars { color: var(--recipe-color); letter-spacing: 0.1em; }
+  .stars { color: #b7791f; letter-spacing: 0.1em; }
   .sources { margin: 0; padding-inline-start: 0.25rem; }
 
   /* A tall photo stands beside the title when there is room. */

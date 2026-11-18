@@ -62,6 +62,8 @@
   // <amount> in the text scales with the multiplier, like the ingredient list.
   const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(scaleAmounts(bodyHtml(t.body), mult), recipe.ingredients) })));
   const count = $derived(recipe.flat.length);
+  // Scale to a yield: "for 30 empanadas" is the same multiplier as "x 1 1/4".
+  const yieldRows = $derived((recipe.yields ?? []).map((y) => ({ unit: y?.unit ?? "", base: Number(y?.amount) })).filter((y) => y.base > 0));
 
   // Keep the marked-up mentions in the text in step with `active`.
   $effect(() => {
@@ -93,6 +95,12 @@
   <header class="pane-head">
     <h2>Ingredients</h2>
     <AmountInput bind:value={mult} label="Multiply the recipe by" />
+    {#each yieldRows as y}
+      <span class="scale-to">Makes
+        <AmountInput times={false} unit={y.unit} label="Scale the recipe to this many {y.unit || 'servings'}"
+          bind:value={() => y.base * mult, (v) => (mult = v / y.base)} />
+      </span>
+    {/each}
     {#if !onclose}
       <Button onclick={() => addRecipe(recipe, mult)}>Add to shopping list</Button>
       {#if onList}<Text muted>On the list ×{floatToFrac(onList)}</Text>{/if}
@@ -134,7 +142,7 @@
         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
         <article class="pane text-pane" bind:this={textEl} onclick={pickMention}>
           <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
-          <RecipeHero {recipe} />
+          <RecipeHero {recipe} {mult} />
           {@render prose()}
         </article>
       {/snippet}
@@ -143,7 +151,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <article class="pane column" class:sheet-up={sheetOpen} bind:this={textEl} onclick={pickMention}>
       <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
-      <RecipeHero {recipe} />
+      <RecipeHero {recipe} {mult} />
       <section class="ingredients-inline" bind:this={listEl} aria-label="Ingredients">
         {@render head()}{@render list()}
       </section>
