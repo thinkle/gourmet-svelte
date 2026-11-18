@@ -12,7 +12,7 @@
   import RecipeHero from "./RecipeHero.svelte";
   import RecipeEditor from "./RecipeEditor.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
-  import { bodyHtml } from "../../app/recipeText.js";
+  import { bodyHtml, scaleAmounts } from "../../app/recipeText.js";
   import { RecipeEdit } from "../../app/editState.svelte.js";
   /**
      recipe       the screen's prepared copy (for showing)
@@ -54,12 +54,14 @@
   // Scrolling back up to the list itself puts the sheet away.
   $effect(() => { if (wide || listOnScreen) sheetOpen = false; });
 
-  const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(bodyHtml(t.body), recipe.ingredients) })));
+  // <amount> in the text scales with the multiplier, like the ingredient list.
+  const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(scaleAmounts(bodyHtml(t.body), mult), recipe.ingredients) })));
   const count = $derived(recipe.flat.length);
 
   // Keep the marked-up mentions in the text in step with `active`.
   $effect(() => {
     const now = active;
+    void blocks; // the text is redrawn when the multiplier changes
     textEl?.querySelectorAll("ing").forEach((el) => el.classList.toggle("active", el.getAttribute("target") === now));
   });
 

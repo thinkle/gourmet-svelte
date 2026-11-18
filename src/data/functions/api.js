@@ -18,6 +18,7 @@ import { addRecipe, getRecipe, getRecipes, deleteRecipe } from './recipeFunction
 import { updateRecipe } from './updateRecipe.js';
 import { getUserFromApiToken, touchApiToken } from './tokenFunctions.js';
 import { normalizeIngredients } from '../../utils/ingredientParsing.js';
+import { bareItem } from '../../utils/bareItem.js';
 import { reparseRecipeIngredients } from './reparseIngredientsFunction.js';
 
 function jsonResponse(statusCode, body) {
@@ -183,6 +184,22 @@ function ensureScope(user, scope) {
     }
 }
 
+/**
+   Fill `shopItem` (the bare item: "large eggs, beaten" -> "eggs") on every
+   ingredient that has neither a `shopItem` nor the desktop app's `ingkey`.
+   What a client sent always wins; nothing is filled when no item is left
+   ("to taste").
+**/
+function withShopItems(list) {
+    return list.map((ing) => {
+        if (!ing || typeof ing !== 'object') { return ing; }
+        if (Array.isArray(ing.ingredients)) { return { ...ing, ingredients: withShopItems(ing.ingredients) }; }
+        if (ing.shopItem || ing.ingkey) { return ing; }
+        const item = bareItem(ing.text);
+        return item ? { ...ing, shopItem: item } : ing;
+    });
+}
+
 function normalizeRecipeInput(rawRecipe = {}) {
     const recipe = { ...rawRecipe };
     if (recipe.ingredients) {
@@ -190,7 +207,7 @@ function normalizeRecipeInput(rawRecipe = {}) {
         // as groups with nested lists, or already canonical. Whatever we get,
         // parse it here so the stored recipe always has structured amounts --
         // API clients don't run the browser-side parser the editor uses.
-        recipe.ingredients = normalizeIngredients(recipe.ingredients);
+        recipe.ingredients = withShopItems(normalizeIngredients(recipe.ingredients));
     }
     if (Array.isArray(recipe.categories) && recipe.categories.length) {
         if (typeof recipe.categories[0] === 'string') {
@@ -230,7 +247,11 @@ const RECIPE_SHAPE = {
             ingredient: 'the ingredient name and any prep, e.g. "flour, sifted"',
             altAmounts: 'optional array of further measures of the same quantity, e.g. ' +
                 '[{amount: 225, unit: "g"}] next to {amount: 2, unit: "sticks"}; each ' +
-                'may also be a string like "225 g". Send [] to say there are none.',
+                'may also be a string like "225 g". Send [] to say there are none. When you resend an ingredient you got from GET, keep its altAmounts.',
+            shopItem: 'optional: the bare item for a shopping list, e.g. "eggs" for "large ' +
+                'eggs, beaten", "butter" for "unsalted butter". If you omit it the server ' +
+                'fills it from the ingredient text. If you change an ingredient\'s text, ' +
+                'drop its old shopItem (or send a new one): a shopItem you send is kept as is.',
         },
         alsoAccepted: [
             'a plain string like "1 1/2 cups flour, sifted" -- the server parses ' +
@@ -254,13 +275,41 @@ const RECIPE_SHAPE = {
                 '(amount, rangeAmount, unit, standardUnit). `amount` stays the primary ' +
                 'measure; altAmounts are shown after it and scale with it. Absent when ' +
                 'the ingredient has only one measure.',
+            shopItem: 'the bare item ("eggs", "butter", "diced tomatoes"), lower case: what a ' +
+                'shopping list should show and merge on. Filled by the server on API writes ' +
+                'when the client sent neither shopItem nor ingkey. Older ingredients may have ' +
+                'none, or only `ingkey` (same meaning, from the desktop app).',
+            ingkey: 'older ingredients only: the bare item as the desktop app stored it',
         },
         note: 'Send amount/unit/ingredient separately when you know them. If you ' +
             'only have a line of text, send the text and we will parse it.',
     },
     categories: 'array of strings, or [{name}]',
     sources: 'array of strings, or [{name, url}]',
-    instructions: 'a string (plain text or HTML), or an array of strings',
+    instructions:
+        'Recipe text. Three ways to send it: (1) `instructions: "..."` -- one string, ' +
+        'stored as ONE block headed "Instructions"; (2) `instructions: ["...", "..."]` -- ' +
+        'one block per string, the first headed "Instructions"; (3) `text: [{header, body}, ...]` ' +
+        '-- the stored shape, one entry per block with your own headers ("Dough", "Filling", ' +
+        '"To serve"); this is what GET returns. TRAP: on update, sending `instructions` ' +
+        'REPLACES ALL stored text blocks with what you send, so a recipe with three blocks ' +
+        'collapses to one. To change one block, GET the recipe, edit its `text` array and send ' +
+        'the whole `text` array back (send `text`, not `instructions`; if both are sent, ' +
+        '`text` wins). ' +
+        'BODY FORMAT: plain text or HTML. Plain text: a blank line starts a new paragraph, ' +
+        'lines starting "1." or "-" become lists, a short first line ending in ":" becomes a ' +
+        'subheading. HTML: the app shows only these tags (others are removed, their text kept): ' +
+        'p br h2 h3 h4 h5 h6 ol ul li b strong i em u a blockquote hr sub sup small span div ' +
+        'table thead tbody tr th td img amount; attributes kept: href title src alt colspan ' +
+        'rowspan (no class, style, on* or data-*). Bodies are stored exactly as sent. ' +
+        'SCALABLE AMOUNTS: wrap a quantity in the text in <amount>...</amount> and the app ' +
+        'multiplies it with the recipe: "Beat in <amount>2</amount> eggs, then ' +
+        '<amount>1 1/2 cups</amount> milk; bake for 20 minutes" shows "Beat in 4 eggs, then ' +
+        '3 cups milk; bake for 20 minutes" at x2 (20 minutes is not wrapped, so it does not ' +
+        'scale). Inside the tag: a number, fraction, mixed number or range ("2", "1/2", ' +
+        '"1 1/2", "2-3", "2 to 3"), optionally followed by a unit ("200 g", "1 cup"). No ' +
+        'attributes. Works in plain-text bodies too. Only wrap amounts of ingredients, never ' +
+        'times, temperatures, pan sizes or step numbers. Old clients show the plain text.',
     yields: '[{amount, unit}]',
     times: '[{name, seconds, text}]',
     rating: 'number, 0-5',
@@ -268,7 +317,12 @@ const RECIPE_SHAPE = {
         'Updates are partial at the field level: fields you omit keep their stored ' +
         'value. Fields you send replace what is stored -- sending `ingredients` ' +
         'replaces the entire ingredient list, it is not merged with the old one. ' +
-        'To add one ingredient, read the recipe first and send the full new list.',
+        'To add one ingredient, read the recipe first and send the full new list. ' +
+        'Send each ingredient back as GET returned it (keep its altAmounts, shopItem ' +
+        'and originalText), or send a changed line as a plain string like "butter ' +
+        '(2 sticks)" for the server to parse. An ingredient object sent without its ' +
+        'altAmounts loses them. The same goes for text: sending `instructions` replaces ' +
+        'every text block; send `text: [{header, body}]` to keep several.',
 };
 
 /**

@@ -80,3 +80,41 @@ describe("sanitizeBody", () => {
     }
   });
 });
+
+describe("Scalable amounts in the editor", () => {
+  const MARKED = [
+    "<p>Beat <amount>2</amount> eggs, then <amount>1 1/2 cups</amount> milk. Bake 20 minutes.</p>",
+    "Plain text with <amount>2-3</amount> cloves\n\nand a second paragraph",
+  ];
+
+  for (const body of MARKED) {
+    it(`shows ${JSON.stringify(body.slice(0, 30))} with its <amount> tags, without writing it back`, () => {
+      const writes = [];
+      const el = show(body, (html) => writes.push(html));
+      el.dispatchEvent(new FocusEvent("focus"));
+      el.dispatchEvent(new FocusEvent("blur"));
+      expect(el.innerHTML).toBe(bodyHtml(body));
+      expect(el.querySelectorAll("amount").length).toBeGreaterThan(0);
+      expect(writes).toEqual([]);
+    });
+  }
+
+  it("an untouched recipe with marked amounts saves back byte-identical", async () => {
+    const recipe = { id: 2, text: MARKED.map((body, i) => ({ header: `H${i}`, body })) };
+    let sent = null;
+    const edit = new RecipeEdit(recipe, { data: { async updateRecipe(r) { sent = JSON.stringify(r); return r; } } });
+    for (const block of recipe.text) show(block.body);
+    expect(edit.dirty).toBe(false);
+    await edit.save();
+    expect(sent).toBe(JSON.stringify(recipe));
+  });
+
+  it("keeps <amount> when the user edits around it", () => {
+    const writes = [];
+    const el = show(MARKED[0], (html) => writes.push(html));
+    el.querySelector("p").append(" Serve.");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(writes[0]).toContain("<amount>2</amount>");
+    expect(writes[0]).toContain("<amount>1 1/2 cups</amount>");
+  });
+});
