@@ -14,6 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { reparseAltAmounts } from '../../src/utils/ingredientParsing.js';
+import { safeReparse } from './alt-guard.mjs';
 
 const args = process.argv.slice(2);
 const detailsAt = args.includes('--details') ? args[args.indexOf('--details') + 1] : null;
@@ -32,7 +33,7 @@ const recipes = fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l
 const detailLines = [];
 const stats = {
     recipes: recipes.length, recipesChanged: 0, ingredients: 0, withParenthesis: 0,
-    changed: 0, byAltUnit: {}, byPrimaryUnit: {}, twoOrMoreAlts: 0,
+    changed: 0, byAltUnit: {}, byPrimaryUnit: {}, twoOrMoreAlts: 0, skipped: {},
 };
 const bump = (o, k) => { o[k] = (o[k] || 0) + 1; };
 
@@ -44,7 +45,13 @@ function walk(list, where, recipeId, state) {
         if (Array.isArray(ing.ingredients)) { walk(ing.ingredients, at, recipeId, state); return; }
         stats.ingredients++;
         if (/\(.*\)/.test(String(ing.text || ''))) { stats.withParenthesis++; }
-        const fixed = reparseAltAmounts(ing);
+        const res = safeReparse(reparseAltAmounts, ing);
+        if (res.skipped) {
+            bump(stats.skipped, res.skipped);
+            detailLines.push(JSON.stringify({ recipe: recipeId, at, skipped: res.skipped, from: ing.text }));
+            return;
+        }
+        const fixed = res.fixed;
         if (!fixed) { return; }
         stats.changed++;
         state.changed = true;
