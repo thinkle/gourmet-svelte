@@ -146,10 +146,15 @@ export function findSecondUnits(list, set) {
   });
   return n;
 }
-function tryLine(ing, path, set) {
-  if (!ing || typeof ing !== "object" || ing.altAmounts?.length) return 0;
+/** The re-read line if it holds a second measure the stored one lacks, else null. */
+export function withSecondUnit(ing) {
+  if (!ing || typeof ing !== "object" || ing.altAmounts?.length) return null;
   const next = parseLine(ingredientLine(ing), ing);
-  if (!next.altAmounts?.length) return 0;
+  return next.altAmounts?.length ? next : null;
+}
+function tryLine(ing, path, set) {
+  const next = withSecondUnit(ing);
+  if (!next) return 0;
   set(path, next);
   return 1;
 }

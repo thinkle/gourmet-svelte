@@ -173,3 +173,13 @@ describe("understood() shows second measures", () => {
     expect(understood(parseLine("1 cup flour")).also).toBeUndefined();
   });
 });
+
+describe("withSecondUnit", () => {
+  it("re-reads an old line that holds a second measure, and leaves others alone", async () => {
+    const { withSecondUnit } = await import("./recipeEdit.js");
+    const old = { text: "unsalted butter (2 1/2 sticks)", amount: { amount: 285, unit: "g" } };
+    expect(withSecondUnit(old).altAmounts[0]).toMatchObject({ amount: 2.5, unit: "sticks" });
+    expect(withSecondUnit({ text: "flour", amount: { amount: 1, unit: "c" } })).toBeNull();
+    expect(withSecondUnit({ ...old, altAmounts: [{ amount: 2.5, unit: "sticks" }] })).toBeNull();
+  });
+});
