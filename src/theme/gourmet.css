@@ -17,6 +17,19 @@
 }
 
 /* ── App shell ─────────────────────────────────────────── */
+.gourmet-tabs {
+  --tab-bar-border-bottom: none;
+  --tab-border-bottom: 1px solid color-mix(in oklab, var(--fg) 30%, transparent);
+  /* Old Gourmet: a thin rule under every tab, a thicker coloured one under
+     the open tab that glides over (the old one took 600ms; a little quicker
+     feels crisper) and takes that recipe's colour on the way. */
+  --tab-indicator-height: 3px;
+  --tab-indicator-transition: 450ms cubic-bezier(0.25, 0.8, 0.35, 1);
+}
+.gourmet-tabs.tab-indicator-live {
+  --tab-active-border-bottom: var(--tab-border-bottom);
+}
+
 /* A recipe fills the space under the tabs; its panes scroll, the page does not. */
 .tab-panel { height: 100%; }
 .tab-panel[hidden] { display: none; }

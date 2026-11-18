@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "color": "^3.1.3",
-    "contain-css-svelte": "^1.9.1",
+    "contain-css-svelte": "^1.10.1",
     "deepcopy": "^2.1.0",
     "dexie": "^3.0.3",
     "dompurify": "^3.4.18",

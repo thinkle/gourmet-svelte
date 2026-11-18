@@ -67,8 +67,9 @@
       </Bar>
     {/if}
     {#if library.status === "ready"}
-      <TabBar>
-        <TabItem active={tab === "search"} onclick={() => (tab = "search")}>Recipes</TabItem>
+      <TabBar class="gourmet-tabs">
+        <TabItem active={tab === "search"} onclick={() => (tab = "search")}
+          style="--tab-indicator-color: var(--primary-bg)">Recipes</TabItem>
         {#each openRecipes as r (r.id)}
           <TabItem active={tab === r.id} onclick={() => (tab = r.id)} onclose={() => closeRecipe(r)}
             closeLabel="Close {r.title}" title={r.title} style="--tab-indicator-color: {r.color.bg}">
