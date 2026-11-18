@@ -25,12 +25,13 @@
 
   // The photo's own shape, learned when it loads; cropped only if extreme.
   let ratio = $state(1.5);
+  let natural = $state(null); // the photo's own width in px: never shown larger than this
   const shown = $derived(Math.min(2.4, Math.max(0.7, ratio)));
   const portrait = $derived(ratio < 0.95);
-  const onload = (e) => { const i = e.currentTarget; if (i.naturalWidth && i.naturalHeight) ratio = i.naturalWidth / i.naturalHeight; };
+  const onload = (e) => { const i = e.currentTarget; if (i.naturalWidth && i.naturalHeight) { ratio = i.naturalWidth / i.naturalHeight; natural = i.naturalWidth; } };
 </script>
 
-<header class="hero" class:portrait class:photo={recipe.photo} style="{recipeRole(recipe.color)} --ratio: {shown}">
+<header class="hero" class:portrait class:photo={recipe.photo} style="{recipeRole(recipe.color)} --ratio: {shown}{natural ? `; --natural: ${natural}px` : ''}">
   {#if recipe.photo}
     <figure><img src={recipe.photo} alt="" {onload} /></figure>
   {/if}
@@ -64,7 +65,7 @@
   figure { margin: 0; }
   img {
     display: block;
-    width: 100%;
+    width: min(100%, var(--natural, 100%));
     aspect-ratio: var(--ratio);
     max-height: min(26rem, 50dvh);
     object-fit: cover;
