@@ -89,7 +89,7 @@ export function sourceItems(r) {
   const named = [], links = [];
   for (const s of r.sources ?? []) {
     const n = (s?.name ?? "").trim(), u = (s?.url ?? "").trim() || (isLink(n) ? n : "");
-    if (n && !isLink(n)) named.push({ label: n, url: u });
+    if (n && !isLink(n)) named.push({ label: n.replace(/^www\./i, ""), url: u });
     else if (u) links.push({ label: site(u), url: u });
   }
   const bare = named.filter((x) => !x.url);

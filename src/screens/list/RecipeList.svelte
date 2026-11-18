@@ -23,9 +23,13 @@
       </p>
       {#snippet end()}
         {@const src = sourceLabels(r)}
-        {#if src.length}<span class="source" title={src.join(", ")}><span class="name">{src[0]}</span>{#if src.length > 1}<span class="more">+{src.length - 1}</span>{/if}</span>{/if}
-        {#if r.rating}<span class="stars" aria-label="Rated {Math.round(r.rating / 2)} of 5">{stars(r.rating)}</span>{/if}
-        {#if fmtTime(r.seconds)}<Text muted>{fmtTime(r.seconds)}</Text>{/if}
+        <div class="meta">
+          {#if src.length}<span class="source" title={src.join(", ")}>{src[0]}</span>{/if}
+          <span class="facts">
+            {#if r.rating}<span class="stars" aria-label="Rated {Math.round(r.rating / 2)} of 5">{stars(r.rating)}</span>{/if}
+            {#if fmtTime(r.seconds)}<Text muted>{fmtTime(r.seconds)}</Text>{/if}
+          </span>
+        </div>
       {/snippet}
     </DataListItem>
   {/each}
