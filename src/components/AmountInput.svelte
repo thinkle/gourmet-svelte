@@ -8,7 +8,7 @@
   import { floatToFrac, fracToFloat, increment, decrement } from "../utils/numbers.js";
 
   // `times` shows the "×" (a multiplier); `unit` follows the box ("Makes [30] cookies").
-  let { value = $bindable(1), label = "Amount", min = 0, times = true, unit = "" } = $props();
+  let { value = $bindable(1), label = "Amount", min = 0, times = true, unit = "", whole = false } = $props();
 
   let editing = $state(false);
   let text = $state("");
@@ -45,7 +45,8 @@
     else if (e.key === "Escape") { editing = false; e.currentTarget.blur(); }
   }
   function step(dir) {
-    const next = dir > 0 ? increment(value) : decrement(value);
+    // whole: a count of things (eggs), so the buttons go one at a time: 2 ⅔ -> 3, 4 -> 5.
+    const next = whole ? (dir > 0 ? Math.floor(value + 1e-9) + 1 : Math.ceil(value - 1e-9) - 1) : dir > 0 ? increment(value) : decrement(value);
     if (valid(next)) value = next;
     if (editing) text = floatToFrac(value, { unicodeFractions: false });
   }

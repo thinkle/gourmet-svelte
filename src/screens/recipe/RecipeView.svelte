@@ -13,6 +13,7 @@
   import RecipeEditor from "./RecipeEditor.svelte";
   import { markIngredients, recipeRole } from "../../app/lib.js";
   import { bodyHtml, scaleAmounts } from "../../app/recipeText.js";
+  import { countables, nounFor } from "../../app/countable.js";
   import { shopping, addRecipe } from "../../app/shopping.svelte.js";
   import { refFor, isRef } from "../../app/shoppingList.js";
   import { floatToFrac } from "../../utils/numbers.js";
@@ -63,6 +64,8 @@
   const blocks = $derived((recipe.text ?? []).map((t) => ({ header: t.header, html: markIngredients(scaleAmounts(bodyHtml(t.body), mult), recipe.ingredients) })));
   const count = $derived(recipe.flat.length);
   // Scale to a yield: "for 30 empanadas" is the same multiplier as "x 1 1/4".
+  // ...or "for 4 eggs": the whole things in the recipe, counted.
+  const countRows = $derived(countables(recipe));
   const yieldRows = $derived((recipe.yields ?? []).map((y) => ({ unit: y?.unit ?? "", base: Number(y?.amount) })).filter((y) => y.base > 0));
 
   // Keep the marked-up mentions in the text in step with `active`.
@@ -99,6 +102,12 @@
       <span class="scale-to">Makes
         <AmountInput times={false} unit={y.unit} label="Scale the recipe to this many {y.unit || 'servings'}"
           bind:value={() => y.base * mult, (v) => (mult = v / y.base)} />
+      </span>
+    {/each}
+    {#each countRows as c}
+      <span class="scale-to">With
+        <AmountInput times={false} whole unit={nounFor(c, c.base * mult)} label="Scale the recipe to this many {c.many}"
+          bind:value={() => c.base * mult, (v) => (mult = v / c.base)} />
       </span>
     {/each}
     {#if !onclose}
