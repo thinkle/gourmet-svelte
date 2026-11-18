@@ -54,9 +54,13 @@ export function plainToHtml(text) {
   return out.join("\n");
 }
 
+/** HTML cleaned to the tags and attributes a body may have. */
+export function sanitizeBody(html) {
+  return DOMPurify.sanitize(html ?? "", { ALLOWED_TAGS, ALLOWED_ATTR, ALLOW_DATA_ATTR: false });
+}
+
 /** A stored body as safe HTML for display. */
 export function bodyHtml(body) {
   const raw = body ?? "";
-  const html = looksLikeHtml(raw) ? raw : plainToHtml(raw);
-  return DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR, ALLOW_DATA_ATTR: false });
+  return sanitizeBody(looksLikeHtml(raw) ? raw : plainToHtml(raw));
 }

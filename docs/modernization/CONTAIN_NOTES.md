@@ -35,7 +35,8 @@ Record decisions here as slices land, so later screens match.
 | Ingredients beside text | `SplitPane` or `Columns` by container query | R2-4 |
 | Category chips | `Tag` | |
 | Dialogs (delete confirm, token shown once) | `Dialog` | |
-| Form rows in the editor | `Form`, `FormItem`, `Input`, `Select`, `TextArea` | R3 |
+| Form rows in the editor | `FormProvider layout="above"`, `FormItem` (one input), `Fieldset` (rows), `Input`, `CircleButton` for row tools | R3 |
+| Confirm (revert, discard, delete) | `Dialog` via `ConfirmHost` + `ask()` | R3 |
 | Multiplier | `Input` type number or `GroupedToggle` presets (½, 1, 2, 3) | R2-2 |
 
 ## Gap log
@@ -45,6 +46,8 @@ substitutes.
 
 | Need | Seen in | Contain issue | Meanwhile |
 | --- | --- | --- | --- |
-| | | | |
 | `AGENTS-EXTERNAL.md` (which AGENTS.md says to read first) is not in the published `contain-css-svelte` 1.10.1 package, so the Tab Navigation and field variables could only be learned from `dist/vars/*.css` and `TabBar.svelte`. Ship it in `files`. | Sliding tab underline task | Packaging | Read the CSS in `node_modules/contain-css-svelte/dist/vars/`. |
 | The sliding indicator replaces the active tab's own underline, so a "thin rule under every tab, thick coloured one under the active tab" look needs the owner's workaround: `.tab-indicator-live { --tab-active-border-bottom: var(--tab-border-bottom) }` in `gourmet.css`. A variable such as `--tab-indicator-keep-rule` (or having the live state fall back to `--tab-border-bottom`) would make this a one-liner. | Sliding tab underline task | TabBar / underlined-tabs preset | The override above. |
+| `Dialog` `dismissible` treats a keyboard-made click (Enter/Space on a button inside, clientX/Y 0) as a backdrop click, so it closes and reports a dismissal instead of the button's action | R3 confirm dialogs (`ConfirmHost.svelte`) | to file | Confirm dialogs are not `dismissible`; Escape and the close button still dismiss |
+| No combobox / autocomplete input | R3 categories | to file | `Input` with a native `<datalist>` |
+| No rich-text / contenteditable surface | R3-5 text bodies | to file | Plain `contenteditable` styled in `gourmet.css` |

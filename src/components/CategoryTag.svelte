@@ -3,8 +3,9 @@
   // matches it, so a category always wears the same colour.
   import { Tag } from "contain-css-svelte";
   import { catColor } from "../app/lib.js";
-  let { name } = $props();
+  // `onclose`, when given, makes the tag removable (in the editor).
+  let { name, onclose = null } = $props();
   const c = $derived(catColor(name));
 </script>
 
-{#if c}<Tag bg={c.bg} fg={c.fg}>{name}</Tag>{:else}<Tag>{name}</Tag>{/if}
+{#if c}<Tag bg={c.bg} fg={c.fg} {onclose} closeLabel="Remove {name}">{name}</Tag>{:else}<Tag {onclose} closeLabel="Remove {name}">{name}</Tag>{/if}

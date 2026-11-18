@@ -155,22 +155,28 @@ R1-3, R2-2, R2-3 and R2-4 with it:
 
 ## R3 — Recipe editor
 
-- [ ] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
+- [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
   `IngredientList.svelte`, `IngredientEditor.svelte`, `props/*`
-- [ ] **R3-2 Edit-state model, tests first** — lead
+  Done (`rb/r3-editor`): `specs/recipe-editor.md`, incl. where the old save/revert broke.
+- [x] **R3-2 Edit-state model, tests first** — lead
+  Done (`rb/r3-editor`): `src/app/editState.svelte.js` over `recipeData` (not `recipeStores`, see spec); Vitest added (`npm test`).
   A plain module: load, dirty tracking, save, revert, save-failed. Tested with
   empty, malformed and full recipes before any UI exists.
-- [ ] **R3-3 Domain inputs** — `screen-builder`, one PR each
+- [~] **R3-3 Domain inputs** — `screen-builder`, one PR each
+  First pass (`rb/r3-editor`): ingredient line, yields, times (typed), category with suggestions, stars. Left: a reusable amount+unit input; a duration picker.
   Ingredient line (free text parsed by the existing parser), amount, duration,
   category (with suggestions), yields, rating.
-- [ ] **R3-4 Ingredient list editing** — `screen-builder`
+- [x] **R3-4 Ingredient list editing** — `screen-builder`
+  Done, first pass (`rb/r3-editor`): add/remove/reorder by buttons and Alt+arrows, through groups; groups add/rename/ungroup. No drag; no recipe references.
   Add, remove, group, reorder. Reorder with buttons and keyboard first; drag
   later if missed.
-- [ ] **R3-5 Text blocks** — lead decides approach, `screen-builder` builds
+- [~] **R3-5 Text blocks** — lead decides approach, `screen-builder` builds
+  First pass (`rb/r3-editor`): contenteditable + small toolbar, no write unless edited; round trip tested on fixtures. Left: run the test on a real dump (`GOURMET_DUMP=… npm test -- --run`).
   Round-trip test: every text body in a dump of Tom's recipes
   (`scripts/migrate/dump.mjs`, read from disk, never committed) loads and
   saves unchanged when untouched.
-- [ ] **R3-6 Screen + new recipe + delete** — `screen-builder`
+- [x] **R3-6 Screen + new recipe + delete** — `screen-builder`
+  Done, first pass (`rb/r3-editor`): Edit in place, Save/Revert/Cancel, New recipe, soft Delete with confirm, dirty tabs.
 - [ ] **R3-7 Image upload** — spec by `legacy-reader`
   (`widgets/inputs/ImageEntry.svelte`), lead decides resize approach,
   `screen-builder` builds
