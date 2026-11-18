@@ -5,7 +5,7 @@
   import { tick } from "svelte";
   import { Button, CircleButton, Input, Inline, Text } from "contain-css-svelte";
   import IngredientLine from "../../../components/IngredientLine.svelte";
-  import { ingredientsView, moveLine, insertLine, removeLine, ungroup } from "../../../app/recipeEdit.js";
+  import { ingredientsView, moveLine, insertLine, removeLine, ungroup, findSecondUnits } from "../../../app/recipeEdit.js";
 
   /** @type {{ edit: import("../../../app/editState.svelte.js").RecipeEdit }} */
   let { edit } = $props();
@@ -26,6 +26,8 @@
     if (path.length === 1) l[path[0]] = value;
     else l[path[0]].ingredients[path[1]] = value;
   }
+  let found = $state(null);
+  function readSecondUnits() { found = findSecondUnits(list(), set); }
   const enter = (path) => focus(insertLine(list(), path));
   const remove = (path) => focus(removeLine(list(), path));
   const move = (path, dir) => focus(moveLine(list(), path, dir));
@@ -91,6 +93,8 @@
   <Inline wrap>
     <Button onclick={() => enter(null)}>Add line</Button>
     <Button onclick={addGroup}>Add group</Button>
+    <Button onclick={readSecondUnits} title="Look through the lines for a second measure written in the text, like (2 sticks) or (113 g), and give it its own place">Find second units</Button>
+    {#if found !== null}<Text muted>{found ? `Found ${found}. Save to keep them.` : "None to find."}</Text>{/if}
   </Inline>
   <p class="hint"><Text muted>Type a line the way you'd write it. Enter adds the next; Alt+↑/↓ moves a line, in and out of groups.</Text></p>
 </div>

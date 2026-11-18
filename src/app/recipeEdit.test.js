@@ -126,3 +126,30 @@ describe("moving lines through groups", () => {
     expect(names(l)).toBe("a g1 g2  b ");
   });
 });
+
+describe("second units in the editor", () => {
+  it("a line shows its second measure and reads it back", async () => {
+    const { parseLine, ingredientLine } = await import("./recipeEdit.js");
+    const ing = parseLine("285 g unsalted butter (2 1/2 sticks)");
+    expect(ing.altAmounts?.[0]).toMatchObject({ amount: 2.5, unit: "sticks" });
+    expect(ingredientLine(ing)).toBe("285 g (2 1/2 sticks) unsalted butter");
+    expect(parseLine(ingredientLine(ing), ing).altAmounts?.[0]).toMatchObject({ amount: 2.5, unit: "sticks" });
+  });
+  it("retyping a line without a second measure drops the old one", async () => {
+    const { parseLine } = await import("./recipeEdit.js");
+    const old = { text: "butter", amount: { amount: 285, unit: "g" }, altAmounts: [{ amount: 2.5, unit: "sticks" }] };
+    expect(parseLine("300 g butter", old).altAmounts).toBeUndefined();
+  });
+  it("findSecondUnits fixes stored lines with the measure still in the text, including in groups", async () => {
+    const { findSecondUnits } = await import("./recipeEdit.js");
+    const list = [
+      { text: "flour", amount: { amount: 240, unit: "g" } },
+      { text: "COFFEE BUTTER:", ingredients: [{ text: "unsalted butter (2 1/2 sticks)", amount: { amount: 285, unit: "g" } }] },
+    ];
+    const set = (p, v) => (p.length === 1 ? (list[p[0]] = v) : (list[p[0]].ingredients[p[1]] = v));
+    expect(findSecondUnits(list, set)).toBe(1);
+    expect(list[1].ingredients[0].text).toBe("unsalted butter");
+    expect(list[1].ingredients[0].altAmounts[0]).toMatchObject({ amount: 2.5, unit: "sticks" });
+    expect(findSecondUnits(list, set)).toBe(0);
+  });
+});

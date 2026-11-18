@@ -107,7 +107,7 @@
         {#if library.status !== "signed-out" && !usingFixtures}
           <Inline>
             {#if library.syncing}<Text>Syncing…</Text>{/if}
-            <Button onclick={signOut}>Sign out</Button>
+            <Button class="quiet" onclick={signOut}>Sign out</Button>
           </Inline>
         {/if}
       </Bar>

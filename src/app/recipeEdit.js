@@ -96,6 +96,11 @@ export function ingredientLine(ing) {
     }
     if (a.unit) parts.push(a.unit);
   }
+  // Second measures ride along in brackets, as they display: "285 g (2 1/2 sticks) butter".
+  const alts = (ing.altAmounts ?? [])
+    .map((m) => (typeof m?.amount === "number" ? [typeof m.rangeAmount === "number" ? `${plainFrac(m.rangeAmount)}-${plainFrac(m.amount)}` : plainFrac(m.amount), m.unit].filter(Boolean).join(" ") : ""))
+    .filter(Boolean);
+  if (alts.length) parts.push(...alts.map((t) => `(${t})`));
   if (ing.text) parts.push(ing.text);
   return parts.join(" ");
 }
@@ -112,7 +117,7 @@ export function understood(ing) {
 
 // Keys the parser owns; everything else on an ingredient (shopItem,
 // reference, optional, …) is the user's and survives a re-parse.
-const PARSED_KEYS = ["text", "amount", "originalText"];
+const PARSED_KEYS = ["text", "amount", "originalText", "altAmounts"]; // altAmounts: the typed line says what it is
 
 /** A line the user typed, parsed by Gourmet's own parser, keeping the old ingredient's extras. */
 export function parseLine(line, previous) {
@@ -121,6 +126,29 @@ export function parseLine(line, previous) {
     for (const [k, v] of Object.entries(previous)) if (!PARSED_KEYS.includes(k)) extras[k] = v;
   }
   return { ...extras, ...parseIngredientText(line) };
+}
+
+/**
+   Re-read lines that were stored with a second measure left in the text
+   ("285 g unsalted butter (2 1/2 sticks)"). Changes only lines where the
+   parser finds an alternate and the line has none yet. Returns the number
+   of lines it would change, and applies `set(path, ingredient)` to each.
+*/
+export function findSecondUnits(list, set) {
+  let n = 0;
+  (list ?? []).forEach((ing, i) => {
+    if (Array.isArray(ing?.ingredients)) {
+      ing.ingredients.forEach((sub, j) => { n += tryLine(sub, [i, j], set); });
+    } else n += tryLine(ing, [i], set);
+  });
+  return n;
+}
+function tryLine(ing, path, set) {
+  if (!ing || typeof ing !== "object" || ing.altAmounts?.length) return 0;
+  const next = parseLine(ingredientLine(ing), ing);
+  if (!next.altAmounts?.length) return 0;
+  set(path, next);
+  return 1;
 }
 
 // ── Times ────────────────────────────────────────────────────────────
