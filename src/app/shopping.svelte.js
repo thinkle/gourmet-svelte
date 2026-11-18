@@ -39,7 +39,7 @@ export async function loadShopping() {
   shopping.loaded = true;
 }
 
-const blankList = () => ({ title: "Shopping List", isShoppingList: 1, ingredients: [], checked: [], images: [], deleted: 0, share: 0 });
+const blankList = () => ({ title: "Shopping List", isShoppingList: 1, ingredients: [], images: [], deleted: 0, share: 0 });
 
 async function persist(rec) {
   if (canReachServer()) {
@@ -108,35 +108,59 @@ export const removeItem = (ids) => change((rec) => {
   rec.ingredients = rec.ingredients.filter((i) => !(i.id !== undefined && !isRef(i) && ids.includes(i.id)));
 });
 
-/** Tick or untick an item (by its key). Also forgets ticks for items no longer on the list. */
-export const setChecked = (key, on, liveKeys) => change((rec) => {
-  const keep = new Set((rec.checked ?? []).filter((k) => !liveKeys || liveKeys.has(k)));
-  if (on) keep.add(key); else keep.delete(key);
-  rec.checked = [...keep];
-});
-
 const without = (arr, k) => (arr ?? []).filter((x) => x !== k);
 const withKey = (arr, k) => [...new Set([...(arr ?? []), k])];
 
-// "Always have it": into the pantry (stored on the list document, so it syncs
-// and applies to every recipe), or out of it. `hint` is true when old recipes
-// mark the item "ignore": removing it then also records pantryOff, because
-// the recipes themselves are never written.
-export const setPantry = (key, on, hint = false) => change((rec) => {
-  rec.trip = without(rec.trip, key);
-  if (on) { rec.pantry = withKey(rec.pantry, key); rec.pantryOff = without(rec.pantryOff, key); }
-  else { rec.pantry = without(rec.pantry, key); if (hint) rec.pantryOff = withKey(rec.pantryOff, key); }
+// The three states of an item (desktop Gourmet's shopping list and pantry, plus the store trip):
+//   To buy -> In the cart (this trip) -> gone at "Done shopping"
+//   Already have (remembered for every list); "this trip" puts one back in To buy
+// All of it is stored on the list document: cart, alreadyHave, alreadyHaveOff, trip.
+
+/** Tap an item into the cart, or back out of it. */
+export const setCart = (key, on) => change((rec) => {
+  rec.cart = on ? withKey(rec.cart, key) : without(rec.cart, key);
 });
 
-/** Put a pantry item back on the list for this trip only. */
-export const putBack = (key) => change((rec) => { rec.trip = withKey(rec.trip, key); rec.checked = without(rec.checked, key); });
+/** "Already have" for good (every list), or out of it again. */
+export const setAlreadyHave = (key, on) => change((rec) => {
+  rec.trip = without(rec.trip, key);
+  rec.cart = without(rec.cart, key);
+  if (on) { rec.alreadyHave = withKey(rec.alreadyHave, key); rec.alreadyHaveOff = without(rec.alreadyHaveOff, key); }
+  else {
+    // alreadyHaveOff also overrides a default or an old recipe's "ignore", which are never written to.
+    rec.alreadyHave = without(rec.alreadyHave, key);
+    rec.alreadyHaveOff = withKey(rec.alreadyHaveOff, key);
+  }
+});
 
-/** Add something to the pantry by name ("olive oil"). */
-export const addToPantry = (text) => {
-  const t = (text ?? "").trim();
-  return t ? setPantry(itemKey({ text: t }), true) : Promise.resolve();
-};
+/** An Already have item wanted on this trip only. */
+export const wantThisTrip = (key) => change((rec) => { rec.trip = withKey(rec.trip, key); });
 
-export const clearChecked = () => change((rec) => { rec.checked = []; });
+/** The trip is over: empty the cart and forget this trip's put-backs. */
+export const doneShopping = () => change((rec) => { rec.cart = []; rec.trip = []; });
+
+/** Shopping category (aisle) for an item key, remembered for every future list. Empty name clears it. */
+export const setCategory = (key, name) => change((rec) => {
+  const n = (name ?? "").trim();
+  rec.aisles = { ...(rec.aisles ?? {}) };
+  if (n) rec.aisles[key] = n;
+  else delete rec.aisles[key];
+});
+
+/** Save the category order (the full list, as shown). */
+export const setCategoryOrder = (names) => change((rec) => { rec.aisleOrder = [...names]; });
+
+/** Rename or merge an item: every ingredient that had these keys is now this key. */
+export const renameItem = (baseKeys, currentKey, newName) => change((rec) => {
+  const target = (newName ?? "").trim().toLowerCase();
+  if (!target) return;
+  rec.keyAliases = { ...(rec.keyAliases ?? {}) };
+  for (const b of baseKeys) { if (b === target) delete rec.keyAliases[b]; else rec.keyAliases[b] = target; }
+  // The item keeps its category and state under the new key.
+  const move = (arr) => (arr ?? []).map((k) => (k === currentKey ? target : k));
+  rec.cart = move(rec.cart); rec.alreadyHave = move(rec.alreadyHave); rec.trip = move(rec.trip);
+  rec.aisles = { ...(rec.aisles ?? {}) };
+  if (rec.aisles[currentKey] && !rec.aisles[target]) rec.aisles[target] = rec.aisles[currentKey];
+});
 
 export { itemKey };

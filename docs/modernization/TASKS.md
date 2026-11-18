@@ -219,17 +219,20 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   `isShoppingList` recipe document and saved through `recipeData` (fixtures mode
   and signed-out sessions save to the local row only). `legacy/` store not
   reused: it is bound to the old stores; new code is `src/app/shopping*.js`.
-- [x] **S-2b Pantry.** "Always have it" per item; pantry stored as `pantry` on
-  the list document (plus `trip`, `pantryOff`); "In your pantry" section with
-  put back, edit, add; old `shopIgnore` read as a hint, never written. See the
-  spec's Pantry section.
+- [x] **S-2b Desktop structure.** Three sections (To buy by aisle, In the
+  cart with "Done shopping", Already have seeded from the desktop
+  `default_pantry` and old `shopIgnore`), aisles with a two-tap chip picker,
+  editable aisle order, guessed default aisles (curated keywords plus the
+  desktop's default table), rename/merge by key alias. Stored on the list
+  document: `cart`, `alreadyHave`, `alreadyHaveOff`, `trip`, `aisles`,
+  `aisleOrder`, `keyAliases`. Stored `ingkey`/`shopItem` is the item key when
+  present. No pantry editor (the pantry was a metaphor). See the spec.
 - [ ] **S-3 Tom checks it against real data**: dump first
-  (`scripts/migrate/dump.mjs`); `checked` is a new field on list documents. Decide
+  (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.
 - [ ] **S-4 Tests**: unit tests for `buildList` and the save path once `npm test`
   exists (R0-3); none added now because the only runner is the API one.
-- [ ] **S-5 Later**: aisles; rename or split a merged item; pantry by category or quantity;
-  add from the recipe list; list as MCP endpoints (see the spec's last section);
+- [ ] **S-5 Later**: aisles; rename or split a merged item; multi-select aisle assigning; add from the recipe list; list as MCP endpoints (see the spec's last section);
   family sharing; item names from `getShopItem` can read oddly ("Purpose Flour"
   for "all-purpose flour": kept logic, reported, not patched).
 

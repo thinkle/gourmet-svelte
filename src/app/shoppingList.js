@@ -7,6 +7,7 @@
 import { getShopItem } from "../utils/ingredientUtils.js";
 import { addAmounts } from "../utils/unitAmounts.js";
 import { formatAmount } from "../utils/numbers.js";
+import { guessAisle, DEFAULT_AISLES } from "./shoppingAisles.js";
 
 export const isRef = (ing) => ing && ing.reference !== undefined && ing.reference !== null && ing.reference !== "";
 // getShopItem (kept) keeps words from asides and prep notes ("(2 1/2 sticks)",
@@ -48,17 +49,44 @@ function walk(list, mult, source, recipes, seen, out, missing) {
   }
 }
 
+// The desktop app's default_pantry (gourmet/shopping.py), matched loosely by item name.
+export const DEFAULT_ALREADY_HAVE = ["flour, all purpose", "sugar", "salt", "black pepper, ground", "ice", "water", "oil, vegetable", "oil, olive"];
+
+// "all-purpose flour" and "flour, all purpose" are the same thing; so are "extra-virgin olive oil" and "oil, olive".
+const NOISE = new Set(["all", "purpose", "extra", "virgin", "kosher", "table", "granulated", "fine", "white", "plain", "ground", "pure"]);
+const tokens = (s) => new Set(String(s).toLowerCase().split(/[^a-zÀ-ſ]+/).filter((w) => w && !NOISE.has(w)));
+const sameSet = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+const DEFAULT_TOKENS = DEFAULT_ALREADY_HAVE.map(tokens);
+export const matchesDefault = (name) => { const t = tokens(name); return t.size > 0 && DEFAULT_TOKENS.some((d) => sameSet(d, t)); };
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+/** The item key stored recipes already carry (ingkey, shopItem), else the cleaned getShopItem. */
+export function baseKey(ing) {
+  const stored = (typeof ing.ingkey === "string" && ing.ingkey.trim()) || (typeof ing.shopItem === "string" && ing.shopItem.trim());
+  return stored ? stored.toLowerCase() : itemKey(ing);
+}
+const baseName = (ing) => {
+  const stored = (typeof ing.ingkey === "string" && ing.ingkey.trim()) || (typeof ing.shopItem === "string" && ing.shopItem.trim());
+  return stored ? cap(stored) : itemName(ing);
+};
+
 /**
    The list as the screen shows it.
    `rec` is the stored shopping-list document (or null), `recipes` the prepared
-   library. Returns {recipes: [...on the list], items: [...merged, A to Z]}.
+   library. Fields read from the document (see specs/shopping-list.md):
+   cart, alreadyHave, alreadyHaveOff, trip, aisles {key: name},
+   aisleOrder [name], keyAliases {key: key}.
+   Returns {recipes, items, groups (to buy, by category), cart, alreadyHave,
+   categoryNames (in order), keys}.
 */
 export function buildList(rec, recipes) {
   const entries = rec?.ingredients ?? [];
-  const checked = new Set(rec?.checked ?? []);
-  const pantry = new Set(rec?.pantry ?? []);
-  const pantryOff = new Set(rec?.pantryOff ?? []); // removed from the pantry although old recipes say "ignore"
-  const trip = new Set(rec?.trip ?? []); // pantry items put back on the list for this trip
+  const cartSet = new Set(rec?.cart ?? []);
+  const have = new Set(rec?.alreadyHave ?? []);
+  const haveOff = new Set(rec?.alreadyHaveOff ?? []); // taken out of Already have though a default or an old "ignore" says it is there
+  const trip = new Set(rec?.trip ?? []); // Already have items wanted on this trip
+  const cats = rec?.aisles ?? {};
+  const aliases = rec?.keyAliases ?? {};
   const onList = [];
   const leaves = [];
   const missing = [];
@@ -74,24 +102,29 @@ export function buildList(rec, recipes) {
   }
   const byKey = new Map();
   for (const l of leaves) {
-    const key = itemKey(l.ing);
+    const base = baseKey(l.ing);
+    const key = aliases[base] ?? base;
+    l.base = base;
     if (!byKey.has(key)) byKey.set(key, []);
     byKey.get(key).push(l);
   }
   const items = [...byKey.entries()].map(([key, ls]) => {
     const scaled = ls.map((l) => scale(l.ing.amount, l.mult)).filter(Boolean);
     const amounts = scaled.length ? addAmounts(scaled, key).map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") })) : [];
-    // Old recipes carry shopIgnore on ingredients (the web app's "ignore"). Read only, as a pantry hint.
-    const hint = ls.some((l) => l.ing.shopIgnore === true);
-    const inPantryList = pantry.has(key) || (hint && !pantryOff.has(key));
+    const name = ls.every((l) => l.base === key) ? baseName(ls[0].ing) : cap(key);
+    // Already have: what you said, the desktop app's defaults, and old recipes' shopIgnore (read only).
+    const hint = ls.some((l) => l.ing.shopIgnore === true) || matchesDefault(name);
+    const alreadyHave = (have.has(key) || (hint && !haveOff.has(key))) && !trip.has(key);
+    const inCart = cartSet.has(key);
     return {
       key,
-      name: itemName(ls[0].ing),
-      hint,
-      inPantryList,
-      inPantry: inPantryList && !trip.has(key),
+      baseKeys: [...new Set(ls.map((l) => l.base))],
+      name,
       amounts,
-      checked: checked.has(key),
+      category: cats[key] || null, // the user's choice (stored)
+      guess: cats[key] ? null : guessAisle(name), // computed, never stored
+      state: alreadyHave ? "have" : inCart ? "cart" : "buy",
+      onTrip: trip.has(key),
       from: ls.map((l) => ({
         title: l.source, // null for a loose item
         mult: l.mult,
@@ -100,9 +133,34 @@ export function buildList(rec, recipes) {
       looseIds: ls.filter((l) => l.loose).map((l) => l.ing.id),
     };
   }).sort((a, b) => a.name.localeCompare(b.name));
-  // Pantry entries no recipe on the list uses right now, so the pantry can be viewed and edited on its own.
-  const pantryOnly = [...pantry].filter((k) => !byKey.has(k)).sort();
-  return { recipes: onList, items, keys: new Set(byKey.keys()), pantryOnly };
+
+  for (const i of items) i.aisle = i.category ?? i.guess ?? null;
+  // Aisle order: the user's saved order, then the default walking order, then any other
+  // names A to Z. Items with no aisle come last, as "Other".
+  const order = rec?.aisleOrder ?? [];
+  const present = new Set([...items.map((i) => i.aisle), ...order].filter(Boolean));
+  const known = new Set([...DEFAULT_AISLES, ...Object.values(cats), ...order]);
+  const rank = (n) => (order.includes(n) ? order.indexOf(n) : 1000 + (DEFAULT_AISLES.includes(n) ? DEFAULT_AISLES.indexOf(n) : 100));
+  const byRank = (a, b) => rank(a) - rank(b) || a.localeCompare(b);
+  const categoryNames = [...present].sort(byRank);
+  // For choosing an aisle: every known aisle, the most used (on this list) first.
+  const uses = (n) => items.filter((i) => i.aisle === n).length;
+  const aisleChoices = [...known].sort((a, b) => uses(b) - uses(a) || byRank(a, b));
+  const buy = items.filter((i) => i.state === "buy");
+  const groups = [...categoryNames, null]
+    .map((name) => ({ name, items: buy.filter((i) => i.aisle === name) }))
+    .filter((g) => g.items.length);
+  return {
+    recipes: onList,
+    items,
+    groups,
+    buyCount: buy.length,
+    cart: items.filter((i) => i.state === "cart"),
+    alreadyHave: items.filter((i) => i.state === "have"),
+    categoryNames,
+    aisleChoices,
+    keys: new Set(byKey.keys()),
+  };
 }
 
 /** Pick the document to use when there are several. */

@@ -143,6 +143,8 @@
 .hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }
 
 /* ── Shopping list ─────────────────────────────────────── */
+/* An aisle that is only a guess (nothing chosen yet) reads quieter. */
+.guess { opacity: 0.6; }
 /* A recipe on the list: its title on its own line, then multiplier and a remove button. */
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
 .on-list > :not(.title) { grid-row: 2; }

@@ -23,7 +23,10 @@ Its `ingredients` array holds two kinds of entry:
     { "id": 4, "text": "onions", "originalText": "2 lb onions",
       "amount": { "amount": 2, "unit": "lb" } }
   ],
-  "checked": ["flour", "onions"]
+  "cart": ["eggs"],
+  "alreadyHave": ["flour"],
+  "aisles": { "eggs": "Dairy & eggs" },
+  "aisleOrder": ["Produce", "Dairy & eggs"]
 }
 ```
 
@@ -34,8 +37,10 @@ Its `ingredients` array holds two kinds of entry:
 - Loose item: any entry with no `reference`. Same shape as a recipe ingredient
   (`text`, optional `amount`), made with `parseIngredientText` so "2 lb
   onions" works. Gets a small numeric `id` unique within the list.
-- `checked` (new, optional, top-level): list of item keys (lowercase shop-item
-  name, see below) the shopper has ticked. Absent means nothing ticked.
+- New optional top-level fields, all item-key based (see "Structure"): `cart`,
+  `alreadyHave`, `alreadyHaveOff`, `trip`, `aisles`, `aisleOrder`, `keyAliases`.
+  They are named `aisles`/`aisleOrder`, not `categories`, because `categories`
+  is a recipe field the local save code (`prepRecLocal`) reads as a list.
 
 Observed in the real data (a fixtures dump): there can be several shopping-list
 documents (empty local ones plus one with recipe references). The old app took
@@ -75,19 +80,8 @@ first add creates one. (Open question for the owner: clean up the spares.)
 5. Each merged item remembers where it came from: recipe title (with its
    multiplier) and the original ingredient text.
 
-Grouping on screen: "To buy" (unticked, A-Z) then "Got it" (ticked, A-Z, below).
-The old app had no aisles or categories; it sorted A-Z. Aisle grouping is deferred.
-
-## Checked
-
-Old app: the checkbox did nothing (it logged to the console). "Ignore" ("I
-already have this") was stored as `shopIgnore` on the source recipe's own
-ingredient, i.e. it edited the recipe. We do not do that.
-
-New: ticking stores the item key in the list document's `checked` array, so it
-syncs and survives reload. A key that no longer matches any item is dropped the
-next time the list is saved. "Clear ticked" empties the array; removing a recipe
-leaves ticks alone. Checked keys are per item name, not per recipe line.
+Grouping on screen: see "Structure" below (To buy by aisle, In the cart,
+Already have). The old web app had no aisles; it sorted A to Z.
 
 ## What syncs
 
@@ -103,50 +97,84 @@ not changed here.
 Fixtures mode (and any session with no signed-in database user) saves to the
 local Dexie row only, never the glue layer, so the server cannot be reached.
 
-Stored-shape note (AGENTS rule 2): `checked` is a new field on shopping-list
-documents only. Take a dump (`scripts/migrate/dump.mjs`) before the first real
+Stored-shape note (AGENTS rule 2): `cart`, `alreadyHave`, `alreadyHaveOff`, `trip`, `aisles`, `aisleOrder` and
+`keyAliases` are new fields on shopping-list documents only. Take a dump (`scripts/migrate/dump.mjs`) before the first real
 save of a list from this build.
 
-## Pantry ("I already have this")
+## Structure (after desktop Gourmet)
 
-What the earlier versions did, as far as this repo shows:
+### What the desktop app did (read from `/Users/thinkle/Projects/from-pebble/Projects/gourmet/gourmet/`)
 
-- Old PyGTK Gourmet: the owner recalls a pantry list that remembered items you
-  said you already had, so "water" or "salt" stopped appearing on every list.
-  No GTK source is in this repo, so this is the owner's description only.
-- Web version (`legacy/`): partial. `setShopItem(item, shopItem, shopIgnore)` in
-  `shoppingStores.js` set `shopIgnore` on the ingredient inside the source
-  recipe, and `ShoppingListItems.svelte` showed an "Ignored Items" section
-  ("You removed these from the list -- maybe you already have them?"), with a
-  button to restore. It was remembered per recipe line, not across recipes, and
-  it edited the recipes. Git history (`git log -S shopIgnore`) shows it added
-  as "ignoring ... things we can change about items" and never extended. A
-  fixtures dump has 55 ingredients with `shopIgnore: true`, so it was used.
+- `shopping.py` `Shopper`: every ingredient is reduced to `[amount, unit, key]`
+  (`ingkey`). Amounts for one key are combined (`combine_ingredient`, with unit
+  conversion and ranges). Keys in `self.pantry` go to a second dictionary
+  (`mypantry`); everything else is the shopping list. `default_pantry`
+  (flour all purpose, sugar, salt, black pepper ground, ice, water, oil
+  vegetable, oil olive) seeds the pantry. `organize()` groups by category
+  (`orgdic`: key -> category, default from the language tables, else
+  "Unknown"), categories sorted by `catorder_dic` (known positions) else A to Z,
+  empty/unknown last (`_cat_compare`), items A to Z.
+- `shopgui.py`: two panes, "Shopping List" and "Already Have (Pantry Items)";
+  actions "Move to pantry" / "Move to shopping list" (`add_selection_to_pantry`,
+  `rem_selection_from_pantry`), "Change Category" (pick an existing category,
+  "Create new category", or drag onto a category; dragging a category header
+  re-orders categories and saves `commit_category_orders`), add arbitrary items,
+  and a prompt about optional ingredients (`getOptionalDic`, `shop_handle_optional`).
+- `backends/db.py`: `shopcats` (ingkey, shopcategory, position),
+  `shopcatsorder` (shopcategory, position), `pantry` (ingkey, pantry boolean).
+  All three are keyed by ingredient key, so a choice holds for every recipe and list.
+- `plugins/shopping_associations/shopping_key_editor_plugin.py`: edit an
+  ingredient key's shopping category from the key editor (a combo of existing
+  categories). It does not rename keys.
+- `defaults/defaults_en.py` `INGREDIENT_DATA`: about 436 (name, key, category)
+  rows; categories produce, seafood, meats, spices, baking, dairy,
+  international, pastas, wines&oils, bread, soups&sauces, condiments. This is
+  the default category table (the web app has none).
+- The web version (`legacy/`) only had `shopIgnore` on the source recipe's
+  ingredient ("Ignored Items" section); see git history `-S shopIgnore`. 55
+  ingredients in a fixtures dump carry `shopIgnore: true`.
 
-New behaviour:
+### What is built
 
-- Per item, two choices: tick = "Have it" (this list only); "Always have it" =
-  add the item key to the pantry.
-- Stored as a top-level `pantry: [itemKey]` array on the shopping-list document,
-  same pattern as `checked`: it syncs with the list, applies to every recipe, and
-  nothing is written into recipes. (It could live in a separate document, but
-  that needs a second saved document and a way to find it; the list document is
-  already found, saved and synced. Cost: the pantry follows whichever list
-  document is chosen.)
-- Pantry items are not counted as to-buy and not in the tab count, but are shown
-  in "In your pantry" with their merged amounts, so you can see what recipes use.
-  "Put back" puts one on the list for this trip (key added to `trip: [itemKey]`,
-  and its tick cleared); "Always have it" again or removing it clears that.
-- "Edit pantry" shows the full pantry, including entries no recipe on the list
-  uses right now, with remove (x) and an "Add to pantry" box (name parsed the
-  same way, so "Olive oil" matches "extra-virgin olive oil" only as far as the
-  kept `getShopItem` agrees).
-- Old `shopIgnore: true` on recipe ingredients is read, never written, as a
-  pantry hint: an item with any such ingredient counts as in the pantry. Removing
-  it from the pantry records its key in `pantryOff: [itemKey]` on the list, so
-  the hint is overridden without touching the recipe.
-- Stored-shape note: `pantry`, `trip` and `pantryOff` are new optional fields on
-  shopping-list documents only; dump before the first real save (as for `checked`).
+Three sections, one stored document (nothing written to recipes):
+
+1. **To buy**, grouped by aisle in the user's order, unassigned last ("Other").
+   Tapping an item puts it in the cart (`cart: [key]`).
+2. **In the cart**, collapsed, this trip only. Tapping puts it back.
+   "Done shopping" empties `cart` and `trip`.
+3. **Already have** (desktop's pantry, its own label), collapsed, with merged
+   amounts. Remembered for every recipe and list: `alreadyHave: [key]`.
+   "Already have" on a To-buy item adds it for good. "Buy this trip" adds the key
+   to `trip` (cleared by Done shopping). "Don't have it" removes it for good.
+   Seeds: the desktop `default_pantry`, matched loosely by words (noise words such
+   as "all", "purpose", "extra", "virgin", "kosher", "ground" are ignored, so
+   "all-purpose flour" matches "flour, all purpose") and old `shopIgnore: true`
+   marks are read, never written, as "already have" hints. `alreadyHaveOff:
+   [key]` overrides a seed or hint when the user removes it.
+
+Item keys: a stored `ingkey`, else `shopItem`, else the cleaned `getShopItem`
+(see above), lowercased. `keyAliases: {key: key}` records "rename/merge this
+item" (Rename... in the aisle row): typing another item's name makes them one.
+
+Aisles: `aisles: {key: name}` (user choices only) and `aisleOrder: [name]` (set by
+"Arrange aisles", move up/down). Choosing an aisle is two taps: the aisle chip on
+the row opens a row of chips (existing and default aisles, most used first, plus a
+"New aisle" box, Enter saves); a chip assigns and closes. With no choice the aisle
+is a computed guess (`src/app/shoppingAisles.js`: a small curated keyword table,
+then the desktop table converted to `src/app/aisleDefaults.js` with its
+categories folded into Produce, Meat & fish, Dairy & eggs, Bakery, Baking, Spices,
+Pantry, Frozen, Drinks), shown muted, never stored, replaced by the user's pick.
+Default aisle order is the walking order in that list.
+
+Not carried over from desktop: optional-ingredient prompt (the web recipe has no
+optional flag); drag and drop (tapping instead); a per-key position inside a
+category (`ingorder`, disabled in the desktop code too); printing and saving the
+list to a file; the 436-row key table as stored data (used as guess data only);
+separate categories for pantry rows (they use the same aisles); multi-select
+assigning (one item at a time keeps it two taps).
+
+Stored-shape note (AGENTS rule 2): all of these are new optional fields on
+shopping-list documents only; dump before the first real save.
 
 ## Old features: keep, drop, defer
 
@@ -157,14 +185,14 @@ New behaviour:
 | Merge identical items, add compatible units | keep (kept `addAmounts`) |
 | Add a loose item (free text, parsed) | keep |
 | Show which recipes an item comes from | keep (compact line under the item) |
-| Check off | keep (made real; stored) |
+| Check off | keep, as "in the cart" for this trip |
 | Remove a loose item | keep |
-| Clear list | keep as "Clear ticked" only; clearing everything is remove-per-recipe |
-| Rename an item (`shopItem`) / "Separate" an ingredient from a merge | defer |
+| Clear list | "Done shopping" clears the cart; remove recipes one by one |
+| Rename an item / merge two | keep (key alias); "Separate" defer |
 | "Ignore" (already have it) | keep, as the pantry (see above) |
 | Recipe picker dialog on the list screen | drop; add from the recipe view |
 | Add from the recipe list (bulk) | defer |
-| Aisles / categories | defer |
+| Aisles / categories | keep (user aisles + guessed defaults) |
 | Family sharing of one list | defer (needs the linked-accounts model) |
 
 ## What an MCP agent would need (note only, API unchanged)
@@ -181,5 +209,5 @@ convention. Needed, additively, later:
   rather than replace `ingredients` (a PUT replaces the list and loses ticks).
 - Read the merged list (item, amounts, from which recipes, ticked), so the agent
   does not reimplement merging. Today that logic lives only in the client.
-- Document `checked`, `reference` and `amount.unit: "recipe"` in
+- Document `cart`, `alreadyHave`, `aisles`, `reference` and `amount.unit: "recipe"` in
   `public/openapi.yaml`.
