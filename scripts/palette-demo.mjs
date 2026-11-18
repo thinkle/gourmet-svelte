@@ -4,7 +4,7 @@
 import fs from "fs";
 import { wordColors } from "../src/common/colors.js";
 
-const rows = wordColors.map((w) => ({ src: w.matcher.source, flags: w.matcher.flags, bg: w.color.bg, fg: w.color.fg, contrast: +w.contrast.toFixed(1) }));
+const rows = wordColors.map((w) => ({ src: w.matcher.source, flags: w.matcher.flags, bg: w.color.bg, fg: w.color.fg, contrast: +w.contrast.toFixed(1), ing: Boolean(w.ingredient) }));
 const html = `<!doctype html>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Gourmet palettes</title>
@@ -18,7 +18,7 @@ const html = `<!doctype html>
   .try input { width:100%; box-sizing:border-box; font:inherit; font-size:1.1rem; padding:.55rem .75rem; border:2px solid var(--line); border-radius:.5rem; }
   .result { display:flex; align-items:center; gap:.75rem; margin-top:.6rem; min-height:3rem; }
   .chip { display:inline-flex; align-items:center; padding:.45rem .9rem; border-radius:.6rem; font-family:Georgia,serif; font-weight:600; }
-  .row { display:grid; grid-template-columns:2rem 5rem 1fr auto; gap:.75rem; align-items:center; padding:.4rem .25rem; border-bottom:1px solid var(--line); }
+  .row { display:grid; grid-template-columns:2rem 5rem 1fr auto auto; gap:.75rem; align-items:center; padding:.4rem .25rem; border-bottom:1px solid var(--line); }
   .row.hit { outline:3px solid var(--ink); outline-offset:-2px; border-radius:.4rem; background:#fff7dc; }
   .row.out { opacity:.4; }
   .n { color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
@@ -26,11 +26,13 @@ const html = `<!doctype html>
   code { font:13px ui-monospace,monospace; word-break:break-word; }
   .c { font-size:12px; color:var(--muted); white-space:nowrap; }
   .c.low { color:#b3261e; font-weight:600; }
+  .ing { font-size:11px; padding:.1rem .4rem; border-radius:1rem; background:#efe6d3; color:var(--muted); white-space:nowrap; }
+  .row:not(:has(.ing)) .c { grid-column:5; }
   .tier { margin:1.2rem 0 .2rem; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
 </style>
 <main>
   <h1>Recipe palettes</h1>
-  <p class="lead">Top to bottom is priority: the first rule that matches a recipe's title or one of its categories wins. Type below to see which one a recipe would get.</p>
+  <p class="lead">A recipe is checked against the rules top to bottom, first on its title, then on its categories, then (only the rules marked + ingredients) on its ingredients. The first hit wins. Type below to try a title or a category; the ingredients step isn't simulated here.</p>
   <div class="try">
     <input id="q" placeholder="Try a title or category: &quot;Moroccan Chickpea Stew&quot;" autofocus>
     <div class="result" id="result"></div>
@@ -42,7 +44,7 @@ const rows = ${JSON.stringify(rows)}.map((r) => ({ ...r, re: new RegExp(r.src, r
 const el = document.getElementById("rows");
 rows.forEach((r, i) => {
   const d = document.createElement("div"); d.className = "row"; r.el = d;
-  d.innerHTML = '<span class="n">' + (i + 1) + '</span><div class="sw" style="background:' + r.bg + ';color:' + r.fg + '">Aa</div><code>/' + r.src.replace(/</g, "&lt;") + '/' + r.flags + '</code><span class="c' + (r.contrast < 4.5 ? " low" : "") + '" title="text contrast (below 4.5 is flagged)">' + r.contrast + ':1</span>';
+  d.innerHTML = '<span class="n">' + (i + 1) + '</span><div class="sw" style="background:' + r.bg + ';color:' + r.fg + '">Aa</div><code>/' + r.src.replace(/</g, "&lt;") + '/' + r.flags + '</code>' + (r.ing ? '<span class="ing" title="also tried against the ingredients, as a last resort">+ ingredients</span>' : '') + '<span class="c' + (r.contrast < 4.5 ? " low" : "") + '" title="text contrast (below 4.5 is flagged)">' + r.contrast + ':1</span>';
   el.append(d);
 });
 const q = document.getElementById("q"), out = document.getElementById("result");
