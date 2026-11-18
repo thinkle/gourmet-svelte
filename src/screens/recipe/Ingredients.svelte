@@ -1,12 +1,8 @@
 <script>
   import Ingredients from "./Ingredients.svelte";
-  // Gourmet's own natural-number display: 1 ⅓, 2–3, ⅛.
-  import { formatAmount } from "../../utils/numbers.js";
+  // The amount and any alternate measures ("2 sticks (225 g)"), scaled.
+  import Measures from "../../components/Measures.svelte";
   let { list, mult = 1, active = null, onpick } = $props();
-  const amt = (a) => {
-    if (!a || a.amount == null) return "";
-    return [formatAmount(a, { multiplier: mult }), a.unit].filter(Boolean).join(" ");
-  };
 </script>
 
 <ul class="ingredients">
@@ -20,7 +16,7 @@
       <li>
         <button type="button" class="ingredient" class:active={active === ing.text}
           data-ingredient={ing.text} aria-pressed={active === ing.text} onclick={() => onpick?.(ing.text)}>
-          <span class="amount" class:scaled={mult !== 1}>{amt(ing.amount)}</span>
+          <span class="amount" class:scaled={mult !== 1}><Measures amount={ing.amount} altAmounts={ing.altAmounts} {mult} /></span>
           <span class="item">{ing.text}</span>
         </button>
       </li>
@@ -41,7 +37,7 @@
   }
   .ingredient {
     display: grid;
-    grid-template-columns: minmax(4.75rem, max-content) 1fr;
+    grid-template-columns: fit-content(11rem) 1fr;
     column-gap: 0.75rem;
     width: 100%;
     padding: 0.4rem 0.5rem;
@@ -58,7 +54,7 @@
   .ingredient:hover { background: color-mix(in oklab, currentColor 7%, transparent); }
   .ingredient:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
   .ingredient.active { background: var(--note-bg); color: var(--note-fg); }
-  .amount { font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
+  .amount { min-inline-size: 4.75rem; font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
   /* Scaled amounts take the recipe's colour, so you can see the multiplier is on. */
   .amount.scaled { color: var(--recipe-bg); }
 </style>

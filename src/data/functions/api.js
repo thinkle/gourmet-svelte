@@ -228,12 +228,19 @@ const RECIPE_SHAPE = {
             amount: 'number, or a string like "1 1/2" or "2-3" (optional)',
             unit: 'string, e.g. "cups", "tbsp", "cloves" (optional)',
             ingredient: 'the ingredient name and any prep, e.g. "flour, sifted"',
+            altAmounts: 'optional array of further measures of the same quantity, e.g. ' +
+                '[{amount: 225, unit: "g"}] next to {amount: 2, unit: "sticks"}; each ' +
+                'may also be a string like "225 g". Send [] to say there are none.',
         },
         alsoAccepted: [
             'a plain string like "1 1/2 cups flour, sifted" -- the server parses ' +
             'the amount and unit out of it for you',
             '{text, amount: {amount, rangeAmount, unit}} -- the canonical stored shape',
             '{text, ingredients: [...]} -- a group heading with its own sub-list',
+            'a second measure written in parentheses ("2 sticks (225 g) butter", ' +
+            '"butter (2 sticks)") or after a slash ("2 cups / 240 g flour") -- when ' +
+            'it is a plain number and a mass, volume or stick unit, the server moves ' +
+            'it into altAmounts; any other parenthetical stays in the text',
         ],
         stored: {
             text: 'the ingredient name only, with the amount and unit removed',
@@ -243,6 +250,10 @@ const RECIPE_SHAPE = {
                 unit: 'the unit as written',
                 standardUnit: 'our normalized unit, when we recognize it',
             },
+            altAmounts: 'optional array of further measures, each shaped like `amount` ' +
+                '(amount, rangeAmount, unit, standardUnit). `amount` stays the primary ' +
+                'measure; altAmounts are shown after it and scale with it. Absent when ' +
+                'the ingredient has only one measure.',
         },
         note: 'Send amount/unit/ingredient separately when you know them. If you ' +
             'only have a line of text, send the text and we will parse it.',
