@@ -122,7 +122,7 @@
           <TabItem active={tab === key} onclick={() => (tab = key)} onclose={() => closeRecipe(key)}
             closeLabel="Close {r.title}" title={dirty[key] ? `${r.title} (unsaved changes)` : r.title}
             style="--tab-indicator-color: {r.color.bg}">
-            <span class="tab-chip" style="--swatch-bg: {r.color.bg}; --swatch-fg: {r.color.fg};"></span>{shortTitle(r.title)}{#if dirty[key]}<span class="tab-dirty" aria-label="unsaved changes">•</span>{/if}
+            <span class="tab-chip" style="--swatch-bg: {r.color.bg}; --swatch-accent: {r.color.accent ?? r.color.fg};"></span>{shortTitle(r.title)}{#if dirty[key]}<span class="tab-dirty" aria-label="unsaved changes">•</span>{/if}
           </TabItem>
         {/each}
       </TabBar>
