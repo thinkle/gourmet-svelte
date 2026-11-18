@@ -153,3 +153,15 @@ describe("second units in the editor", () => {
     expect(findSecondUnits(list, set)).toBe(0);
   });
 });
+
+describe("stick and square are units", () => {
+  it("read as the primary measure, with or without a second measure", async () => {
+    const { parseLine } = await import("./recipeEdit.js");
+    expect(parseLine("1 stick cinnamon").amount).toMatchObject({ amount: 1, unit: "stick", standardUnit: "stick" });
+    expect(parseLine("2 squares unsweetened chocolate").amount).toMatchObject({ amount: 2, standardUnit: "square" });
+    const b = parseLine("2 sticks (225 g) butter");
+    expect(b.text).toBe("butter");
+    expect(b.amount).toMatchObject({ amount: 2, standardUnit: "stick" });
+    expect(b.altAmounts[0]).toMatchObject({ amount: 225, unit: "g" });
+  });
+});

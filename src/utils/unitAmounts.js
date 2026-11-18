@@ -181,6 +181,8 @@ const UNIT_SYNONYMS = {
     "package":["pkg.",   "package",  "Package", "packages", "Packages", "pkg", "Pkg.", "pack"],
     "slice": ["slice",  "slices"],
     "bunch": ["bunch",  "bunches"],
+    "stick": ["stick",  "sticks"],   // butter, cinnamon
+    "square":["square", "squares"],  // chocolate
 }
 
 const METRIC_RANGE = (1,999)

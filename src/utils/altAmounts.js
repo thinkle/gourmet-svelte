@@ -29,7 +29,7 @@ const CONTAINER_NEXT = new RegExp('^\\s*' + CONTAINER + '\\b', 'i');
 // alternate measure ("1 can (14 oz) tomatoes", "2 large (8 oz) potatoes").
 // Unknown unit words are treated the same way: we only attach a second
 // measure when we understand the first.
-const FINE_PRIMARY_COUNT_UNITS = ['each', 'whole', 'clove', 'head', 'slice', 'bunch'];
+const FINE_PRIMARY_COUNT_UNITS = ['each', 'whole', 'clove', 'head', 'slice', 'bunch', 'stick', 'square'];
 
 const STICK = /^sticks?$/i;
 
