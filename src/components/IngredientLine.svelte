@@ -52,6 +52,7 @@
     <span class="understood" title="How Gourmet read this line">
       <span class="amount">{seen.amount}</span>
       {#if seen.unit}<span class="unit">{seen.unit}</span>{/if}
+      {#each seen.also ?? [] as m}<span class="also">({m})</span>{/each}
       <span class="item">{seen.item}</span>
     </span>
   {/if}

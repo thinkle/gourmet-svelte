@@ -200,11 +200,11 @@
 .line-tools { display: inline-flex; gap: 0.1rem; flex: none; }
 /* What the parser understood: the amount and unit, set apart from the name. */
 .understood { font-size: 0.85rem; opacity: 0.85; font-family: var(--font-family); }
-.understood .amount, .understood .unit {
+.understood .amount, .understood .unit, .understood .also {
   display: inline-block; margin-inline-end: 0.3em; padding: 0 0.35em; border-radius: 0.3em;
   background: var(--note-bg); color: var(--note-fg); font-weight: 700;
 }
-.understood .unit { font-weight: 400; }
+.understood .unit, .understood .also { font-weight: 400; }
 .star-input { display: inline-flex; gap: 0.1rem; border-radius: 0.3rem; }
 .star-input .star { border: 0; background: none; padding: 0 0.1rem; font-size: 1.6rem; line-height: 1; cursor: pointer; color: color-mix(in oklab, currentColor 25%, transparent); }
 .star-input .star.lit { color: #b7791f; }

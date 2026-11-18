@@ -165,3 +165,11 @@ describe("stick and square are units", () => {
     expect(b.altAmounts[0]).toMatchObject({ amount: 225, unit: "g" });
   });
 });
+
+describe("understood() shows second measures", () => {
+  it("lists them for the chip beside the line", async () => {
+    const { parseLine, understood } = await import("./recipeEdit.js");
+    expect(understood(parseLine("285g unsalted butter (2 1/2 sticks)"))).toMatchObject({ amount: "285", unit: "g", item: "unsalted butter", also: ["2 ½ sticks"] });
+    expect(understood(parseLine("1 cup flour")).also).toBeUndefined();
+  });
+});

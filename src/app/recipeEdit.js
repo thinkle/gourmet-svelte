@@ -112,7 +112,10 @@ export function understood(ing) {
   const amount = typeof a.amount === "number"
     ? (typeof a.rangeAmount === "number" ? `${floatToFrac(a.rangeAmount)}–${floatToFrac(a.amount)}` : floatToFrac(a.amount))
     : "";
-  return { amount, unit: a.unit ?? "", item: ing.text ?? "" };
+  const also = (ing.altAmounts ?? [])
+    .filter((m) => typeof m?.amount === "number")
+    .map((m) => [typeof m.rangeAmount === "number" ? `${floatToFrac(m.rangeAmount)}–${floatToFrac(m.amount)}` : floatToFrac(m.amount), m.unit].filter(Boolean).join(" "));
+  return also.length ? { amount, unit: a.unit ?? "", item: ing.text ?? "", also } : { amount, unit: a.unit ?? "", item: ing.text ?? "" };
 }
 
 // Keys the parser owns; everything else on an ingredient (shopItem,
