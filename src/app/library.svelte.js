@@ -87,11 +87,11 @@ export const editorData = {
 async function load(account) {
   running = account;
   library.error = null;
+  library.syncing = true;
   try {
     await dropFixtureWrites();
     await readCache();
     library.status = library.recipes.length ? "ready" : "loading";
-    library.syncing = true;
     let pending = false;
     await recipeData.sync(false, {
       // Recipes arrive in batches; show them without re-reading on every one.
@@ -114,7 +114,7 @@ async function load(account) {
   }
 }
 
-export const reload = () => { if (running) return load(running); };
+export const reload = () => { if (running && !library.syncing && !fixturesMode) return load(running); };
 
 user.subscribe((u) => {
   // Fixtures mode never loads an account (and never syncs).

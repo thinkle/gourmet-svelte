@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { Page, Bar, Container, Input, Select, Option, Text, Inline, TabBar, TabItem, Button } from "contain-css-svelte";
   import { library, reload, loadFixtures, storedRecipe, putRecipe, editorData } from "./library.svelte.js";
   import { startSession, signIn, signUp, signOut } from "../auth/session.js";
@@ -13,6 +13,7 @@
   import ShoppingList from "../screens/shopping/ShoppingList.svelte";
   import { shopping, loadShopping, useLocalOnly } from "./shopping.svelte.js";
   import { buildList } from "./shoppingList.js";
+  import { readRecipeTabs, writeRecipeTabs } from "./recipeTabs.js";
 
   let usingFixtures = $state(false);
   onMount(async () => {
@@ -36,6 +37,33 @@
   let drafts = $state({}); // "new-N" -> the prepared blank shown while it is new
   let dirty = $state({}); // tab key -> has unsaved edits
   let newCount = 0;
+  let tabsRestored = $state(false);
+  // Wait for the first sync, including recipes absent from this device's cache.
+  // Do not overwrite the bookmark while signing in or receiving partial batches.
+  $effect(() => {
+    if (!tabsRestored && library.status === "ready" && !library.syncing && !library.error) {
+      untrack(() => {
+        restoreTabs(true);
+        tabsRestored = true;
+      });
+    }
+  });
+  function restoreTabs(initial = false) {
+    const restored = readRecipeTabs(location.hash, library.recipes);
+    const keepActive = initial && (openIds.length > 0 || tab === "shopping");
+    // Following another hash must never throw away an unsaved editor.
+    openIds = [...new Set([...restored.ids, ...openIds.filter((key) => initial || dirty[key])])];
+    if (!keepActive) tab = restored.tab;
+  }
+  function hashChanged() {
+    if (tabsRestored) restoreTabs();
+  }
+  $effect(() => {
+    if (!tabsRestored || library.status !== "ready") return;
+    const hash = writeRecipeTabs(location.hash, openIds, tab, library.recipes);
+    // Replacing keeps tab clicks from filling the browser's Back history.
+    if (hash !== location.hash) history.replaceState(history.state, "", `${location.pathname}${location.search}${hash}`);
+  });
   // Open tabs follow the library, so a recipe that syncs in again stays current.
   const openTabs = $derived(openIds
     .map((key) => ({ key, recipe: drafts[key] ?? library.recipes.find((r) => r.id === key) }))
@@ -96,7 +124,7 @@
   });
 </script>
 
-<svelte:window bind:innerWidth={viewport} />
+<svelte:window bind:innerWidth={viewport} onhashchange={hashChanged} />
 
 <Page>
   {#snippet header()}
@@ -106,11 +134,15 @@
         <h1 class="brand"><img src="/images/cookie.png" alt="" />Gourmet</h1>
         {#if library.status !== "signed-out" && !usingFixtures}
           <Inline>
-            {#if library.syncing}<Text>Syncing…</Text>{/if}
+            <Button onclick={reload} disabled={library.syncing || library.status !== "ready"}
+              aria-label="Sync recipes with the cloud">{library.syncing ? "Syncing…" : "Sync recipes"}</Button>
             <Button onclick={signOut}>Sign out</Button>
           </Inline>
         {/if}
       </Bar>
+    {/if}
+    {#if library.status === "ready" && library.error}
+      <p role="status"><Text warning>Showing saved recipes. Sync failed: {library.error}</Text></p>
     {/if}
     {#if library.status === "ready"}
       <TabBar class="gourmet-tabs">
@@ -186,7 +218,6 @@
           <Text muted>{results.length} of {library.recipes.length}</Text>
           <Button primary onclick={newRecipe}>New recipe</Button>
         </Inline>
-        {#if library.error}<p><Text warning>Showing saved recipes. Sync failed: {library.error}</Text></p>{/if}
       </Container>
       <Container maxWidth="56rem" height="auto">
         <RecipeList {results} onopen={openRecipe} />

@@ -153,6 +153,21 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   to the list and back, and finishing is noticeable on a phone.
 - [ ] **R2-6 Tom starts using it** — read-only, alongside the old app.
 
+- [x] **R2-7 Cloud refresh and bookmarked recipe tabs** — owner request,
+  2026-11-25. One app-layer task: expose the kept sync through a Sync recipes
+  button (busy/disabled state, visible failure and retry); keep open recipe
+  views and drafts mounted. Store saved open recipes in order and the active
+  tab in `#recipes=…&tab=…`, preferring stable server IDs and falling back to
+  `local:<id>` for local-only saves. Restore after initial sync; skip unavailable
+  IDs and unsaved new drafts. Hash changes retain dirty tabs; tab clicks replace
+  history. Unit tests cover URL mapping across caches and sync arrivals,
+  concurrency, failure/retry and signed-out behavior. Verified by 140 Vitest
+  tests, a production build and headless Chromium checks at desktop/phone sizes
+  with local fixtures and mocked cloud responses (including delayed initial
+  sync, arrivals, busy state, error/retry, reload and dirty edits). REST checks
+  were blocked before/after by the MongoDB binary download returning HTTP 403;
+  this checkout has no `check` script.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
@@ -270,5 +285,5 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
 
 ## Later — each its own small project
 
-Shopping list with MCP endpoints and family sharing · open-recipe tabs
+Shopping list with MCP endpoints and family sharing
 · sub-recipes · import/export UI · share links · extension (MV3)
