@@ -296,7 +296,7 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   existing recipe tab. Source links use local recipe ids, including when titles
   are duplicated or list references use Mongo ids. Missing recipes stay plain
   text. Links do not cross off items. Verified mouse/keyboard, tab reuse and
-  phone layout with synthetic fixtures; build, 145 API tests and 144 Vitest
+  phone layout with synthetic fixtures; build, 145 API tests and 166 Vitest
   tests pass. API, stored shape and recipe data are unchanged.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
