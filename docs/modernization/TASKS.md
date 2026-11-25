@@ -282,6 +282,15 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   mixed-unit order does not affect the result; build and both test runners pass.
   Verified: build, 145 API tests and 162 app tests pass; independent verifier
   PASS WITH NOTES. Extra kept-utility Jest failures match unchanged baseline.
+- [x] **S-2g Direct shopping-item editor** — put Shopping Ingredient, original
+  recipe lines and Category in one dialog; save name/category together, retain
+  drafts on failure, and let Cancel discard both. Custom-category entry starts
+  collapsed. Compact the dialog's close/header spacing; use existing alias and
+  category writes without changing recipe wording, stored shape or REST API.
+  Verified desktop/390px preview, focus, rename+category persistence, Cancel
+  and Escape, custom/automatic categories, merge totals/original lines, and
+  retry after an injected category-save failure in an isolated local cache.
+  Build, 145 API tests and 140 Vitest tests pass.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.

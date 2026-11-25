@@ -230,11 +230,6 @@
   --shopping-icon-fill: var(--aisle-icon-fill);
 }
 .aisle-label svg { flex-shrink: 0; }
-.aisle-choice[aria-pressed="true"] {
-  --button-bg: var(--aisle-bg, var(--bg));
-  --button-fg: var(--aisle-fg, var(--fg));
-  --button-border: 1px solid var(--aisle-fg, currentColor);
-}
 .aisle-produce { --aisle-bg: #edf5e8; --aisle-fg: #295c38; }
 .aisle-meat { --aisle-bg: #faeee9; --aisle-fg: #8f4037; }
 .aisle-seafood { --aisle-bg: #eaf4f8; --aisle-fg: #285d78; }
@@ -259,14 +254,31 @@
   /* Contain publishes the current surface pair as the summary inverts. */
   --shopping-icon-fill: var(--current-bg, var(--bg));
 }
-.shopping-aisle-dialog { --dialog-max-width: 28rem; }
-.aisle-picker {
-  display: grid; gap: 1rem;
+.shopping-item-dialog {
+  --dialog-max-width: 30rem;
+  --dialog-min-height: 0;
+  --dialog-padding: 1rem;
+  --circle-button-size: 2rem;
+  --button-margin: 0;
+}
+.shopping-item-dialog .close-bar {
+  position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
+  height: auto;
+}
+.shopping-item-editor {
   --dropdown-menu-width: 18rem;
   --menu-item-padding: 0.35rem 0.65rem;
+  --input-width: 100%;
 }
-.aisle-picker label { display: grid; gap: 0.4rem; }
-.aisle-picker p { margin: 0; }
+.shopping-item-editor fieldset { display: grid; gap: 1rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shopping-item-editor label { display: grid; gap: 0.35rem; min-width: 0; }
+.shopping-name-field > span { padding-inline-end: 2.5rem; font-weight: 600; }
+.shopping-item-editor p { margin: 0; }
+.shopping-edit-originals { list-style: none; padding: 0; margin: -0.4rem 0 0; font-size: 0.875rem; }
+.shopping-edit-originals li + li { margin-block-start: 0.5rem; }
+.shopping-edit-originals small, .shopping-editor-hint { font-size: 0.8125rem; }
+.shopping-custom-category > summary { cursor: pointer; font-size: 0.875rem; }
+.shopping-custom-category > label { margin-block-start: 0.75rem; }
 .shopping-row { --data-list-item-icon-width: 1.75rem; }
 .shopping-item-name {
   --data-list-item-paragraph-font-size: 1rem;
