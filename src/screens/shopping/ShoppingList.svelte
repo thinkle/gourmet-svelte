@@ -13,7 +13,7 @@
   } from "../../app/shopping.svelte.js";
   import RecipeOnList from "./RecipeOnList.svelte";
   import ShoppingIcon from "../../components/ShoppingIcon.svelte";
-  import AislePicker from "./AislePicker.svelte";
+  import ShoppingItemEditor from "./ShoppingItemEditor.svelte";
   import AisleSection from "./AisleSection.svelte";
   import { aisleName } from "./aisleKinds.js";
 
@@ -30,21 +30,33 @@
     await addItem(text);
   }
 
-  // Open a focused picker; choosing an aisle saves it and closes.
-  let picking = $state(null); // the key of the item whose aisle is being chosen
-  const pickedItem = $derived(list.items.find((item) => item.key === picking));
-  async function choose(item, name) {
-    picking = null;
-    if ((name ?? "") !== (item.category ?? "")) await setCategory(item.key, name);
+  // Snapshot the item while editing so a rename does not unmount its drafts.
+  let picking = $state(null);
+  let savingItem = $state(false);
+  function closeItemEditor() {
+    if (!savingItem) picking = null;
   }
-  // Rename or merge: typing another item's name makes them one item.
-  let renaming = $state(null);
-  let rename = $state("");
-  async function saveRename(e) {
-    e.preventDefault();
-    const item = renaming;
-    renaming = null;
-    if (rename.trim() && rename.trim().toLowerCase() !== item.key) await renameItem(item.baseKeys, item.key, rename);
+  async function saveItem({ name, category }) {
+    if (savingItem || !picking || !name.trim()) return;
+    savingItem = true;
+    try {
+      let item = picking;
+      const key = name.toLowerCase();
+      if (key !== item.key) {
+        await renameItem(item.baseKeys, item.key, name);
+        if (shopping.error) return;
+        // On a category-save failure, retry against the renamed key.
+        item = { ...item, key, name };
+        picking = item;
+      }
+      if (category !== undefined) {
+        await setCategory(item.key, category);
+        if (shopping.error) return;
+      }
+      picking = null;
+    } finally {
+      savingItem = false;
+    }
   }
 
   let arranging = $state(false);
@@ -100,10 +112,10 @@
           <ShoppingIcon kind="pantry" />
         </CircleButton>
       </Tooltip>
-      <Tooltip tooltipText={`Change aisle: ${item.aisle ? aisleName(item.aisle) : 'none'}${item.category ? '' : ' (suggested)'}`}
+      <Tooltip tooltipText={`Edit name or category: ${item.aisle ? aisleName(item.aisle) : 'none'}${item.category ? '' : ' (suggested)'}`}
         tooltipId={`shopping-aisle-${encodeURIComponent(item.key)}`} horizontal="left">
-        <CircleButton class="shopping-action" onclick={() => (picking = picking === item.key ? null : item.key)}
-          aria-label="Change aisle for {item.name}: {item.aisle ? aisleName(item.aisle) : 'none'}" aria-expanded={picking === item.key} aria-haspopup="dialog"
+        <CircleButton class="shopping-action" onclick={() => (picking = item)}
+          aria-label="Edit shopping item {item.name}" aria-expanded={picking?.key === item.key} aria-haspopup="dialog"
           aria-describedby={`shopping-aisle-${encodeURIComponent(item.key)}`}>
           <ShoppingIcon kind="aisle" />
         </CircleButton>
@@ -189,22 +201,11 @@
     {/if}
   {/if}
 
-  <Dialog open={!!pickedItem} modal class="shopping-aisle-dialog" aria-label="Change aisle" onclose={() => (picking = null)}>
-    {#if pickedItem}
-      <h3>Change aisle for {pickedItem.name}</h3>
-      <AislePicker item={pickedItem} choices={list.aisleChoices}
-        onchoose={(name) => choose(pickedItem, name)}
-        onrename={() => { renaming = pickedItem; rename = pickedItem.name; picking = null; }}
-        oncancel={() => (picking = null)} />
+  <Dialog open={!!picking} modal class="shopping-item-dialog" aria-label="Edit shopping item" onclose={closeItemEditor}
+    oncancel={(event) => { if (savingItem) event.preventDefault(); }}>
+    {#if picking}
+      <ShoppingItemEditor item={picking} choices={list.aisleChoices}
+        onsave={saveItem} oncancel={closeItemEditor} saving={savingItem} error={shopping.error} />
     {/if}
-  </Dialog>
-
-  <Dialog open={!!renaming} modal onclose={() => (renaming = null)}>
-    <form onsubmit={saveRename}>
-      <h3>Rename {renaming?.name}</h3>
-      <p><label>Shopping item name <Input type="text" bind:value={rename} autocomplete="off" /></label></p>
-      <p><Text muted>Recipe wording stays unchanged. This name is remembered for future lists. Using another item's name merges them.</Text></p>
-      <Inline><Button primary type="submit">Save</Button><Button type="button" onclick={() => (renaming = null)}>Cancel</Button></Inline>
-    </form>
   </Dialog>
 </Container>
