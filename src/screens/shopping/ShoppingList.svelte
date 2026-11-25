@@ -17,6 +17,8 @@
   import AisleSection from "./AisleSection.svelte";
   import { aisleName } from "./aisleKinds.js";
 
+  let { onopen } = $props();
+
   const list = $derived(buildList(shopping.rec, library.recipes));
   const shoppingGroups = $derived([...list.categoryNames, null]
     .map((name) => ({ name, items: list.items.filter((item) => item.state !== "have" && item.aisle === name) }))
@@ -78,8 +80,11 @@
     <summary>{unique(sources(item)).join(", ")}</summary>
     <ul class="shopping-source-details">
       {#each item.from as source}
+        {@const recipe = source.recipeId == null ? null : library.recipes.find((r) => r.id === source.recipeId)}
         <li>
-          {#if item.from.length > 1}<strong>{source.title ?? "Added by hand"}</strong>{/if}
+          {#if recipe && onopen}
+            <Button class="shopping-recipe-link" onclick={() => onopen(recipe)} aria-label="Open recipe {source.title}">{source.title}</Button>
+          {:else if item.from.length > 1}<strong>{source.title ?? "Added by hand"}</strong>{/if}
           <p>{source.text}</p>
         </li>
       {/each}
@@ -143,7 +148,8 @@
   {#if list.recipes.length}
     <h3>For {list.recipes.length} {list.recipes.length === 1 ? "recipe" : "recipes"}</h3>
     {#each list.recipes as r (r.id)}
-      <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)} />
+      <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)}
+        onopen={r.found && onopen ? () => onopen(r.recipe) : undefined} />
     {/each}
   {/if}
 
