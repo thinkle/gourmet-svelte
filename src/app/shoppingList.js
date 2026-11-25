@@ -11,11 +11,11 @@ import { guessAisle, DEFAULT_AISLES } from "./shoppingAisles.js";
 
 export const isRef = (ing) => ing && ing.reference !== undefined && ing.reference !== null && ing.reference !== "";
 // getShopItem (kept) keeps words from asides and prep notes ("(2 1/2 sticks)",
-// ", packed", " -- cut back because ...") in the name, so hand it the text
+// ", packed", "; adjust to taste", " -- cut back because ...") in the name, so hand it the text
 // without them.
 const bare = (ing) => {
   if (ing.shopItem) return ing;
-  const text = (ing.text ?? "").replace(/\([^)]*\)/g, " ").split(/\s--?\s|,/)[0].replace(/(^|\s)[\d\/.]+(?=\s|$)/g, " ").trim();
+  const text = (ing.text ?? "").replace(/\([^)]*\)/g, " ").split(/\s--?\s|[,;]/)[0].replace(/(^|\s)[\d\/.]+(?=\s|$)/g, " ").trim();
   return { ...ing, text: text || ing.text };
 };
 export const itemName = (ing) => getShopItem(bare(ing));

@@ -68,7 +68,10 @@ first add creates one. (Open question for the owner: clean up the spares.)
 2. Item key: `getShopItem(ingredient)` (`src/utils/ingredientUtils.js`: the
    ingredient's own `shopItem` if set, else the meaningful words, title-cased).
    It is given the text without parenthetical asides, text after a comma or
-   " -- ", and bare numbers, because the extractor otherwise keeps those words.
+   semicolons, " -- ", and bare numbers, because the extractor otherwise keeps
+   those words. Semicolons are hard note boundaries, matching the Python
+   desktop's `keymanager.snip_notes()` behavior. The full original text stays
+   available separately; explicit `ingkey`/`shopItem` values are not truncated.
    "Unsalted butter" and "butter, softened" thus both reach "Butter" when the
    extractor agrees; it is the old grouping, unchanged.
 3. Per key, `addAmounts` (`src/utils/unitAmounts.js`) adds amounts that share a
