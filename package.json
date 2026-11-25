@@ -45,7 +45,7 @@
     "jest-fetch-mock": "^3.0.3",
     "jest-transform-svelte": "^2.1.1",
     "mongodb": "^3.6.5",
-    "netlify-cli": "^3.13.5",
+    "netlify-cli": "^27.20.0",
     "netlify-identity-widget": "^1.9.1",
     "node-fetch": "^2.6.1",
     "sass": "^1.69.5",
