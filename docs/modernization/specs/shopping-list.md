@@ -136,34 +136,66 @@ save of a list from this build.
 
 ### What is built
 
-Three sections, one stored document (nothing written to recipes):
+One stored document (nothing written to recipes), with the shopping rows and pantry:
 
 1. **To buy**, grouped by aisle in the user's order, unassigned last ("Other").
-   Tapping an item puts it in the cart (`cart: [key]`).
-2. **In the cart**, collapsed, this trip only. Tapping puts it back.
-   "Done shopping" empties `cart` and `trip`.
-3. **Already have** (desktop's pantry, its own label), collapsed, with merged
+   A checkbox in the leading icon area makes the row's action clear. Tapping
+   the checkbox or row crosses it off in place (`cart: [key]`); tapping again
+   restores it. Crossed-off rows keep their aisle and position. The former
+   **In the cart** expander is removed (owner, 2026-11-25).
+2. **Done shopping** appears when items are crossed off, with a count.
+   It empties `cart` and `trip`, resetting the list for the next trip.
+3. **Pantry Items** (owner's preferred label, 2026-11-25; formerly Already have), collapsed, with merged
    amounts. Remembered for every recipe and list: `alreadyHave: [key]`.
-   "Already have" on a To-buy item adds it for good. "Buy this trip" adds the key
-   to `trip` (cleared by Done shopping). "Don't have it" removes it for good.
+   The pantry cupboard icon on a To-buy item adds it for good, with the tooltip
+   "Pantry item — keep off lists". "Buy this trip" adds the key
+   to `trip` (cleared by Done shopping). "Remove from pantry" removes it for good.
    Seeds: the desktop `default_pantry`, matched loosely by words (noise words such
    as "all", "purpose", "extra", "virgin", "kosher", "ground" are ignored, so
    "all-purpose flour" matches "flour, all purpose") and old `shopIgnore: true`
    marks are read, never written, as "already have" hints. `alreadyHaveOff:
    [key]` overrides a seed or hint when the user removes it.
 
+The Pantry Items summary includes the same double-door pantry icon as the row
+action. Default aisle headings have softly tinted Contain surfaces and matching
+SVG food icons. Defaults (owner, 2026-11-25): Produce; Bakery; Dairy & Eggs;
+Meat; Seafood Counter; Deli; Canned; Rice, Pasta and Grains; International Aisle;
+Baking; Spices; Oils & Condiments; Cereal & Breakfast; Coffee & Tea;
+Soda & Water; Juice; Frozen; Beer, Wine & Spirits. This is a generic store walk,
+not a claim about a specific store's numbered aisles. Department references:
+[Market Basket](https://www.shopmarketbasket.com/departments/),
+[Wegmans](https://www.wegmans.com/shop/categories),
+[Whole Foods](https://www.wholefoodsmarket.com/products?page=1).
+Custom aisle headings and Other stay plain text. "Pantry" is reserved for
+remembered items to keep off lists; explicit old aisle assignments named Pantry
+display as "Misc (choose an aisle)" without rewriting their stored keys.
+The stored "Dairy & eggs" key is retained and displayed as "Dairy & Eggs".
+The same aisle colors apply to checkbox borders, checked fills and row tools.
+Recipe attribution is smaller and muted beneath the ingredient name. Its
+native disclosure reveals each original ingredient line (including preparation
+and shopping notes). Opening or reading the disclosure does not cross off the
+row. Recipe wording remains unchanged.
+
+Aisle editing opens a compact dialog: the effective current aisle is
+shown explicitly (including suggested status). Up to seven choices use buttons
+with the current choice checked; longer lists use Contain Select with a check
+beside the current option. Selection saves and closes the dialog. A separate
+new-aisle field has an Add aisle button; Reset aisle clears an explicit choice.
+Default aisle icons also appear in the short-list buttons and rich Select
+labels/options. On small screens Contain uses the native, text-only select.
+
 Item keys: a stored `ingkey`, else `shopItem`, else the cleaned `getShopItem`
 (see above), lowercased. `keyAliases: {key: key}` records "rename/merge this
 item" (Rename... in the aisle row): typing another item's name makes them one.
 
 Aisles: `aisles: {key: name}` (user choices only) and `aisleOrder: [name]` (set by
-"Arrange aisles", move up/down). Choosing an aisle is two taps: the aisle chip on
-the row opens a row of chips (existing and default aisles, most used first, plus a
-"New aisle" box, Enter saves); a chip assigns and closes. With no choice the aisle
-is a computed guess (`src/app/shoppingAisles.js`: a small curated keyword table,
-then the desktop table converted to `src/app/aisleDefaults.js` with its
-categories folded into Produce, Meat & fish, Dairy & eggs, Bakery, Baking, Spices,
-Pantry, Frozen, Drinks), shown muted, never stored, replaced by the user's pick.
+"Arrange aisles", move up/down). The tag icon opens the picker described above.
+With no choice the aisle is a computed guess (`src/app/shoppingAisles.js`):
+normalized word matching, simple plural handling, and longest matching phrase
+wins, with curated phrases breaking ties over the desktop reference table.
+Frozen/canned packaging takes precedence. The desktop table's Pantry and
+Meat & fish buckets are reclassified into the current defaults for guesses only.
+Guesses are never stored and never override an explicit user assignment.
 Default aisle order is the walking order in that list.
 
 Not carried over from desktop: optional-ingredient prompt (the web recipe has no

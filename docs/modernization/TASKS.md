@@ -233,6 +233,23 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   document: `cart`, `alreadyHave`, `alreadyHaveOff`, `trip`, `aisles`,
   `aisleOrder`, `keyAliases`. Stored `ingkey`/`shopItem` is the item key when
   present. No pantry editor (the pantry was a metaphor). See the spec.
+- [x] **S-2c Shopping list clarity** — compact pantry/tag CircleButtons with
+  hover/focus descriptions; double-door pantry icon (also in its summary), and
+  cart icon by ingredients. "Pantry Items" replaces "Already have" (owner,
+  2026-11-25); its icon follows Contain's current surface when expanded.
+  Checkbox-led rows cross off and restore in place. Recipe attribution is
+  smaller and muted, with an expandable original ingredient line. Rename/merge
+  aliases preserve recipe wording and are remembered on the list document.
+  Aisle picker: current/suggested choice, up to seven buttons or a rich Select
+  with icons; native text-only select on phones. Default aisle colors wrap the
+  section, including checkbox borders/fills and row tools. Eighteen store-style
+  defaults split Meat/Seafood/Deli, canned/grains/international, and coffee/tea,
+  cereal/breakfast, soda/water, juice and alcohol. Legacy Pantry assignments
+  display "Misc (choose an aisle)"; stored assignments/keys are unchanged.
+  Verified with local fixtures at desktop/phone sizes, including both picker
+  variants, checkbox/row/keyboard toggles, captions, and expanded pantry colors.
+  Aisle/naming tests cover suggestions, packaging precedence, explicit choices,
+  the owner's full onion example and aliases; build and both test runners pass.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.
