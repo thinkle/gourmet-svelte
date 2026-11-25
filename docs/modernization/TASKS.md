@@ -259,6 +259,12 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   stored keys and malformed note-only text. Verified the before/after name
   and preserved original line in a read-only fixture; build, 145 API tests
   and 140 Vitest tests pass.
+- [x] **S-2e Automatic shopping unit promotion — WONTFIX** (owner, 2026-11-25).
+  Keep `addAmounts` behavior: combine compatible amounts using the largest
+  unit already present. Do not promote a tablespoons-only total to cups or
+  gallons using ad hoc thresholds. Python had a readability scorer and unit
+  preferences; there is no equivalent selector in the kept JS. Revisit only
+  with a deliberate, tested readability policy. No unit code changed.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.
