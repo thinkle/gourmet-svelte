@@ -191,6 +191,13 @@ Item keys: a stored `ingkey`, else `shopItem`, else the cleaned `getShopItem`
 (see above), lowercased. `keyAliases: {key: key}` records "rename/merge this
 item" (Rename... in the aisle row): typing another item's name makes them one.
 
+Unit display decision (owner, 2026-11-25): **automatic unit promotion is
+WONTFIX for now**. The kept `addAmounts` combines compatible measurements using
+the largest unit already present; a tablespoons-only total can remain 20 Tbs.
+The desktop's `adjust_unit()` used a readability scorer and preferred unit
+ranges. That selector was not ported to JS; do not replace it with arbitrary
+thresholds that might produce unhelpful units or awkward fractions.
+
 Aisles: `aisles: {key: name}` (user choices only) and `aisleOrder: [name]` (set by
 "Arrange aisles", move up/down). The tag icon opens the picker described above.
 With no choice the aisle is a computed guess (`src/app/shoppingAisles.js`):
