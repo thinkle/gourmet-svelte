@@ -5,7 +5,7 @@
 // compatible amounts. The old crawler (legacy/src/stores/shoppingStores.js)
 // was tied to the old stores, so this is a small rewrite of the walk only.
 import { getShopItem } from "../utils/ingredientUtils.js";
-import { addAmounts } from "../utils/unitAmounts.js";
+import { addAmounts, adjustAmountUnit } from "../utils/unitAmounts.js";
 import { formatAmount } from "../utils/numbers.js";
 import { guessAisle, DEFAULT_AISLES } from "./shoppingAisles.js";
 
@@ -110,7 +110,9 @@ export function buildList(rec, recipes) {
   }
   const items = [...byKey.entries()].map(([key, ls]) => {
     const scaled = ls.map((l) => scale(l.ing.amount, l.mult)).filter(Boolean);
-    const amounts = scaled.length ? addAmounts(scaled, key).map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") })) : [];
+    const amounts = addAmounts(scaled, key)
+      .map((a) => adjustAmountUnit(a, { favorCurrentUnit: false }))
+      .map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") }));
     const name = ls.every((l) => l.base === key) ? baseName(ls[0].ing) : cap(key);
     // Already have: what you said, the desktop app's defaults, and old recipes' shopIgnore (read only).
     const hint = ls.some((l) => l.ing.shopIgnore === true) || matchesDefault(name);

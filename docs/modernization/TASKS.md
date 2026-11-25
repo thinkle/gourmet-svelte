@@ -265,6 +265,23 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   gallons using ad hoc thresholds. Python had a readability scorer and unit
   preferences; there is no equivalent selector in the kept JS. Revisit only
   with a deliberate, tested readability policy. No unit code changed.
+- [x] **S-2f Readable shopping quantities** — owner approved 2026-11-25,
+  superseding S-2e's deferral after investigating the Python implementation.
+  Scope: `src/utils/unitAmounts.js` (repair comma-operator unit groups, expose
+  Python-derived readability scoring/selection, preserve ranges and zeroes in
+  addition), `src/utils/numbers.js` (display a zero lower range endpoint),
+  `src/app/shoppingList.js` (select units after aggregation), regression tests
+  in `src/app/shoppingUnits.test.js`, and `docs/modernization/shopping-units.md`.
+  Keep Python fraction scores/ranges and optional current-unit bias. Score final
+  totals once, including single lines; select one unit for both range endpoints.
+  Keep existing fl oz when readable, but do not introduce it from other units.
+  Recognize pint/quart inputs without introducing them as new display choices.
+  No density conversion, API/stored-shape changes or recipe-view promotion.
+  Done when: 20 Tbs -> 1¼ c; 3 tsp -> 1 Tbs; 1500 g -> 1½ kg; 15 fl oz stays;
+  2 c stays; ranges, zeroes, unknown units and original recipe data survive;
+  mixed-unit order does not affect the result; build and both test runners pass.
+  Verified: build, 145 API tests and 162 app tests pass; independent verifier
+  PASS WITH NOTES. Extra kept-utility Jest failures match unchanged baseline.
 - [x] **S-2g Direct shopping-item editor** — put Shopping Ingredient, original
   recipe lines and Category in one dialog; save name/category together, retain
   drafts on failure, and let Cancel discard both. Custom-category entry starts
