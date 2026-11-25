@@ -206,8 +206,94 @@
 .rich-text-body:focus { outline: 2px solid var(--recipe-bg, currentColor); outline-offset: 1px; }
 .rich-text-body:empty::before { content: attr(data-placeholder); opacity: 0.5; }
 /* ── Shopping list ─────────────────────────────────────── */
-/* An aisle that is only a guess (nothing chosen yet) reads quieter. */
-.guess { opacity: 0.6; }
+/* A soft surface and a matching ink color make default aisles easy to scan. */
+.themed-aisle {
+  --checkbox-border: 1px solid var(--aisle-fg);
+  --checkbox-checked-bg: var(--aisle-fg);
+  --checkbox-checked-fg: var(--aisle-bg);
+  --checkbox-checked-border: 1px solid var(--aisle-fg);
+  --shopping-icon-fill: var(--aisle-bg);
+}
+.aisle-heading {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.75rem; margin-block-start: 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  --aisle-icon-fill: color-mix(in oklab, var(--current-fg) 12%, var(--current-bg));
+  --shopping-icon-fill: var(--aisle-icon-fill);
+}
+.aisle-heading h4 { margin: 0; color: inherit; }
+.aisle-heading svg { flex-shrink: 0; }
+.aisle-label {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  color: var(--aisle-fg, inherit);
+  --aisle-icon-fill: color-mix(in oklab, var(--aisle-fg) 12%, var(--aisle-bg));
+  --shopping-icon-fill: var(--aisle-icon-fill);
+}
+.aisle-label svg { flex-shrink: 0; }
+.aisle-choice[aria-pressed="true"] {
+  --button-bg: var(--aisle-bg, var(--bg));
+  --button-fg: var(--aisle-fg, var(--fg));
+  --button-border: 1px solid var(--aisle-fg, currentColor);
+}
+.aisle-produce { --aisle-bg: #edf5e8; --aisle-fg: #295c38; }
+.aisle-meat { --aisle-bg: #faeee9; --aisle-fg: #8f4037; }
+.aisle-seafood { --aisle-bg: #eaf4f8; --aisle-fg: #285d78; }
+.aisle-deli { --aisle-bg: #fbf2dc; --aisle-fg: #765319; }
+.aisle-canned { --aisle-bg: #f8ecea; --aisle-fg: #8b453b; }
+.aisle-grains { --aisle-bg: #f5efde; --aisle-fg: #72551f; }
+.aisle-international { --aisle-bg: #f2ecf7; --aisle-fg: #674886; }
+.aisle-condiments { --aisle-bg: #eef3df; --aisle-fg: #50601f; }
+.aisle-dairy { --aisle-bg: #edf3f8; --aisle-fg: #355d7b; }
+.aisle-bakery { --aisle-bg: #fbf0dd; --aisle-fg: #82511e; }
+.aisle-baking { --aisle-bg: #f5edf3; --aisle-fg: #78516c; }
+.aisle-spices { --aisle-bg: #fbefdf; --aisle-fg: #8b4d23; }
+.aisle-pantry { --aisle-bg: #f4eee4; --aisle-fg: #6b411d; }
+.aisle-frozen { --aisle-bg: #eaf6f7; --aisle-fg: #286774; }
+.aisle-coffee { --aisle-bg: #f3eae4; --aisle-fg: #70462e; }
+.aisle-breakfast { --aisle-bg: #f8f0dd; --aisle-fg: #795820; }
+.aisle-soda { --aisle-bg: #e9f3f4; --aisle-fg: #2b6268; }
+.aisle-juice { --aisle-bg: #fff0df; --aisle-fg: #92501e; }
+.aisle-alcohol { --aisle-bg: #f5edf6; --aisle-fg: #6a436b; }
+.pantry-summary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  /* Contain publishes the current surface pair as the summary inverts. */
+  --shopping-icon-fill: var(--current-bg, var(--bg));
+}
+.shopping-aisle-dialog { --dialog-max-width: 28rem; }
+.aisle-picker {
+  display: grid; gap: 1rem;
+  --dropdown-menu-width: 18rem;
+  --menu-item-padding: 0.35rem 0.65rem;
+}
+.aisle-picker label { display: grid; gap: 0.4rem; }
+.aisle-picker p { margin: 0; }
+.shopping-row { --data-list-item-icon-width: 1.75rem; }
+.shopping-item-name {
+  --data-list-item-paragraph-font-size: 1rem;
+  --data-list-item-body-opacity: 1;
+}
+.shopping-item-source {
+  font-size: 0.8125rem;
+  color: var(--muted-text-fg);
+  --data-list-item-paragraph-font-size: 0.8125rem;
+  --data-list-item-paragraph-line-height: 1.45;
+  --data-list-item-body-opacity: 1;
+  --muted-text-fg: color-mix(in srgb, var(--current-fg), var(--current-bg) 30%);
+}
+.shopping-item-source > summary { cursor: pointer; }
+.shopping-source-details { margin: 0.4rem 0 0; padding-inline-start: 1rem; color: var(--current-fg); }
+.shopping-source-details li + li { margin-block-start: 0.4rem; }
+.shopping-item-name.crossed-off { text-decoration: line-through; color: color-mix(in oklab, var(--fg) 55%, var(--bg)); }
+/* Row tools inherit their aisle pair, with the cookie palette as the default. */
+.shopping-action {
+  --circle-button-size: 2.25rem;
+  --button-margin: 0;
+  --circle-button-bg: transparent;
+  --circle-button-fg: var(--aisle-fg, var(--primary-bg));
+  --circle-button-border: none;
+  --circle-button-hover-bg: var(--aisle-bg, var(--primary-fg));
+  --circle-button-hover-fg: var(--aisle-fg, var(--primary-bg));
+}
 /* A recipe on the list: its title on its own line, then multiplier and a remove button. */
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
 .on-list > :not(.title) { grid-row: 2; }

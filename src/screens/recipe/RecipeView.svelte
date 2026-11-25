@@ -8,6 +8,7 @@
   import { fly, scale } from "svelte/transition";
   import { Button, SplitPane, Text } from "contain-css-svelte";
   import AmountInput from "../../components/AmountInput.svelte";
+  import ShoppingIcon from "../../components/ShoppingIcon.svelte";
   import Ingredients from "./Ingredients.svelte";
   import RecipeHero from "./RecipeHero.svelte";
   import RecipeEditor from "./RecipeEditor.svelte";
@@ -94,7 +95,10 @@
     <h2>Ingredients</h2>
     <AmountInput bind:value={mult} label="Multiply the recipe by" />
     {#if !onclose}
-      <Button onclick={() => addRecipe(recipe, mult)}>Add to shopping list</Button>
+      <Button onclick={() => addRecipe(recipe, mult)}>
+        {#snippet icon()}<ShoppingIcon kind="cart" />{/snippet}
+        Add to shopping list
+      </Button>
       {#if onList}<Text muted>On the list ×{floatToFrac(onList)}</Text>{/if}
     {/if}
     {#if onclose}<button type="button" class="sheet-close" aria-label="Hide ingredients" onclick={onclose}>×</button>{/if}

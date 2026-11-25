@@ -51,3 +51,4 @@ substitutes.
 | `Dialog` `dismissible` treats a keyboard-made click (Enter/Space on a button inside, clientX/Y 0) as a backdrop click, so it closes and reports a dismissal instead of the button's action | R3 confirm dialogs (`ConfirmHost.svelte`) | to file | Confirm dialogs are not `dismissible`; Escape and the close button still dismiss |
 | No combobox / autocomplete input | R3 categories | to file | `Input` with a native `<datalist>` |
 | No rich-text / contenteditable surface | R3-5 text bodies | to file | Plain `contenteditable` styled in `gourmet.css` |
+| Rich Select options show SVG icons on desktop, but Select switches to a native text-only control below 600px; there is no rich mobile option mode. | Shopping aisle picker | Select | Retain labeled native mobile options; desktop menu and selected value show the aisle icons. |
