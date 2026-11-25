@@ -250,6 +250,15 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   variants, checkbox/row/keyboard toggles, captions, and expanded pantry colors.
   Aisle/naming tests cover suggestions, packaging precedence, explicit choices,
   the owner's full onion example and aliases; build and both test runners pass.
+- [x] **S-2d Shopping ingredient note boundaries** — restore the desktop's
+  semicolon boundary in the shopping-name adapter. The sugar adjustment note
+  must stay in the expandable original line and stay out of naming, merging,
+  pantry matching and aisle guessing. Stored ingkey/shopItem values stay
+  authoritative; kept parsers, API and recipe wording remain unchanged.
+  Eight regression cases cover the sugar example, merging, other delimiters,
+  stored keys and malformed note-only text. Verified the before/after name
+  and preserved original line in a read-only fixture; build, 145 API tests
+  and 140 Vitest tests pass.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.
