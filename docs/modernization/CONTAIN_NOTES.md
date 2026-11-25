@@ -52,3 +52,4 @@ substitutes.
 | No combobox / autocomplete input | R3 categories | to file | `Input` with a native `<datalist>` |
 | No rich-text / contenteditable surface | R3-5 text bodies | to file | Plain `contenteditable` styled in `gourmet.css` |
 | Rich Select options show SVG icons on desktop, but Select switches to a native text-only control below 600px; there is no rich mobile option mode. | Shopping aisle picker | Select | Retain labeled native mobile options; desktop menu and selected value show the aisle icons. |
+| Dialog reserves a separate close-bar row; there is no header/close layout option for a compact form whose first label should align with the close button. | Shopping-item editor | Dialog | Scope absolute positioning of the existing close bar to `.shopping-item-dialog` in the theme and reserve space beside its first label. |

@@ -179,17 +179,22 @@ native disclosure reveals each original ingredient line (including preparation
 and shopping notes). Opening or reading the disclosure does not cross off the
 row. Recipe wording remains unchanged.
 
-Aisle editing opens a compact dialog: the effective current aisle is
-shown explicitly (including suggested status). Up to seven choices use buttons
-with the current choice checked; longer lists use Contain Select with a check
-beside the current option. Selection saves and closes the dialog. A separate
-new-aisle field has an Add aisle button; Reset aisle clears an explicit choice.
-Default aisle icons also appear in the short-list buttons and rich Select
-labels/options. On small screens Contain uses the native, text-only select.
+The tag button opens a single shopping-item editor (owner, 2026-11-25).
+Shopping Ingredient is directly editable and receives focus; the full original
+ingredient lines and source recipe names are shown beneath it. Category is a
+Contain Select with default aisle icons, a check on the current choice, and an
+Automatic option that clears an explicit assignment. Suggested categories are
+labeled. Custom-category entry starts inside a collapsed disclosure; typing a
+custom name previews it in the selector. Save applies name and category edits
+together, using the renamed key for any category write; Cancel discards drafts.
+If a category write fails after renaming succeeds, the editor retains its drafts
+and retries against the renamed key. On small screens Contain uses the native,
+text-only select. The close control sits beside the first field rather than
+reserving an empty header row.
 
 Item keys: a stored `ingkey`, else `shopItem`, else the cleaned `getShopItem`
 (see above), lowercased. `keyAliases: {key: key}` records "rename/merge this
-item" (Rename... in the aisle row): typing another item's name makes them one.
+item" (the Shopping Ingredient field): typing another item's name makes them one.
 
 Unit display decision (owner, 2026-11-25): **automatic unit promotion is
 WONTFIX for now**. The kept `addAmounts` combines compatible measurements using
