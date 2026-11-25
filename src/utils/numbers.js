@@ -394,7 +394,7 @@ export function formatAmount (amount,options) {
     if (!amount) {
         return ''
     }
-    if (amount.rangeAmount) {
+    if (Number.isFinite(amount.rangeAmount)) {
         return `${floatToFrac(amount.rangeAmount,options)}–${floatToFrac(amount.amount,options)}`.replace(' ','\xa0'); // non-breaking space
     }
     else {
