@@ -178,6 +178,12 @@ Recipe attribution is smaller and muted beneath the ingredient name. Its
 native disclosure reveals each original ingredient line (including preparation
 and shopping notes). Opening or reading the disclosure does not cross off the
 row. Recipe wording remains unchanged.
+Recipe titles in the recipes-on-list section and expanded original-line
+references open the recipe in the app's existing tab system; an already-open
+recipe is focused, without creating another tab. Derived source references carry
+the local recipe id so matching never relies on title text. Missing recipes and
+loose items do not have recipe links. Opening a recipe does not cross off its
+shopping item. No source-id field is written to stored ingredients.
 
 The tag button opens a single shopping-item editor (owner, 2026-11-25).
 Shopping Ingredient is directly editable and receives focus; the full original

@@ -307,6 +307,20 @@
   --circle-button-hover-fg: var(--aisle-fg, var(--primary-bg));
 }
 /* A recipe on the list: its title on its own line, then multiplier and a remove button. */
+.shopping-recipe-link {
+  --button-bg: transparent;
+  --button-fg: currentColor;
+  --button-padding: 0;
+  --button-margin: 0;
+  --button-border: none;
+  --button-font-family: inherit;
+  --button-font-size: inherit;
+  --button-font-weight: inherit;
+  --button-text-decoration: underline;
+  --button-hover-bg: transparent;
+  --button-hover-fg: var(--primary-bg);
+  --button-box-shadow: none;
+}
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
 .on-list > :not(.title) { grid-row: 2; }
 .on-list .title { grid-row: 1; grid-column: 1 / -1; font-family: var(--recipe-font-family); font-weight: 600; text-wrap: balance; }

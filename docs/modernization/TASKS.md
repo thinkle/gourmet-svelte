@@ -274,6 +274,13 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   and Escape, custom/automatic categories, merge totals/original lines, and
   retry after an injected category-save failure in an isolated local cache.
   Build, 145 API tests and 140 Vitest tests pass.
+- [x] **S-2h Open recipes from the shopping list** — recipe titles in the
+  recipes-on-list section and expanded ingredient references open/focus the
+  existing recipe tab. Source links use local recipe ids, including when titles
+  are duplicated or list references use Mongo ids. Missing recipes stay plain
+  text. Links do not cross off items. Verified mouse/keyboard, tab reuse and
+  phone layout with synthetic fixtures; build, 145 API tests and 144 Vitest
+  tests pass. API, stored shape and recipe data are unchanged.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.

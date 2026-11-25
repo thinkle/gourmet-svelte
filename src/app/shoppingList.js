@@ -35,17 +35,17 @@ const scale = (amount, mult) => {
 };
 
 /** Every leaf ingredient under a list, following groups and nested recipe references. */
-function walk(list, mult, source, recipes, seen, out, missing) {
+function walk(list, mult, source, recipes, seen, out, missing, sourceId) {
   for (const ing of list ?? []) {
     if (!ing) continue;
-    if (ing.ingredients) walk(ing.ingredients, mult, source, recipes, seen, out, missing);
+    if (ing.ingredients) walk(ing.ingredients, mult, source, recipes, seen, out, missing, sourceId);
     else if (isRef(ing)) {
       const target = findRecipe(recipes, ing.reference);
       const times = ing.amount?.amount && ing.amount.amount !== 1 ? ing.amount.amount : 1;
       if (!target) { missing.push(ing); continue; }
       if (seen.includes(target.id)) continue; // a recipe that contains itself
-      walk(target.ingredients, mult * times, source, recipes, [...seen, target.id], out, missing);
-    } else if (ing.text) out.push({ ing, mult, source });
+      walk(target.ingredients, mult * times, source, recipes, [...seen, target.id], out, missing, sourceId);
+    } else if (ing.text) out.push({ ing, mult, source, sourceId });
   }
 }
 
@@ -95,7 +95,7 @@ export function buildList(rec, recipes) {
       const target = findRecipe(recipes, e.reference);
       const mult = e.amount?.amount || 1;
       onList.push({ entry: e, id: e.reference, title: target?.title ?? e.text ?? "(recipe)", mult, found: !!target, recipe: target });
-      if (target) walk(target.ingredients, mult, target.title, recipes, [target.id], leaves, missing);
+      if (target) walk(target.ingredients, mult, target.title, recipes, [target.id], leaves, missing, target.id);
     } else if (e?.text) {
       leaves.push({ ing: e, mult: 1, source: null, loose: true });
     }
@@ -127,6 +127,7 @@ export function buildList(rec, recipes) {
       onTrip: trip.has(key),
       from: ls.map((l) => ({
         title: l.source, // null for a loose item
+        recipeId: l.sourceId ?? null, // local id for opening the source recipe
         mult: l.mult,
         text: l.ing.originalText || [formatAmount(l.ing.amount), l.ing.amount?.unit, l.ing.text].filter(Boolean).join(" "),
       })),
