@@ -2,7 +2,7 @@
   // One open recipe in edit mode, in place of the view: the same two panes
   // (ingredients on the left, everything else on the right; one column on a
   // phone), with Save, Revert, Cancel and Delete above.
-  import { Bar, Button, Inline, SplitPane, Text } from "contain-css-svelte";
+  import { Bar, Button, Inline, SplitPane, Surface, Text } from "contain-css-svelte";
   import IngredientsEditor from "./edit/IngredientsEditor.svelte";
   import DetailsEditor from "./edit/DetailsEditor.svelte";
   import TextEditor from "./edit/TextEditor.svelte";
@@ -58,12 +58,13 @@
 {/snippet}
 
 {#snippet ingredients()}
-  <header class="pane-head"><h2>Ingredients</h2></header>
+  <Surface as="header" class="pane-head"><h2>Ingredients</h2></Surface>
   <IngredientsEditor {edit} />
 {/snippet}
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="recipe-view recipe-editor" class:wide bind:clientWidth={width} style={recipeRole(color)} {onkeydown}>
+<div class="recipe-frame" bind:clientWidth={width}>
+<Surface class={["recipe-view", "recipe-editor", wide && "wide"]} style={recipeRole(color)} {onkeydown}>
   {#if wide}
     <SplitPane leftWidth="24rem" height="100%" resizerLabel="Resize the ingredients" resizeBehavior="preserve-left">
       {#snippet left()}
@@ -85,4 +86,5 @@
       <TextEditor {edit} />
     </div>
   {/if}
+</Surface>
 </div>

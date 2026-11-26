@@ -12,7 +12,7 @@ import { get } from "svelte/store";
 import { user } from "../stores/userStore.js";
 import recipeData from "../data/recipeData.js";
 import localRecipeData from "../data/local/dexieApi.js";
-import { chooseList, refFor, isRef, itemKey } from "./shoppingList.js";
+import { chooseList, refFor, isRef, itemKey, baseKey } from "./shoppingList.js";
 import { parseIngredientText } from "../utils/ingredientParsing.js";
 import { getToken } from "../auth/session.js";
 import { createLiveShopping } from "./liveShopping.js";
@@ -196,7 +196,10 @@ export const removeRecipe = (ref) => change((rec) => {
 export const addItem = (text) => change((rec) => {
   const clean = (text ?? "").trim();
   if (!clean) return;
-  rec.ingredients.push({ ...parseIngredientText(clean), id: nextId(rec) });
+  const entry = { ...parseIngredientText(clean), id: nextId(rec) };
+  const key = rec.keyAliases?.[baseKey(entry)] ?? baseKey(entry);
+  rec.excludedItems = (rec.excludedItems ?? []).filter((k) => k !== key);
+  rec.ingredients.push(entry);
 });
 
 export const removeItem = (ids) => change((rec) => {

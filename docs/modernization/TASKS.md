@@ -153,6 +153,41 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   to the list and back, and finishing is noticeable on a phone.
 - [ ] **R2-6 Tom starts using it** — read-only, alongside the old app.
 
+- [x] **R2-7 Cloud refresh and bookmarked recipe tabs** — owner request,
+  2026-11-25. One app-layer task: expose the kept sync through a Sync recipes
+  button (busy/disabled state, visible failure and retry); keep open recipe
+  views and drafts mounted. Follow-up (2026-11-26): cloud sync icon and subtle
+  top-bar buttons that blend into the bar and reveal their shape on hover or
+  keyboard focus; icon labels remain accessible on phones. Remember saved open
+  recipes and the active tab in sessionStorage, scoped to the account and each
+  browser tab, leaving ordinary URLs short. Duplicated tabs begin with copied
+  session state, then diverge. A Bookmark link dialog offers copy/manual copy
+  and opening the recipe set in a new browser tab. Explicit links retain
+  `#recipes=…&tab=…` and override session state, using stable server IDs with
+  `local:<id>` fallback. Existing bookmarks still work. Restore after initial
+  sync; skip unavailable IDs and unsaved new drafts. Hash changes retain dirty
+  tabs. No dedicated single-recipe pop-out action yet. Unit tests cover URL
+  mapping across caches, independent sessions/account isolation, restricted
+  storage, empty explicit links, sync arrivals, concurrency and failure/retry.
+  Verified by 144 Vitest tests, a production build and headless Chromium checks
+  at desktop/phone sizes using local/mock data: independent tabs and refresh,
+  bookmark precedence/copy/new window, clipboard fallback, busy/error/retry,
+  retained multiplier/drafts, and toolbar hover and keyboard focus.
+  REST checks remain blocked by the MongoDB binary download returning HTTP 403;
+  this checkout has no `check` script.
+
+- [x] **R2-8 Recipe color tones** — owner requested 2026-11-26. Keep recipe
+  palettes as filled roles; map their local primary pair and text ingredient
+  through Contain on a neutral recipe Surface. Scaled amounts, multiplier and
+  rating use primary text tones (35% tint); highlight amounts use the note
+  family's ink pin. Headers and the phone sheet declare their surfaces.
+  Recipe styling lives in the theme. No API, stored data or kept logic changes.
+  Browser checks use an in-memory synthetic recipe and both light/dark neutral
+  palettes; all 71 recipe palettes keep amount/input/prose tones consistent.
+  Minimum measured contrast: 4.82:1 for tints, 12.12:1 for highlights. Checked
+  the dark phone sheet and desktop editor without saves. Build, 179 API tests
+  (2 skipped), and 181 Vitest tests pass; no `check` script exists.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
@@ -265,6 +300,23 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   gallons using ad hoc thresholds. Python had a readability scorer and unit
   preferences; there is no equivalent selector in the kept JS. Revisit only
   with a deliberate, tested readability policy. No unit code changed.
+- [x] **S-2f Readable shopping quantities** — owner approved 2026-11-25,
+  superseding S-2e's deferral after investigating the Python implementation.
+  Scope: `src/utils/unitAmounts.js` (repair comma-operator unit groups, expose
+  Python-derived readability scoring/selection, preserve ranges and zeroes in
+  addition), `src/utils/numbers.js` (display a zero lower range endpoint),
+  `src/app/shoppingList.js` (select units after aggregation), regression tests
+  in `src/app/shoppingUnits.test.js`, and `docs/modernization/shopping-units.md`.
+  Keep Python fraction scores/ranges and optional current-unit bias. Score final
+  totals once, including single lines; select one unit for both range endpoints.
+  Keep existing fl oz when readable, but do not introduce it from other units.
+  Recognize pint/quart inputs without introducing them as new display choices.
+  No density conversion, API/stored-shape changes or recipe-view promotion.
+  Done when: 20 Tbs -> 1¼ c; 3 tsp -> 1 Tbs; 1500 g -> 1½ kg; 15 fl oz stays;
+  2 c stays; ranges, zeroes, unknown units and original recipe data survive;
+  mixed-unit order does not affect the result; build and both test runners pass.
+  Verified: build, 145 API tests and 162 app tests pass; independent verifier
+  PASS WITH NOTES. Extra kept-utility Jest failures match unchanged baseline.
 - [x] **S-2g Direct shopping-item editor** — put Shopping Ingredient, original
   recipe lines and Category in one dialog; save name/category together, retain
   drafts on failure, and let Cancel discard both. Custom-category entry starts
@@ -274,6 +326,13 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   and Escape, custom/automatic categories, merge totals/original lines, and
   retry after an injected category-save failure in an isolated local cache.
   Build, 145 API tests and 140 Vitest tests pass.
+- [x] **S-2h Open recipes from the shopping list** — recipe titles in the
+  recipes-on-list section and expanded ingredient references open/focus the
+  existing recipe tab. Source links use local recipe ids, including when titles
+  are duplicated or list references use Mongo ids. Missing recipes stay plain
+  text. Links do not cross off items. Verified mouse/keyboard, tab reuse and
+  phone layout with synthetic fixtures; build, 145 API tests and 166 Vitest
+  tests pass. API, stored shape and recipe data are unchanged.
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.
@@ -296,6 +355,24 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   guard, Escape, checkbox keyboard activation and no live requests while off.
   Deployed two-phone trial remains for the owner. See `specs/live-shopping.md`.
 
+- [~] **S-7 Shopping-list MCP control** — owner requested 2026-11-25; separate
+  branch `rb/s-7-shopping-mcp`, from `dev`, independent of S-6 live sync. Owner's
+  confirmed dump from this session precedes backend write changes. Additive
+  `/shopping-list` reads and commands: add loose item, add recipe/multiplier,
+  remove merged item from this list only, remove recipe reference, categorize
+  one/many keys (null restores suggestions). Conditional field updates preserve
+  cart/pantry/images/live metadata. Reuse the app's merged view; new optional
+  `excludedItems` keeps removed recipe-derived items off this list without
+  changing source recipes. The Netlify entrypoint routes new paths while
+  existing recipe paths delegate unchanged. No edits to kept logic. OpenAPI,
+  API tests and app exclusion tests included. Actual MCP tool registration
+  requires the separate MCP server's source location, requested from the owner.
+  API-side verification: build and standalone function bundle pass; 179 API
+  tests pass (2 existing skips), 169 app tests pass; all OpenAPI references
+  resolve. No real-database test writes. Separate MCP tool registrations remain
+  pending their source location.
+  See `specs/shopping-mcp.md` for the integration contract and trial steps.
+
 ## R6 — Cutover
 
 - [ ] **R6-1** A week of daily use on the `dev` deploy — Tom
@@ -307,5 +384,5 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
 
 ## Later — each its own small project
 
-Shopping list with MCP endpoints and family sharing · open-recipe tabs
+Shopping list with MCP endpoints and family sharing
 · sub-recipes · import/export UI · share links · extension (MV3)

@@ -24,6 +24,26 @@ Per-recipe colour: set the role's variables on the recipe's outer surface
 (`surfaceVars(role, prefix)` or `<Surface>`), never by painting backgrounds on
 inner elements, so text and controls inside know what they sit on.
 
+### Recipe color chain (R2-8)
+
+`recipeRole()` supplies the filled `--recipe-bg/-fg` pair, a decorative
+`--recipe-accent`, and `--recipe-color` as a **mixing ingredient**. On
+`.recipe-view`, the theme maps these to `--primary-bg/-fg/-color` and sets
+`--primary-text-amount: 35%`. A neutral `<Surface>` computes the primary text
+foreground against the reading surface. Nested surfaces recompute it, so a
+light recipe palette never becomes pale text pasted onto light paper.
+
+Use `<Text primary>` for scaled ingredients and rating stars. Raw `<amount>`
+in instruction HTML uses the public `--primary-text-fg` shortcut. The changed
+multiplier supplies that tone through `--input-fg` on its wrapper. Filled
+recipe bands keep the recipe family's paired ink; highlights use the note
+family and its `--on-note-primary-text-fg` pin. Instruction highlights are raw
+HTML, so they use the note pair directly and nested amounts inherit its ink.
+Do not set a text color to `--recipe-bg` or `--recipe-color`.
+
+The published package still omits the guide; for this task the full guide and
+`docs/color-families.md` were read from the sibling `contain-css-svelte` source.
+
 ## Component choices
 
 Record decisions here as slices land, so later screens match.

@@ -19,7 +19,7 @@
   import AisleSection from "./AisleSection.svelte";
   import { aisleName } from "./aisleKinds.js";
 
-  let { active = true } = $props();
+  let { active = true, onopen } = $props();
   let explainingLive = $state(false);
   const liveBusy = $derived(live.status === 'joining' || live.status === 'syncing');
   const editingPaused = $derived(live.enabled || live.status === 'joining');
@@ -101,8 +101,11 @@
     <summary>{unique(sources(item)).join(", ")}</summary>
     <ul class="shopping-source-details">
       {#each item.from as source}
+        {@const recipe = source.recipeId == null ? null : library.recipes.find((r) => r.id === source.recipeId)}
         <li>
-          {#if item.from.length > 1}<strong>{source.title ?? "Added by hand"}</strong>{/if}
+          {#if recipe && onopen}
+            <Button class="shopping-recipe-link" onclick={() => onopen(recipe)} aria-label="Open recipe {source.title}">{source.title}</Button>
+          {:else if item.from.length > 1}<strong>{source.title ?? "Added by hand"}</strong>{/if}
           <p>{source.text}</p>
         </li>
       {/each}
@@ -182,8 +185,12 @@
   {#if list.recipes.length}
     <h3>For {list.recipes.length} {list.recipes.length === 1 ? "recipe" : "recipes"}</h3>
     {#each list.recipes as r (r.id)}
-      {#if editingPaused}<p>{r.title}{r.mult !== 1 ? ` ×${r.mult}` : ''}</p>
-      {:else}<RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)} />{/if}
+      {#if editingPaused}
+        <p>{#if r.found && onopen}<Button class="shopping-recipe-link" onclick={() => onopen(r.recipe)} aria-label="Open recipe {r.title}">{r.title}</Button>{:else}{r.title}{/if}{r.mult !== 1 ? ` ×${r.mult}` : ''}</p>
+      {:else}
+        <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)}
+          onopen={r.found && onopen ? () => onopen(r.recipe) : undefined} />
+      {/if}
     {/each}
   {/if}
 
