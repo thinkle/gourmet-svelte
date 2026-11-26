@@ -75,7 +75,7 @@
   function openPicker() { error = ""; pickedAt = edit.version; picking = true; }
 </script>
 
-<Fieldset border padding borderRadius>
+<Fieldset border="1px solid color-mix(in oklab, currentColor 20%, transparent)" padding="0.9rem 1rem" borderRadius="0.5rem">
   {#snippet legend()}Photos{/snippet}
   <section class="photos-editor" aria-label="Photo paste area" bind:this={area} onpaste={paste}>
     {#if photos.length}
