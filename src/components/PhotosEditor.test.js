@@ -1,10 +1,16 @@
-import { afterEach, describe, it, expect, vi } from 'vitest';
+import { afterEach, beforeAll, afterAll, describe, it, expect, vi } from 'vitest';
 import { mount, unmount, flushSync } from 'svelte';
 import PhotosEditor from '../screens/recipe/edit/PhotosEditor.svelte';
 import { RecipeEdit } from '../app/editState.svelte.js';
 import { preparePhoto, photoFromUrl } from '../app/recipePhotos.js';
 vi.mock('../app/recipePhotos.js',()=>({preparePhoto:vi.fn(),photoFromUrl:vi.fn(),photosFit:()=>true}));
 let component;
+const showModal=HTMLDialogElement.prototype.showModal,closeDialog=HTMLDialogElement.prototype.close;
+beforeAll(()=>{
+  HTMLDialogElement.prototype.showModal=function(){this.open=true;};
+  HTMLDialogElement.prototype.close=function(){this.open=false;};
+});
+afterAll(()=>{HTMLDialogElement.prototype.showModal=showModal;HTMLDialogElement.prototype.close=closeDialog;});
 afterEach(async()=>{if(component) await unmount(component);document.body.innerHTML='';vi.resetAllMocks();});
 function show(images=[]) {
   const data={updateRecipe:vi.fn(async r=>r)};
@@ -12,6 +18,8 @@ function show(images=[]) {
   component=mount(PhotosEditor,{target:document.body,props:{edit}});flushSync();return {edit,data};
 }
 const wait=async()=>{await Promise.resolve();await Promise.resolve();flushSync();};
+const click=(text)=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()===text);expect(b,`button ${text}`).toBeTruthy();b.click();flushSync();};
+const openPicker=()=>click('Add photo…');
 describe('photo editor draft behavior',()=>{
   it('does not change photos on mount; removal and captions revert cleanly',()=>{
     const images=[{url:'data:image/png;base64,YQ==',caption:'Old',width:600}];
@@ -32,7 +40,8 @@ describe('photo editor draft behavior',()=>{
   });
   it('does not append an in-flight import after Revert',async()=>{
     let finish;preparePhoto.mockReturnValue(new Promise(resolve=>finish=resolve));
-    const {edit}=show();const input=document.querySelector('input[type=file]');
+    const {edit}=show();openPicker();
+    const input=document.querySelector('input[type=file]');
     Object.defineProperty(input,'files',{value:[new File(['x'],'pie.png',{type:'image/png'})]});
     input.dispatchEvent(new Event('change',{bubbles:true}));await wait();
     edit.revert();finish({url:'data:image/png;base64,YQ=='});await wait();
@@ -40,9 +49,33 @@ describe('photo editor draft behavior',()=>{
   });
   it('keeps existing photos when URL import fails and shows the error',async()=>{
     photoFromUrl.mockRejectedValue(new Error('Could not fetch photo'));
-    const {edit}=show([{url:'data:image/png;base64,YQ=='}]);
+    const {edit}=show([{url:'data:image/png;base64,YQ=='}]);openPicker();
     const input=document.querySelector('input[type=url]');input.value='https://images.example/photo.png';input.dispatchEvent(new Event('input',{bubbles:true}));flushSync();
-    [...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Import photo').click();await wait();
+    click('Import photo');await wait();
     await vi.waitFor(()=>expect(document.querySelector('[role=alert]')?.textContent).toContain('Could not fetch photo'));expect(edit.dirty).toBe(false);
+  });
+});
+describe('the add-a-photo dialog',()=>{
+  it('keeps the three ways to add behind one button and closes once a photo lands',async()=>{
+    preparePhoto.mockResolvedValue({url:'data:image/png;base64,YQ=='});
+    const {edit}=show();
+    // Nothing but the trigger until it is opened.
+    expect(document.querySelector('input[type=file]')).toBeNull();
+    expect(document.querySelector('input[type=url]')).toBeNull();
+    openPicker();
+    expect(document.querySelector('input[type=file]')).toBeTruthy();
+    expect(document.querySelector('input[type=url]')).toBeTruthy();
+    expect([...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Paste photo')).toBe(true);
+    const input=document.querySelector('input[type=file]');
+    Object.defineProperty(input,'files',{value:[new File(['x'],'pie.png',{type:'image/png'})]});
+    input.dispatchEvent(new Event('change',{bubbles:true}));await wait();
+    await vi.waitFor(()=>expect(edit.draft.images).toHaveLength(1));
+    await vi.waitFor(()=>expect(document.querySelector('input[type=url]')).toBeNull());
+  });
+  it('shuts an open picker when the draft is replaced',async()=>{
+    const {edit}=show();openPicker();
+    expect(document.querySelector('input[type=url]')).toBeTruthy();
+    edit.revert();flushSync();await wait();
+    expect(document.querySelector('input[type=url]')).toBeNull();
   });
 });

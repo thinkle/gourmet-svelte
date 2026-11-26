@@ -250,6 +250,7 @@
 .hero .bottom .tag, .hero .bottom span { white-space: nowrap; }
 .recipe-prose h3 { font-family: var(--recipe-font-family); font-size: 1.15em; font-weight: 700; margin: 1.6em 0 0.6em; }
 .recipe-prose a { overflow-wrap: anywhere; }
+
 .hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }
 
 /* ── Recipe editor ─────────────────────────────────────── */
@@ -420,3 +421,9 @@
 .linked-ingredient-entry > input { inline-size: 100%; }
 
 .linked-ingredient-entry .amount-input { flex-wrap: wrap; max-inline-size: 100%; }
+
+/* The add-a-photo dialog: one labelled column, not three indents. */
+.photo-picker { display: grid; gap: 0.9rem; min-inline-size: min(26rem, 80vw); }
+.photo-picker h2 { margin: 0; }
+.photo-picker p { margin: 0; }
+.photo-picker .file-trigger { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
