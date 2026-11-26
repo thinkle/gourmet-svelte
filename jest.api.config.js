@@ -5,7 +5,7 @@ module.exports = {
     testEnvironment: 'node',
     transform: { '^.+\\.js$': 'babel-jest' },
     testPathIgnorePatterns: ['/node_modules/', '<rootDir>/\\.claude/'],
-    testMatch: ['<rootDir>/src/data/functions/**/*.contract.test.js'],
+    testMatch: ['<rootDir>/src/data/functions/**/*.contract.test.js', '<rootDir>/netlify/tests/**/*.contract.test.js'],
     // First run may download a MongoDB binary.
     testTimeout: 60000,
 };

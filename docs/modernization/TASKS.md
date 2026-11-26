@@ -283,6 +283,19 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   family sharing; item names from `getShopItem` can read oddly ("Purpose Flour"
   for "all-purpose flour": kept logic, reported, not patched).
 
+- [x] **S-6 Opt-in live shopping** — owner requested 2026-11-25; branch
+  `rb/s-6-live-shopping`. Owner confirmed database dump complete before backend
+  write changes. Icon opens explanation and explicit on/off control; default
+  off makes no live requests. Share checkmarks and Done shopping through the
+  same/existing linked account. Durable offline outbox, per-item atomic writes,
+  retry deduplication and trip boundaries; poll only on the visible shopping
+  screen while online, with failure backoff. Pause list editing in live mode.
+  Existing REST contract and kept logic unchanged. Verified build, function
+  bundling, 159 API tests (in-memory Mongo), 157 app tests (fake IndexedDB),
+  and local fixture browser checks at desktop/phone size: explanation, sign-in
+  guard, Escape, checkbox keyboard activation and no live requests while off.
+  Deployed two-phone trial remains for the owner. See `specs/live-shopping.md`.
+
 ## R6 — Cutover
 
 - [ ] **R6-1** A week of daily use on the `dev` deploy — Tom

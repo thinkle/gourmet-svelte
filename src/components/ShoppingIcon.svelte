@@ -12,6 +12,9 @@
     <path d="M2 3h2l3 12-1 3h13M10 9v3m5-3v3" />
     <circle cx="8" cy="21" r="1" fill="currentColor" stroke="none" />
     <circle cx="18" cy="21" r="1" fill="currentColor" stroke="none" />
+  {:else if kind === "live"}
+    <path d="M8 7a6 6 0 0 1 10 3m-2-4 3 4 2-4M16 17a6 6 0 0 1-10-3m2 4-3-4-2 4" />
+    <path d="m9 12 2 2 4-4" />
   {:else}
     <path d="M3 5a2 2 0 0 1 2-2h6l10 10a2 2 0 0 1 0 3l-5 5a2 2 0 0 1-3 0L3 11Z" fill="var(--shopping-icon-fill, var(--primary-fg))" />
     <circle cx="7.5" cy="7.5" r="1" fill="currentColor" stroke="none" />

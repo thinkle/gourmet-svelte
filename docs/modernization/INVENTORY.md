@@ -35,7 +35,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | Account | Linked accounts / invites | keep | R4 | In use (family). Server side unchanged |
 | Share | Public share link `/share/:id` | later | | Server handlers stay |
 | Data | Import / export file UI | later | | Server handlers stay; take a `mongodump` instead (P0-4) |
-| Shopping | Shopping list | keep | S | Back in scope (owner, 2026-11-17). To buy by store aisle with checkboxes and in-place crossing off, "Done shopping" resets the trip; Pantry Items are remembered off-list. Original ingredient notes are expandable; rename/merge aliases stay separate from recipe wording. See `specs/shopping-list.md`. MCP endpoints and family sharing still later |
+| Shopping | Shopping list | keep | S | Back in scope (owner, 2026-11-17). To buy by store aisle with checkboxes and in-place crossing off, "Done shopping" resets the trip; Pantry Items are remembered off-list. Original ingredient notes are expandable; rename/merge aliases stay separate from recipe wording. See `specs/shopping-list.md`. Opt-in live checkmarks for the same/existing linked account approved 2026-11-25 (S-6); see `specs/live-shopping.md`. MCP endpoints and new family-sharing setup still later |
 | Nutrition | Ingredient-to-nutrition-database mapping and its UI | cut | | Superseded: an AI client can do the mapping. Server handlers left alone until after cutover |
 | Extension | Chrome importer + `/sidebar` | cut from build | | MV2; source kept in `legacy/` |
 | Dev | Demo pages, Admin, ManageDB, fake-user switcher | cut | | |

@@ -14,8 +14,93 @@ import recipeData from "../data/recipeData.js";
 import localRecipeData from "../data/local/dexieApi.js";
 import { chooseList, refFor, isRef, itemKey } from "./shoppingList.js";
 import { parseIngredientText } from "../utils/ingredientParsing.js";
+import { getToken } from "../auth/session.js";
+import { createLiveShopping } from "./liveShopping.js";
+import { liveShoppingStore } from "./liveShoppingStorage.js";
 
 export const shopping = $state({ rec: null, loaded: false, error: null, saving: false });
+export const live = $state({ enabled: false, pending: 0, status: 'off', error: null, notice: null });
+
+let liveEngine;
+let liveScope;
+let liveVisible = false;
+let liveListId;
+let restoring;
+const accountKey = (u) => u?.remoteUser?.dbUser ? JSON.stringify([u.email, u.remoteUser.dbUser.linked || u.email]) : null;
+let identityKey;
+user.subscribe((u) => {
+  const next = accountKey(u);
+  if (next === identityKey) return;
+  identityKey = next;
+  liveEngine?.dispose();
+  liveEngine = null; liveScope = null; liveListId = null; restoring = null;
+  Object.assign(live, { enabled: false, pending: 0, status: 'off', error: null, notice: null });
+});
+
+async function configureLive(rec) {
+  if (!canReachServer() || !rec?._id) return;
+  const scope = JSON.stringify([identityKey, rec._id]);
+  if (liveScope === scope) { await restoring; return; }
+  liveEngine?.dispose();
+  liveScope = scope; liveListId = rec._id;
+  const stillCurrent = () => liveScope === scope;
+  const engine = createLiveShopping({
+    store: liveShoppingStore(scope),
+    canPoll: () => stillCurrent() && liveVisible && canReachServer()
+      && document.visibilityState === 'visible' && navigator.onLine !== false,
+    request: async (action) => {
+      const token = await getToken();
+      if (!stillCurrent()) throw new Error('Account changed.');
+      const response = await fetch('/.netlify/functions/live-shopping', {
+        method: 'POST', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ listId: rec._id, ...(action ? { action } : {}) }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const body = await response.json();
+      if (!response.ok) throw Object.assign(new Error(body.error || 'Could not sync live shopping.'), { status: response.status });
+      return body;
+    },
+    onSnapshot: async (snapshot) => {
+      if (!stillCurrent()) return;
+      const cached = await localRecipeData.getRecipe(undefined, { mongoId: snapshot._id });
+      if (!stillCurrent()) return;
+      // Keep cached images and device-local ids; live writes are already confirmed server saves.
+      await localRecipeData.updateServerRecipe({ ...structuredClone(snapshot), images: cached?.images || [], savedRemote: 1 });
+      if (stillCurrent() && !live.enabled) await loadShopping();
+    },
+    onChange: ({ recipe, ...state }) => {
+      if (!stillCurrent()) return;
+      Object.assign(live, state);
+      if (recipe) shopping.rec = { ...recipe, id: shopping.rec?.id };
+    },
+  });
+  liveEngine = engine;
+  restoring = engine.restore();
+  try { await restoring; }
+  catch (err) {
+    engine.dispose();
+    if (stillCurrent()) { liveEngine = null; liveScope = null; restoring = null; }
+    throw err;
+  }
+  if (stillCurrent()) engine.wake();
+}
+
+export function setLiveShoppingVisible(visible) { liveVisible = visible; liveEngine?.wake(); }
+export const retryLiveShopping = () => liveEngine?.retry();
+export async function toggleLiveShopping() {
+  try {
+    await queue;
+    if (live.enabled) { await liveEngine.disable(); await loadShopping(); return; }
+    const rec = chooseList(await readRows());
+    if (!canReachServer()) throw new Error('Sign in to use live shopping.');
+    if (!rec?._id || !rec.savedRemote) throw new Error('Save and sync your shopping list before enabling live mode.');
+    if (navigator.onLine === false) throw new Error('Connect once to start live shopping. After that, shopping works offline.');
+    await configureLive(rec);
+    await liveEngine.enable();
+    shopping.error = null;
+  } catch (err) { live.error = err.message || String(err); }
+}
 
 let localOnly = false;
 /** Fixtures mode calls this so nothing can reach the server from it. */
@@ -30,7 +115,13 @@ async function readRows() {
 /** Read the list from the local cache. Call again after a sync. */
 export async function loadShopping() {
   try {
-    shopping.rec = chooseList(await readRows());
+    const rows = await readRows();
+    if (!live.enabled) shopping.rec = chooseList(rows);
+    const rec = live.enabled ? rows.find((r) => r._id === liveListId) : shopping.rec;
+    if (rec) {
+      try { await configureLive(rec); }
+      catch { live.error = 'Could not restore live shopping on this phone. Try enabling it again.'; }
+    }
     shopping.error = null;
   } catch (err) {
     console.error("Could not read the shopping list", err);
@@ -56,6 +147,10 @@ async function persist(rec) {
 let queue = Promise.resolve();
 function change(edit) {
   const run = async () => {
+    if (live.enabled || live.status === 'joining') {
+      shopping.error = 'Turn live mode off before editing the list. Checkmarks still work in live mode.';
+      return;
+    }
     shopping.saving = true;
     try {
       const rec = chooseList(await readRows()) ?? blankList();
@@ -117,7 +212,11 @@ const withKey = (arr, k) => [...new Set([...(arr ?? []), k])];
 // All of it is stored on the list document: cart, alreadyHave, alreadyHaveOff, trip.
 
 /** Tap an item into the cart, or back out of it. */
-export const setCart = (key, on) => change((rec) => {
+async function liveAction(type, key, on) {
+  try { await liveEngine.enqueue(type, key, on); shopping.error = null; }
+  catch (err) { shopping.error = err.message || String(err); }
+}
+export const setCart = (key, on) => live.enabled ? liveAction('cart', key, on) : change((rec) => {
   rec.cart = on ? withKey(rec.cart, key) : without(rec.cart, key);
 });
 
@@ -137,7 +236,7 @@ export const setAlreadyHave = (key, on) => change((rec) => {
 export const wantThisTrip = (key) => change((rec) => { rec.trip = withKey(rec.trip, key); });
 
 /** The trip is over: empty the cart and forget this trip's put-backs. */
-export const doneShopping = () => change((rec) => { rec.cart = []; rec.trip = []; });
+export const doneShopping = () => live.enabled ? liveAction('done') : change((rec) => { rec.cart = []; rec.trip = []; });
 
 /** Shopping category (aisle) for an item key, remembered for every future list. Empty name clears it. */
 export const setCategory = (key, name) => change((rec) => {
