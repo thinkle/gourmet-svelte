@@ -153,6 +153,29 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   to the list and back, and finishing is noticeable on a phone.
 - [ ] **R2-6 Tom starts using it** — read-only, alongside the old app.
 
+- [x] **R2-7 Cloud refresh and bookmarked recipe tabs** — owner request,
+  2026-11-25. One app-layer task: expose the kept sync through a Sync recipes
+  button (busy/disabled state, visible failure and retry); keep open recipe
+  views and drafts mounted. Follow-up (2026-11-26): cloud sync icon and subtle
+  top-bar buttons that blend into the bar and reveal their shape on hover or
+  keyboard focus; icon labels remain accessible on phones. Remember saved open
+  recipes and the active tab in sessionStorage, scoped to the account and each
+  browser tab, leaving ordinary URLs short. Duplicated tabs begin with copied
+  session state, then diverge. A Bookmark link dialog offers copy/manual copy
+  and opening the recipe set in a new browser tab. Explicit links retain
+  `#recipes=…&tab=…` and override session state, using stable server IDs with
+  `local:<id>` fallback. Existing bookmarks still work. Restore after initial
+  sync; skip unavailable IDs and unsaved new drafts. Hash changes retain dirty
+  tabs. No dedicated single-recipe pop-out action yet. Unit tests cover URL
+  mapping across caches, independent sessions/account isolation, restricted
+  storage, empty explicit links, sync arrivals, concurrency and failure/retry.
+  Verified by 144 Vitest tests, a production build and headless Chromium checks
+  at desktop/phone sizes using local/mock data: independent tabs and refresh,
+  bookmark precedence/copy/new window, clipboard fallback, busy/error/retry,
+  retained multiplier/drafts, and toolbar hover and keyboard focus.
+  REST checks remain blocked by the MongoDB binary download returning HTTP 403;
+  this checkout has no `check` script.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
@@ -318,5 +341,5 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
 
 ## Later — each its own small project
 
-Shopping list with MCP endpoints and family sharing · open-recipe tabs
+Shopping list with MCP endpoints and family sharing
 · sub-recipes · import/export UI · share links · extension (MV3)

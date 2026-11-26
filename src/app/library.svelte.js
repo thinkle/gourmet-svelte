@@ -17,6 +17,7 @@ export const library = $state({
   syncing: false,
   error: null,
   who: null,
+  account: null,
 });
 
 let running = null; // the account a load is in flight or done for
@@ -87,11 +88,11 @@ export const editorData = {
 async function load(account) {
   running = account;
   library.error = null;
+  library.syncing = true;
   try {
     await dropFixtureWrites();
     await readCache();
     library.status = library.recipes.length ? "ready" : "loading";
-    library.syncing = true;
     let pending = false;
     await recipeData.sync(false, {
       // Recipes arrive in batches; show them without re-reading on every one.
@@ -114,7 +115,7 @@ async function load(account) {
   }
 }
 
-export const reload = () => { if (running) return load(running); };
+export const reload = () => { if (running && !library.syncing && !fixturesMode) return load(running); };
 
 user.subscribe((u) => {
   // Fixtures mode never loads an account (and never syncs).
@@ -122,11 +123,12 @@ user.subscribe((u) => {
   if (!u) {
     running = null;
     rows.clear();
-    Object.assign(library, { status: "signed-out", recipes: [], syncing: false, error: null, who: null });
+    Object.assign(library, { status: "signed-out", recipes: [], syncing: false, error: null, who: null, account: null });
     return;
   }
   library.who = u.remoteUser?.dbUser?.name || u.username || u.email;
   const account = u.remoteUser?.dbUser && (u.remoteUser.account || u.email);
+  library.account = account || null;
   if (!account) { if (library.status === "signed-out") library.status = "signing-in"; return; }
   if (running !== account) load(account);
 });
@@ -139,6 +141,6 @@ export async function loadFixtures() {
   if (!import.meta.env.DEV || !file) return false;
   fixturesMode = true;
   show((await file()).default);
-  Object.assign(library, { status: "ready", who: "Fixtures" });
+  Object.assign(library, { status: "ready", who: "Fixtures", account: "fixtures" });
   return true;
 }

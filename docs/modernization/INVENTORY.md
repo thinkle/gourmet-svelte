@@ -19,7 +19,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | View | Ingredient groups | keep | R2 | MCP writes these |
 | View | Images (display) | keep | R2 | |
 | View | Clickable times that start a timer | keep | R2 | `TimeLink`, `Timer`; logic kept in `utils/timerDrawer.js`, `utils/times.js` |
-| View | Several recipes open at once (tabs) | later | | `OpenRecipes.svelte` |
+| View | Several recipes open at once (tabs), remembered per browser tab with explicit bookmark links | keep | R2-7 | Owner request, 2026-11-25/26; sessionStorage keeps normal URLs short; bookmark links use stable IDs |
 | View | Linked sub-recipes | later | | Stored references keep working; no UI to follow them yet |
 | View | Print styles | keep | R2 | Cheap with Contain; check one recipe prints on a page |
 | Edit | All fields incl. groups, reorder ingredients | keep | R3 | |
@@ -29,7 +29,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | Edit | Copy recipe | later | | |
 | Edit | Delete / undelete | keep | R3 | |
 | Edit | **Multiple measures per ingredient** | keep (new) | R5 | |
-| Sync | Local cache + background sync | keep | R0 | Reused as is |
+| Sync | Local cache + background sync, manual cloud sync | keep | R0 / R2-7 | Kept sync reused as is; in-app Sync recipes button |
 | Account | API tokens | keep | R4 | The MCP depends on these |
 | Account | Change name | keep | R4 | |
 | Account | Linked accounts / invites | keep | R4 | In use (family). Server side unchanged |
