@@ -404,3 +404,11 @@
 /* A recipe ingredient opens the referenced recipe in the tab strip. */
 .ingredients .linked-recipe .item { text-decoration: underline; text-underline-offset: 0.2em; }
 .ingredients div.ingredient { cursor: default; }
+
+/* Photo editing uses the recipe's existing form surface. */
+.photos-editor { display: grid; gap: 0.75rem; }
+.photos-editor input[type="file"] { max-inline-size: 100%; }
+.photos-editor .inline input { min-inline-size: 0; }
+.photo-list { display: grid; gap: 1.25rem; margin: 0; padding-inline-start: 1.5rem; }
+.photo-list li { display: grid; gap: 0.5rem; }
+.photo-list img { max-inline-size: 100%; max-block-size: 15rem; object-fit: contain; justify-self: start; }

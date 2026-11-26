@@ -238,7 +238,7 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   saves unchanged when untouched.
 - [x] **R3-6 Screen + new recipe + delete** — `screen-builder`
   Done, first pass (`rb/r3-editor`): Edit in place, Save/Revert/Cancel, New recipe, soft Delete with confirm, dirty tabs.
-- [ ] **R3-7 Image upload** — spec by `legacy-reader`
+- [x] **R3-7 Image upload** — spec by `legacy-reader`
   (`widgets/inputs/ImageEntry.svelte`), lead decides resize approach,
   `screen-builder` builds
   Add (file picker, camera on a phone, paste), remove and reorder images in the
@@ -247,6 +247,16 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   First, a contract test (new, additive): a REST update of a recipe that has
   images, sent without image data, leaves the stored images in place. If it
   fails, stop and report; that is an API decision, not part of this card.
+  Implemented 2026-11-26 at owner request: upload, clipboard paste and HTTPS
+  URL import, captions, removal and ordering. Browser resize retains the legacy
+  1200px longest edge and data-URL image objects. URL imports use a new signed-in,
+  read-only download function, bounded to 4 MB, with public-IP checks and pinned
+  DNS on each redirect; no database access. File uploads allow up to 10 MB.
+  Pending photo work cannot save late after Cancel/Revert. REST photo-preservation
+  prerequisite passed. Prepared image and aggregate photo budgets guard the
+  save payload size. Build, 234 app tests and 207 API tests pass (2 existing
+  skips); new function bundle and public-image download check pass.
+  No stored-shape or existing API write-path changes.
 
 ## R4 — Account
 

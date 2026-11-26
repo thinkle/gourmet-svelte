@@ -25,7 +25,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | Edit | All fields incl. groups, reorder ingredients | keep | R3 | |
 | Edit | Save / revert state | keep | R3 | Test first: this is what kept breaking |
 | Edit | Rich text bodies | keep, simplified | R3 | Must not damage existing HTML |
-| Edit | Image upload and resize | keep | R3 | Old code: `widgets/inputs/ImageEntry.svelte` with `pica`. REST responses omit image data: check a REST update cannot drop stored images |
+| Edit | Image upload, paste, URL import and resize | keep | R3-7 | Old code: `widgets/inputs/ImageEntry.svelte` with `pica`. REST responses omit image data: check a REST update cannot drop stored images |
 | Edit | Copy recipe | later | | |
 | Edit | Delete / undelete | keep | R3 | |
 | Edit | **Multiple measures per ingredient** | keep (new) | R5 | |

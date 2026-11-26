@@ -5,20 +5,23 @@
   import { Bar, Button, Inline, SplitPane, Surface, Text } from "contain-css-svelte";
   import IngredientsEditor from "./edit/IngredientsEditor.svelte";
   import DetailsEditor from "./edit/DetailsEditor.svelte";
+  import PhotosEditor from "./edit/PhotosEditor.svelte";
   import TextEditor from "./edit/TextEditor.svelte";
   import { ask } from "../../app/confirm.svelte.js";
   import { recipeRole } from "../../app/lib.js";
 
   /** @type {{ edit: import("../../app/editState.svelte.js").RecipeEdit, color: {bg: string, fg: string}, suggestions?: string[], onsaved: (row: object) => void, onclose: () => void, ondeleted: (row: object) => void }} */
   let { edit, color, suggestions = [], onsaved, onclose, ondeleted } = $props();
+  let photosBusy = $state(false);
   let width = $state(1000);
   const wide = $derived(width >= 720);
 
   const FIELD_NAMES = { title: "title", categories: "categories", rating: "rating", yields: "yields", times: "times",
-    sources: "sources", ingredients: "ingredients", text: "text" };
+    sources: "sources", images: "photos", ingredients: "ingredients", text: "text" };
   const what = $derived(edit.changed.map((f) => FIELD_NAMES[f] ?? f).join(", "));
 
   async function save() {
+    if (photosBusy) return;
     const saved = await edit.save();
     if (saved && !edit.dirty) onsaved?.(saved);
   }
@@ -47,7 +50,7 @@
       {#if edit.status === "saving"}<Text muted>Saving…</Text>
       {:else if edit.status === "error"}<Text warning role="alert">Not saved: {edit.error}</Text>
       {:else if edit.dirty}<Text muted>Unsaved changes</Text>{/if}
-      <Button primary onclick={save} disabled={edit.status === "saving" || !edit.dirty}>
+      <Button primary onclick={save} disabled={photosBusy || edit.status === "saving" || !edit.dirty}>
         {edit.status === "error" ? "Try again" : "Save"}
       </Button>
       <Button onclick={revert} disabled={!edit.dirty}>Revert</Button>
@@ -74,7 +77,8 @@
         <div class="pane text-pane">
           {@render actions()}
           <DetailsEditor {edit} {suggestions} />
-          <TextEditor {edit} />
+          <PhotosEditor {edit} bind:busy={photosBusy} />
+      <TextEditor {edit} />
         </div>
       {/snippet}
     </SplitPane>
@@ -83,6 +87,7 @@
       {@render actions()}
       <DetailsEditor {edit} {suggestions} />
       <section class="ingredients-inline" aria-label="Ingredients">{@render ingredients()}</section>
+      <PhotosEditor {edit} bind:busy={photosBusy} />
       <TextEditor {edit} />
     </div>
   {/if}
