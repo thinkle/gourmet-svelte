@@ -1,4 +1,5 @@
 <script>
+  import { onMount, untrack } from "svelte";
   // The shopping list, after desktop Gourmet's (specs/shopping-list.md):
   //   To buy        grouped by aisle; tap to cross off or restore in place
   //   Pantry Items  remembered for every list; shown quietly
@@ -10,6 +11,7 @@
   import {
     shopping, addItem, removeItem, removeRecipe, setRecipeMultiplier,
     setCart, setAlreadyHave, wantThisTrip, doneShopping, setCategory, setCategoryOrder, renameItem,
+    live, setLiveShoppingVisible, toggleLiveShopping, retryLiveShopping,
   } from "../../app/shopping.svelte.js";
   import RecipeOnList from "./RecipeOnList.svelte";
   import ShoppingIcon from "../../components/ShoppingIcon.svelte";
@@ -17,7 +19,26 @@
   import AisleSection from "./AisleSection.svelte";
   import { aisleName } from "./aisleKinds.js";
 
-  let { onopen } = $props();
+  let { active = true, onopen } = $props();
+  let explainingLive = $state(false);
+  const liveBusy = $derived(live.status === 'joining' || live.status === 'syncing');
+  const editingPaused = $derived(live.enabled || live.status === 'joining');
+  $effect(() => {
+    const visible = active && library.status === 'ready' && !library.syncing;
+    untrack(() => setLiveShoppingVisible(visible));
+  });
+  onMount(() => {
+    const wake = () => setLiveShoppingVisible(active && library.status === 'ready' && !library.syncing);
+    document.addEventListener('visibilitychange', wake);
+    window.addEventListener('online', wake);
+    window.addEventListener('offline', wake);
+    return () => {
+      document.removeEventListener('visibilitychange', wake);
+      window.removeEventListener('online', wake);
+      window.removeEventListener('offline', wake);
+      setLiveShoppingVisible(false);
+    };
+  });
 
   const list = $derived(buildList(shopping.rec, library.recipes));
   const shoppingGroups = $derived([...list.categoryNames, null]
@@ -112,14 +133,14 @@
     {@render detail(item)}
     {#snippet end()}
       <Tooltip tooltipText="Pantry item — keep off lists" tooltipId={`shopping-have-${encodeURIComponent(item.key)}`} horizontal="left">
-        <CircleButton class="shopping-action" onclick={() => setAlreadyHave(item.key, true)} aria-label="Mark {item.name} as a pantry item"
+        <CircleButton disabled={editingPaused} class="shopping-action" onclick={() => setAlreadyHave(item.key, true)} aria-label="Mark {item.name} as a pantry item"
           aria-describedby={`shopping-have-${encodeURIComponent(item.key)}`}>
           <ShoppingIcon kind="pantry" />
         </CircleButton>
       </Tooltip>
       <Tooltip tooltipText={`Edit name or category: ${item.aisle ? aisleName(item.aisle) : 'none'}${item.category ? '' : ' (suggested)'}`}
         tooltipId={`shopping-aisle-${encodeURIComponent(item.key)}`} horizontal="left">
-        <CircleButton class="shopping-action" onclick={() => (picking = item)}
+        <CircleButton disabled={editingPaused} class="shopping-action" onclick={() => (picking = item)}
           aria-label="Edit shopping item {item.name}" aria-expanded={picking?.key === item.key} aria-haspopup="dialog"
           aria-describedby={`shopping-aisle-${encodeURIComponent(item.key)}`}>
           <ShoppingIcon kind="aisle" />
@@ -127,7 +148,7 @@
       </Tooltip>
       {#if item.looseIds.length}
         <Tooltip tooltipText="Remove item" horizontal="left">
-          <CircleButton class="shopping-action" aria-label="Remove {item.name}" onclick={() => removeItem(item.looseIds)}>×</CircleButton>
+          <CircleButton disabled={editingPaused} class="shopping-action" aria-label="Remove {item.name}" onclick={() => removeItem(item.looseIds)}>×</CircleButton>
         </Tooltip>
       {/if}
     {/snippet}
@@ -135,21 +156,41 @@
 {/snippet}
 
 <Container maxWidth="40rem" height="auto">
-  <h2>Shopping list</h2>
+  <Inline>
+    <h2>Shopping list</h2>
+    <Tooltip tooltipText={live.enabled ? 'Live shopping is on' : 'Shop together: live mode'}>
+      <CircleButton primary={live.enabled} aria-label="Live shopping settings" aria-haspopup="dialog"
+        aria-expanded={explainingLive} onclick={() => (explainingLive = true)}>
+        <ShoppingIcon kind="live" />
+      </CircleButton>
+    </Tooltip>
+  </Inline>
+  {#if live.enabled}
+    <p role="status"><Text muted>Live shopping · {live.pending ? `${live.pending} change${live.pending === 1 ? '' : 's'} saved on this phone` : live.status === 'synced' ? 'Up to date' : live.status === 'syncing' ? 'Syncing…' : 'Paused — changes stay on this phone'}</Text></p>
+    <p><Text muted>Check items together. Turn live mode off to edit the list.</Text></p>
+  {/if}
+  {#if live.notice}<p role="status"><Text warning>{live.notice}</Text></p>{/if}
+  {#if live.error}
+    <p role="status"><Text warning>{live.error}</Text> {#if live.enabled}<Button onclick={retryLiveShopping}>Retry sync</Button>{/if}</p>
+  {/if}
   {#if shopping.error}<p><Text warning>Could not save the list: {shopping.error}</Text></p>{/if}
 
   <form onsubmit={add}>
     <Inline>
-      <Input type="text" placeholder="Add an item, like 2 lb onions" bind:value={draft} aria-label="Add an item" autocomplete="off" />
-      <Button primary type="submit">Add</Button>
+      <Input disabled={editingPaused} type="text" placeholder="Add an item, like 2 lb onions" bind:value={draft} aria-label="Add an item" autocomplete="off" />
+      <Button disabled={editingPaused} primary type="submit">Add</Button>
     </Inline>
   </form>
 
   {#if list.recipes.length}
     <h3>For {list.recipes.length} {list.recipes.length === 1 ? "recipe" : "recipes"}</h3>
     {#each list.recipes as r (r.id)}
-      <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)}
-        onopen={r.found && onopen ? () => onopen(r.recipe) : undefined} />
+      {#if editingPaused}
+        <p>{#if r.found && onopen}<Button class="shopping-recipe-link" onclick={() => onopen(r.recipe)} aria-label="Open recipe {r.title}">{r.title}</Button>{:else}{r.title}{/if}{r.mult !== 1 ? ` ×${r.mult}` : ''}</p>
+      {:else}
+        <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)}
+          onopen={r.found && onopen ? () => onopen(r.recipe) : undefined} />
+      {/if}
     {/each}
   {/if}
 
@@ -165,8 +206,8 @@
       <p><Text muted>Nothing left to buy.</Text></p>
     {/each}
     {#if list.categoryNames.length > 1}
-      <p><Button onclick={() => (arranging = !arranging)}>{arranging ? "Done arranging" : "Arrange aisles"}</Button></p>
-      {#if arranging}
+      <p><Button disabled={editingPaused} onclick={() => (arranging = !arranging)}>{arranging ? "Done arranging" : "Arrange aisles"}</Button></p>
+      {#if arranging && !editingPaused}
         <DataList>
           {#each list.categoryNames as name, i (name)}
             <DataListItem>
@@ -196,8 +237,8 @@
               <p><Text muted>{#if amountText(item)}{amountText(item)}{" "}{/if}{item.name}</Text></p>
               {@render sourceDetails(item)}
               {#snippet end()}
-                <Button onclick={() => wantThisTrip(item.key)} aria-label="Buy {item.name} this trip">Buy this trip</Button>
-                <Button onclick={() => setAlreadyHave(item.key, false)} aria-label="Remove {item.name} from pantry">Remove from pantry</Button>
+                <Button disabled={editingPaused} onclick={() => wantThisTrip(item.key)} aria-label="Buy {item.name} this trip">Buy this trip</Button>
+                <Button disabled={editingPaused} onclick={() => setAlreadyHave(item.key, false)} aria-label="Remove {item.name} from pantry">Remove from pantry</Button>
               {/snippet}
             </DataListItem>
           {/each}
@@ -213,5 +254,20 @@
       <ShoppingItemEditor item={picking} choices={list.aisleChoices}
         onsave={saveItem} oncancel={closeItemEditor} saving={savingItem} error={shopping.error} />
     {/if}
+  </Dialog>
+  <Dialog open={explainingLive} modal aria-label="Live shopping" onclose={() => (explainingLive = false)}>
+    <h2>Shop together</h2>
+    <p>Turn on live mode on both phones to share checkmarks on this shopping list. Use the same account or an existing linked account.</p>
+    <p>Updates arrive about every five seconds while this screen is open. Offline checkmarks are saved on your phone and sent when you return here with a connection.</p>
+    <p>Live mode shares checkmarks and “Done shopping.” Turn it off to add items, change recipes, or edit names and aisles. “Done shopping” ends this trip and turns live mode off on both phones once each reconnects.</p>
+    <p>Live mode is off by default. Once enabled, this phone remembers it until you turn it off or finish the trip.</p>
+    {#if live.error}<p><Text warning>{live.error}</Text></p>{/if}
+    <Inline>
+      <Button primary disabled={liveBusy || (live.enabled && live.pending > 0)} onclick={toggleLiveShopping}>
+        {live.enabled ? 'Turn live mode off' : live.status === 'joining' ? 'Connecting…' : 'Turn live mode on'}
+      </Button>
+      <Button onclick={() => (explainingLive = false)}>Close</Button>
+    </Inline>
+    {#if live.enabled && live.pending}<p>Let your saved changes sync before turning live mode off. You can close this dialog or leave the screen now.</p>{/if}
   </Dialog>
 </Container>

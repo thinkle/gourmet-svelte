@@ -21,4 +21,10 @@ export function startSession() {
 export const signIn = () => netlifyIdentity.open("login");
 export const signUp = () => netlifyIdentity.open("signup");
 export const signOut = () => netlifyIdentity.logout();
+/** Live shopping refreshes the Identity JWT for each request without copying auth state. */
+export async function getToken() {
+  const identityUser = netlifyIdentity.currentUser();
+  if (!identityUser) throw Object.assign(new Error('Sign in again to resume live shopping.'), { status: 401 });
+  return identityUser.jwt();
+}
 export { user };

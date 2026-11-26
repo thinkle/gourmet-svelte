@@ -342,6 +342,22 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   family sharing; item names from `getShopItem` can read oddly ("Purpose Flour"
   for "all-purpose flour": kept logic, reported, not patched).
 
+- [x] **S-6 Opt-in live shopping** — owner requested 2026-11-25; branch
+  `rb/s-6-live-shopping`. Owner confirmed database dump complete before backend
+  write changes. Icon opens explanation and explicit on/off control; default
+  off makes no live requests. Share checkmarks and Done shopping through the
+  same/existing linked account. Durable offline outbox, per-item atomic writes,
+  retry deduplication and trip boundaries; poll only on the visible shopping
+  screen while online, with failure backoff. Pause list editing in live mode.
+  Existing REST contract and kept logic unchanged. After integration with dev
+  on 2026-11-26: build and both function bundles pass, 194 API tests (in-memory
+  Mongo; 2 existing skips), 203 app tests (fake IndexedDB/mounted components).
+  Includes cache-failure trip completion, disable/checkbox races, recipe links
+  while editing is paused, and focused MCP shopping compatibility. Earlier
+  local fixture browser checks at desktop/phone size covered explanation, sign-in
+  guard, Escape, checkbox keyboard activation and no live requests while off.
+  Deployed two-phone trial remains for the owner. See `specs/live-shopping.md`.
+
 - [~] **S-7 Shopping-list MCP control** — owner requested 2026-11-25; separate
   branch `rb/s-7-shopping-mcp`, from `dev`, independent of S-6 live sync. Owner's
   confirmed dump from this session precedes backend write changes. Additive

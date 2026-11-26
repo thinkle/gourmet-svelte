@@ -249,7 +249,7 @@
       </div>
     {/each}
 
-    <div class="tab-panel search" hidden={tab !== "shopping"}><ShoppingList onopen={openRecipe} /></div>
+    <div class="tab-panel search" hidden={tab !== "shopping"}><ShoppingList active={tab === 'shopping'} onopen={openRecipe} /></div>
 
     <div class="tab-panel search" hidden={tab !== "search"}>
       <Container maxWidth="56rem" height="auto">
