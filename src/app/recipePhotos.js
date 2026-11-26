@@ -22,6 +22,34 @@ export function readDataUrl(blob) {
   });
 }
 
+// Formats that can carry transparency; a JPEG source never can.
+const ALPHA_TYPES = /^image\/(png|gif|webp|avif)$/i;
+// Quality is given up before resolution: dropping to 0.6 costs far less of
+// the picture than shrinking it by a fifth.
+const JPEG_QUALITIES = [0.85, 0.72, 0.6];
+
+/** True when any pixel is less than fully opaque, or when we cannot tell. */
+function hasAlpha(context, width, height) {
+  try {
+    const { data } = context.getImageData(0, 0, width, height);
+    for (let i = 3; i < data.length; i += 4) if (data[i] < 255) return true;
+    return false;
+  } catch {
+    return true; // No pixel access: keep the format that cannot lose anything.
+  }
+}
+
+/**
+   What to try saving this canvas as, best first. A photograph re-encoded as
+   PNG is routinely larger than the JPEG it came from, which used to push the
+   resize loop into shrinking the picture to meet the budget. A picture with
+   transparency stays PNG, since JPEG would flatten it.
+**/
+function* encodings(canvas, transparent) {
+  if (transparent) { yield canvas.toDataURL('image/png'); return; }
+  for (const quality of JPEG_QUALITIES) yield canvas.toDataURL('image/jpeg', quality);
+}
+
 export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOTO_DATA } = {}) {
   if (!file?.type?.startsWith('image/') || file.type === 'image/svg+xml') throw new Error('Choose a photo such as JPEG, PNG, or WebP.');
   if (file.size > MAX_PHOTO_BYTES) throw new Error('Choose a photo smaller than 10 MB.');
@@ -38,11 +66,17 @@ export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOT
   Object.assign(canvas, size);
   const context = canvas.getContext('2d');
   if (!context) throw new Error('This browser could not resize the photo.');
+  // Only a format that can carry alpha is worth scanning for it, and a scan
+  // we cannot run (no getImageData) means we keep the format that is safe.
+  const mayHaveAlpha = ALPHA_TYPES.test(file.type ?? '');
+  let transparent = null;
   for (let attempt = 0; attempt < 8; attempt++) {
     canvas.width = size.width; canvas.height = size.height;
     context.drawImage(img, 0, 0, size.width, size.height);
-    const resized = canvas.toDataURL('image/png');
-    if (resized.length <= maxData) return { url: resized };
+    if (transparent === null) transparent = mayHaveAlpha && hasAlpha(context, size.width, size.height);
+    for (const url of encodings(canvas, transparent)) {
+      if (url.length <= maxData) return { url };
+    }
     size.width = Math.max(1, Math.round(size.width * 0.8));
     size.height = Math.max(1, Math.round(size.height * 0.8));
   }
