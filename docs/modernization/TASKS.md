@@ -188,6 +188,19 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   the dark phone sheet and desktop editor without saves. Build, 179 API tests
   (2 skipped), and 181 Vitest tests pass; no `check` script exists.
 
+- [x] **R2-9 Linked recipes** — owner requested 2026-11-26. Underlined
+  ingredient controls open/focus the target tab, including grouped ingredients
+  and the phone sheet. Shopping expands chains with path-local cycle detection
+  for both local and API-only recipe IDs; repeated independent branches count.
+  Document existing REST reference/batch semantics in OpenAPI and recipes/schema;
+  contract-test create/read/update preservation. Read-only live Thanksgiving
+  menu has IDs in prose and no linked ingredients. MCP source located in the
+  separate nutrition-tracker Cloudflare worker and explicitly documented/typed
+  there, with five mocked MCP handler tests. Worker deployed at owner request
+  on 2026-11-26; connected tool-schema refresh remains pending. Web fix committed
+  to local dev at owner request; pushing/deployment remains pending. No live
+  recipe writes. See `specs/linked-recipes.md`.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
@@ -372,4 +385,4 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
 ## Later — each its own small project
 
 Shopping list with MCP endpoints and family sharing
-· sub-recipes · import/export UI · share links · extension (MV3)
+· import/export UI · share links · extension (MV3)

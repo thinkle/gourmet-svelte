@@ -24,7 +24,7 @@
      stored       the stored record to edit (the raw row; a blank one for a new recipe)
      startEditing open straight into edit mode (a new recipe)
   */
-  let { recipe, stored, startEditing = false, suggestions = [], data, onsaved, ondeleted, onclose, ondirty } = $props();
+  let { recipe, recipes = [], onopen, stored, startEditing = false, suggestions = [], data, onsaved, ondeleted, onclose, ondirty } = $props();
 
   // Edit mode, in place: the editor replaces the view in this same tab.
   let edit = $state(null);
@@ -117,7 +117,7 @@
 
 {#snippet list()}
   {#if count}
-    <Ingredients list={recipe.ingredients} {mult} {active} onpick={pickIngredient} />
+    <Ingredients list={recipe.ingredients} {mult} {active} onpick={pickIngredient} {recipes} {onopen} />
   {:else}<p><Text muted>No ingredients.</Text></p>{/if}
 {/snippet}
 

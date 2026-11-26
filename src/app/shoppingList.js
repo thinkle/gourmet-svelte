@@ -41,10 +41,12 @@ function walk(list, mult, source, recipes, seen, out, missing, sourceId) {
     if (ing.ingredients) walk(ing.ingredients, mult, source, recipes, seen, out, missing, sourceId);
     else if (isRef(ing)) {
       const target = findRecipe(recipes, ing.reference);
-      const times = ing.amount?.amount && ing.amount.amount !== 1 ? ing.amount.amount : 1;
+      const times = ing.amount?.amount ?? 1;
       if (!target) { missing.push(ing); continue; }
-      if (seen.includes(target.id)) continue; // a recipe that contains itself
-      walk(target.ingredients, mult * times, source, recipes, [...seen, target.id], out, missing, sourceId);
+      // Track this path by object identity: REST recipes may have no local id.
+      // A repeated sub-recipe on another branch must still count.
+      if (seen.includes(target)) continue;
+      walk(target.ingredients, mult * times, source, recipes, [...seen, target], out, missing, sourceId);
     } else if (ing.text) out.push({ ing, mult, source, sourceId });
   }
 }
@@ -93,9 +95,9 @@ export function buildList(rec, recipes) {
   for (const e of entries) {
     if (isRef(e)) {
       const target = findRecipe(recipes, e.reference);
-      const mult = e.amount?.amount || 1;
+      const mult = e.amount?.amount ?? 1;
       onList.push({ entry: e, id: e.reference, title: target?.title ?? e.text ?? "(recipe)", mult, found: !!target, recipe: target });
-      if (target) walk(target.ingredients, mult, target.title, recipes, [target.id], leaves, missing, target.id);
+      if (target) walk(target.ingredients, mult, target.title, recipes, [target], leaves, missing, target.id);
     } else if (e?.text) {
       leaves.push({ ing: e, mult: 1, source: null, loose: true });
     }

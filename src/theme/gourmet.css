@@ -400,3 +400,7 @@
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
 .on-list > :not(.title) { grid-row: 2; }
 .on-list .title { grid-row: 1; grid-column: 1 / -1; font-family: var(--recipe-font-family); font-weight: 600; text-wrap: balance; }
+
+/* A recipe ingredient opens the referenced recipe in the tab strip. */
+.ingredients .linked-recipe .item { text-decoration: underline; text-underline-offset: 0.2em; }
+.ingredients div.ingredient { cursor: default; }

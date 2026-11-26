@@ -20,7 +20,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | View | Images (display) | keep | R2 | |
 | View | Clickable times that start a timer | keep | R2 | `TimeLink`, `Timer`; logic kept in `utils/timerDrawer.js`, `utils/times.js` |
 | View | Several recipes open at once (tabs), remembered per browser tab with explicit bookmark links | keep | R2-7 | Owner request, 2026-11-25/26; sessionStorage keeps normal URLs short; bookmark links use stable IDs |
-| View | Linked sub-recipes | later | | Stored references keep working; no UI to follow them yet |
+| View | Linked sub-recipes | keep | R2-9 | Owner approved 2026-11-26: underlined ingredient controls open the target tab; shopping follows chains and skips cycles |
 | View | Print styles | keep | R2 | Cheap with Contain; check one recipe prints on a page |
 | Edit | All fields incl. groups, reorder ingredients | keep | R3 | |
 | Edit | Save / revert state | keep | R3 | Test first: this is what kept breaking |

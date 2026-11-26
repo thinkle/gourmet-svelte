@@ -237,7 +237,7 @@
     <!-- Every open recipe stays mounted, so each keeps its scroll position and multiplier. -->
     {#each openTabs as { key, recipe: r } (key)}
       <div class="tab-panel" hidden={tab !== key}>
-        <RecipeView recipe={r}
+        <RecipeView recipes={library.recipes} onopen={openRecipe} recipe={r}
           stored={() => (key in drafts ? blankRecipe() : storedRecipe(key))}
           startEditing={key in drafts}
           suggestions={categories}

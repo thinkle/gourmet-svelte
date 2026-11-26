@@ -729,12 +729,43 @@ components:
           description: A whole ingredient line, e.g. "1 1/2 cups flour, sifted".
         - $ref: "#/components/schemas/StructuredIngredient"
         - $ref: "#/components/schemas/IngredientGroup"
+    LinkedRecipeIngredient:
+      type: object
+      description: |
+        Another recipe as an ingredient. Search or GET the target first and use
+        its exact _id in reference. text is a display label, not a lookup key.
+        amount.amount is a batch multiplier (1 = the whole target recipe,
+        0.5 = half), not a number of servings or a weight/volume conversion.
+        Omit amount for one batch. Shopping expands nested references and skips
+        circular edges. A name, URL or ID in instructions does not create a link.
+        On update, GET first and resend the entire ingredients array, preserving
+        reference on existing links. MCP tools must accept ingredient objects;
+        tools limited to string arrays cannot create these links.
+      required: [text, reference]
+      properties:
+        text:
+          type: string
+        reference:
+          type: string
+          description: Exact target recipe _id from the API, never a browser-local id.
+        amount:
+          $ref: "#/components/schemas/Amount"
+      example:
+        text: Apple filling
+        reference: recipe-id-from-search
+        amount: {amount: 1}
     StructuredIngredient:
       type: object
       description: |
         The preferred shape. `ingredient` is the name and prep only -- keep the
         amount and unit out of it.
       properties:
+        reference:
+          type: string
+          description: Linked recipe _id. See LinkedRecipeIngredient for batch semantics and examples.
+        text:
+          type: string
+          description: Canonical ingredient label; also accepted instead of ingredient.
         ingredient:
           type: string
           description: Ingredient name and prep, e.g. "flour, sifted".
@@ -745,6 +776,7 @@ components:
           oneOf:
             - type: number
             - type: string
+            - $ref: "#/components/schemas/Amount"
         unit:
           type: string
           description: e.g. "cups", "tbsp", "cloves".
@@ -798,6 +830,9 @@ components:
       type: object
       description: The canonical stored shape, as returned by GET requests.
       properties:
+        reference:
+          type: string
+          description: Optional target recipe _id; amount.amount is a batch multiplier. Preserve on update.
         text:
           type: string
           description: The ingredient name only, with amount and unit removed.

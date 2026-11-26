@@ -254,6 +254,7 @@ const RECIPE_SHAPE = {
                 'drop its old shopItem (or send a new one): a shopItem you send is kept as is.',
         },
         alsoAccepted: [
+            '{text: "Apple filling", reference: "recipe-id-from-search", amount: {amount: 1}} -- a linked recipe; reference is the target _id, amount is whole batches, never servings. Names or IDs in instructions do not create links.',
             'a plain string like "1 1/2 cups flour, sifted" -- the server parses ' +
             'the amount and unit out of it for you',
             '{text, amount: {amount, rangeAmount, unit}} -- the canonical stored shape',
@@ -279,6 +280,7 @@ const RECIPE_SHAPE = {
                 'shopping list should show and merge on. Filled by the server on API writes ' +
                 'when the client sent neither shopItem nor ingkey. Older ingredients may have ' +
                 'none, or only `ingkey` (same meaning, from the desktop app).',
+            reference: 'optional: the linked recipe _id returned by GET/search. Put this on an ingredient object with text and amount: {amount: 1} for one whole batch; 0.5 for half. Nested references are expanded for shopping. This is not an ingredient name or a URL. Preserve it when updating.',
             ingkey: 'older ingredients only: the bare item as the desktop app stored it',
         },
         note: 'Send amount/unit/ingredient separately when you know them. If you ' +
