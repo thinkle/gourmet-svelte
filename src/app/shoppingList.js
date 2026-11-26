@@ -104,6 +104,8 @@ export function buildList(rec, recipes) {
   for (const l of leaves) {
     const base = baseKey(l.ing);
     const key = aliases[base] ?? base;
+    // MCP removal hides a merged item on this list without editing source recipes.
+    if ((rec?.excludedItems ?? []).includes(key)) continue;
     l.base = base;
     if (!byKey.has(key)) byKey.set(key, []);
     byKey.get(key).push(l);
