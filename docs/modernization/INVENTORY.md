@@ -19,7 +19,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | View | Ingredient groups | keep | R2 | MCP writes these |
 | View | Images (display) | keep | R2 | |
 | View | Clickable times that start a timer | keep | R2 | `TimeLink`, `Timer`; logic kept in `utils/timerDrawer.js`, `utils/times.js` |
-| View | Several recipes open at once (tabs), bookmarked by ID in the hash URL | keep | R2-7 | Owner request, 2026-11-25; saved recipes and active tab survive refresh |
+| View | Several recipes open at once (tabs), remembered per browser tab with explicit bookmark links | keep | R2-7 | Owner request, 2026-11-25/26; sessionStorage keeps normal URLs short; bookmark links use stable IDs |
 | View | Linked sub-recipes | later | | Stored references keep working; no UI to follow them yet |
 | View | Print styles | keep | R2 | Cheap with Contain; check one recipe prints on a page |
 | Edit | All fields incl. groups, reorder ingredients | keep | R3 | |

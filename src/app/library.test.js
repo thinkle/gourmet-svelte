@@ -56,8 +56,10 @@ describe("in-app cloud sync", () => {
   });
 
   it("does not sync when signed out", async () => {
+    expect(library.account).toBe("test@example.invalid");
     user.set(null);
     await reload();
+    expect(library.account).toBe(null);
     expect(recipeData.sync).toHaveBeenCalledTimes(1);
   });
 });

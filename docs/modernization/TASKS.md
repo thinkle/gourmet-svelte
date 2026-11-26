@@ -156,16 +156,24 @@ R1-3, R2-2, R2-3 and R2-4 with it:
 - [x] **R2-7 Cloud refresh and bookmarked recipe tabs** — owner request,
   2026-11-25. One app-layer task: expose the kept sync through a Sync recipes
   button (busy/disabled state, visible failure and retry); keep open recipe
-  views and drafts mounted. Store saved open recipes in order and the active
-  tab in `#recipes=…&tab=…`, preferring stable server IDs and falling back to
-  `local:<id>` for local-only saves. Restore after initial sync; skip unavailable
-  IDs and unsaved new drafts. Hash changes retain dirty tabs; tab clicks replace
-  history. Unit tests cover URL mapping across caches and sync arrivals,
-  concurrency, failure/retry and signed-out behavior. Verified by 140 Vitest
-  tests, a production build and headless Chromium checks at desktop/phone sizes
-  with local fixtures and mocked cloud responses (including delayed initial
-  sync, arrivals, busy state, error/retry, reload and dirty edits). REST checks
-  were blocked before/after by the MongoDB binary download returning HTTP 403;
+  views and drafts mounted. Follow-up (2026-11-26): cloud sync icon and subtle
+  top-bar buttons that blend into the bar and reveal their shape on hover or
+  keyboard focus; icon labels remain accessible on phones. Remember saved open
+  recipes and the active tab in sessionStorage, scoped to the account and each
+  browser tab, leaving ordinary URLs short. Duplicated tabs begin with copied
+  session state, then diverge. A Bookmark link dialog offers copy/manual copy
+  and opening the recipe set in a new browser tab. Explicit links retain
+  `#recipes=…&tab=…` and override session state, using stable server IDs with
+  `local:<id>` fallback. Existing bookmarks still work. Restore after initial
+  sync; skip unavailable IDs and unsaved new drafts. Hash changes retain dirty
+  tabs. No dedicated single-recipe pop-out action yet. Unit tests cover URL
+  mapping across caches, independent sessions/account isolation, restricted
+  storage, empty explicit links, sync arrivals, concurrency and failure/retry.
+  Verified by 144 Vitest tests, a production build and headless Chromium checks
+  at desktop/phone sizes using local/mock data: independent tabs and refresh,
+  bookmark precedence/copy/new window, clipboard fallback, busy/error/retry,
+  retained multiplier/drafts, and toolbar hover and keyboard focus.
+  REST checks remain blocked by the MongoDB binary download returning HTTP 403;
   this checkout has no `check` script.
 
 ## R3 — Recipe editor

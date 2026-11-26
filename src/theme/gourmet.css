@@ -17,6 +17,25 @@
 }
 
 /* ── App shell ─────────────────────────────────────────── */
+.gourmet-topbar {
+  --button-bg: var(--primary-bg);
+  --button-fg: var(--primary-fg);
+  --button-border: none;
+  --button-box-shadow: none;
+  --button-icon-gap: 0.4rem;
+  --button-hover-bg: color-mix(in oklab, var(--primary-bg) 84%, var(--primary-fg));
+  --button-hover-fg: var(--primary-fg);
+  --button-hover-filter: none;
+  --disabled-base-color-percentage: 100%;
+  --button-disabled-filter: opacity(0.6);
+}
+.gourmet-topbar button:focus-visible {
+  --button-bg: var(--button-hover-bg);
+}
+@media (max-width: 600px) {
+  .gourmet-topbar .topbar-action-label { display: none; }
+}
+.recipe-bookmark-dialog { --input-width: 100%; }
 /* The cookie has been Gourmet's mark since the PyGTK days. */
 .brand { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
 .brand img { height: 1.6em; width: auto; }

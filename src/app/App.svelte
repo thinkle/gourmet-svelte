@@ -1,9 +1,11 @@
 <script>
   import { onMount, untrack } from "svelte";
-  import { Page, Bar, Container, Input, Select, Option, Text, Inline, TabBar, TabItem, Button } from "contain-css-svelte";
+  import { Page, Bar, Container, Input, Select, Option, Text, Inline, TabBar, TabItem, Button, ButtonLink, Dialog } from "contain-css-svelte";
   import { library, reload, loadFixtures, storedRecipe, putRecipe, editorData } from "./library.svelte.js";
   import { startSession, signIn, signUp, signOut } from "../auth/session.js";
   import WhiskLogo from "../components/WhiskLogo.svelte";
+  import CloudSyncIcon from "../components/CloudSyncIcon.svelte";
+  import BookmarkIcon from "../components/BookmarkIcon.svelte";
   import { search, categoriesOf, prepare } from "./lib.js";
   import { blankRecipe } from "./recipeEdit.js";
   import { ask } from "./confirm.svelte.js";
@@ -13,7 +15,7 @@
   import ShoppingList from "../screens/shopping/ShoppingList.svelte";
   import { shopping, loadShopping, useLocalOnly } from "./shopping.svelte.js";
   import { buildList } from "./shoppingList.js";
-  import { readRecipeTabs, writeRecipeTabs } from "./recipeTabs.js";
+  import { readRecipeTabs, writeRecipeTabs, hasRecipeTabs, loadTabSession, saveTabSession, bookmarkHash } from "./recipeTabs.js";
 
   let usingFixtures = $state(false);
   onMount(async () => {
@@ -38,36 +40,69 @@
   let dirty = $state({}); // tab key -> has unsaved edits
   let newCount = 0;
   let tabsRestored = $state(false);
+  let tabAccount = $state(null);
+  let bookmarkMode = $state(false);
+  let bookmarkOpen = $state(false);
+  let bookmarkUrl = $state("");
+  let bookmarkMessage = $state("");
   // Wait for the first sync, including recipes absent from this device's cache.
   // Do not overwrite the bookmark while signing in or receiving partial batches.
   $effect(() => {
+    if (tabAccount !== null && tabAccount !== library.account) {
+      untrack(() => {
+        openIds = []; drafts = {}; dirty = {}; tab = "search";
+        tabsRestored = false; tabAccount = null; bookmarkOpen = false;
+      });
+    }
     if (!tabsRestored && library.status === "ready" && !library.syncing && !library.error) {
       untrack(() => {
+        tabAccount = library.account;
+        bookmarkMode = hasRecipeTabs(location.hash);
         restoreTabs(true);
         tabsRestored = true;
       });
     }
   });
   function restoreTabs(initial = false) {
-    const restored = readRecipeTabs(location.hash, library.recipes);
+    const hash = bookmarkMode ? location.hash : initial ? loadTabSession(library.account) : "";
+    const restored = readRecipeTabs(hash, library.recipes);
     const keepActive = initial && (openIds.length > 0 || tab === "shopping");
     // Following another hash must never throw away an unsaved editor.
     openIds = [...new Set([...restored.ids, ...openIds.filter((key) => initial || dirty[key])])];
     if (!keepActive) tab = restored.tab;
   }
   function hashChanged() {
+    bookmarkMode = hasRecipeTabs(location.hash);
     if (tabsRestored) restoreTabs();
   }
   $effect(() => {
-    if (!tabsRestored || library.status !== "ready") return;
-    const hash = writeRecipeTabs(location.hash, openIds, tab, library.recipes);
+    if (!tabsRestored || library.status !== "ready" || tabAccount !== library.account) return;
+    saveTabSession(tabAccount, writeRecipeTabs("", openIds, tab, library.recipes));
+    if (!bookmarkMode) return;
+    const hash = bookmarkHash(location.hash, openIds, tab, library.recipes);
     // Replacing keeps tab clicks from filling the browser's Back history.
     if (hash !== location.hash) history.replaceState(history.state, "", `${location.pathname}${location.search}${hash}`);
   });
+  function showBookmark() {
+    const url = new URL(location.href);
+    url.hash = bookmarkHash(location.hash, openIds, tab, library.recipes);
+    bookmarkUrl = url.href;
+    bookmarkMessage = "";
+    bookmarkOpen = true;
+  }
+  async function copyBookmark() {
+    try {
+      await navigator.clipboard.writeText(bookmarkUrl);
+      bookmarkMessage = "Link copied.";
+    } catch {
+      bookmarkMessage = "Select and copy the link above; automatic copying is unavailable.";
+    }
+  }
   // Open tabs follow the library, so a recipe that syncs in again stays current.
   const openTabs = $derived(openIds
     .map((key) => ({ key, recipe: drafts[key] ?? library.recipes.find((r) => r.id === key) }))
     .filter((t) => t.recipe));
+  const hasLocalTabs = $derived(openTabs.some(({ recipe }) => recipe.id != null && !recipe._id));
   $effect(() => { if (tab !== "search" && tab !== "shopping" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
 
   function openRecipe(r) {
@@ -130,13 +165,26 @@
   {#snippet header()}
     <!-- On a phone an open recipe gets the whole screen: the brand bar steps aside. -->
     {#if !(phone && tab !== "search" && tab !== "shopping")}
-      <Bar primary>
+      <Bar primary class="gourmet-topbar">
         <h1 class="brand"><img src="/images/cookie.png" alt="" />Gourmet</h1>
-        {#if library.status !== "signed-out" && !usingFixtures}
+        {#if library.status !== "signed-out"}
           <Inline>
-            <Button onclick={reload} disabled={library.syncing || library.status !== "ready"}
-              aria-label="Sync recipes with the cloud">{library.syncing ? "Syncing…" : "Sync recipes"}</Button>
-            <Button onclick={signOut}>Sign out</Button>
+            {#if !usingFixtures}
+              <Button onclick={reload} disabled={library.syncing || library.status !== "ready"}
+                aria-label="Sync recipes with the cloud" aria-busy={library.syncing} title="Sync recipes with the cloud">
+                {#snippet icon()}<CloudSyncIcon />{/snippet}
+                <span class="topbar-action-label">{library.syncing ? "Syncing…" : "Sync recipes"}</span>
+              </Button>
+            {/if}
+            {#if library.status === "ready"}
+              <Button onclick={showBookmark} aria-label="Bookmark open recipes" title="Bookmark open recipes">
+                {#snippet icon()}<BookmarkIcon />{/snippet}
+                <span class="topbar-action-label">Bookmark link</span>
+              </Button>
+            {/if}
+            {#if !usingFixtures}
+              <Button onclick={signOut}>Sign out</Button>
+            {/if}
           </Inline>
         {/if}
       </Bar>
@@ -227,3 +275,19 @@
 </Page>
 
 <ConfirmHost />
+
+{#if bookmarkOpen}
+  <Dialog open modal onclose={() => (bookmarkOpen = false)} aria-label="Bookmark open recipes" class="recipe-bookmark-dialog">
+    <h2>Bookmark open recipes</h2>
+    <p>Copy this link, or open it in a new browser tab and bookmark that page.</p>
+    <p>It opens your saved recipe tabs. Unsaved edits and new recipes are not included.</p>
+    {#if hasLocalTabs}<p>Recipes saved only on this device can only reopen here.</p>{/if}
+    <Input value={bookmarkUrl} readonly aria-label="Recipe bookmark link" onclick={(e) => e.currentTarget.select()} />
+    <Inline wrap>
+      <Button primary onclick={copyBookmark}>Copy link</Button>
+      <ButtonLink href={bookmarkUrl} target="_blank" rel="noopener">Open in new browser tab</ButtonLink>
+      <Button onclick={() => (bookmarkOpen = false)}>Done</Button>
+    </Inline>
+    {#if bookmarkMessage}<p role="status">{bookmarkMessage}</p>{/if}
+  </Dialog>
+{/if}
