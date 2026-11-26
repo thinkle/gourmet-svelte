@@ -10,8 +10,8 @@
   import { ask } from "../../app/confirm.svelte.js";
   import { recipeRole } from "../../app/lib.js";
 
-  /** @type {{ edit: import("../../app/editState.svelte.js").RecipeEdit, color: {bg: string, fg: string}, suggestions?: string[], onsaved: (row: object) => void, onclose: () => void, ondeleted: (row: object) => void }} */
-  let { edit, color, suggestions = [], onsaved, onclose, ondeleted } = $props();
+  /** @type {{ edit: import("../../app/editState.svelte.js").RecipeEdit, color: {bg: string, fg: string}, suggestions?: string[], recipes?: object[], onsaved: (row: object) => void, onclose: () => void, ondeleted: (row: object) => void }} */
+  let { edit, color, recipes = [], suggestions = [], onsaved, onclose, ondeleted } = $props();
   let photosBusy = $state(false);
   let width = $state(1000);
   const wide = $derived(width >= 720);
@@ -62,7 +62,7 @@
 
 {#snippet ingredients()}
   <Surface as="header" class="pane-head"><h2>Ingredients</h2></Surface>
-  <IngredientsEditor {edit} />
+  <IngredientsEditor {edit} {recipes} />
 {/snippet}
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -78,7 +78,7 @@
           {@render actions()}
           <DetailsEditor {edit} {suggestions} />
           <PhotosEditor {edit} bind:busy={photosBusy} />
-      <TextEditor {edit} />
+          <TextEditor {edit} />
         </div>
       {/snippet}
     </SplitPane>

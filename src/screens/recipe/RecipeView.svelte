@@ -131,7 +131,7 @@
 {/snippet}
 
 {#if edit}
-  <RecipeEditor {edit} color={recipe.color} {suggestions}
+  <RecipeEditor {edit} {recipes} color={recipe.color} {suggestions}
     onsaved={(row) => { onsaved?.(row); edit = null; }}
     onclose={endEdit}
     ondeleted={(row) => { edit = null; ondeleted?.(row); }} />

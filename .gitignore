@@ -16,3 +16,6 @@ background.js
 /legacy/extension/*.map
 /legacy/public/build/
 .claude/worktrees/
+
+# Scratch logs from browser checks
+.playwright-mcp/

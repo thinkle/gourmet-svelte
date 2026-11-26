@@ -412,3 +412,11 @@
 .photo-list { display: grid; gap: 1.25rem; margin: 0; padding-inline-start: 1.5rem; }
 .photo-list li { display: grid; gap: 0.5rem; }
 .photo-list img { max-inline-size: 100%; max-block-size: 15rem; object-fit: contain; justify-self: start; }
+
+/* Recipe search in the ingredient picker stays contained on a phone. */
+.recipe-link-choices { list-style: none; padding: 0; max-block-size: 15rem; overflow-y: auto; display: grid; gap: 0.35rem; }
+.recipe-link-choices button { inline-size: 100%; text-align: start; display: grid; gap: 0.2rem; white-space: normal; overflow-wrap: anywhere; }
+.linked-ingredient-entry { flex: 1; min-inline-size: 0; display: grid; gap: 0.35rem; }
+.linked-ingredient-entry > input { inline-size: 100%; }
+
+.linked-ingredient-entry .amount-input { flex-wrap: wrap; max-inline-size: 100%; }

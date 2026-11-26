@@ -256,7 +256,18 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   prerequisite passed. Prepared image and aggregate photo budgets guard the
   save payload size. Build, 234 app tests and 207 API tests pass (2 existing
   skips); new function bundle and public-image download check pass.
+  Deployed browser checks passed for upload/paste/URL conversion, caption,
+  ordering/removal/save and 390px layout, with all recipe calls mocked.
   No stored-shape or existing API write-path changes.
+
+- [x] **R3-8 Linked recipe ingredient picker** — owner requested 2026-11-26.
+  Add recipe ingredients at top level or inside a group, search by name/category,
+  choose a batch fraction, and store the existing reference shape. Current
+  recipe and deleted/list records are excluded. Existing linked rows show their
+  target with a custom display label, editable batches, Change recipe and Unlink.
+  Revert/Cancel and normal save apply; shopping uses the existing recursive
+  expansion. Build, 240 app tests and 207 API tests pass (2 existing skips).
+  No stored-shape or backend change. Direct dev iteration requested.
 
 ## R4 — Account
 

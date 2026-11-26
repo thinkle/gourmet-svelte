@@ -22,7 +22,7 @@ The `legacy-reader` agent adds detail rows under each screen as it writes specs.
 | View | Several recipes open at once (tabs), remembered per browser tab with explicit bookmark links | keep | R2-7 | Owner request, 2026-11-25/26; sessionStorage keeps normal URLs short; bookmark links use stable IDs |
 | View | Linked sub-recipes | keep | R2-9 | Owner approved 2026-11-26: underlined ingredient controls open the target tab; shopping follows chains and skips cycles |
 | View | Print styles | keep | R2 | Cheap with Contain; check one recipe prints on a page |
-| Edit | All fields incl. groups, reorder ingredients | keep | R3 | |
+| Edit | All fields incl. groups, reorder ingredients | keep | R3 | Linked recipe picker and batch amounts: R3-8 |
 | Edit | Save / revert state | keep | R3 | Test first: this is what kept breaking |
 | Edit | Rich text bodies | keep, simplified | R3 | Must not damage existing HTML |
 | Edit | Image upload, paste, URL import and resize | keep | R3-7 | Old code: `widgets/inputs/ImageEntry.svelte` with `pica`. REST responses omit image data: check a REST update cannot drop stored images |
