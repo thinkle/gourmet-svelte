@@ -24,14 +24,19 @@ scratch on Svelte 5 + Contain while the logic and API are kept. Read
    `netlify/functions` write paths needs a dump first
    (`scripts/migrate/dump.mjs`). Do not print or commit `MONGO_*` values or
    API tokens.
-3. **Branches.** `dev` is the rebuild (dev.gourmetrecipemanager.com); `master`
-   is the old app in production. Never commit directly to `master`. For small
-   fixes, commit directly to local `dev` (owner preference, 2026-11-26); no PR
-   is required. Larger task work goes on `rb/<task-id>-short-name`, branched
-   from `dev`, and merges by pull request into `dev`. The MCP in daily use talks
-   to the `dev` deploy, so `dev` must
-   always build and its REST API must always work (rule 1). Do not push, merge
-   or deploy unless asked.
+3. **Branches and delivery.** `dev` is the rebuild
+   (dev.gourmetrecipemanager.com); `master` is the old app in production.
+   Never commit directly to `master`. For small fixes, commit directly to
+   `dev`; no PR is required (owner preference, 2026-11-26). Larger task work
+   goes on `rb/<task-id>-short-name`, branched from `dev`, and merges by PR.
+   All completed changes must be committed and pushed; do not leave work
+   only on this laptop. Use the deployed dev site for manual testing, not a
+   local dev server. Local build and automated test commands remain required.
+   A push to `dev` triggers its Netlify deployment: wait for it and verify
+   the deployed version before reporting the fix as available. The MCP in
+   daily use talks to dev, so it must always build and its REST API must
+   always work (rule 1). Do not merge larger task branches or deploy to
+   production without an explicit request.
 4. **One task, one PR (or one commit for a small fix).** Stay inside what the
    card names. If the task needs a change elsewhere, stop and report it.
 5. **`legacy/` is reference only.** It is the old UI. Never edit it, never
