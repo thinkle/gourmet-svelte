@@ -25,13 +25,15 @@ scratch on Svelte 5 + Contain while the logic and API are kept. Read
    (`scripts/migrate/dump.mjs`). Do not print or commit `MONGO_*` values or
    API tokens.
 3. **Branches.** `dev` is the rebuild (dev.gourmetrecipemanager.com); `master`
-   is the old app in production. Never commit to either. Task work goes on
-   `rb/<task-id>-short-name`, branched from `dev`, and merges by pull request
-   into `dev`. The MCP in daily use talks to the `dev` deploy, so `dev` must
+   is the old app in production. Never commit directly to `master`. For small
+   fixes, commit directly to local `dev` (owner preference, 2026-11-26); no PR
+   is required. Larger task work goes on `rb/<task-id>-short-name`, branched
+   from `dev`, and merges by pull request into `dev`. The MCP in daily use talks
+   to the `dev` deploy, so `dev` must
    always build and its REST API must always work (rule 1). Do not push, merge
    or deploy unless asked.
-4. **One task, one PR.** Stay inside what the card names. If the task needs a
-   change elsewhere, stop and report it.
+4. **One task, one PR (or one commit for a small fix).** Stay inside what the
+   card names. If the task needs a change elsewhere, stop and report it.
 5. **`legacy/` is reference only.** It is the old UI. Never edit it, never
    import from it, never copy its markup or CSS into new code. Only the
    `legacy-reader` agent reads it, to write behaviour specs.

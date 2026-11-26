@@ -6,6 +6,7 @@
 import Dexie from "dexie";
 import { get } from "svelte/store";
 import { user } from "../stores/userStore.js";
+import { signIn } from "../auth/session.js";
 import recipeData, { connectedRemote } from "../data/recipeData.js";
 import localRecipeData from "../data/local/dexieApi.js";
 import { prepare, isRecipe } from "./lib.js";
@@ -16,6 +17,7 @@ export const library = $state({
   recipes: [],
   syncing: false,
   error: null,
+  needsSignIn: false,
   who: null,
   account: null,
 });
@@ -85,9 +87,20 @@ export const editorData = {
   },
 };
 
-async function load(account) {
+const isSignInError = (err) =>
+  [err?.status, err?.statusCode, err?.code].some((code) => Number(code) === 401)
+  || /^(not signed in|unauthorized|no user!?)$/i.test(String(err?.error ?? err?.message ?? err));
+
+function offerSignIn() {
+  library.error = null;
+  library.needsSignIn = true;
+  return signIn();
+}
+
+async function load(account, interactive = false) {
   running = account;
   library.error = null;
+  library.needsSignIn = false;
   library.syncing = true;
   try {
     await dropFixtureWrites();
@@ -106,6 +119,15 @@ async function load(account) {
     await readCache();
     library.status = "ready";
   } catch (err) {
+    // Signing out while a request is in flight must stay signed out.
+    if (running !== account) return;
+    if (isSignInError(err)) {
+      library.error = null;
+      library.needsSignIn = true;
+      library.status = library.recipes.length ? "ready" : "error";
+      if (interactive) offerSignIn();
+      return;
+    }
     console.error("Could not load recipes", err);
     library.error = String(err?.error ?? err?.message ?? err);
     // What the cache already had is still worth showing.
@@ -115,7 +137,15 @@ async function load(account) {
   }
 }
 
-export const reload = () => { if (running && !library.syncing && !fixturesMode) return load(running); };
+export const reload = () => {
+  if (fixturesMode || library.syncing) return;
+  const current = get(user);
+  if (!current?.access_token || !running || library.needsSignIn
+      || (current.expires_at && Number(current.expires_at) <= Date.now())) {
+    return offerSignIn();
+  }
+  return load(running, true);
+};
 
 user.subscribe((u) => {
   // Fixtures mode never loads an account (and never syncs).
@@ -123,14 +153,14 @@ user.subscribe((u) => {
   if (!u) {
     running = null;
     rows.clear();
-    Object.assign(library, { status: "signed-out", recipes: [], syncing: false, error: null, who: null, account: null });
+    Object.assign(library, { status: "signed-out", recipes: [], syncing: false, error: null, needsSignIn: false, who: null, account: null });
     return;
   }
   library.who = u.remoteUser?.dbUser?.name || u.username || u.email;
   const account = u.remoteUser?.dbUser && (u.remoteUser.account || u.email);
   library.account = account || null;
   if (!account) { if (library.status === "signed-out") library.status = "signing-in"; return; }
-  if (running !== account) load(account);
+  if (running !== account || library.needsSignIn) load(account);
 });
 
 // Design work without signing in: `npm run dev`, then open /?fixtures with a

@@ -167,29 +167,29 @@
     {#if !(phone && tab !== "search" && tab !== "shopping")}
       <Bar primary class="gourmet-topbar">
         <h1 class="brand"><img src="/images/cookie.png" alt="" />Gourmet</h1>
-        {#if library.status !== "signed-out"}
-          <Inline>
-            {#if !usingFixtures}
-              <Button onclick={reload} disabled={library.syncing || library.status !== "ready"}
-                aria-label="Sync recipes with the cloud" aria-busy={library.syncing} title="Sync recipes with the cloud">
-                {#snippet icon()}<CloudSyncIcon />{/snippet}
-                <span class="topbar-action-label">{library.syncing ? "Syncing…" : "Sync recipes"}</span>
-              </Button>
-            {/if}
-            {#if library.status === "ready"}
-              <Button onclick={showBookmark} aria-label="Bookmark open recipes" title="Bookmark open recipes">
-                {#snippet icon()}<BookmarkIcon />{/snippet}
-                <span class="topbar-action-label">Bookmark link</span>
-              </Button>
-            {/if}
-            {#if !usingFixtures}
-              <Button onclick={signOut}>Sign out</Button>
-            {/if}
-          </Inline>
-        {/if}
+        <Inline>
+          {#if !usingFixtures}
+            <Button onclick={reload} disabled={library.syncing || library.status === "signing-in" || library.status === "loading"}
+              aria-label="Sync recipes with the cloud" aria-busy={library.syncing} title="Sync recipes with the cloud">
+              {#snippet icon()}<CloudSyncIcon />{/snippet}
+              <span class="topbar-action-label">{library.syncing ? "Syncing…" : "Sync recipes"}</span>
+            </Button>
+          {/if}
+          {#if library.status === "ready"}
+            <Button onclick={showBookmark} aria-label="Bookmark open recipes" title="Bookmark open recipes">
+              {#snippet icon()}<BookmarkIcon />{/snippet}
+              <span class="topbar-action-label">Bookmark link</span>
+            </Button>
+          {/if}
+          {#if !usingFixtures && library.status !== "signed-out"}
+            <Button onclick={signOut}>Sign out</Button>
+          {/if}
+        </Inline>
       </Bar>
     {/if}
-    {#if library.status === "ready" && library.error}
+    {#if library.status === "ready" && library.needsSignIn}
+      <p role="status">Sign in to sync your recipes. <Button onclick={signIn}>Sign in</Button></p>
+    {:else if library.status === "ready" && library.error}
       <p role="status"><Text warning>Showing saved recipes. Sync failed: {library.error}</Text></p>
     {/if}
     {#if library.status === "ready"}
@@ -229,9 +229,14 @@
     </Container>
   {:else if library.status === "error"}
     <Container maxWidth="32rem" height="auto">
-      <h2>Could not load your recipes</h2>
-      <p>{library.error}</p>
-      <Inline><Button primary onclick={reload}>Try again</Button><Button onclick={signOut}>Sign out</Button></Inline>
+      {#if library.needsSignIn}
+        <h2>Sign in to sync your recipes</h2>
+        <Button primary onclick={signIn}>Sign in</Button>
+      {:else}
+        <h2>Could not load your recipes</h2>
+        <p>{library.error}</p>
+        <Inline><Button primary onclick={reload}>Try again</Button><Button onclick={signOut}>Sign out</Button></Inline>
+      {/if}
     </Container>
   {:else}
     <!-- Every open recipe stays mounted, so each keeps its scroll position and multiplier. -->

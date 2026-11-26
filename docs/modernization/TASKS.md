@@ -201,6 +201,19 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   to local dev at owner request; pushing/deployment remains pending. No live
   recipe writes. See `specs/linked-recipes.md`.
 
+- [x] **R2-10 Sign in from manual cloud sync** — owner reported 2026-11-26.
+  Sync stays available when signed out and opens sign-in before making a remote
+  request if the user/token is missing or expired. A server auth rejection
+  offers sign-in instead of a generic sync error, keeping cached recipes.
+  Startup auth rejection offers a sign-in action without opening a modal.
+  Ordinary network failures remain retryable. An old failed sync cannot restore
+  an error after logout. Kept request/store/sync code and API are unchanged.
+  Small fixes may commit directly to local dev per the owner's updated policy.
+  Verified: build passed, 223 app tests passed (baseline 216), 181 API tests
+  passed with 2 existing skips. Browser: signed-out Sync opens the login form,
+  makes zero recipe requests, and fits at 390 px. Independent verifier passed.
+  No check script exists; existing bundle-size warning remains.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),
