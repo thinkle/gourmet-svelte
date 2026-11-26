@@ -330,6 +330,24 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   family sharing; item names from `getShopItem` can read oddly ("Purpose Flour"
   for "all-purpose flour": kept logic, reported, not patched).
 
+- [~] **S-7 Shopping-list MCP control** — owner requested 2026-11-25; separate
+  branch `rb/s-7-shopping-mcp`, from `dev`, independent of S-6 live sync. Owner's
+  confirmed dump from this session precedes backend write changes. Additive
+  `/shopping-list` reads and commands: add loose item, add recipe/multiplier,
+  remove merged item from this list only, remove recipe reference, categorize
+  one/many keys (null restores suggestions). Conditional field updates preserve
+  cart/pantry/images/live metadata. Reuse the app's merged view; new optional
+  `excludedItems` keeps removed recipe-derived items off this list without
+  changing source recipes. The Netlify entrypoint routes new paths while
+  existing recipe paths delegate unchanged. No edits to kept logic. OpenAPI,
+  API tests and app exclusion tests included. Actual MCP tool registration
+  requires the separate MCP server's source location, requested from the owner.
+  API-side verification: build and standalone function bundle pass; 179 API
+  tests pass (2 existing skips), 169 app tests pass; all OpenAPI references
+  resolve. No real-database test writes. Separate MCP tool registrations remain
+  pending their source location.
+  See `specs/shopping-mcp.md` for the integration contract and trial steps.
+
 ## R6 — Cutover
 
 - [ ] **R6-1** A week of daily use on the `dev` deploy — Tom

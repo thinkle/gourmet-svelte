@@ -248,19 +248,22 @@ shopping-list documents only; dump before the first real save.
 | Aisles / categories | keep (user aisles + guessed defaults) |
 | Family sharing of one list | defer (needs the linked-accounts model) |
 
-## What an MCP agent would need (note only, API unchanged)
+## MCP commands (S-7, owner approved 2026-11-25)
 
-The shopping list is a recipe document, so the existing `/recipes/*` routes
-already reach it by `_id`, but `isShoppingList` documents are not discoverable
-or documented, and an agent would have to know the reference-with-multiplier
-convention. Needed, additively, later:
+The shopping list is still a recipe document. Additive `/shopping-list` routes
+now provide discovery, the same merged view as the app, and focused commands
+without replacing the recipe document. See `specs/shopping-mcp.md` and
+`public/openapi.yaml`. The old `/recipes/*` contract is unchanged.
 
-- Find the list: a search filter or a `GET /recipes/shopping-list` returning the
-  document (creating it if absent).
-- Add a recipe by `_id` and multiplier, add a loose item (plain string, parsed
-  as for recipes), tick/untick by name: small POST/PATCH calls that append
-  rather than replace `ingredients` (a PUT replaces the list and loses ticks).
-- Read the merged list (item, amounts, from which recipes, ticked), so the agent
-  does not reimplement merging. Today that logic lives only in the client.
-- Document `cart`, `alreadyHave`, `aisles`, `reference` and `amount.unit: "recipe"` in
-  `public/openapi.yaml`.
+`excludedItems: [canonical key]` is a new optional list-only field. MCP removal
+deletes loose entries contributing to that key and hides all remaining
+recipe-derived contributions. This is separate from pantry preferences and
+does not change source recipes. The shared app view applies exclusions after
+aliases; an explicit loose add with the same key clears its exclusion. Read
+returns exclusions so clients can explain hidden items. Old clients lacking
+this field's display support can still show an excluded recipe-derived item;
+use the updated app alongside these commands.
+
+Shopping MCP check-off, pantry mutation and Done shopping are outside S-7.
+Actual connected MCP tool registrations are in a separate codebase and remain
+pending its source location. No deployed data was changed to verify these routes.
