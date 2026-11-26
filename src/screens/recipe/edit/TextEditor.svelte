@@ -1,9 +1,23 @@
 <script>
   // The recipe's text blocks: a header and a body each. Bodies are edited
   // with RichTextBody, which writes nothing back unless the body is edited.
+  import { get } from "svelte/store";
   import { Button, CircleButton, Input, Inline, Text } from "contain-css-svelte";
   import RichTextBody from "../../../components/RichTextBody.svelte";
   import { textView } from "../../../app/recipeEdit.js";
+  import { user } from "../../../auth/session.js";
+  import { preparePhoto, photoFromUrl, INLINE_EDGE, MAX_INLINE_DATA } from "../../../app/recipePhotos.js";
+
+  // A pasted picture, held to the inline budget. A URL goes through the same
+  // server-side fetch the Photos box uses (it needs a token); a file copied
+  // from the desktop does not, so pasting a screenshot works signed out too.
+  async function prepareImage(source) {
+    const blob = typeof source === "string"
+      ? await photoFromUrl(source, { token: get(user)?.access_token })
+      : source;
+    const { url } = await preparePhoto(blob, { edge: INLINE_EDGE, maxData: MAX_INLINE_DATA });
+    return url;
+  }
 
   /** @type {{ edit: import("../../../app/editState.svelte.js").RecipeEdit }} */
   let { edit } = $props();
@@ -37,7 +51,7 @@
           <CircleButton aria-label="Move block down" onclick={() => move(i, 1)}>↓</CircleButton>
           <CircleButton aria-label="Remove block" onclick={() => remove(i)}>×</CircleButton>
         </Inline>
-        <RichTextBody body={b.body} label={b.header || "Text"} onchange={(html) => (blockList()[i].body = html)} />
+        <RichTextBody body={b.body} label={b.header || "Text"} {prepareImage} onchange={(html) => (blockList()[i].body = html)} />
       </div>
     {:else}
       <p><Text muted>No text yet.</Text></p>

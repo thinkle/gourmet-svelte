@@ -251,6 +251,9 @@
 .recipe-prose h3 { font-family: var(--recipe-font-family); font-size: 1.15em; font-weight: 700; margin: 1.6em 0 0.6em; }
 .recipe-prose a { overflow-wrap: anywhere; }
 
+/* Pictures pasted into a body: never wider than the column they sit in. */
+.recipe-prose img { max-inline-size: 100%; block-size: auto; border-radius: 0.3rem; display: block; margin: 0.75em 0; }
+.recipe-prose img[data-localizing], .recipe-prose img[data-pending] { opacity: 0.55; }
 .hero .sources { overflow-wrap: anywhere; font-size: 0.9rem; }
 
 /* ── Recipe editor ─────────────────────────────────────── */

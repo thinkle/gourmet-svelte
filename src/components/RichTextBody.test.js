@@ -23,10 +23,10 @@ const REAL = dump ? JSON.parse(readFileSync(dump, "utf8")) : [];
 let mounted = [];
 afterEach(() => { mounted.forEach((c) => unmount(c)); mounted = []; document.body.innerHTML = ""; });
 
-function show(body, onchange) {
+function show(body, onchange, extra = {}) {
   const target = document.createElement("div");
   document.body.append(target);
-  mounted.push(mount(RichTextBody, { target, props: { body, onchange } }));
+  mounted.push(mount(RichTextBody, { target, props: { body, onchange, ...extra } }));
   flushSync();
   return target.querySelector("[contenteditable]");
 }
@@ -116,5 +116,95 @@ describe("Scalable amounts in the editor", () => {
     el.dispatchEvent(new Event("input", { bubbles: true }));
     expect(writes[0]).toContain("<amount>2</amount>");
     expect(writes[0]).toContain("<amount>1 1/2 cups</amount>");
+  });
+});
+
+// ── Pasted pictures ──────────────────────────────────────────────────
+//
+// jsdom has no execCommand, so stand in for the one call the paste path
+// makes: append the HTML to the editable region, as a caret at the end would.
+function withInsertHTML(el, run) {
+  const had = Object.prototype.hasOwnProperty.call(document, "execCommand");
+  const before = document.execCommand;
+  document.execCommand = (command, _ui, value) => {
+    if (command === "insertHTML") el.insertAdjacentHTML("beforeend", value);
+    return true;
+  };
+  try { return run(); } finally { had ? (document.execCommand = before) : delete document.execCommand; }
+}
+
+function pasteEvent({ html, text, files = [] }) {
+  const event = new Event("paste", { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "clipboardData", {
+    value: { files, getData: (type) => (type === "text/html" ? html ?? "" : text ?? "") },
+  });
+  return event;
+}
+
+const settle = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); flushSync(); };
+
+describe("pictures pasted into a body", () => {
+  it("keeps a pasted <img> and brings its remote src in as a data URL", async () => {
+    const writes = [];
+    const el = show("<p>Stir</p>", (html) => writes.push(html), {
+      prepareImage: async () => "data:image/png;base64,YQ==",
+    });
+    withInsertHTML(el, () =>
+      el.dispatchEvent(pasteEvent({ html: '<p>Then bake</p><img src="https://e.com/a.jpg" alt="pan">' }))
+    );
+    await settle();
+    expect(el.querySelector("img").getAttribute("src")).toBe("data:image/png;base64,YQ==");
+    expect(writes.at(-1)).toContain("data:image/png;base64,YQ==");
+    expect(writes.at(-1)).toContain("Then bake");
+    expect(writes.at(-1)).not.toContain("https://e.com/a.jpg");
+  });
+
+  it("uses the clipboard's own file when the paste is just a picture", async () => {
+    const seen = [];
+    const el = show("", null, {
+      prepareImage: async (source) => { seen.push(source); return "data:image/png;base64,YQ=="; },
+    });
+    const file = new File(["x"], "shot.png", { type: "image/png" });
+    withInsertHTML(el, () =>
+      el.dispatchEvent(pasteEvent({ html: '<img src="https://e.com/a.jpg">', files: [file] }))
+    );
+    await settle();
+    expect(seen).toEqual([file]);                       // the file, not a refetch of the URL
+    expect(el.querySelector("img").getAttribute("src")).toBe("data:image/png;base64,YQ==");
+  });
+
+  it("keeps a hotlink rather than a hole when the picture cannot be brought in", async () => {
+    const writes = [];
+    const el = show("", (html) => writes.push(html), {
+      prepareImage: async () => { throw new Error("Sign in to import a photo URL."); },
+    });
+    withInsertHTML(el, () => el.dispatchEvent(pasteEvent({ html: '<img src="https://e.com/a.jpg">' })));
+    await settle();
+    expect(el.querySelector("img").getAttribute("src")).toBe("https://e.com/a.jpg");
+    expect(writes.at(-1)).toContain("https://e.com/a.jpg");
+  });
+
+  it("never writes back a picture that is still being prepared", async () => {
+    let finish;
+    const writes = [];
+    const el = show("", (html) => writes.push(html), {
+      prepareImage: () => new Promise((resolve) => { finish = resolve; }),
+    });
+    withInsertHTML(el, () =>
+      el.dispatchEvent(pasteEvent({ files: [new File(["x"], "shot.png", { type: "image/png" })] }))
+    );
+    await settle();
+    expect(writes.every((w) => !w.includes("<img"))).toBe(true);
+    finish("data:image/png;base64,YQ==");
+    await settle();
+    expect(writes.at(-1)).toContain("data:image/png;base64,YQ==");
+  });
+
+  it("pastes plain prose exactly as before when nothing can prepare pictures", async () => {
+    const writes = [];
+    const el = show("", (html) => writes.push(html));
+    withInsertHTML(el, () => el.dispatchEvent(pasteEvent({ html: "<p>Chop the onion</p>" })));
+    await settle();
+    expect(writes.at(-1)).toBe("<p>Chop the onion</p>");
   });
 });
