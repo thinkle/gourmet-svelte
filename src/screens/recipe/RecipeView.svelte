@@ -97,7 +97,8 @@
 {#snippet head(onclose)}
   <Surface as="header" class="pane-head">
     <h2>Ingredients</h2>
-    <AmountInput bind:value={mult} label="Multiply the recipe by" />
+    <!-- `scaled` marks a multiplier worth printing; x1 is not. -->
+    <span class="multiplier" class:scaled={mult !== 1}><AmountInput bind:value={mult} label="Multiply the recipe by" /></span>
     {#if mult !== 1}{#each countRows as c}
       <span class="scale-to">With
         <AmountInput times={false} whole unit={nounFor(c, c.base * mult)} label="Scale the recipe to this many {c.many}"

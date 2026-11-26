@@ -1,0 +1,323 @@
+/* ── Printing ──────────────────────────────────────────────────────────
+   Ctrl+P prints what you are looking at: the open recipe, or the shopping
+   list. Inactive tabs are already `hidden`, so the browser drops them.
+
+   Two things the screen does that paper cannot. The app is a fixed-height
+   frame whose panes scroll inside it, which on paper means one page and
+   everything below the fold is lost: every scroller is unwound here so the
+   content flows onto as many sheets as it needs. And the look is carried by
+   filled colour, which a browser leaves out unless the person ticks
+   "Background graphics": pale title text on a pale band would print as
+   nothing at all, so the recipe is set as ink on paper, with the recipe's
+   own colour kept only where a border can carry it.
+
+   What is on the page is what was on the screen, multiplier included: the
+   amounts are already scaled in the DOM, and the multiplier itself prints
+   as plain text beside the Ingredients heading. */
+
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  /* ── Let the content flow ─────────────────────────────────────────── */
+  /* The app is one tall frame with scrolling panes; paper has none of that. */
+  html,
+  /* Two kinds of box a browser cannot break across a page: a scroll
+     container, and a container-query container. Both are simply sliced
+     wherever the page ends -- which is how a shopping list came out with
+     its first line cut in half. The screen needs them; paper does not. */
+  .page,
+  .page > .side-by-side,
+  .page > .side-by-side > .content,
+  .tab-panel,
+  .tab-panel * {
+    overflow: visible !important;
+    container-type: normal !important;
+  }
+  body,
+  body > div,
+  .page,
+  .page > .side-by-side,
+  .page > .side-by-side > .content,
+  .tab-panel,
+  .recipe-frame,
+  .recipe-view,
+  .recipe-view .pane,
+  .recipe-view .sheet {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  body,
+  body > div,
+  .page,
+  .page > .side-by-side,
+  .page > .side-by-side > .content,
+  .tab-panel:not([hidden]) {
+    display: block !important;
+  }
+  /* The tabs you are not looking at stay off the paper. */
+  .tab-panel[hidden] {
+    display: none !important;
+  }
+
+  /* ── Ink on paper ─────────────────────────────────────────────────── */
+  /* Nothing may depend on a fill: backgrounds are off by default when
+     printing. One ink, and shadows and rounded chips go. */
+  body,
+  .page,
+  .page > .side-by-side,
+  .page > .side-by-side > .content {
+    background: #fff !important;
+    color: #000;
+  }
+  .tab-panel,
+  .tab-panel *,
+  .tab-panel *::before,
+  .tab-panel *::after {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #1a1a1a !important;
+    text-shadow: none !important;
+  }
+
+  /* ── Only the recipe, none of the app ─────────────────────────────── */
+  .gourmet-topbar,
+  .gourmet-tabs,
+  .recipe-actions,
+  .recipe-view .fab,
+  .recipe-view .sheet,
+  .split-pane > .resizer,
+  .pane-head button,
+  .amount-input .steps,
+  .sheet-close,
+  .shopping-screen button,
+  .shopping-screen form,
+  [role="status"],
+  dialog {
+    display: none !important;
+  }
+  /* A recipe's name on the shopping list is a button; on paper it is a title. */
+  .shopping-screen .shopping-recipe-link {
+    display: inline !important;
+    text-decoration: none !important;
+  }
+  /* The multiplier and the yields are fields on screen, numbers on paper. */
+  .amount-input input,
+  .shopping-screen input {
+    border: 0 !important;
+    padding: 0 !important;
+    /* Wide enough that no value is ever clipped by the box it sits in. */
+    inline-size: 3.2em !important;
+    text-align: start !important;
+    font: inherit !important;
+    font-weight: 700;
+  }
+  /* Where a field can be sized to its content, the number sits right against
+     the words that follow it: "Makes 8 samosas", not "Makes 8    samosas". */
+  @supports (field-sizing: content) {
+    .amount-input input,
+    .shopping-screen input {
+      inline-size: auto !important;
+      field-sizing: content;
+    }
+  }
+
+  /* ── One column: title, ingredients, method ───────────────────────── */
+  /* On a wide screen the two panes sit side by side, with the title inside
+     the right-hand one. `display: contents` dissolves those wrappers so the
+     three parts become one column in the order a cook reads them. */
+  .recipe-view {
+    display: flex !important;
+    flex-direction: column;
+  }
+  .split-pane,
+  .split-pane > .left,
+  .split-pane > .right,
+  .recipe-view .text-pane,
+  .recipe-view .column {
+    display: contents !important;
+  }
+  .recipe-view .hero {
+    order: 1;
+  }
+  .recipe-view .ingredients-pane,
+  .recipe-view .ingredients-inline {
+    order: 2;
+    padding: 0 !important;
+    margin: 0 0 0.5cm !important;
+  }
+  .recipe-view .recipe-prose {
+    order: 3;
+    max-width: none;
+    margin: 0 !important;
+  }
+
+  /* ── The head of the recipe ───────────────────────────────────────── */
+  .hero {
+    gap: 0.4cm;
+    margin-block-end: 0.5cm;
+    break-inside: avoid;
+    break-after: avoid;
+  }
+  .hero.photo {
+    grid-template-columns: 4.5cm 1fr !important;
+    align-items: start;
+  }
+  .hero img {
+    max-height: 5cm !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+  }
+  .hero .info {
+    gap: 0.3cm;
+  }
+  /* The recipe's colour, where a border can still carry it. */
+  .hero .band {
+    padding: 0 0 0 0.3cm !important;
+    border-radius: 0 !important;
+    border-inline-start: 3pt solid var(--recipe-bg, #000) !important;
+  }
+  .hero h1 {
+    font-size: 19pt;
+  }
+  .hero .facts {
+    gap: 0.2cm 0.8cm;
+    padding: 0;
+  }
+  .hero dt {
+    font-size: 7pt;
+  }
+  .hero dd {
+    font-size: 10pt;
+  }
+  .hero .cats,
+  .hero .sources {
+    font-size: 9pt;
+  }
+  .hero .cats li {
+    /* The category chips are fills; on paper they are a list of words. */
+    display: inline;
+  }
+  .hero .cats li:not(:last-child)::after {
+    content: ", ";
+  }
+
+  /* ── Ingredients ──────────────────────────────────────────────────── */
+  /* "Ingredients x 2" is worth printing; "x 1" is not. */
+  .pane-head .multiplier:not(.scaled) {
+    display: none;
+  }
+  .pane-head {
+    position: static !important;
+    justify-content: flex-start;
+    gap: 0.1cm 0.4cm;
+    padding: 0 0 0.1cm !important;
+    margin-block-end: 0.2cm !important;
+    border-block-end: 1pt solid currentColor !important;
+    break-after: avoid;
+  }
+  .ingredients .ingredient {
+    padding: 0.03cm 0 !important;
+    break-inside: avoid;
+    font-size: 10pt;
+  }
+  .ingredients .amount {
+    min-inline-size: 2.2cm;
+  }
+  .ingredients .group {
+    break-inside: avoid;
+  }
+  .ingredients .group > h4 {
+    margin: 0.25cm 0 0.1cm;
+    break-after: avoid;
+  }
+  /* A long list reads better in two columns than down a whole page; a short
+     one is left alone. (A browser without :has() simply keeps one column.) */
+  .recipe-view .ingredients-pane > .ingredients:has(li:nth-child(9)),
+  .recipe-view .ingredients-inline > .ingredients:has(li:nth-child(9)) {
+    columns: 2;
+    column-gap: 1cm;
+  }
+
+  /* ── Method ───────────────────────────────────────────────────────── */
+  .recipe-prose {
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+  .recipe-prose h2 {
+    margin: 0.4cm 0 0.2cm;
+    break-after: avoid;
+  }
+  .recipe-prose h2::after {
+    background: currentColor !important;
+  }
+  .recipe-prose p,
+  .recipe-prose li {
+    break-inside: avoid;
+    orphans: 2;
+    widows: 2;
+  }
+  .recipe-prose ol > li {
+    padding-inline-start: 1cm;
+    margin-block-end: 0.3cm;
+    min-height: 0;
+  }
+  /* The step number is a filled disc on screen; on paper, an outlined one. */
+  .recipe-prose ol > li::before {
+    width: 0.6cm;
+    height: 0.6cm;
+    border: 0.75pt solid currentColor;
+    font-size: 9pt;
+  }
+  /* Highlighting is an on-screen affordance: the marks themselves do not print. */
+  .recipe-prose ing,
+  .recipe-prose ing.active,
+  .recipe-prose ing:hover {
+    text-decoration: none !important;
+    box-shadow: none !important;
+  }
+  .recipe-prose img {
+    max-height: 7cm;
+    break-inside: avoid;
+  }
+  /* A link on paper is only useful if you can read where it goes. */
+  .hero .sources a[href^="http"]::after,
+  .recipe-prose a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── Shopping list ────────────────────────────────────────────────── */
+  .shopping-screen h2 {
+    margin-block-start: 0;
+  }
+  .aisle-heading {
+    padding: 0.15cm 0 0.05cm !important;
+    margin-block-start: 0.4cm !important;
+    border-block-end: 1pt solid currentColor !important;
+    border-radius: 0 !important;
+    break-after: avoid;
+  }
+  /* A line of the list is never split down the middle by a page break. */
+  .shopping-screen .data-list {
+    display: block !important;
+  }
+  .shopping-screen .data-list > li,
+  .shopping-row {
+    break-inside: avoid;
+  }
+  /* An empty box to tick while you shop. */
+  .shopping-row input[type="checkbox"] {
+    appearance: none !important;
+    inline-size: 0.4cm !important;
+    block-size: 0.4cm !important;
+    border: 0.75pt solid currentColor !important;
+  }
+  .on-list {
+    break-inside: avoid;
+  }
+}

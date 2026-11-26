@@ -134,7 +134,7 @@
   </DataListItem>
 {/snippet}
 
-<Container maxWidth="40rem" height="auto">
+<Container maxWidth="40rem" height="auto" class="shopping-screen">
   <h2>Shopping list</h2>
   {#if shopping.error}<p><Text warning>Could not save the list: {shopping.error}</Text></p>{/if}
 
