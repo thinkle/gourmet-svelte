@@ -1,11 +1,10 @@
 <script>
   // The shopping list, after desktop Gourmet's (specs/shopping-list.md):
-  //   To buy        grouped by aisle (shopping category); tap an item to put it in the cart
-  //   In the cart   this trip only; "Done shopping" empties it
-  //   Already have  remembered for every list; shown quietly
+  //   To buy        grouped by aisle; tap to cross off or restore in place
+  //   Pantry Items  remembered for every list; shown quietly
   // Items are worked out from the recipes on the list (app/shoppingList.js);
   // saving goes through app/shopping.svelte.js.
-  import { Container, Inline, Input, Button, CircleButton, DataList, DataListItem, Dialog, Accordion, Text } from "contain-css-svelte";
+  import { Container, Inline, Input, Button, CircleButton, Checkbox, DataList, DataListItem, Dialog, Accordion, Text, Tooltip } from "contain-css-svelte";
   import { library } from "../../app/library.svelte.js";
   import { buildList } from "../../app/shoppingList.js";
   import {
@@ -13,8 +12,17 @@
     setCart, setAlreadyHave, wantThisTrip, doneShopping, setCategory, setCategoryOrder, renameItem,
   } from "../../app/shopping.svelte.js";
   import RecipeOnList from "./RecipeOnList.svelte";
+  import ShoppingIcon from "../../components/ShoppingIcon.svelte";
+  import ShoppingItemEditor from "./ShoppingItemEditor.svelte";
+  import AisleSection from "./AisleSection.svelte";
+  import { aisleName } from "./aisleKinds.js";
+
+  let { onopen } = $props();
 
   const list = $derived(buildList(shopping.rec, library.recipes));
+  const shoppingGroups = $derived([...list.categoryNames, null]
+    .map((name) => ({ name, items: list.items.filter((item) => item.state !== "have" && item.aisle === name) }))
+    .filter((group) => group.items.length));
 
   let draft = $state("");
   async function add(e) {
@@ -24,22 +32,33 @@
     await addItem(text);
   }
 
-  // One tap on the aisle chip opens the choices; one tap on a choice saves it and closes.
-  let picking = $state(null); // the key of the item whose aisle is being chosen
-  let newAisle = $state("");
-  async function choose(item, name) {
-    picking = null;
-    newAisle = "";
-    if ((name ?? "") !== (item.category ?? "")) await setCategory(item.key, name);
+  // Snapshot the item while editing so a rename does not unmount its drafts.
+  let picking = $state(null);
+  let savingItem = $state(false);
+  function closeItemEditor() {
+    if (!savingItem) picking = null;
   }
-  // Rename or merge: typing another item's name makes them one item.
-  let renaming = $state(null);
-  let rename = $state("");
-  async function saveRename(e) {
-    e.preventDefault();
-    const item = renaming;
-    renaming = null;
-    if (rename.trim() && rename.trim().toLowerCase() !== item.key) await renameItem(item.baseKeys, item.key, rename);
+  async function saveItem({ name, category }) {
+    if (savingItem || !picking || !name.trim()) return;
+    savingItem = true;
+    try {
+      let item = picking;
+      const key = name.toLowerCase();
+      if (key !== item.key) {
+        await renameItem(item.baseKeys, item.key, name);
+        if (shopping.error) return;
+        // On a category-save failure, retry against the renamed key.
+        item = { ...item, key, name };
+        picking = item;
+      }
+      if (category !== undefined) {
+        await setCategory(item.key, category);
+        if (shopping.error) return;
+      }
+      picking = null;
+    } finally {
+      savingItem = false;
+    }
   }
 
   let arranging = $state(false);
@@ -56,33 +75,60 @@
   const amountText = (item) => item.amounts.map((a) => a.text).join(" + ");
 </script>
 
+{#snippet sourceDetails(item)}
+  <details class="shopping-item-source">
+    <summary>{unique(sources(item)).join(", ")}</summary>
+    <ul class="shopping-source-details">
+      {#each item.from as source}
+        {@const recipe = source.recipeId == null ? null : library.recipes.find((r) => r.id === source.recipeId)}
+        <li>
+          {#if recipe && onopen}
+            <Button class="shopping-recipe-link" onclick={() => onopen(recipe)} aria-label="Open recipe {source.title}">{source.title}</Button>
+          {:else if item.from.length > 1}<strong>{source.title ?? "Added by hand"}</strong>{/if}
+          <p>{source.text}</p>
+        </li>
+      {/each}
+    </ul>
+  </details>
+{/snippet}
+
 {#snippet detail(item)}
-  <p>
+  <p class={item.state === "cart" ? "shopping-item-name crossed-off" : "shopping-item-name"}>
     {#if amountText(item)}<strong>{amountText(item)}</strong>{" "}{/if}{item.name}
   </p>
-  <p><Text muted>{unique(sources(item)).join(", ")}</Text></p>
-  {#if picking === item.key}
-    <Inline wrap>
-      {#each list.aisleChoices as name (name)}
-        <Button primary={name === item.category} onclick={() => choose(item, name)} aria-label="Put {item.name} in {name}">{name}</Button>
-      {/each}
-      <Input type="text" placeholder="New aisle" bind:value={newAisle} aria-label="New aisle for {item.name}" autocomplete="off"
-        onkeydown={(e) => { if (e.key === "Enter" && newAisle.trim()) { e.preventDefault(); choose(item, newAisle); } }} />
-      {#if item.category}<Button onclick={() => choose(item, "")} aria-label="Forget the aisle for {item.name}">Clear</Button>{/if}
-      <Button onclick={() => { renaming = item; rename = item.name; picking = null; }} aria-label="Rename {item.name}">Rename…</Button>
-    </Inline>
-  {/if}
+  {@render sourceDetails(item)}
 {/snippet}
 
 {#snippet buyRow(item)}
-  <DataListItem interactive onclick={() => setCart(item.key, true)}>
+  <DataListItem interactive class="shopping-row" aria-pressed={item.state === "cart"}
+    onclick={(event) => {
+      if (event.target instanceof Element && event.target.closest(".shopping-row-check, .shopping-item-source")) return;
+      setCart(item.key, item.state !== "cart");
+    }}>
+    {#snippet start()}
+      <Checkbox class="shopping-row-check" checked={item.state === "cart"} aria-label="Cross off {item.name}"
+        onchange={(event) => setCart(item.key, event.currentTarget.checked)} />
+    {/snippet}
     {@render detail(item)}
     {#snippet end()}
-      <Button onclick={() => setAlreadyHave(item.key, true)} aria-label="Already have {item.name}">Already have</Button>
-      <Button onclick={() => (picking = picking === item.key ? null : item.key)} aria-label="Aisle for {item.name}: {item.aisle ?? 'none'}"
-        class={item.category ? "" : "guess"}>{item.aisle ?? "Aisle"}</Button>
+      <Tooltip tooltipText="Pantry item — keep off lists" tooltipId={`shopping-have-${encodeURIComponent(item.key)}`} horizontal="left">
+        <CircleButton class="shopping-action" onclick={() => setAlreadyHave(item.key, true)} aria-label="Mark {item.name} as a pantry item"
+          aria-describedby={`shopping-have-${encodeURIComponent(item.key)}`}>
+          <ShoppingIcon kind="pantry" />
+        </CircleButton>
+      </Tooltip>
+      <Tooltip tooltipText={`Edit name or category: ${item.aisle ? aisleName(item.aisle) : 'none'}${item.category ? '' : ' (suggested)'}`}
+        tooltipId={`shopping-aisle-${encodeURIComponent(item.key)}`} horizontal="left">
+        <CircleButton class="shopping-action" onclick={() => (picking = item)}
+          aria-label="Edit shopping item {item.name}" aria-expanded={picking?.key === item.key} aria-haspopup="dialog"
+          aria-describedby={`shopping-aisle-${encodeURIComponent(item.key)}`}>
+          <ShoppingIcon kind="aisle" />
+        </CircleButton>
+      </Tooltip>
       {#if item.looseIds.length}
-        <CircleButton aria-label="Remove {item.name}" onclick={() => removeItem(item.looseIds)}>×</CircleButton>
+        <Tooltip tooltipText="Remove item" horizontal="left">
+          <CircleButton class="shopping-action" aria-label="Remove {item.name}" onclick={() => removeItem(item.looseIds)}>×</CircleButton>
+        </Tooltip>
       {/if}
     {/snippet}
   </DataListItem>
@@ -102,7 +148,8 @@
   {#if list.recipes.length}
     <h3>For {list.recipes.length} {list.recipes.length === 1 ? "recipe" : "recipes"}</h3>
     {#each list.recipes as r (r.id)}
-      <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)} />
+      <RecipeOnList entry={r} onchange={(m) => setRecipeMultiplier(r.id, m)} onremove={() => removeRecipe(r.id)}
+        onopen={r.found && onopen ? () => onopen(r.recipe) : undefined} />
     {/each}
   {/if}
 
@@ -110,9 +157,10 @@
     <p><Text muted>Nothing on the list yet. Open a recipe and choose "Add to shopping list", or type an item above.</Text></p>
   {:else}
     <h3>To buy</h3>
-    {#each list.groups as g (g.name ?? "")}
-      {#if g.name || list.categoryNames.length}<h4>{g.name ?? "Other"}</h4>{/if}
-      <DataList>{#each g.items as item (item.key)}{@render buyRow(item)}{/each}</DataList>
+    {#each shoppingGroups as g (g.name ?? "")}
+      <AisleSection name={g.name} showHeading={!!g.name || list.categoryNames.length > 0}>
+        <DataList stackable={false}>{#each g.items as item (item.key)}{@render buyRow(item)}{/each}</DataList>
+      </AisleSection>
     {:else}
       <p><Text muted>Nothing left to buy.</Text></p>
     {/each}
@@ -122,10 +170,10 @@
         <DataList>
           {#each list.categoryNames as name, i (name)}
             <DataListItem>
-              <p>{name}</p>
+              <p>{aisleName(name)}</p>
               {#snippet end()}
-                <CircleButton aria-label="Move {name} up" onclick={() => move(i, -1)} disabled={i === 0}>↑</CircleButton>
-                <CircleButton aria-label="Move {name} down" onclick={() => move(i, 1)} disabled={i === list.categoryNames.length - 1}>↓</CircleButton>
+                <CircleButton aria-label="Move {aisleName(name)} up" onclick={() => move(i, -1)} disabled={i === 0}>↑</CircleButton>
+                <CircleButton aria-label="Move {aisleName(name)} down" onclick={() => move(i, 1)} disabled={i === list.categoryNames.length - 1}>↓</CircleButton>
               {/snippet}
             </DataListItem>
           {/each}
@@ -134,34 +182,22 @@
     {/if}
 
     {#if list.cart.length}
-      <Accordion>
-        <details>
-        <summary>In the cart ({list.cart.length})</summary>
-        <DataList>
-          {#each list.cart as item (item.key)}
-            <DataListItem interactive onclick={() => setCart(item.key, false)}>
-              <p><Text muted>{#if amountText(item)}{amountText(item)}{" "}{/if}{item.name}</Text></p>
-              {#snippet end()}<Text muted>tap to put back</Text>{/snippet}
-            </DataListItem>
-          {/each}
-        </DataList>
-        </details>
-      </Accordion>
-      <p><Button primary onclick={doneShopping}>Done shopping</Button></p>
+      <p><Button primary onclick={doneShopping}>Done shopping</Button> <Text muted>{list.cart.length} crossed off</Text></p>
     {/if}
 
     {#if list.alreadyHave.length}
       <Accordion>
         <details>
-        <summary>Already have ({list.alreadyHave.length})</summary>
-        <p><Text muted>Remembered for every recipe and list. Recipes still use them; they are just not on your list.</Text></p>
+        <summary><span class="pantry-summary"><ShoppingIcon kind="pantry" />Pantry Items ({list.alreadyHave.length})</span></summary>
+        <p><Text muted>Pantry items stay off every shopping list. Recipes still use them; choose “Buy this trip” when you need to restock.</Text></p>
         <DataList>
           {#each list.alreadyHave as item (item.key)}
             <DataListItem>
               <p><Text muted>{#if amountText(item)}{amountText(item)}{" "}{/if}{item.name}</Text></p>
+              {@render sourceDetails(item)}
               {#snippet end()}
                 <Button onclick={() => wantThisTrip(item.key)} aria-label="Buy {item.name} this trip">Buy this trip</Button>
-                <Button onclick={() => setAlreadyHave(item.key, false)} aria-label="Stop having {item.name} for good">Don't have it</Button>
+                <Button onclick={() => setAlreadyHave(item.key, false)} aria-label="Remove {item.name} from pantry">Remove from pantry</Button>
               {/snippet}
             </DataListItem>
           {/each}
@@ -171,12 +207,11 @@
     {/if}
   {/if}
 
-  <Dialog open={!!renaming} modal onclose={() => (renaming = null)}>
-    <form onsubmit={saveRename}>
-      <h3>Rename {renaming?.name}</h3>
-      <p><label>Same as <Input type="text" bind:value={rename} autocomplete="off" /></label></p>
-      <p><Text muted>Typing another item's name merges the two on every list.</Text></p>
-      <Inline><Button primary type="submit">Save</Button><Button type="button" onclick={() => (renaming = null)}>Cancel</Button></Inline>
-    </form>
+  <Dialog open={!!picking} modal class="shopping-item-dialog" aria-label="Edit shopping item" onclose={closeItemEditor}
+    oncancel={(event) => { if (savingItem) event.preventDefault(); }}>
+    {#if picking}
+      <ShoppingItemEditor item={picking} choices={list.aisleChoices}
+        onsave={saveItem} oncancel={closeItemEditor} saving={savingItem} error={shopping.error} />
+    {/if}
   </Dialog>
 </Container>

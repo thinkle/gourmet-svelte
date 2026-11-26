@@ -5,17 +5,17 @@
 // compatible amounts. The old crawler (legacy/src/stores/shoppingStores.js)
 // was tied to the old stores, so this is a small rewrite of the walk only.
 import { getShopItem } from "../utils/ingredientUtils.js";
-import { addAmounts } from "../utils/unitAmounts.js";
+import { addAmounts, adjustAmountUnit } from "../utils/unitAmounts.js";
 import { formatAmount } from "../utils/numbers.js";
 import { guessAisle, DEFAULT_AISLES } from "./shoppingAisles.js";
 
 export const isRef = (ing) => ing && ing.reference !== undefined && ing.reference !== null && ing.reference !== "";
 // getShopItem (kept) keeps words from asides and prep notes ("(2 1/2 sticks)",
-// ", packed", " -- cut back because ...") in the name, so hand it the text
+// ", packed", "; adjust to taste", " -- cut back because ...") in the name, so hand it the text
 // without them.
 const bare = (ing) => {
   if (ing.shopItem) return ing;
-  const text = (ing.text ?? "").replace(/\([^)]*\)/g, " ").split(/\s--?\s|,/)[0].replace(/(^|\s)[\d\/.]+(?=\s|$)/g, " ").trim();
+  const text = (ing.text ?? "").replace(/\([^)]*\)/g, " ").split(/\s--?\s|[,;]/)[0].replace(/(^|\s)[\d\/.]+(?=\s|$)/g, " ").trim();
   return { ...ing, text: text || ing.text };
 };
 export const itemName = (ing) => getShopItem(bare(ing));
@@ -35,17 +35,17 @@ const scale = (amount, mult) => {
 };
 
 /** Every leaf ingredient under a list, following groups and nested recipe references. */
-function walk(list, mult, source, recipes, seen, out, missing) {
+function walk(list, mult, source, recipes, seen, out, missing, sourceId) {
   for (const ing of list ?? []) {
     if (!ing) continue;
-    if (ing.ingredients) walk(ing.ingredients, mult, source, recipes, seen, out, missing);
+    if (ing.ingredients) walk(ing.ingredients, mult, source, recipes, seen, out, missing, sourceId);
     else if (isRef(ing)) {
       const target = findRecipe(recipes, ing.reference);
       const times = ing.amount?.amount && ing.amount.amount !== 1 ? ing.amount.amount : 1;
       if (!target) { missing.push(ing); continue; }
       if (seen.includes(target.id)) continue; // a recipe that contains itself
-      walk(target.ingredients, mult * times, source, recipes, [...seen, target.id], out, missing);
-    } else if (ing.text) out.push({ ing, mult, source });
+      walk(target.ingredients, mult * times, source, recipes, [...seen, target.id], out, missing, sourceId);
+    } else if (ing.text) out.push({ ing, mult, source, sourceId });
   }
 }
 
@@ -95,7 +95,7 @@ export function buildList(rec, recipes) {
       const target = findRecipe(recipes, e.reference);
       const mult = e.amount?.amount || 1;
       onList.push({ entry: e, id: e.reference, title: target?.title ?? e.text ?? "(recipe)", mult, found: !!target, recipe: target });
-      if (target) walk(target.ingredients, mult, target.title, recipes, [target.id], leaves, missing);
+      if (target) walk(target.ingredients, mult, target.title, recipes, [target.id], leaves, missing, target.id);
     } else if (e?.text) {
       leaves.push({ ing: e, mult: 1, source: null, loose: true });
     }
@@ -104,13 +104,17 @@ export function buildList(rec, recipes) {
   for (const l of leaves) {
     const base = baseKey(l.ing);
     const key = aliases[base] ?? base;
+    // MCP removal hides a merged item on this list without editing source recipes.
+    if ((rec?.excludedItems ?? []).includes(key)) continue;
     l.base = base;
     if (!byKey.has(key)) byKey.set(key, []);
     byKey.get(key).push(l);
   }
   const items = [...byKey.entries()].map(([key, ls]) => {
     const scaled = ls.map((l) => scale(l.ing.amount, l.mult)).filter(Boolean);
-    const amounts = scaled.length ? addAmounts(scaled, key).map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") })) : [];
+    const amounts = addAmounts(scaled, key)
+      .map((a) => adjustAmountUnit(a, { favorCurrentUnit: false }))
+      .map((a) => ({ ...a, text: [formatAmount(a), a.unit].filter(Boolean).join(" ") }));
     const name = ls.every((l) => l.base === key) ? baseName(ls[0].ing) : cap(key);
     // Already have: what you said, the desktop app's defaults, and old recipes' shopIgnore (read only).
     const hint = ls.some((l) => l.ing.shopIgnore === true) || matchesDefault(name);
@@ -127,6 +131,7 @@ export function buildList(rec, recipes) {
       onTrip: trip.has(key),
       from: ls.map((l) => ({
         title: l.source, // null for a loose item
+        recipeId: l.sourceId ?? null, // local id for opening the source recipe
         mult: l.mult,
         text: l.ing.originalText || [formatAmount(l.ing.amount), l.ing.amount?.unit, l.ing.text].filter(Boolean).join(" "),
       })),

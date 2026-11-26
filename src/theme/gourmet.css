@@ -17,6 +17,25 @@
 }
 
 /* ── App shell ─────────────────────────────────────────── */
+.gourmet-topbar {
+  --button-bg: var(--primary-bg);
+  --button-fg: var(--primary-fg);
+  --button-border: none;
+  --button-box-shadow: none;
+  --button-icon-gap: 0.4rem;
+  --button-hover-bg: color-mix(in oklab, var(--primary-bg) 84%, var(--primary-fg));
+  --button-hover-fg: var(--primary-fg);
+  --button-hover-filter: none;
+  --disabled-base-color-percentage: 100%;
+  --button-disabled-filter: opacity(0.6);
+}
+.gourmet-topbar button:focus-visible {
+  --button-bg: var(--button-hover-bg);
+}
+@media (max-width: 600px) {
+  .gourmet-topbar .topbar-action-label { display: none; }
+}
+.recipe-bookmark-dialog { --input-width: 100%; }
 /* The cookie has been Gourmet's mark since the PyGTK days. */
 /* A button that blends into its bar until you point at it (Sign out). */
 .bar button.quiet {
@@ -75,16 +94,62 @@
 .stars { color: #b7791f; letter-spacing: 0.05em; white-space: nowrap; }
 
 /* ── One recipe: two panes that scroll on their own ────── */
+/* Set ingredients before the recipe Surface computes its text tones. Each
+   nested surface (title band, fields, highlights, phone sheet) resolves anew.
+   The palette's background is a mixing target, never a text foreground. */
+.recipe-view {
+  --primary-bg: var(--recipe-bg);
+  --primary-fg: var(--recipe-fg);
+  --primary-color: var(--recipe-color);
+  /* Keep pale ingredients on paper and dark ingredients on dark surfaces legible. */
+  --primary-text-amount: 35%;
+  --on-primary-heading-fg: var(--primary-fg);
+  --on-primary-link-text-fg: var(--primary-fg);
+  /* A highlighted amount uses the highlighter's checked ink pair. */
+  --on-note-primary-text-fg: var(--note-fg);
+  --link-color: var(--primary-color);
+  --heading-tint: var(--primary-color);
+}
+.amount-input.changed { --input-fg: var(--primary-text-fg); }
+.ingredients .ingredient.active:hover { --paint-bg-mix-amount: 0%; }
+.recipe-frame { height: 100%; min-height: 0; }
 .recipe-view { height: 100%; min-height: 0; display: flex; flex-direction: column; }
 .recipe-view .pane { overflow-y: auto; overscroll-behavior: contain; min-height: 0; height: 100%; }
 .recipe-view .ingredients-pane { padding: 0 0.75rem 2rem; font-family: var(--recipe-font-family); font-size: 1.02rem; }
+
+.ingredients { list-style: none; margin: 0; padding: 0; }
+.ingredients .group > h4 {
+  margin: 1.1rem 0 0.25rem;
+  font-family: var(--font-family);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.ingredients .ingredient {
+  display: grid;
+  grid-template-columns: fit-content(11rem) 1fr;
+  column-gap: 0.75rem;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: 0.375rem;
+  font: inherit;
+  text-align: start;
+  line-height: 1.35;
+  cursor: pointer;
+  scroll-margin-block: 3.5rem 1rem;
+}
+.ingredients .ingredient:hover { --paint-bg-mix-color: var(--surface-fg, var(--fg)); --paint-bg-mix-amount: 7%; }
+.ingredients .ingredient:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.ingredients .amount { min-inline-size: 4.75rem; font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
 .recipe-view .text-pane { padding: 1rem clamp(1rem, 4cqi, 3rem) 4rem; container-type: inline-size; flex: 1; }
 .pane-head {
   position: sticky; top: 0; z-index: 1;
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
   padding: 0.75rem 0.25rem 0.6rem;
   margin-block-end: 0.25rem;
-  background: var(--bg);
   border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent);
 }
 .pane-head .scale-to { display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -115,13 +180,12 @@
 .recipe-view .sheet {
   position: absolute; inset-inline: 0; inset-block-end: 0; z-index: 4;
   max-height: 48dvh; overflow-y: auto; overscroll-behavior: contain;
-  padding: 0 0.75rem 1.25rem;
-  background: var(--bg);
   border-block-start: 0.3rem solid var(--recipe-bg);
   border-radius: 1rem 1rem 0 0;
   box-shadow: 0 -0.5rem 1.5rem rgb(0 0 0 / 0.2);
   font-family: var(--recipe-font-family); font-size: 1.02rem;
 }
+.recipe-view .sheet-surface { padding: 0 0.75rem 1.25rem; }
 .sheet-close {
   width: 2.25rem; height: 2.25rem; border: 0; border-radius: 50%;
   background: color-mix(in oklab, currentColor 8%, transparent); color: inherit;
@@ -173,10 +237,14 @@
   border-radius: 0.2em;
   scroll-margin-block: 6rem;
 }
-.recipe-prose ing:hover { background: color-mix(in oklab, var(--note-bg) 55%, transparent); }
+.recipe-prose ing:hover { background: var(--note-bg); color: var(--note-fg); }
 .recipe-prose ing.active { background: var(--note-bg); color: var(--note-fg); text-decoration: none; box-shadow: 0 0 0 0.15em var(--note-bg); }
 /* An amount marked in the text (<amount>): it scales with the recipe. */
 .recipe-prose amount { white-space: nowrap; }
+.recipe-prose amount.scaled { color: var(--primary-text-fg); font-weight: 700; }
+/* Raw instruction HTML cannot contain a Svelte Surface. Highlighted mentions
+   use the note pair; amounts inside them follow that foreground. */
+.recipe-prose ing:is(:hover, .active) amount.scaled { color: inherit; }
 
 /* Facts in the recipe header stay whole. */
 .hero .bottom .tag, .hero .bottom span { white-space: nowrap; }
@@ -188,11 +256,11 @@
 .tab-dirty { margin-inline-start: 0.35em; font-weight: 700; }
 .recipe-actions { display: flex; justify-content: flex-end; margin: 0 0 0.5rem; }
 .recipe-editor .text-pane, .recipe-editor .column { display: grid; align-content: start; gap: 1rem; }
-.recipe-editor .bar { position: sticky; top: 0; z-index: 2; background: var(--bg); }
+.recipe-editor .bar { position: sticky; top: 0; z-index: 2; }
 .details-editor { display: grid; gap: 0.75rem; }
 .ingredients-editor ul { list-style: none; margin: 0; padding: 0; }
 .ingredients-editor .edit-line, .ingredients-editor .group-head { display: flex; align-items: flex-start; gap: 0.35rem; margin-block: 0.3rem; }
-.ingredients-editor .edit-group { margin-block: 0.9rem; padding-inline-start: 0.6rem; border-inline-start: 0.2rem solid var(--recipe-bg); }
+.ingredients-editor .edit-group { margin-block: 0.9rem; padding-inline-start: 0.6rem; border-inline-start: 0.2rem solid var(--primary-text-fg); }
 .ingredients-editor .group-head input { font-weight: 700; }
 .ingredient-line { flex: 1; min-width: 0; display: grid; gap: 0.15rem; }
 .ingredient-line input { width: 100%; }
@@ -211,12 +279,124 @@
 .text-block-editor { display: grid; gap: 0.4rem; margin-block-end: 1rem; }
 .text-block-editor .rich-text { display: grid; gap: 0.4rem; }
 .rich-text-body.recipe-prose { margin: 0; max-width: none; min-height: 6rem; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in oklab, currentColor 25%, transparent); border-radius: 0.4rem; }
-.rich-text-body:focus { outline: 2px solid var(--recipe-bg, currentColor); outline-offset: 1px; }
+.rich-text-body:focus { outline: 2px solid var(--primary-text-fg); outline-offset: 1px; }
 .rich-text-body:empty::before { content: attr(data-placeholder); opacity: 0.5; }
 /* ── Shopping list ─────────────────────────────────────── */
-/* An aisle that is only a guess (nothing chosen yet) reads quieter. */
-.guess { opacity: 0.6; }
+/* A soft surface and a matching ink color make default aisles easy to scan. */
+.themed-aisle {
+  --checkbox-border: 1px solid var(--aisle-fg);
+  --checkbox-checked-bg: var(--aisle-fg);
+  --checkbox-checked-fg: var(--aisle-bg);
+  --checkbox-checked-border: 1px solid var(--aisle-fg);
+  --shopping-icon-fill: var(--aisle-bg);
+}
+.aisle-heading {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.75rem; margin-block-start: 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  --aisle-icon-fill: color-mix(in oklab, var(--current-fg) 12%, var(--current-bg));
+  --shopping-icon-fill: var(--aisle-icon-fill);
+}
+.aisle-heading h4 { margin: 0; color: inherit; }
+.aisle-heading svg { flex-shrink: 0; }
+.aisle-label {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  color: var(--aisle-fg, inherit);
+  --aisle-icon-fill: color-mix(in oklab, var(--aisle-fg) 12%, var(--aisle-bg));
+  --shopping-icon-fill: var(--aisle-icon-fill);
+}
+.aisle-label svg { flex-shrink: 0; }
+.aisle-produce { --aisle-bg: #edf5e8; --aisle-fg: #295c38; }
+.aisle-meat { --aisle-bg: #faeee9; --aisle-fg: #8f4037; }
+.aisle-seafood { --aisle-bg: #eaf4f8; --aisle-fg: #285d78; }
+.aisle-deli { --aisle-bg: #fbf2dc; --aisle-fg: #765319; }
+.aisle-canned { --aisle-bg: #f8ecea; --aisle-fg: #8b453b; }
+.aisle-grains { --aisle-bg: #f5efde; --aisle-fg: #72551f; }
+.aisle-international { --aisle-bg: #f2ecf7; --aisle-fg: #674886; }
+.aisle-condiments { --aisle-bg: #eef3df; --aisle-fg: #50601f; }
+.aisle-dairy { --aisle-bg: #edf3f8; --aisle-fg: #355d7b; }
+.aisle-bakery { --aisle-bg: #fbf0dd; --aisle-fg: #82511e; }
+.aisle-baking { --aisle-bg: #f5edf3; --aisle-fg: #78516c; }
+.aisle-spices { --aisle-bg: #fbefdf; --aisle-fg: #8b4d23; }
+.aisle-pantry { --aisle-bg: #f4eee4; --aisle-fg: #6b411d; }
+.aisle-frozen { --aisle-bg: #eaf6f7; --aisle-fg: #286774; }
+.aisle-coffee { --aisle-bg: #f3eae4; --aisle-fg: #70462e; }
+.aisle-breakfast { --aisle-bg: #f8f0dd; --aisle-fg: #795820; }
+.aisle-soda { --aisle-bg: #e9f3f4; --aisle-fg: #2b6268; }
+.aisle-juice { --aisle-bg: #fff0df; --aisle-fg: #92501e; }
+.aisle-alcohol { --aisle-bg: #f5edf6; --aisle-fg: #6a436b; }
+.pantry-summary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  /* Contain publishes the current surface pair as the summary inverts. */
+  --shopping-icon-fill: var(--current-bg, var(--bg));
+}
+.shopping-item-dialog {
+  --dialog-max-width: 30rem;
+  --dialog-min-height: 0;
+  --dialog-padding: 1rem;
+  --circle-button-size: 2rem;
+  --button-margin: 0;
+}
+.shopping-item-dialog .close-bar {
+  position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
+  height: auto;
+}
+.shopping-item-editor {
+  --dropdown-menu-width: 18rem;
+  --menu-item-padding: 0.35rem 0.65rem;
+  --input-width: 100%;
+}
+.shopping-item-editor fieldset { display: grid; gap: 1rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shopping-item-editor label { display: grid; gap: 0.35rem; min-width: 0; }
+.shopping-name-field > span { padding-inline-end: 2.5rem; font-weight: 600; }
+.shopping-item-editor p { margin: 0; }
+.shopping-edit-originals { list-style: none; padding: 0; margin: -0.4rem 0 0; font-size: 0.875rem; }
+.shopping-edit-originals li + li { margin-block-start: 0.5rem; }
+.shopping-edit-originals small, .shopping-editor-hint { font-size: 0.8125rem; }
+.shopping-custom-category > summary { cursor: pointer; font-size: 0.875rem; }
+.shopping-custom-category > label { margin-block-start: 0.75rem; }
+.shopping-row { --data-list-item-icon-width: 1.75rem; }
+.shopping-item-name {
+  --data-list-item-paragraph-font-size: 1rem;
+  --data-list-item-body-opacity: 1;
+}
+.shopping-item-source {
+  font-size: 0.8125rem;
+  color: var(--muted-text-fg);
+  --data-list-item-paragraph-font-size: 0.8125rem;
+  --data-list-item-paragraph-line-height: 1.45;
+  --data-list-item-body-opacity: 1;
+  --muted-text-fg: color-mix(in srgb, var(--current-fg), var(--current-bg) 30%);
+}
+.shopping-item-source > summary { cursor: pointer; }
+.shopping-source-details { margin: 0.4rem 0 0; padding-inline-start: 1rem; color: var(--current-fg); }
+.shopping-source-details li + li { margin-block-start: 0.4rem; }
+.shopping-item-name.crossed-off { text-decoration: line-through; color: color-mix(in oklab, var(--fg) 55%, var(--bg)); }
+/* Row tools inherit their aisle pair, with the cookie palette as the default. */
+.shopping-action {
+  --circle-button-size: 2.25rem;
+  --button-margin: 0;
+  --circle-button-bg: transparent;
+  --circle-button-fg: var(--aisle-fg, var(--primary-bg));
+  --circle-button-border: none;
+  --circle-button-hover-bg: var(--aisle-bg, var(--primary-fg));
+  --circle-button-hover-fg: var(--aisle-fg, var(--primary-bg));
+}
 /* A recipe on the list: its title on its own line, then multiplier and a remove button. */
+.shopping-recipe-link {
+  --button-bg: transparent;
+  --button-fg: currentColor;
+  --button-padding: 0;
+  --button-margin: 0;
+  --button-border: none;
+  --button-font-family: inherit;
+  --button-font-size: inherit;
+  --button-font-weight: inherit;
+  --button-text-decoration: underline;
+  --button-hover-bg: transparent;
+  --button-hover-fg: var(--primary-bg);
+  --button-box-shadow: none;
+}
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
 .on-list > :not(.title) { grid-row: 2; }
 .on-list .title { grid-row: 1; grid-column: 1 / -1; font-family: var(--recipe-font-family); font-weight: 600; text-wrap: balance; }

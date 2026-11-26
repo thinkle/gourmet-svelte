@@ -68,7 +68,10 @@ first add creates one. (Open question for the owner: clean up the spares.)
 2. Item key: `getShopItem(ingredient)` (`src/utils/ingredientUtils.js`: the
    ingredient's own `shopItem` if set, else the meaningful words, title-cased).
    It is given the text without parenthetical asides, text after a comma or
-   " -- ", and bare numbers, because the extractor otherwise keeps those words.
+   semicolons, " -- ", and bare numbers, because the extractor otherwise keeps
+   those words. Semicolons are hard note boundaries, matching the Python
+   desktop's `keymanager.snip_notes()` behavior. The full original text stays
+   available separately; explicit `ingkey`/`shopItem` values are not truncated.
    "Unsalted butter" and "butter, softened" thus both reach "Butter" when the
    extractor agrees; it is the old grouping, unchanged.
 3. Per key, `addAmounts` (`src/utils/unitAmounts.js`) adds amounts that share a
@@ -136,34 +139,84 @@ save of a list from this build.
 
 ### What is built
 
-Three sections, one stored document (nothing written to recipes):
+One stored document (nothing written to recipes), with the shopping rows and pantry:
 
 1. **To buy**, grouped by aisle in the user's order, unassigned last ("Other").
-   Tapping an item puts it in the cart (`cart: [key]`).
-2. **In the cart**, collapsed, this trip only. Tapping puts it back.
-   "Done shopping" empties `cart` and `trip`.
-3. **Already have** (desktop's pantry, its own label), collapsed, with merged
+   A checkbox in the leading icon area makes the row's action clear. Tapping
+   the checkbox or row crosses it off in place (`cart: [key]`); tapping again
+   restores it. Crossed-off rows keep their aisle and position. The former
+   **In the cart** expander is removed (owner, 2026-11-25).
+2. **Done shopping** appears when items are crossed off, with a count.
+   It empties `cart` and `trip`, resetting the list for the next trip.
+3. **Pantry Items** (owner's preferred label, 2026-11-25; formerly Already have), collapsed, with merged
    amounts. Remembered for every recipe and list: `alreadyHave: [key]`.
-   "Already have" on a To-buy item adds it for good. "Buy this trip" adds the key
-   to `trip` (cleared by Done shopping). "Don't have it" removes it for good.
+   The pantry cupboard icon on a To-buy item adds it for good, with the tooltip
+   "Pantry item — keep off lists". "Buy this trip" adds the key
+   to `trip` (cleared by Done shopping). "Remove from pantry" removes it for good.
    Seeds: the desktop `default_pantry`, matched loosely by words (noise words such
    as "all", "purpose", "extra", "virgin", "kosher", "ground" are ignored, so
    "all-purpose flour" matches "flour, all purpose") and old `shopIgnore: true`
    marks are read, never written, as "already have" hints. `alreadyHaveOff:
    [key]` overrides a seed or hint when the user removes it.
 
+The Pantry Items summary includes the same double-door pantry icon as the row
+action. Default aisle headings have softly tinted Contain surfaces and matching
+SVG food icons. Defaults (owner, 2026-11-25): Produce; Bakery; Dairy & Eggs;
+Meat; Seafood Counter; Deli; Canned; Rice, Pasta and Grains; International Aisle;
+Baking; Spices; Oils & Condiments; Cereal & Breakfast; Coffee & Tea;
+Soda & Water; Juice; Frozen; Beer, Wine & Spirits. This is a generic store walk,
+not a claim about a specific store's numbered aisles. Department references:
+[Market Basket](https://www.shopmarketbasket.com/departments/),
+[Wegmans](https://www.wegmans.com/shop/categories),
+[Whole Foods](https://www.wholefoodsmarket.com/products?page=1).
+Custom aisle headings and Other stay plain text. "Pantry" is reserved for
+remembered items to keep off lists; explicit old aisle assignments named Pantry
+display as "Misc (choose an aisle)" without rewriting their stored keys.
+The stored "Dairy & eggs" key is retained and displayed as "Dairy & Eggs".
+The same aisle colors apply to checkbox borders, checked fills and row tools.
+Recipe attribution is smaller and muted beneath the ingredient name. Its
+native disclosure reveals each original ingredient line (including preparation
+and shopping notes). Opening or reading the disclosure does not cross off the
+row. Recipe wording remains unchanged.
+Recipe titles in the recipes-on-list section and expanded original-line
+references open the recipe in the app's existing tab system; an already-open
+recipe is focused, without creating another tab. Derived source references carry
+the local recipe id so matching never relies on title text. Missing recipes and
+loose items do not have recipe links. Opening a recipe does not cross off its
+shopping item. No source-id field is written to stored ingredients.
+
+The tag button opens a single shopping-item editor (owner, 2026-11-25).
+Shopping Ingredient is directly editable and receives focus; the full original
+ingredient lines and source recipe names are shown beneath it. Category is a
+Contain Select with default aisle icons, a check on the current choice, and an
+Automatic option that clears an explicit assignment. Suggested categories are
+labeled. Custom-category entry starts inside a collapsed disclosure; typing a
+custom name previews it in the selector. Save applies name and category edits
+together, using the renamed key for any category write; Cancel discards drafts.
+If a category write fails after renaming succeeds, the editor retains its drafts
+and retries against the renamed key. On small screens Contain uses the native,
+text-only select. The close control sits beside the first field rather than
+reserving an empty header row.
+
 Item keys: a stored `ingkey`, else `shopItem`, else the cleaned `getShopItem`
 (see above), lowercased. `keyAliases: {key: key}` records "rename/merge this
-item" (Rename... in the aisle row): typing another item's name makes them one.
+item" (the Shopping Ingredient field): typing another item's name makes them one.
+
+Unit display decision (owner, 2026-11-25): **automatic unit promotion is
+WONTFIX for now**. The kept `addAmounts` combines compatible measurements using
+the largest unit already present; a tablespoons-only total can remain 20 Tbs.
+The desktop's `adjust_unit()` used a readability scorer and preferred unit
+ranges. That selector was not ported to JS; do not replace it with arbitrary
+thresholds that might produce unhelpful units or awkward fractions.
 
 Aisles: `aisles: {key: name}` (user choices only) and `aisleOrder: [name]` (set by
-"Arrange aisles", move up/down). Choosing an aisle is two taps: the aisle chip on
-the row opens a row of chips (existing and default aisles, most used first, plus a
-"New aisle" box, Enter saves); a chip assigns and closes. With no choice the aisle
-is a computed guess (`src/app/shoppingAisles.js`: a small curated keyword table,
-then the desktop table converted to `src/app/aisleDefaults.js` with its
-categories folded into Produce, Meat & fish, Dairy & eggs, Bakery, Baking, Spices,
-Pantry, Frozen, Drinks), shown muted, never stored, replaced by the user's pick.
+"Arrange aisles", move up/down). The tag icon opens the picker described above.
+With no choice the aisle is a computed guess (`src/app/shoppingAisles.js`):
+normalized word matching, simple plural handling, and longest matching phrase
+wins, with curated phrases breaking ties over the desktop reference table.
+Frozen/canned packaging takes precedence. The desktop table's Pantry and
+Meat & fish buckets are reclassified into the current defaults for guesses only.
+Guesses are never stored and never override an explicit user assignment.
 Default aisle order is the walking order in that list.
 
 Not carried over from desktop: optional-ingredient prompt (the web recipe has no
@@ -195,19 +248,22 @@ shopping-list documents only; dump before the first real save.
 | Aisles / categories | keep (user aisles + guessed defaults) |
 | Family sharing of one list | defer (needs the linked-accounts model) |
 
-## What an MCP agent would need (note only, API unchanged)
+## MCP commands (S-7, owner approved 2026-11-25)
 
-The shopping list is a recipe document, so the existing `/recipes/*` routes
-already reach it by `_id`, but `isShoppingList` documents are not discoverable
-or documented, and an agent would have to know the reference-with-multiplier
-convention. Needed, additively, later:
+The shopping list is still a recipe document. Additive `/shopping-list` routes
+now provide discovery, the same merged view as the app, and focused commands
+without replacing the recipe document. See `specs/shopping-mcp.md` and
+`public/openapi.yaml`. The old `/recipes/*` contract is unchanged.
 
-- Find the list: a search filter or a `GET /recipes/shopping-list` returning the
-  document (creating it if absent).
-- Add a recipe by `_id` and multiplier, add a loose item (plain string, parsed
-  as for recipes), tick/untick by name: small POST/PATCH calls that append
-  rather than replace `ingredients` (a PUT replaces the list and loses ticks).
-- Read the merged list (item, amounts, from which recipes, ticked), so the agent
-  does not reimplement merging. Today that logic lives only in the client.
-- Document `cart`, `alreadyHave`, `aisles`, `reference` and `amount.unit: "recipe"` in
-  `public/openapi.yaml`.
+`excludedItems: [canonical key]` is a new optional list-only field. MCP removal
+deletes loose entries contributing to that key and hides all remaining
+recipe-derived contributions. This is separate from pantry preferences and
+does not change source recipes. The shared app view applies exclusions after
+aliases; an explicit loose add with the same key clears its exclusion. Read
+returns exclusions so clients can explain hidden items. Old clients lacking
+this field's display support can still show an excluded recipe-derived item;
+use the updated app alongside these commands.
+
+Shopping MCP check-off, pantry mutation and Done shopping are outside S-7.
+Actual connected MCP tool registrations are in a separate codebase and remain
+pending its source location. No deployed data was changed to verify these routes.

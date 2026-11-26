@@ -1,4 +1,5 @@
 <script>
+  import { Surface, Text } from "contain-css-svelte";
   import Ingredients from "./Ingredients.svelte";
   // The amount and any alternate measures ("2 sticks (225 g)"), scaled.
   import Measures from "../../components/Measures.svelte";
@@ -14,45 +15,12 @@
       </li>
     {:else if ing}
       <li>
-        <button type="button" class="ingredient" class:active={active === ing.text}
+        <Surface as="button" colorRole={active === ing.text ? "note" : null} type="button" class={["ingredient", active === ing.text && "active"]}
           data-ingredient={ing.text} aria-pressed={active === ing.text} onclick={() => onpick?.(ing.text)}>
-          <span class="amount"><Measures amount={ing.amount} altAmounts={ing.altAmounts} {mult} /></span>
+          <span class="amount"><Text primary={mult !== 1}><Measures amount={ing.amount} altAmounts={ing.altAmounts} {mult} /></Text></span>
           <span class="item">{ing.text}</span>
-        </button>
+        </Surface>
       </li>
     {/if}
   {/each}
 </ul>
-
-<style>
-  ul { list-style: none; margin: 0; padding: 0; }
-  .group > h4 {
-    margin: 1.1rem 0 0.25rem;
-    font-family: var(--font-family);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    opacity: 0.7;
-  }
-  .ingredient {
-    display: grid;
-    grid-template-columns: fit-content(11rem) 1fr;
-    column-gap: 0.75rem;
-    width: 100%;
-    padding: 0.4rem 0.5rem;
-    border: 0;
-    border-radius: 0.375rem;
-    background: none;
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    line-height: 1.35;
-    cursor: pointer;
-    scroll-margin-block: 3.5rem 1rem;
-  }
-  .ingredient:hover { background: color-mix(in oklab, currentColor 7%, transparent); }
-  .ingredient:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
-  .ingredient.active { background: var(--note-bg); color: var(--note-fg); }
-  .amount { min-inline-size: 4.75rem; font-weight: 700; font-variant-numeric: tabular-nums; text-align: end; }
-</style>

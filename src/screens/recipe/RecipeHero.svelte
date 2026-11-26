@@ -46,7 +46,7 @@
     {/if}
     {#if hasFacts}
       <dl class="facts">
-        {#if recipe.rating}<div><dt>Rating</dt><dd class="stars">{stars(recipe.rating)}</dd></div>{/if}
+        {#if recipe.rating}<div><dt>Rating</dt><dd class="stars"><Text primary>{stars(recipe.rating)}</Text></dd></div>{/if}
         {#each times as t}<div><dt>{t.label}</dt><dd>{t.value}</dd></div>{/each}
         {#each yields as y}
           <div><dt>Makes</dt>
@@ -104,10 +104,10 @@
   .facts div { display: grid; gap: 0.1rem; }
   dt {
     font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted-fg, color-mix(in oklab, currentColor 60%, transparent));
+    color: var(--muted-text-fg);
   }
   dd { margin: 0; font-size: 1.1rem; font-weight: 500; }
-  .stars { color: #b7791f; letter-spacing: 0.1em; }
+  .stars { letter-spacing: 0.1em; }
   .sources { margin: 0; padding-inline-start: 0.25rem; }
 
   /* A tall photo stands beside the title when there is room. */

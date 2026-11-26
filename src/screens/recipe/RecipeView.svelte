@@ -6,8 +6,9 @@
   // lower part of the screen, wherever you are in the text.
   import { tick, untrack } from "svelte";
   import { fly, scale } from "svelte/transition";
-  import { Button, SplitPane, Text } from "contain-css-svelte";
+  import { Button, SplitPane, Surface, Text } from "contain-css-svelte";
   import AmountInput from "../../components/AmountInput.svelte";
+  import ShoppingIcon from "../../components/ShoppingIcon.svelte";
   import Ingredients from "./Ingredients.svelte";
   import RecipeHero from "./RecipeHero.svelte";
   import RecipeEditor from "./RecipeEditor.svelte";
@@ -94,7 +95,7 @@
 </script>
 
 {#snippet head(onclose)}
-  <header class="pane-head">
+  <Surface as="header" class="pane-head">
     <h2>Ingredients</h2>
     <AmountInput bind:value={mult} label="Multiply the recipe by" />
     {#if mult !== 1}{#each countRows as c}
@@ -104,11 +105,14 @@
       </span>
     {/each}{/if}
     {#if !onclose}
-      <Button onclick={() => addRecipe(recipe, mult)}>Add to shopping list</Button>
+      <Button onclick={() => addRecipe(recipe, mult)}>
+        {#snippet icon()}<ShoppingIcon kind="cart" />{/snippet}
+        Add to shopping list
+      </Button>
       {#if onList}<Text muted>On the list ×{floatToFrac(onList)}</Text>{/if}
     {/if}
     {#if onclose}<button type="button" class="sheet-close" aria-label="Hide ingredients" onclick={onclose}>×</button>{/if}
-  </header>
+  </Surface>
 {/snippet}
 
 {#snippet list()}
@@ -132,7 +136,8 @@
     onclose={endEdit}
     ondeleted={(row) => { edit = null; ondeleted?.(row); }} />
 {:else}
-<div class="recipe-view" class:wide bind:clientWidth={width} style={recipeRole(recipe.color)}>
+<div class="recipe-frame" bind:clientWidth={width}>
+<Surface class={["recipe-view", wide && "wide"]} style={recipeRole(recipe.color)}>
   {#if wide}
     <SplitPane leftWidth="22rem" height="100%" resizerLabel="Resize the ingredients" resizeBehavior="preserve-left">
       {#snippet left()}
@@ -170,9 +175,10 @@
     {/if}
     {#if sheetOpen}
       <aside class="sheet" aria-label="Ingredients" bind:this={sheetEl} transition:fly={{ y: 320, duration: 220, opacity: 1 }}>
-        {@render head(() => (sheetOpen = false))}{@render list()}
+        <Surface class="sheet-surface">{@render head(() => (sheetOpen = false))}{@render list()}</Surface>
       </aside>
     {/if}
   {/if}
+</Surface>
 </div>
 {/if}

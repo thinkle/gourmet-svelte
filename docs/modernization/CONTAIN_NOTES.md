@@ -24,6 +24,26 @@ Per-recipe colour: set the role's variables on the recipe's outer surface
 (`surfaceVars(role, prefix)` or `<Surface>`), never by painting backgrounds on
 inner elements, so text and controls inside know what they sit on.
 
+### Recipe color chain (R2-8)
+
+`recipeRole()` supplies the filled `--recipe-bg/-fg` pair, a decorative
+`--recipe-accent`, and `--recipe-color` as a **mixing ingredient**. On
+`.recipe-view`, the theme maps these to `--primary-bg/-fg/-color` and sets
+`--primary-text-amount: 35%`. A neutral `<Surface>` computes the primary text
+foreground against the reading surface. Nested surfaces recompute it, so a
+light recipe palette never becomes pale text pasted onto light paper.
+
+Use `<Text primary>` for scaled ingredients and rating stars. Raw `<amount>`
+in instruction HTML uses the public `--primary-text-fg` shortcut. The changed
+multiplier supplies that tone through `--input-fg` on its wrapper. Filled
+recipe bands keep the recipe family's paired ink; highlights use the note
+family and its `--on-note-primary-text-fg` pin. Instruction highlights are raw
+HTML, so they use the note pair directly and nested amounts inherit its ink.
+Do not set a text color to `--recipe-bg` or `--recipe-color`.
+
+The published package still omits the guide; for this task the full guide and
+`docs/color-families.md` were read from the sibling `contain-css-svelte` source.
+
 ## Component choices
 
 Record decisions here as slices land, so later screens match.
@@ -51,3 +71,5 @@ substitutes.
 | `Dialog` `dismissible` treats a keyboard-made click (Enter/Space on a button inside, clientX/Y 0) as a backdrop click, so it closes and reports a dismissal instead of the button's action | R3 confirm dialogs (`ConfirmHost.svelte`) | to file | Confirm dialogs are not `dismissible`; Escape and the close button still dismiss |
 | No combobox / autocomplete input | R3 categories | to file | `Input` with a native `<datalist>` |
 | No rich-text / contenteditable surface | R3-5 text bodies | to file | Plain `contenteditable` styled in `gourmet.css` |
+| Rich Select options show SVG icons on desktop, but Select switches to a native text-only control below 600px; there is no rich mobile option mode. | Shopping aisle picker | Select | Retain labeled native mobile options; desktop menu and selected value show the aisle icons. |
+| Dialog reserves a separate close-bar row; there is no header/close layout option for a compact form whose first label should align with the close button. | Shopping-item editor | Dialog | Scope absolute positioning of the existing close bar to `.shopping-item-dialog` in the theme and reserve space beside its first label. |

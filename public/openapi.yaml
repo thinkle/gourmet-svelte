@@ -27,6 +27,16 @@ info:
     body format, the HTML subset and scalable `<amount>` markup.
 
     GET /recipes/schema returns this in machine-readable form.
+
+    Shopping: GET /shopping-list first for the merged list and exact item keys.
+    Use the shopping commands to change this list without replacing its stored
+    recipe document. Removing an item hides all its contributions from this
+    list only; source recipes stay unchanged. Categorization accepts multiple
+    keys in one call; category null restores the app's automatic suggestion.
+    Shopping reads use recipes:read and shopping writes use recipes:write.
+    Mutations are online commands; a browser sees them on its next recipe sync
+    (or live-shopping poll). Do not resend an add blindly after an uncertain
+    network result: repeated recipe adds intentionally sum their multipliers.
 servers:
   - url: "https://dev--gourmet-svelte.netlify.app"
 security:
@@ -254,13 +264,299 @@ paths:
             application/json:
               schema:
                 type: integer
+  /.netlify/functions/api/shopping-list:
+    get:
+      summary: Read the merged shopping list
+      operationId: getShoppingList
+      description: |
+        Returns the app's item keys, merged amounts, recipe sources, cart/pantry
+        states and aisle choices. With no listId, selects the active list with
+        most entries, then newest last_modified, matching the app. An account
+        with no list returns listId null and empty recipes/items; GET never
+        creates a list. Requires recipes:read.
+      parameters:
+        - name: listId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
+  /.netlify/functions/api/shopping-list/items/add:
+    post:
+      summary: Add a loose shopping item
+      operationId: addShoppingItem
+      description: |
+        Parses a whole ingredient line such as "2 lb onions" and appends a loose
+        entry. Restores a previously excluded item with the same canonical key.
+        Creates a missing default list. Requires recipes:write. Each call adds
+        a new entry; read the list before retrying an uncertain network result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingItemAddRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
+  /.netlify/functions/api/shopping-list/recipes/add:
+    post:
+      summary: Add a recipe to the shopping list
+      operationId: addRecipeToShoppingList
+      description: |
+        Adds an account-owned recipe reference at multiplier (default 1).
+        If already on the list, multipliers add, as in the app. The source
+        recipe is unchanged. Creates a missing default list. Requires
+        recipes:write. Read before retrying an uncertain network result.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingRecipeAddRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
+  /.netlify/functions/api/shopping-list/items/remove:
+    post:
+      summary: Remove a merged item from this shopping list
+      operationId: removeShoppingItem
+      description: |
+        Use an exact key from GET /shopping-list. Removes matching loose entries
+        and excludes recipe-derived contributions on this list. Never changes
+        a source recipe or marks the item as pantry. A later loose add with
+        the same key restores it. Requires recipes:write.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingItemRemoveRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
+  /.netlify/functions/api/shopping-list/recipes/remove:
+    post:
+      summary: Remove a recipe from the shopping list
+      operationId: removeRecipeFromShoppingList
+      description: |
+        Removes the recipe reference and its contribution to merged items.
+        Keeps loose entries and the source recipe. Requires recipes:write.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingRecipeRemoveRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
+  /.netlify/functions/api/shopping-list/items/categorize:
+    post:
+      summary: Categorize one or more shopping items
+      operationId: categorizeShoppingItems
+      description: |
+        Assigns an aisle/category to exact keys returned by GET /shopping-list.
+        All keys must exist; otherwise no assignments are saved. Category null
+        clears explicit assignments and restores automatic suggestions.
+        Stored assignments persist on this list for future uses of the item.
+        Requires recipes:write.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShoppingItemsCategorizeRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShoppingListResult"
+        default:
+          $ref: "#/components/responses/ShoppingError"
 components:
+  responses:
+    ShoppingListResult:
+      description: Current merged shopping list. No images or internal live-sync metadata.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShoppingListResponse"
+    ShoppingError:
+      description: |
+        JSON error. 400 invalid input; 401 unauthorized; 403 insufficient scope;
+        404 list, source recipe or item key not found; 405 unsupported method;
+        409 concurrent edits exhausted retries; 500 temporarily unavailable.
+        Failed input validation never changes the shopping list.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error:
+                type: string
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: API token
   schemas:
+    ShoppingListTarget:
+      type: object
+      properties:
+        listId:
+          type: string
+          maxLength: 200
+          description: Optional exact list _id; omit to use the app's default selection.
+    ShoppingItemAddRequest:
+      allOf:
+        - $ref: "#/components/schemas/ShoppingListTarget"
+        - type: object
+          required: [text]
+          properties:
+            text:
+              type: string
+              minLength: 1
+              maxLength: 2000
+              examples: ["2 lb onions"]
+    ShoppingRecipeRemoveRequest:
+      allOf:
+        - $ref: "#/components/schemas/ShoppingListTarget"
+        - type: object
+          required: [recipeId]
+          properties:
+            recipeId:
+              type: string
+              minLength: 1
+              maxLength: 200
+    ShoppingRecipeAddRequest:
+      allOf:
+        - $ref: "#/components/schemas/ShoppingRecipeRemoveRequest"
+        - type: object
+          properties:
+            multiplier:
+              type: number
+              exclusiveMinimum: 0
+              maximum: 10000
+              default: 1
+    ShoppingItemRemoveRequest:
+      allOf:
+        - $ref: "#/components/schemas/ShoppingListTarget"
+        - type: object
+          required: [key]
+          properties:
+            key:
+              type: string
+              minLength: 1
+              maxLength: 500
+              description: Exact canonical key from getShoppingList; never guess a plural or alias.
+    ShoppingItemsCategorizeRequest:
+      allOf:
+        - $ref: "#/components/schemas/ShoppingListTarget"
+        - type: object
+          required: [keys, category]
+          properties:
+            keys:
+              type: array
+              minItems: 1
+              maxItems: 100
+              items:
+                type: string
+                minLength: 1
+                maxLength: 500
+            category:
+              type: [string, "null"]
+              minLength: 1
+              maxLength: 100
+              description: A default or custom aisle name; null restores automatic suggestions.
+    ShoppingListResponse:
+      type: object
+      required: [listId, recipes, items, categories, excludedItems]
+      properties:
+        listId:
+          type: [string, "null"]
+        recipes:
+          type: array
+          items:
+            type: object
+            required: [recipeId, title, multiplier, found]
+            properties:
+              recipeId:
+                type: string
+              title:
+                type: string
+              multiplier:
+                type: number
+              found:
+                type: boolean
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShoppingItem"
+        categories:
+          type: array
+          description: All shipped aisles plus custom aisles already assigned or ordered on this list, including when the list is empty. Custom category names are also accepted.
+          items:
+            type: string
+        excludedItems:
+          type: array
+          description: Keys hidden from this list only, without changing source recipes or pantry settings.
+          items:
+            type: string
+    ShoppingItem:
+      type: object
+      required: [key, name, amounts, category, categorySource, state, sources, looseIds]
+      properties:
+        key:
+          type: string
+        name:
+          type: string
+        amounts:
+          type: array
+          description: Aggregated, scaled amounts in the same readable units as the app.
+          items:
+            allOf:
+              - $ref: "#/components/schemas/Amount"
+              - type: object
+                properties:
+                  text:
+                    type: string
+        category:
+          type: [string, "null"]
+        categorySource:
+          type: string
+          enum: [assigned, suggested, none]
+        state:
+          type: string
+          enum: [buy, cart, have]
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              recipeId:
+                type: [string, "null"]
+              title:
+                type: [string, "null"]
+              mult:
+                type: number
+              text:
+                type: string
+        looseIds:
+          type: array
+          items:
+            type: integer
     RecipeQuery:
       type: object
       properties:

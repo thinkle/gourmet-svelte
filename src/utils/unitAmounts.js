@@ -185,40 +185,28 @@ const UNIT_SYNONYMS = {
     "square":["square", "squares"],  // chocolate
 }
 
-const METRIC_RANGE = (1,999)
-/*
-# The following sets up unit groups. Users will be able to turn
-# these on or off (American users, for example, would likely turn
-# off metric units, since we don't use them).
-# (User choice not implemented yet)
-*/
-const UNIT_GROUPS = {
-    'metric mass':[('mg',METRIC_RANGE),
-                   ('g',METRIC_RANGE),
-                   ('kg',(1,undefined))],
-    'metric volume':[('ml',METRIC_RANGE),
-                     ('cl',(1,99)),
-                     ('dl',(1,9)),
-                     ('l',(1,undefined)),],
-    'imperial weight':[('grains',(0,27)),
-                       ('dram',(0.5,15)),
-                       ('oz',(0.25,32)),
-                       ('lb',(0.25,undefined)),
-                       ],
-    'imperial volume':[
-        //('drop',(0,3)),
-        ('tsp',(0.125,5.9)),
-        ('Tbs',(1,4)),
-        ('c',(0.25,8)),
-        //('pt',(1,1)),
-        //('qt',(1,3)),
-        ('gallon',(1,undefined)),
-        //('peck',(1,2)),
-        //('bucket',(1,2)),
-        //('bushel',(1,undefined)),
-        ('fl oz',(1,undefined)),
-    ]
+// Python defaults/defaults_en.py:687–719. JavaScript needs arrays, not
+// Python tuples: (a, b) is a comma expression whose value is only b.
+export const METRIC_RANGE = [1, 999];
+export const UNIT_GROUPS = {
+    'metric mass': [['mg', METRIC_RANGE], ['g', METRIC_RANGE], ['kg', [1, undefined]]],
+    'metric volume': [['ml', METRIC_RANGE], ['cl', [1, 99]], ['dl', [1, 9]], ['l', [1, undefined]]],
+    'imperial weight': [['grains', [0, 27]], ['dram', [0.5, 15]], ['oz', [0.25, 32]], ['lb', [0.25, undefined]]],
+    'imperial volume': [['tsp', [0.125, 5.9]], ['Tbs', [1, 4]], ['c', [0.25, 8]], ['gallon', [1, undefined]], ['fl oz', [1, undefined]]],
+};
+
+const unitGroups = new Map();
+const readableRanges = new Map();
+for (const [group, units] of Object.entries(UNIT_GROUPS)) {
+    for (const [unit, range] of units) {
+        unitGroups.set(unit, group);
+        readableRanges.set(unit, range);
+    }
 }
+// Python omitted these from its lookup as well as its candidates, so incoming
+// pints/quarts could never be adjusted. Recognize them without introducing them.
+unitGroups.set('pt', 'imperial volume');
+unitGroups.set('qt', 'imperial volume');
 
 export const UNIT_NAMES = []
 export const UNIT_LOOKUP = {}
@@ -282,7 +270,7 @@ function createUnitMapping (baseUnit, mapping) {
 
 export function getStandardUnit (unit) {
     if (!unit) {return}
-    return UNIT_LOOKUP[unit]
+    return Object.hasOwn(UNIT_LOOKUP, unit) ? UNIT_LOOKUP[unit] : undefined
 }
 
 export function getMultiplierConversion (unit1, unit2, density) {
@@ -375,50 +363,105 @@ export function parseUnit (text, requireIngredient=false) {
     }
 }
 
-// Return the smallest list of possible representing the amounts in
-// the list handed to us, adding where possible.
-export function addAmounts (amounts, item) {
-    let byUnit = {}
-    for (let amountObj of amounts) {
-        let unit = getStandardUnit(amountObj?.unit)||amountObj?.unit||'';
-        let amount = amountObj?.amount;
-        if (byUnit[unit]) {
-            //console.log('Found same unit, adding',amount,'to',byUnit[unit]);
-            byUnit[unit] += (amount||1);            
-        } else {
-            let addedYet = false;
-            for (let otherUnit in byUnit) {
-                let conversion = getMultiplierConversion(unit,otherUnit);
-                if (conversion) {
-                    // Keep the bigger unit...
-                    if (conversion <= 1) {
-                        //console.log('Converting to unit, adding',amount,unit,'to',byUnit[otherUnit],otherUnit);
-                        byUnit[otherUnit] += (amount||1) * conversion
-                        //console.log('Got',byUnit[otherUnit]);
-                    } else {
-                        //console.log('Converting to unit (swap units), adding',amount,unit,'to',byUnit[otherUnit],otherUnit);
-                        conversion = getMultiplierConversion(otherUnit,unit);
-                        let otherAmount = byUnit[otherUnit] * conversion
-                        delete byUnit[otherUnit]
-                        byUnit[unit] = (amount||1) + otherAmount;
-                        //console.log('Got',byUnit[unit],unit);
-                    }
-                    
-                    addedYet = true;
-                    break;
-                }
-            }
-            if (!addedYet) {
-                byUnit[unit] = amount||1
-            }
+// Python convert.py:293–357: simple fractions, then preferred amount ranges.
+// This scores without rounding or changing the physical quantity.
+export function readabilityScore(amount, unit) {
+    if (!Number.isFinite(amount) || amount < 0) return -Infinity;
+    const nearInteger = (n) => Math.abs(n - Math.round(n)) <= 0.01 + 1e-10;
+    let score = -2;
+    for (const [denominator, reward] of [[1, 1], [2, 1], [4, 1], [3, 1], [8, 0.8], [6, 0.3], [5, 0.2], [10, 0.05]]) {
+        if (nearInteger(amount * denominator)) {
+            score = reward;
+            break;
         }
     }
-    return Object.keys(byUnit).map(
-        (unit)=>({
-            unit,
-            amount : byUnit[unit]
-        })
-    )
+    if (Math.abs(amount - 1) <= 1e-9) score += 0.5;
+    const range = readableRanges.get(getStandardUnit(unit) || unit);
+    if (range && amount > 0) {
+        const [min, max] = range;
+        if (min && amount < min - 1e-9) score -= 2 + 2 * (min - amount) / amount;
+        if (max && amount > max + 1e-9) score -= 2 + 2 * (amount - max) / max;
+    }
+    return score;
+}
+
+// Display-only selection within the input's measurement system and dimension.
+// Shopping disables the optional Python +1 current-unit bonus. Equal scores
+// retain the current unit, then prefer the closest candidate in Python's order.
+export function adjustAmountUnit(amountObj, { favorCurrentUnit = true } = {}) {
+    const unit = getStandardUnit(amountObj?.unit) || amountObj?.unit;
+    const amount = amountObj?.amount;
+    const rangeAmount = amountObj?.rangeAmount;
+    const isRange = Number.isFinite(rangeAmount);
+    const group = unitGroups.get(unit);
+    if (!group || !Number.isFinite(amount) || amount <= 0 || (isRange && rangeAmount < 0)) {
+        return { ...amountObj };
+    }
+    const units = UNIT_GROUPS[group];
+    const index = units.findIndex(([candidate]) => candidate === unit);
+    // Score the less readable endpoint, avoiding a unit that obscures one end.
+    // Zero is valid in a range but does not constrain its measurement scale.
+    const scoreIn = (factor, candidate) => Math.min(
+        readabilityScore(amount * factor, candidate),
+        isRange && rangeAmount > 0 ? readabilityScore(rangeAmount * factor, candidate) : Infinity,
+    );
+    let best = { ...amountObj, unit };
+    let bestScore = scoreIn(1, unit) + (favorCurrentUnit ? 1 : 0);
+    let bestDistance = 0;
+    for (const [candidateIndex, [candidate]] of units.entries()) {
+        // Owner policy: fl oz is useful when supplied, but is usually worse as
+        // a newly introduced unit (Python could turn 10 cups into 80 fl oz).
+        if (candidate === 'fl oz' && unit !== 'fl oz') continue;
+        const factor = getMultiplierConversion(unit, candidate);
+        if (!Number.isFinite(factor) || factor <= 0) continue;
+        const score = scoreIn(factor, candidate);
+        const distance = Math.abs(index - candidateIndex);
+        if (score > bestScore + 1e-9 || (Math.abs(score - bestScore) <= 1e-9 && distance < bestDistance)) {
+            best = { ...amountObj, unit: candidate, amount: amount * factor,
+                ...(isRange ? { rangeAmount: rangeAmount * factor } : {}) };
+            bestScore = score;
+            bestDistance = distance;
+        }
+    }
+    return best;
+}
+
+// Add compatible quantities without density conversion. Keep the largest input
+// unit; callers can select a readable display unit once after all additions.
+// A scalar contributes the same amount to both ends when added to a range.
+export function addAmounts(amounts, item) {
+    const byUnit = new Map();
+    for (const amountObj of amounts) {
+        let unit = getStandardUnit(amountObj?.unit) || amountObj?.unit || '';
+        const amount = amountObj?.amount ?? 1;
+        const hasRange = Number.isFinite(amountObj?.rangeAmount);
+        const low = hasRange ? amountObj.rangeAmount : amount;
+        let added = false;
+        for (const [otherUnit, previous] of byUnit) {
+            let factor = unit === otherUnit ? 1 : getMultiplierConversion(unit, otherUnit);
+            if (!Number.isFinite(factor) || factor <= 0) continue;
+            if (factor <= 1) {
+                previous.amount += amount * factor;
+                previous.low += low * factor;
+                previous.hasRange ||= hasRange;
+            } else {
+                factor = getMultiplierConversion(otherUnit, unit);
+                byUnit.delete(otherUnit);
+                byUnit.set(unit, {
+                    amount: amount + previous.amount * factor,
+                    low: low + previous.low * factor,
+                    hasRange: hasRange || previous.hasRange,
+                });
+            }
+            added = true;
+            break;
+        }
+        if (!added) byUnit.set(unit, { amount, low, hasRange });
+    }
+    return [...byUnit].map(([unit, value]) => ({
+        unit, amount: value.amount,
+        ...(value.hasRange ? { rangeAmount: value.low } : {}),
+    }));
 }
 
 
