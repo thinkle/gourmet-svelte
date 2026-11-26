@@ -51,3 +51,15 @@ export function writeRecipeTabs(hash, ids, tab, recipes) {
   else params.delete("tab");
   return params.size ? `#${params}` : "";
 }
+
+/**
+   Where a newly opened recipe goes: immediately right of the tab it was
+   opened from, so a linked sub-recipe lands next to the recipe that
+   referred to it rather than at the far end of the strip. Opened from
+   search or the shopping list (no recipe tab to sit beside), it goes last.
+**/
+export function insertBeside(ids, id, from) {
+  if (ids.includes(id)) return [...ids];
+  const at = ids.indexOf(from);
+  return at < 0 ? [...ids, id] : [...ids.slice(0, at + 1), id, ...ids.slice(at + 1)];
+}

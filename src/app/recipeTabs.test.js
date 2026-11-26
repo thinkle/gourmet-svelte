@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readRecipeTabs, writeRecipeTabs, hasRecipeTabs, loadTabSession, saveTabSession, bookmarkHash } from "./recipeTabs.js";
+import { readRecipeTabs, writeRecipeTabs, hasRecipeTabs, loadTabSession, saveTabSession, bookmarkHash, insertBeside } from "./recipeTabs.js";
 
 const recipes = [{ id: 244, _id: "server-a" }, { id: 246, _id: "server-b" }, { id: 249 }];
 
@@ -78,5 +78,26 @@ describe("per-browser-tab recipe sessions", () => {
     expect(hasRecipeTabs(hash)).toBe(true);
     expect(readRecipeTabs(hash, recipes)).toEqual({ ids: [], tab: "search" });
     expect(new URLSearchParams(hash.slice(1)).get("other")).toBe("keep");
+  });
+});
+
+describe("a linked recipe opens beside the one that referred to it", () => {
+  it("lands immediately right of the active tab, not at the end", () => {
+    expect(insertBeside(["a", "b", "c"], "d", "a")).toEqual(["a", "d", "b", "c"]);
+    expect(insertBeside(["a", "b", "c"], "d", "b")).toEqual(["a", "b", "d", "c"]);
+    expect(insertBeside(["a", "b", "c"], "d", "c")).toEqual(["a", "b", "c", "d"]);
+  });
+  it("goes last when it was opened from search or the shopping list", () => {
+    expect(insertBeside(["a", "b"], "d", "search")).toEqual(["a", "b", "d"]);
+    expect(insertBeside(["a", "b"], "d", "shopping")).toEqual(["a", "b", "d"]);
+    expect(insertBeside([], "d", "search")).toEqual(["d"]);
+  });
+  it("leaves the strip alone when that recipe is already open", () => {
+    expect(insertBeside(["a", "b", "c"], "c", "a")).toEqual(["a", "b", "c"]);
+  });
+  it("does not mutate the list it was given", () => {
+    const ids = ["a", "b"];
+    insertBeside(ids, "d", "a");
+    expect(ids).toEqual(["a", "b"]);
   });
 });

@@ -15,7 +15,7 @@
   import ShoppingList from "../screens/shopping/ShoppingList.svelte";
   import { shopping, loadShopping, useLocalOnly } from "./shopping.svelte.js";
   import { buildList } from "./shoppingList.js";
-  import { readRecipeTabs, writeRecipeTabs, hasRecipeTabs, loadTabSession, saveTabSession, bookmarkHash } from "./recipeTabs.js";
+  import { readRecipeTabs, writeRecipeTabs, hasRecipeTabs, loadTabSession, saveTabSession, bookmarkHash, insertBeside } from "./recipeTabs.js";
 
   let usingFixtures = $state(false);
   onMount(async () => {
@@ -106,7 +106,8 @@
   $effect(() => { if (tab !== "search" && tab !== "shopping" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
 
   function openRecipe(r) {
-    if (!openIds.includes(r.id)) openIds.push(r.id);
+    // Beside the recipe it was opened from, not at the end of the strip.
+    if (!openIds.includes(r.id)) openIds = insertBeside(openIds, r.id, tab);
     tab = r.id;
   }
   function newRecipe() {
