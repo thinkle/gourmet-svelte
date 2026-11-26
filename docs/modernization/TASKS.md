@@ -176,6 +176,18 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   REST checks remain blocked by the MongoDB binary download returning HTTP 403;
   this checkout has no `check` script.
 
+- [x] **R2-8 Recipe color tones** — owner requested 2026-11-26. Keep recipe
+  palettes as filled roles; map their local primary pair and text ingredient
+  through Contain on a neutral recipe Surface. Scaled amounts, multiplier and
+  rating use primary text tones (35% tint); highlight amounts use the note
+  family's ink pin. Headers and the phone sheet declare their surfaces.
+  Recipe styling lives in the theme. No API, stored data or kept logic changes.
+  Browser checks use an in-memory synthetic recipe and both light/dark neutral
+  palettes; all 71 recipe palettes keep amount/input/prose tones consistent.
+  Minimum measured contrast: 4.82:1 for tints, 12.12:1 for highlights. Checked
+  the dark phone sheet and desktop editor without saves. Build, 179 API tests
+  (2 skipped), and 181 Vitest tests pass; no `check` script exists.
+
 ## R3 — Recipe editor
 
 - [x] **R3-1 Spec** — `legacy-reader` on `Recipe.svelte` (edit mode),

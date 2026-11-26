@@ -77,7 +77,6 @@
     font-variant-numeric: tabular-nums;
     font-weight: 700;
   }
-  .changed :global(input) { color: var(--recipe-bg, currentColor); }
   .steps { display: inline-flex; gap: 0.15rem; }
   .steps :global(button) { min-inline-size: 2rem; padding-inline: 0.4rem; }
 </style>

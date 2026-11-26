@@ -65,6 +65,8 @@ export { text };
 
 // The per-recipe colour as an app-defined Contain role: its pair and its pins,
 // written where the role is applied (a pin at :root cannot see --recipe-fg).
+// recipe-color is a text mixing ingredient; recipe-bg/fg are the filled pair.
+// The theme maps these to local primary tokens before a Surface resolves them.
 export const recipeRole = (c) =>
   `--recipe-bg: ${c.bg}; --recipe-fg: ${c.fg}; --recipe-accent: ${c.accent ?? c.fg}; --recipe-color: ${c.bg}; ` +
   `--on-recipe-link-text-fg: ${c.fg}; --on-recipe-link-hover-text-fg: ${c.fg}; --on-recipe-heading-fg: ${c.fg};`;
