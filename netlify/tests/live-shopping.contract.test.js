@@ -1,6 +1,7 @@
 import { startApi } from '../../src/data/functions/testing/apiHarness.js';
 import { loadDB } from '../../src/data/functions/mongoConnect.js';
 import { handler } from '../functions/live-shopping.js';
+import { handler as recipeApi } from '../functions/api.js';
 
 let api;
 let db;
@@ -71,6 +72,17 @@ it('uses server arrival order for contradictory actions from different phones', 
   await send(action(trip, 'phone-a', 1, 'milk'));
   await send(action(trip, 'phone-b', 1, 'milk', false));
   expect((await call()).recipe.cart).toEqual([]);
+});
+it('retains focused MCP shopping edits alongside live checkmarks', async () => {
+  const trip = (await call()).recipe.liveShopping.tripId;
+  const token = await api.makeToken(alice);
+  const response = await recipeApi({ httpMethod: 'POST', path: '/.netlify/functions/api/shopping-list/items/add',
+    headers: { Authorization: `Bearer ${token.token}` }, body: JSON.stringify({ listId: base._id, text: '2 apples' }) }, {});
+  expect(response.statusCode).toBe(200);
+  const checked = await send(action(trip, 'phone-a', 1, 'milk'));
+  expect(checked.recipe.cart).toEqual(['milk']);
+  expect(checked.recipe.ingredients.some((i) => i.text === 'apples')).toBe(true);
+  expect(checked.recipe.aisles).toEqual(base.aisles);
 });
 it('ends a trip atomically; delayed offline checks and a retried Done cannot change the next trip', async () => {
   const trip = (await call()).recipe.liveShopping.tripId;

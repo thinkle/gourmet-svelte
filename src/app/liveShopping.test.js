@@ -96,6 +96,17 @@ describe('opt-in live shopping', () => {
     expect(s.view().pending).toBe(0);
     s.engine.dispose();
   });
+  it('accepts focused MCP list edits even when the live cart revision has not changed', async () => {
+    const s = setup(); await s.engine.enable();
+    const recipe = { ...snapshot(), ingredients: [{ id: 1, text: 'apples' }],
+      aisles: { apples: 'Produce' }, excludedItems: ['milk'] };
+    s.request.mockResolvedValue({ recipe, staleTrip: false });
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(s.view().recipe.ingredients).toEqual(recipe.ingredients);
+    expect(s.view().recipe.excludedItems).toEqual(['milk']);
+    expect(s.view().recipe.aisles).toEqual({ apples: 'Produce' });
+    s.engine.dispose();
+  });
   it('backs off failed requests, retains the outbox, and pauses retries after auth failure', async () => {
     const s = setup(); await s.engine.enable();
     s.request.mockRejectedValue(new Error('Offline'));
@@ -151,6 +162,30 @@ describe('opt-in live shopping', () => {
     expect(s.view().enabled).toBe(false);
     expect(s.view().notice).toMatch(/other shopper ended/);
     expect(vi.getTimerCount()).toBe(0);
+  });
+  it('still stops after Done if writing the normal recipe cache fails once', async () => {
+    const s = setup(); await s.engine.enable();
+    s.onSnapshot.mockRejectedValueOnce(new Error('Cache busy'));
+    await s.engine.enqueue('done'); await tick();
+    expect(s.view().pending).toBe(0);
+    expect(s.view().enabled).toBe(true);
+    expect((await s.store.read()).tripEnded).toBe(true);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(s.view().enabled).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('cannot disable over a checkbox queued during the final cache write', async () => {
+    const s = setup(); await s.engine.enable(); s.visible(false);
+    let finishCache;
+    s.onSnapshot.mockImplementationOnce(() => new Promise((resolve) => { finishCache = resolve; }));
+    const disabling = s.engine.disable();
+    await vi.waitFor(() => expect(finishCache).toBeTypeOf('function'));
+    await s.engine.enqueue('cart', 'milk', true);
+    finishCache();
+    await expect(disabling).rejects.toThrow(/pending changes/);
+    expect(s.view().enabled).toBe(true);
+    expect(s.view().pending).toBe(1);
+    s.engine.dispose();
   });
   it('ignores late responses after switching accounts or disposing the controller', async () => {
     const s = setup(); await s.engine.enable();

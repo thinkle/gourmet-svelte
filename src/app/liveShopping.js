@@ -82,11 +82,13 @@ export function createLiveShopping({ store, request, onChange, onSnapshot = asyn
         } else if (tripEnded && action?.type !== 'done') {
           s.notice = 'The other shopper ended this trip. Live mode is off.';
         }
+        // Keep the stop decision durable if updating the ordinary recipe cache fails.
+        if (tripEnded || action?.type === 'done') s.tripEnded = true;
       });
       if (disposed) return;
       await onSnapshot(state.snapshot);
       // Both phones stop polling once each has received the confirmed trip boundary.
-      if ((tripEnded || action?.type === 'done') && !state.pending.length) await mutate((s) => { s.enabled = false; });
+      if (state.tripEnded && !state.pending.length) await mutate((s) => { s.enabled = false; s.tripEnded = false; });
       failures = 0; error = null;
       status = state.enabled ? 'synced' : 'off';
       again = state.pending.length ? 0 : interval;
@@ -111,7 +113,7 @@ export function createLiveShopping({ store, request, onChange, onSnapshot = asyn
         const reply = await request(); // explicit opt-in, never called by restore
         if (disposed) return;
         await onSnapshot(reply.recipe);
-        await mutate((s) => { s.enabled = true; s.snapshot = reply.recipe; s.notice = null; });
+        await mutate((s) => { s.enabled = true; s.snapshot = reply.recipe; s.notice = null; s.tripEnded = false; });
         error = null; status = 'synced'; wake(interval); notify();
       } catch (err) {
         error = err.message; status = 'off'; notify(); throw err;
@@ -131,7 +133,11 @@ export function createLiveShopping({ store, request, onChange, onSnapshot = asyn
       state = await store.read();
       if (busy || state?.pending.length) throw new Error('Let pending changes sync before turning live mode off. You can leave this screen while offline.');
       if (state?.snapshot) await onSnapshot(state.snapshot);
-      await mutate((s) => { s.enabled = false; });
+      await mutate((s) => {
+        // A checkbox may have been queued while the cache write above was in flight.
+        if (busy || s.pending.length) throw new Error('Let pending changes sync before turning live mode off. You can leave this screen while offline.');
+        s.enabled = false;
+      });
       error = null; status = 'off'; wake();
     },
     wake: () => wake(),

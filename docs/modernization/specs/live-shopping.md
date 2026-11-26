@@ -30,8 +30,10 @@ after it has observed that the trip ended.
 This first version shares cart checks and Done shopping. Other shopping edits
 (recipes, loose items, pantry, aliases and aisles) pause while live mode is on.
 Both phones must use live mode: ordinary offline whole-list saves, older clients
-or MCP writes are outside this collaboration protocol and can overwrite live
-state. The existing recipe REST API retains its exact semantics.
+or generic recipe API replacements are outside this collaboration protocol and
+can overwrite live state. The focused S-7 shopping commands preserve cart/live
+metadata; their list changes arrive on the next live poll. The existing recipe
+REST API retains its exact semantics.
 
 ## Storage and protocol
 
@@ -93,3 +95,17 @@ checkbox behavior, no console errors and zero live endpoint calls while off.
 The sandbox initially prevented in-memory Mongo from listening (`EPERM`);
 baseline and updated contracts both passed with local listener permission.
 Existing bundle-size and Jest mock/open-handle warnings were left untouched.
+
+PR integration verification (2026-11-26): recovered implementation preserved in
+local commits with the original stash intact, then merged current dev (33c8206).
+Recipe links, readable quantities, MCP exclusions and the newer app sync/tab
+controls are retained. Build and both Netlify function bundles passed; 194 API
+tests passed with 2 existing skips, and 203 app tests passed. Added checks for
+MCP edits alongside live checks, same-revision list snapshots, recipe navigation
+while live editing is paused, and default-off screen mounting without requests.
+Trip-end stop state is durable across a cache-write failure; a checkbox arriving
+during disable cannot be left queued with live mode off. Test suites use only
+in-memory MongoDB/fake IndexedDB. Deployed two-phone/Identity testing remains
+for the owner's opt-in trial; no real shopping data was changed by verification.
+Existing bundle/Jest/Mongo-driver warnings and RecipeOnList's initial-state
+Svelte warning remain outside this card.

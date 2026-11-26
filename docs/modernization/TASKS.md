@@ -349,9 +349,12 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   same/existing linked account. Durable offline outbox, per-item atomic writes,
   retry deduplication and trip boundaries; poll only on the visible shopping
   screen while online, with failure backoff. Pause list editing in live mode.
-  Existing REST contract and kept logic unchanged. Verified build, function
-  bundling, 159 API tests (in-memory Mongo), 157 app tests (fake IndexedDB),
-  and local fixture browser checks at desktop/phone size: explanation, sign-in
+  Existing REST contract and kept logic unchanged. After integration with dev
+  on 2026-11-26: build and both function bundles pass, 194 API tests (in-memory
+  Mongo; 2 existing skips), 203 app tests (fake IndexedDB/mounted components).
+  Includes cache-failure trip completion, disable/checkbox races, recipe links
+  while editing is paused, and focused MCP shopping compatibility. Earlier
+  local fixture browser checks at desktop/phone size covered explanation, sign-in
   guard, Escape, checkbox keyboard activation and no live requests while off.
   Deployed two-phone trial remains for the owner. See `specs/live-shopping.md`.
 
