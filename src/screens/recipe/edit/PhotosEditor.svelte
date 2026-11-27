@@ -11,13 +11,18 @@
   let error = $state("");
   let area = $state();
   let picking = $state(false);
+  // The file input lives here, not in the dialog: it must outlive the dialog
+  // for the chosen photo to arrive at all. See PhotoPicker.
+  let fileInput = $state();
   let disposed = false;
   let controller;
   onDestroy(() => { disposed = true; controller?.abort(); busy = false; });
 
-  // A revert or save replaces the draft: an open picker no longer applies.
+  // A revert replaces the draft: an open picker no longer applies. Not while a
+  // photo is being prepared, so the message about it lands where the user is
+  // looking rather than behind a dialog that vanished.
   let pickedAt = $state(0);
-  $effect(() => { if (picking && edit.version !== pickedAt) picking = false; });
+  $effect(() => { if (picking && !busy && edit.version !== pickedAt) picking = false; });
 
   async function add(readFiles) {
     if (busy) return;
@@ -34,8 +39,11 @@
         edit.set("images", next);
         picking = false;
       }
+      // The draft was replaced while this was being prepared: say so rather
+      // than dropping the photo without a word.
+      else if (!disposed) error = "The recipe changed while that photo was being prepared. Add it again.";
     } catch (err) {
-      if (!disposed && edit.version === version && err.name !== "AbortError") error = err.message || "Could not add that photo.";
+      if (!disposed && err.name !== "AbortError") error = err.message || "Could not add that photo.";
     } finally { if (!disposed) busy = false; }
   }
   function fromUrl(value) {
@@ -106,6 +114,23 @@
       <Button onclick={openPicker} disabled={busy}>Add photo…</Button>
       {#if busy}<Text role="status">Preparing photo…</Text>{/if}
     </Inline>
+    <!-- Outside the dialog on purpose: a photo chosen from the device arrives
+         on this input's change event, long after the dialog may have gone. -->
+    <input
+      bind:this={fileInput}
+      class="file-trigger"
+      type="file"
+      accept="image/*"
+      multiple
+      disabled={busy}
+      aria-label="Upload photos"
+      onchange={(e) => {
+        const input = e.currentTarget;
+        const files = Array.from(input.files ?? []);
+        input.value = "";
+        if (files.length) void add(async () => files);
+      }}
+    />
     {#if error && !picking}<p role="alert"><Text warning>{error}</Text></p>{/if}
     <p><Text muted>You can also paste a copied photo straight into this box.</Text></p>
   </section>
@@ -116,6 +141,7 @@
     {busy}
     {error}
     onfiles={(files) => add(async () => files)}
+    onchoose={() => fileInput?.click()}
     onurl={fromUrl}
     onclipboard={readClipboard}
     onclose={() => { picking = false; error = ""; }}

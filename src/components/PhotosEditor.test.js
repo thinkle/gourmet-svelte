@@ -60,10 +60,9 @@ describe('the add-a-photo dialog',()=>{
     preparePhoto.mockResolvedValue({url:'data:image/png;base64,YQ=='});
     const {edit}=show();
     // Nothing but the trigger until it is opened.
-    expect(document.querySelector('input[type=file]')).toBeNull();
     expect(document.querySelector('input[type=url]')).toBeNull();
+    expect([...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Paste photo')).toBe(false);
     openPicker();
-    expect(document.querySelector('input[type=file]')).toBeTruthy();
     expect(document.querySelector('input[type=url]')).toBeTruthy();
     expect([...document.querySelectorAll('button')].some(b=>b.textContent.trim()==='Paste photo')).toBe(true);
     const input=document.querySelector('input[type=file]');
@@ -71,6 +70,33 @@ describe('the add-a-photo dialog',()=>{
     input.dispatchEvent(new Event('change',{bubbles:true}));await wait();
     await vi.waitFor(()=>expect(edit.draft.images).toHaveLength(1));
     await vi.waitFor(()=>expect(document.querySelector('input[type=url]')).toBeNull());
+  });
+
+  // The cause of a photo chosen on a phone going nowhere: Contain dismisses a
+  // dismissible dialog on a click whose coordinates fall outside its content
+  // box, and a programmatic click carries (0, 0). The input has to outlive the
+  // dialog, so it is not allowed back inside it.
+  it('keeps the file input outside the dialog, where it survives a dismissal',async()=>{
+    show();
+    const before=document.querySelector('input[type=file]');
+    expect(before,'file input is there before the dialog opens').toBeTruthy();
+    openPicker();
+    const input=document.querySelector('input[type=file]');
+    expect(input.closest('dialog')).toBeNull();
+    const clicks=[];input.addEventListener('click',()=>clicks.push(1));
+    click('Choose photo…');
+    expect(clicks).toHaveLength(1);
+  });
+
+  it('says so rather than dropping a photo when the draft changed underneath',async()=>{
+    let finish;preparePhoto.mockReturnValue(new Promise(resolve=>finish=resolve));
+    const {edit}=show();openPicker();
+    const input=document.querySelector('input[type=file]');
+    Object.defineProperty(input,'files',{value:[new File(['x'],'pie.png',{type:'image/png'})]});
+    input.dispatchEvent(new Event('change',{bubbles:true}));await wait();
+    edit.revert();finish({url:'data:image/png;base64,YQ=='});await wait();
+    await vi.waitFor(()=>expect(document.querySelector('[role=alert]')?.textContent).toMatch(/Add it again/));
+    expect(edit.draft.images).toEqual([]);
   });
   it('shuts an open picker when the draft is replaced',async()=>{
     const {edit}=show();openPicker();

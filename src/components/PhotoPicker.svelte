@@ -7,9 +7,13 @@
   // what comes back. This component only collects files or a URL.
   import { Dialog, Button, FormItem, Input, Inline, Text } from "contain-css-svelte";
 
-  let { busy = false, error = "", onfiles, onurl, onclipboard, onclose } = $props();
+  // Not `dismissible`: Contain reads any click that reaches the dialog with
+  // coordinates outside its content box as a backdrop click, and a click made
+  // by the keyboard or by script carries (0, 0). Escape and the close button
+  // still shut it. `onchoose` opens a file input the PARENT keeps, outside
+  // this dialog, for the same reason -- it has to outlive a dismissal.
+  let { busy = false, error = "", onfiles, onchoose, onurl, onclipboard, onclose } = $props();
   let url = $state("");
-  let fileInput = $state();
 
   const submitUrl = () => { if (url.trim()) onurl?.(url.trim()); };
 
@@ -21,7 +25,7 @@
   }
 </script>
 
-<Dialog open dismissible {onclose} aria-label="Add a photo">
+<Dialog open {onclose} aria-label="Add a photo">
   <div class="photo-picker" onpaste={paste}>
     <h2>Add a photo</h2>
     <p><Text muted>The first photo appears on the recipe and in your recipe list.</Text></p>
@@ -29,22 +33,7 @@
     <FormItem>
       {#snippet label()}From your device{/snippet}
       <Inline wrap>
-        <Button onclick={() => fileInput?.click()} disabled={busy}>Choose photo…</Button>
-        <input
-          bind:this={fileInput}
-          class="file-trigger"
-          type="file"
-          accept="image/*"
-          multiple
-          disabled={busy}
-          aria-label="Upload photos"
-          onchange={(e) => {
-            const input = e.currentTarget;
-            const files = Array.from(input.files ?? []);
-            input.value = "";
-            if (files.length) onfiles?.(files);
-          }}
-        />
+        <Button onclick={() => onchoose?.()} disabled={busy}>Choose photo…</Button>
       </Inline>
     </FormItem>
 
