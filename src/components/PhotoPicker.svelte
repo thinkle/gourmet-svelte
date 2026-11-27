@@ -7,11 +7,13 @@
   // what comes back. This component only collects files or a URL.
   import { Dialog, Button, FormItem, Input, Inline, Text } from "contain-css-svelte";
 
-  // Not `dismissible`: Contain reads any click that reaches the dialog with
-  // coordinates outside its content box as a backdrop click, and a click made
-  // by the keyboard or by script carries (0, 0). Escape and the close button
-  // still shut it. `onchoose` opens a file input the PARENT keeps, outside
-  // this dialog, for the same reason -- it has to outlive a dismissal.
+  // `onchoose` opens a file input the PARENT keeps, outside this dialog: a
+  // photo chosen from the device arrives on that input's change event, long
+  // after a dismissal may have taken this dialog away. That is not a
+  // workaround -- it is what makes a chosen photo survive a backdrop tap.
+  // (Contain 1.10.1 and earlier dismissed a `dismissible` dialog on any click
+  // reaching it with coordinates outside its content box, and a scripted or
+  // keyboard click carries (0, 0); fixed in 1.10.2.)
   let { busy = false, error = "", onfiles, onchoose, onurl, onclipboard, onclose } = $props();
   let url = $state("");
 
@@ -25,7 +27,7 @@
   }
 </script>
 
-<Dialog open {onclose} aria-label="Add a photo">
+<Dialog open dismissible {onclose} aria-label="Add a photo">
   <div class="photo-picker" onpaste={paste}>
     <h2>Add a photo</h2>
     <p><Text muted>The first photo appears on the recipe and in your recipe list.</Text></p>

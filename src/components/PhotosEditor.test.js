@@ -72,10 +72,10 @@ describe('the add-a-photo dialog',()=>{
     await vi.waitFor(()=>expect(document.querySelector('input[type=url]')).toBeNull());
   });
 
-  // The cause of a photo chosen on a phone going nowhere: Contain dismisses a
-  // dismissible dialog on a click whose coordinates fall outside its content
-  // box, and a programmatic click carries (0, 0). The input has to outlive the
-  // dialog, so it is not allowed back inside it.
+  // The input has to outlive the dialog: a photo chosen from the device
+  // arrives on its change event, which can land after the dialog is gone --
+  // a backdrop tap while the phone's photo sheet is still up. So it is not
+  // allowed back inside the dialog, dismissible or not.
   it('keeps the file input outside the dialog, where it survives a dismissal',async()=>{
     show();
     const before=document.querySelector('input[type=file]');
