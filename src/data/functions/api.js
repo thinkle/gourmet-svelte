@@ -24,6 +24,7 @@ import {
     describeImages, imageInfo, imageIndex, insertImages, moveImage,
     prepareImages, assertRecipeFits, MAX_IMAGES_PER_REQUEST,
 } from '../../../netlify/lib/recipeImages.js';
+import { isPalette, paletteList, paletteNames } from '../../app/palettes.js';
 
 function jsonResponse(statusCode, body) {
     return {
@@ -256,6 +257,19 @@ function normalizeRecipeInput(rawRecipe = {}) {
     if (typeof recipe.text === 'string') {
         recipe.text = [{ header: 'Instructions', body: recipe.text }];
     }
+    if (recipe.palette !== undefined) {
+        // A palette is chosen from the app's designed set, by name. Null or ""
+        // goes back to the automatic choice.
+        if (recipe.palette === null) { recipe.palette = ''; }
+        if (typeof recipe.palette !== 'string') {
+            throw makeError(400, 'palette must be the name of a palette, or "" for the automatic choice.');
+        }
+        const chosen = recipe.palette.trim().toLowerCase();
+        if (chosen && !isPalette(chosen)) {
+            throw makeError(400, `No palette called "${recipe.palette}". GET /recipes/palettes for the names.`);
+        }
+        recipe.palette = chosen;
+    }
     return recipe;
 }
 
@@ -339,6 +353,15 @@ const RECIPE_SHAPE = {
     yields: '[{amount, unit}]',
     times: '[{name, seconds, text}]',
     rating: 'number, 0-5',
+    palette: 'optional: the name of the palette this recipe wears, e.g. "chocolate", ' +
+        '"christmas", "ocean". Leave it out and Gourmet chooses from the recipe itself -- ' +
+        'its title, then its categories, then a few telling ingredients -- which is right ' +
+        'most of the time. Name one when the automatic choice misses (a holiday cake that ' +
+        'never says "Christmas") or when you are writing a recipe and want it to look like ' +
+        'itself. GET /recipes/palettes returns every name with its colours. The names are ' +
+        'the whole vocabulary: colours cannot be given as hex, because each palette is a ' +
+        'designed, contrast-checked pair that the app derives its other tones from. Send "" ' +
+        'to go back to the automatic choice.',
     images: {
         note: 'A recipe\'s photos are stored with it, as data URLs, so they are NEVER ' +
             'sent back with a recipe: `images` is always [] in a response. Read ' +
@@ -505,6 +528,11 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         ensureScope(user, 'recipes:read');
         return RECIPE_SHAPE;
     }
+    if (pathParts[1] === 'palettes') {
+        ensureScope(user, 'recipes:read');
+        if (method !== 'GET') { throw makeError(405, 'Method not allowed'); }
+        return { palettes: paletteList() };
+    }
     if (pathParts[2] === 'images') {
         return await handleRecipeImages(method, pathParts, user, jsonBody);
     }
@@ -656,10 +684,10 @@ const handler = async (event, context) => {
                 jsonBody,
                 params || {}
             );
-            // The images sub-resource answers about images on purpose.
-            return jsonResponse(200, pathParts[2] === 'images'
-                ? responseBody
-                : stripImagesFromResponse(responseBody));
+            // Image data is stripped out of recipes. These paths answer with
+            // documentation or with images on purpose, so they go back whole.
+            const aboutImages = pathParts[2] === 'images' || pathParts[1] === 'schema' || pathParts[1] === 'palettes';
+            return jsonResponse(200, aboutImages ? responseBody : stripImagesFromResponse(responseBody));
         } catch (err) {
             return jsonResponse(err.statusCode || 500, {
                 error: err.message || err.toString(),

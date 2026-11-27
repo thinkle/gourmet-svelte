@@ -1,7 +1,8 @@
 import { surfaceVars } from "contain-css-svelte";
 
 // Gourmet's own colour logic: chocolate is brown, lemon is yellow, Halloween is black and orange.
-import { getColor, wordColors } from "../common/colors.js";
+import { wordColors } from "../common/colors.js";
+import { paletteFor } from "./palettes.js";
 // Gourmet's own ingredient matcher: wraps mentions of an ingredient in the
 // text with <ing target="ingredient text">…</ing>.
 import { parseIngredients } from "../utils/ingredientUtils.js";
@@ -53,7 +54,8 @@ export function prepare(r) {
     flat,
     ingText: flat.map((i) => i.text ?? "").join(" ").toLowerCase(),
     bodyText: (r.text ?? []).map((t) => text(t?.body)).join(" ").toLowerCase(),
-    color: getColor(r),
+    // The palette the recipe names, else the one its own words choose.
+    color: paletteFor(r),
     image: (r.images ?? []).map((im) => im?.thumbnailUrl || im?.url).find((u) => typeof u === "string" && u.startsWith("data:image")) ?? null,
     photo: (r.images ?? []).map((im) => im?.url).find((u) => typeof u === "string" && u.startsWith("data:image")) ?? null,
   };

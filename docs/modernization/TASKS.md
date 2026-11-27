@@ -428,6 +428,28 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   pending their source location.
   See `specs/shopping-mcp.md` for the integration contract and trial steps.
 
+## C — Colours
+
+- [x] **C-1 A recipe may choose its palette** — owner asked 2026-11-27
+  ("consider whether custom color support is a horrible idea or a good one").
+  Verdict and reasoning in `docs/modernization/recipe-palettes.md`: name a
+  palette, never a colour, because the app derives tints, highlights and link
+  tones from the pair and an arbitrary pair breaks all of them at once — while
+  choosing among the 71 designed palettes adds no clash the automatic matcher
+  cannot already produce. New optional `palette` field; names are derived from
+  each matcher in `src/common/colors.js` (kept, untouched), so a palette added
+  there gets a name for free. `prepare()` applies it, so list rows, tab chips,
+  swatches and the recipe view all follow. Editor control: a swatch and a
+  dropdown headed "Automatic (carrot)". API accepts and returns it, validates
+  against the names, and `GET /recipes/palettes` lists them with their colours
+  for agents choosing one. "" or null goes back to automatic.
+  The `/recipes/schema` key-set assertion was loosened to "must contain" at the
+  owner's explicit request, so the guide can describe new fields; everything it
+  pinned is still pinned.
+  Verified: 7 palette unit tests, 7 contract tests, 291 app tests, 228 API
+  tests (2 existing skips), build. Browser (fixtures, no network): the chooser,
+  saving, and the palette following through to the list row, tab chip and hero.
+
 ## I — Photos for agents
 
 - [x] **I-1 Image interface for API/MCP clients** — owner asked 2026-11-27.

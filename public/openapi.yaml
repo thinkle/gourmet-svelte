@@ -28,6 +28,10 @@ info:
 
     GET /recipes/schema returns this in machine-readable form.
 
+    Colours: a recipe wears a palette Gourmet reads off its own words. Set
+    `palette` to one of the names from GET /recipes/palettes to choose
+    instead; there are no free colours, by design.
+
     Photos: a recipe's pictures are stored with it, so they never travel in a
     recipe response -- read `imageCount`, and GET /recipes/{id}/images for
     captions and sizes. To give a recipe a photo, send `imageUrls` with a
@@ -273,6 +277,41 @@ paths:
             application/json:
               schema:
                 type: integer
+  /.netlify/functions/api/recipes/palettes:
+    get:
+      summary: The palettes a recipe can wear
+      operationId: listRecipePalettes
+      description: |
+        Every palette with its colours. A recipe's `palette` field is one of
+        these names; leave it out and Gourmet chooses from the recipe itself.
+        Colours cannot be given as hex: each palette is a designed,
+        contrast-checked pair the app derives its other tones from, and a page
+        of recipe cards stays calm because every palette on it was drawn by
+        the same hand. Scope recipes:read.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Every palette, in the order the automatic matcher tries them.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  palettes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          examples: ["chocolate"]
+                        bg:
+                          type: string
+                        fg:
+                          type: string
+                        accent:
+                          type: string
   /.netlify/functions/api/recipes/{id}/images:
     parameters:
       - name: id
@@ -851,6 +890,16 @@ components:
           type: number
           minimum: 0
           maximum: 5
+        palette:
+          type: string
+          description: |
+            The name of the palette this recipe wears, from
+            GET /recipes/palettes ("chocolate", "christmas", "ocean"). Omit it
+            and Gourmet picks from the recipe's own words, which is right most
+            of the time; name one when that misses, or when you are writing a
+            recipe and want it to look like itself. "" or null goes back to the
+            automatic choice. A name that is not a palette is a 400.
+          examples: ["christmas"]
         imageUrls:
           description: |
             Photos to put on this recipe, by public HTTPS link (or an inline

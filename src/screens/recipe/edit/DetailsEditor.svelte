@@ -4,6 +4,7 @@
   import { Button, CircleButton, FormItem, FormProvider, Fieldset, Input, Inline } from "contain-css-svelte";
   import CategoryTag from "../../../components/CategoryTag.svelte";
   import StarInput from "../../../components/StarInput.svelte";
+  import PaletteChooser from "../../../components/PaletteChooser.svelte";
   import { listView, parseDuration } from "../../../app/recipeEdit.js";
   import { fmtTime } from "../../../app/lib.js";
   import { floatToFrac, fracToFloat } from "../../../utils/numbers.js";
@@ -81,6 +82,12 @@
     <Fieldset>
       {#snippet legend()}Rating{/snippet}
       <StarInput value={d.rating} onchange={(v) => edit.set("rating", v)} />
+    </Fieldset>
+
+    <Fieldset>
+      {#snippet legend()}Colours{/snippet}
+      <!-- "" is automatic: an explicit value, so switching back is a real change to save. -->
+      <PaletteChooser recipe={d} value={d.palette ?? ""} onchange={(name) => edit.set("palette", name)} />
     </Fieldset>
 
     <Fieldset>

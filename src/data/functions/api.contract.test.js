@@ -169,9 +169,12 @@ describe('GET /recipes/schema', () => {
     it('returns the RECIPE_SHAPE description including the update semantics', async () => {
         const res = await api.call('GET', '/recipes/schema', as(alice));
         expect(res.status).toBe(200);
-        expect(Object.keys(res.json).sort()).toEqual(
+        // Every field described here stays described. New fields may be added
+        // to the guide -- that is what it is for -- so this is "must contain",
+        // not "is exactly" (owner's call, 2026-11-27, card I-1/C-1).
+        expect(Object.keys(res.json).sort()).toEqual(expect.arrayContaining(
             ['categories', 'ingredients', 'instructions', 'rating', 'sources', 'times', 'updateSemantics', 'yields']
-        );
+        ));
         expect(res.json.updateSemantics).toMatch(/replaces the entire ingredient list/);
         expect(Object.keys(res.json.ingredients).sort()).toEqual(['alsoAccepted', 'note', 'preferred', 'stored']);
     });
