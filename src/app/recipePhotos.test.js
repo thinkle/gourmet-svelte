@@ -67,6 +67,39 @@ describe('photo preparation', () => {
     expect(await preparePhoto(new Blob(['photo'],{type:'image/jpeg'}))).toEqual({url:'data:image/jpeg;base64,SMALL'});
     expect(calls).toEqual([0.85, 0.72, 0.6]);
   });
+  // What a phone hands over is not always what a desktop file picker does.
+  it('accepts a photo the picker handed over with no type at all', async () => {
+    vi.stubGlobal('Image',class { naturalWidth=100; naturalHeight=100; set src(value){queueMicrotask(()=>this.onload());} });
+    const file = new Blob(['photo']); // type ''
+    expect(await preparePhoto(file)).toEqual({url:'data:application/octet-stream;base64,cGhvdG8='});
+  });
+
+  it('says what to do about an iPhone HEIC this browser cannot open', async () => {
+    vi.stubGlobal('Image',class { naturalWidth=0; naturalHeight=0; set src(value){queueMicrotask(()=>this.onerror());} });
+    await expect(preparePhoto(new Blob(['x'],{type:'image/heic'}))).rejects.toThrow(/HEIC/);
+  });
+
+  // A browser out of room for a 48-megapixel photo leaves the canvas
+  // untouched and encodes it without complaint: that used to be saved.
+  it('refuses a photo the browser drew as nothing rather than saving a blank', async () => {
+    big();
+    vi.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue({
+      drawImage: vi.fn(), getImageData: () => ({ data: new Uint8ClampedArray([0,0,0,0]) }),
+    });
+    vi.spyOn(HTMLCanvasElement.prototype,'toDataURL').mockReturnValue('data:image/jpeg;base64,X');
+    await expect(preparePhoto(new Blob(['photo'],{type:'image/jpeg'}))).rejects.toThrow(/ran out of room/);
+  });
+
+  it('decodes with createImageBitmap where there is one, and lets it go after', async () => {
+    const close = vi.fn();
+    vi.stubGlobal('createImageBitmap', vi.fn(async () => ({ width: 2400, height: 1600, close })));
+    vi.stubGlobal('Image', class { set src(value) { throw new Error('should not reach <img>'); } });
+    const calls = canvasStub(255);
+    expect(await preparePhoto(new Blob(['photo'],{type:'image/jpeg'}))).toEqual({url:'data:image/jpeg;base64,X'});
+    expect(calls.length).toBeGreaterThan(0);
+    expect(close).toHaveBeenCalled();
+  });
+
   it('bounds total photo data before sending a recipe', () => {
     expect(photosFit([{url:'data:image/png;base64,YQ=='}])).toBe(true);
     expect(photosFit([{url:'x'.repeat(4500000)}])).toBe(false);
@@ -74,7 +107,7 @@ describe('photo preparation', () => {
   it('rejects nonphotos, SVG and oversized uploads', async () => {
     await expect(preparePhoto(new Blob(['x'],{type:'text/plain'}))).rejects.toThrow(/Choose a photo/);
     await expect(preparePhoto(new Blob(['x'],{type:'image/svg+xml'}))).rejects.toThrow(/Choose a photo/);
-    await expect(preparePhoto({type:'image/png',size:11*1024*1024})).rejects.toThrow(/10 MB/);
+    await expect(preparePhoto({type:'image/png',size:26*1024*1024})).rejects.toThrow(/25 MB/);
   });
   it('requests URL photos from the signed-in same-origin fetch endpoint', async () => {
     const fetcher=vi.fn(async()=>({ok:true,blob:async()=>new Blob(['photo'],{type:'image/png'})}));

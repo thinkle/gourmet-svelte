@@ -3,7 +3,10 @@ export const PHOTO_EDGE = 1200;
 export const MAX_PHOTO_DATA = 4000000;
 export const MAX_RECIPE_PHOTO_BYTES = 4500000;
 export const photosFit = (photos) => new TextEncoder().encode(JSON.stringify(photos)).byteLength <= MAX_RECIPE_PHOTO_BYTES;
-export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+// What we will read off a device at all. A current phone's photo is routinely
+// 8-15 MB, and it gets scaled down to PHOTO_EDGE here anyway, so the cap is
+// only there to stop an absurd file being read into memory.
+export const MAX_PHOTO_BYTES = 25 * 1024 * 1024;
 // Inline body images sit in a column of text, not a hero slot, and several
 // may share one recipe: hold them to a smaller edge and a tighter budget.
 export const INLINE_EDGE = 800;
@@ -28,15 +31,26 @@ const ALPHA_TYPES = /^image\/(png|gif|webp|avif)$/i;
 // the picture than shrinking it by a fifth.
 const JPEG_QUALITIES = [0.85, 0.72, 0.6];
 
-/** True when any pixel is less than fully opaque, or when we cannot tell. */
-function hasAlpha(context, width, height) {
-  try {
-    const { data } = context.getImageData(0, 0, width, height);
-    for (let i = 3; i < data.length; i += 4) if (data[i] < 255) return true;
-    return false;
-  } catch {
-    return true; // No pixel access: keep the format that cannot lose anything.
+/**
+   What the drawn canvas holds: whether any pixel is less than fully opaque,
+   and whether nothing arrived at all. null when the pixels cannot be read, in
+   which case we assume neither.
+
+   `blank` is the tell for a draw that failed rather than threw: a browser that
+   runs out of room decoding a very large photo leaves the canvas untouched and
+   still encodes it happily, which is how a phone photo can be saved as nothing.
+**/
+function scanCanvas(context, width, height) {
+  let data;
+  try { ({ data } = context.getImageData(0, 0, width, height)); }
+  catch { return null; } // No pixel access: assume the picture is there and opaque.
+  let transparent = false, blank = true;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 255) transparent = true;
+    if (data[i] !== 0) blank = false;
+    if (transparent && !blank) break;
   }
+  return { transparent, blank };
 }
 
 /**
@@ -50,18 +64,51 @@ function* encodings(canvas, transparent) {
   for (const quality of JPEG_QUALITIES) yield canvas.toDataURL('image/jpeg', quality);
 }
 
-export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOTO_DATA } = {}) {
-  if (!file?.type?.startsWith('image/') || file.type === 'image/svg+xml') throw new Error('Choose a photo such as JPEG, PNG, or WebP.');
-  if (file.size > MAX_PHOTO_BYTES) throw new Error('Choose a photo smaller than 10 MB.');
-  const url = await readDataUrl(file);
+/** Formats a browser may hand us from a phone but cannot decode itself. */
+const PHONE_TYPES = /^image\/(heic|heif)$/i;
+
+/**
+   The photo's pixels, ready to draw, plus its own size.
+
+   createImageBitmap is tried first: it decodes off the main thread and, unlike
+   <img>, does not subsample a very large picture, which is how a 48-megapixel
+   phone photo can otherwise draw blank on iOS. Not every browser has it, and
+   it refuses some formats, so <img> stays as the fallback.
+**/
+async function decodePhoto(file, url) {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file);
+      if (bitmap?.width) return { source: bitmap, width: bitmap.width, height: bitmap.height };
+    } catch { /* fall through to <img> */ }
+  }
   const img = new Image();
   await new Promise((resolve, reject) => {
     img.onload = resolve;
-    img.onerror = () => reject(new Error('That image could not be opened. Try a JPEG or PNG.'));
+    img.onerror = () => reject(new Error(PHONE_TYPES.test(file?.type ?? '')
+      ? 'This browser cannot open HEIC photos. On an iPhone, Settings > Camera > Formats > Most Compatible saves JPEGs, or share the photo to convert it.'
+      : 'That image could not be opened. Try a JPEG or PNG.'));
     img.src = url;
   });
-  const size = photoSize(img.naturalWidth, img.naturalHeight, edge);
-  if (Math.max(img.naturalWidth, img.naturalHeight) <= edge && url.length <= maxData) return { url };
+  return { source: img, width: img.naturalWidth, height: img.naturalHeight };
+}
+
+export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOTO_DATA } = {}) {
+  // A phone's photo picker sometimes hands over a file with no type at all.
+  // Only an outright wrong type is refused here; anything else is left to the
+  // decoder, which knows better than the label does.
+  if (file?.type === 'image/svg+xml' || (file?.type && !file.type.startsWith('image/'))) {
+    throw new Error('Choose a photo such as JPEG, PNG, or WebP.');
+  }
+  if (file?.size > MAX_PHOTO_BYTES) throw new Error('Choose a photo smaller than 25 MB.');
+  const url = await readDataUrl(file);
+  const { source, width, height } = await decodePhoto(file, url);
+  if (!width || !height) throw new Error('That image could not be opened. Try a JPEG or PNG.');
+  const size = photoSize(width, height, edge);
+  if (Math.max(width, height) <= edge && url.length <= maxData) {
+    source.close?.();
+    return { url };
+  }
   const canvas = document.createElement('canvas');
   Object.assign(canvas, size);
   const context = canvas.getContext('2d');
@@ -70,15 +117,27 @@ export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOT
   // we cannot run (no getImageData) means we keep the format that is safe.
   const mayHaveAlpha = ALPHA_TYPES.test(file.type ?? '');
   let transparent = null;
-  for (let attempt = 0; attempt < 8; attempt++) {
-    canvas.width = size.width; canvas.height = size.height;
-    context.drawImage(img, 0, 0, size.width, size.height);
-    if (transparent === null) transparent = mayHaveAlpha && hasAlpha(context, size.width, size.height);
-    for (const url of encodings(canvas, transparent)) {
-      if (url.length <= maxData) return { url };
+  try {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      canvas.width = size.width; canvas.height = size.height;
+      context.drawImage(source, 0, 0, size.width, size.height);
+      if (transparent === null) {
+        const scan = scanCanvas(context, size.width, size.height);
+        // A source that cannot carry transparency has no honest way to come
+        // out blank: nothing was drawn, however quietly.
+        if (scan?.blank && !mayHaveAlpha) {
+          throw new Error('This browser ran out of room to resize that photo. Try a smaller image.');
+        }
+        transparent = mayHaveAlpha && (scan?.transparent ?? true);
+      }
+      for (const encoded of encodings(canvas, transparent)) {
+        if (encoded.length <= maxData) return { url: encoded };
+      }
+      size.width = Math.max(1, Math.round(size.width * 0.8));
+      size.height = Math.max(1, Math.round(size.height * 0.8));
     }
-    size.width = Math.max(1, Math.round(size.width * 0.8));
-    size.height = Math.max(1, Math.round(size.height * 0.8));
+  } finally {
+    source.close?.();
   }
   throw new Error('That photo is too large to save. Try a smaller image.');
 }
