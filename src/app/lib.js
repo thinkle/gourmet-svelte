@@ -94,8 +94,14 @@ export function sourceItems(r) {
     if (n && !isLink(n)) named.push({ label: n.replace(/^www\./i, ""), url: u });
     else if (u) links.push({ label: site(u), url: u });
   }
-  const bare = named.filter((x) => !x.url);
-  if (bare.length === 1 && links.length) bare[0].url = links.shift().url;
+  // Give every name that has no link one of the leftovers, in order: the
+  // importer stores the page's link apart from the names on it, and two
+  // names (an author and a publication) used to leave the link unattached,
+  // showing a bare hostname next to names that were not clickable.
+  for (const name of named) {
+    if (name.url || !links.length) continue;
+    name.url = links.shift().url;
+  }
   const seen = new Set();
   return [...named, ...links].filter((x) => !seen.has(x.label) && seen.add(x.label));
 }

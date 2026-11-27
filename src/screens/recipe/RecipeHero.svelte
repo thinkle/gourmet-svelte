@@ -60,7 +60,9 @@
     {/if}
     {#if sources.length}
       <p class="sources"><Text muted>From</Text>
-        {#each sources as s, i}{#if i}, {/if}{#if s.url}<a href={s.url}>{s.label}</a>{:else}{s.label}{/if}{/each}
+        <!-- The separator is an expression: a literal ", " here loses its
+             trailing space to whitespace trimming at the block boundary. -->
+        {#each sources as s, i}{#if i}{", "}{/if}{#if s.url}<a href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a>{:else}{s.label}{/if}{/each}
       </p>
     {/if}
   </div>
