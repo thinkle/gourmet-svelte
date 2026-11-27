@@ -20,10 +20,25 @@ scratch on Svelte 5 + Contain while the logic and API are kept. Read
    Mongo only). Do not run scripts, migrations or bulk writes against it; write
    the script, Tom runs it. Do not create, edit or delete recipes in a deployed
    or local app except a scratch recipe you made for the check and remove
-   afterwards. Any change to stored recipe shape or to
-   `netlify/functions` write paths needs a dump first
-   (`scripts/migrate/dump.mjs`). Do not print or commit `MONGO_*` values or
-   API tokens.
+   afterwards. Do not print or commit `MONGO_*` values or API tokens.
+
+   **When to dump first** (`scripts/migrate/dump.mjs`, run by Tom; clarified
+   2026-11-27). A dump is insurance against losing or mangling what is already
+   stored, so ask for one when a change could reach recipes nobody is looking
+   at:
+   - a migration, backfill, repair pass or any bulk write;
+   - a change to what a stored field means, or to its shape, where existing
+     documents would have to be read or rewritten differently;
+   - a change to how an existing write path merges or replaces
+     (`updateRecipe`, `applyRecipeUpdate`, the sync reconciliation): a recipe
+     the caller did not mean to touch could change;
+   - deleting or renaming a stored field.
+
+   A dump is **not** needed to add a new way to write the same shapes the app
+   already writes: a new endpoint, a new optional field, a new validation that
+   can only refuse a write. Those can only affect the recipe the caller named,
+   and only in the way the caller asked for. Say in the task card which of
+   these it was.
 3. **Branches and delivery.** `dev` is the rebuild
    (dev.gourmetrecipemanager.com); `master` is the old app in production.
    Never commit directly to `master`. For small fixes, commit directly to

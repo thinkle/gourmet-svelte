@@ -467,6 +467,10 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   `specs/recipe-images-mcp.md` all describe it. Verified: 15 new contract
   tests, 222 API tests (2 existing skips), 284 app tests, build, and a
   standalone function bundle. No real-database writes.
+  Rule 2 asked for a dump before any change to a `netlify/functions` write
+  path; the owner judged that too broad on 2026-11-27 and the rule now names
+  what actually risks stored data. This card writes the same shapes the app
+  already writes, through new paths, so no dump was taken.
 - [ ] **I-2 MCP worker tools** (separate repo, nutrition-tracker Cloudflare
   worker): `imageUrls` on the existing create/update tools, plus the five
   image tools in `specs/recipe-images-mcp.md`, then the trial steps there.
