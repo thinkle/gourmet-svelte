@@ -4,7 +4,7 @@
   // plain ones (1 1/3) while you are, so they are easy to type over. Up and
   // down (arrow keys, or the buttons) step to the next sensible amount.
   // Parsing, display and stepping are Gourmet's own (utils/numbers.js).
-  import { Input, Button } from "contain-css-svelte";
+  import { Input, CircleButton } from "contain-css-svelte";
   import { floatToFrac, fracToFloat, increment, decrement } from "../utils/numbers.js";
 
   // `times` shows the "×" (a multiplier); `unit` follows the box ("Makes [30] cookies").
@@ -44,9 +44,12 @@
     else if (e.key === "Enter") { commit(); e.currentTarget.blur(); }
     else if (e.key === "Escape") { editing = false; e.currentTarget.blur(); }
   }
+  // whole: a count of things (eggs), so the buttons go one at a time: 2 ⅔ -> 3, 4 -> 5.
+  const nextValue = (dir) =>
+    whole ? (dir > 0 ? Math.floor(value + 1e-9) + 1 : Math.ceil(value - 1e-9) - 1) : dir > 0 ? increment(value) : decrement(value);
+  const canStep = (dir) => valid(nextValue(dir));
   function step(dir) {
-    // whole: a count of things (eggs), so the buttons go one at a time: 2 ⅔ -> 3, 4 -> 5.
-    const next = whole ? (dir > 0 ? Math.floor(value + 1e-9) + 1 : Math.ceil(value - 1e-9) - 1) : dir > 0 ? increment(value) : decrement(value);
+    const next = nextValue(dir);
     if (valid(next)) value = next;
     if (editing) text = floatToFrac(value, { unicodeFractions: false });
   }
@@ -65,8 +68,8 @@
     {onkeydown}
   />
   <span class="steps">
-    <Button aria-label="Less" onclick={() => step(-1)}>−</Button>
-    <Button aria-label="More" onclick={() => step(1)}>+</Button>
+    <CircleButton aria-label="Less: {label}" disabled={!canStep(-1)} onclick={() => step(-1)}>−</CircleButton>
+    <CircleButton aria-label="More: {label}" disabled={!canStep(1)} onclick={() => step(1)}>+</CircleButton>
   </span>
   {#if unit}<span class="unit">{unit}</span>{/if}
 </span>
@@ -81,6 +84,11 @@
     font-variant-numeric: tabular-nums;
     font-weight: 700;
   }
-  .steps { display: inline-flex; gap: 0.15rem; }
-  .steps :global(button) { min-inline-size: 2rem; padding-inline: 0.4rem; }
+  /* Round steppers, sized to sit beside the box; Contain centres the glyph. */
+  .steps {
+    display: inline-flex;
+    gap: 0.25rem;
+    --circle-button-size: 2rem;
+    --button-margin: 0;
+  }
 </style>

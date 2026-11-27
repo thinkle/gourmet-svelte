@@ -269,6 +269,14 @@ R1-3, R2-2, R2-3 and R2-4 with it:
   expansion. Build, 240 app tests and 207 API tests pass (2 existing skips).
   No stored-shape or backend change. Direct dev iteration requested.
 
+- [x] **R3-9 Amount stepper buttons** — owner reported 2026-11-27. The −/+
+  buttons on `AmountInput` were plain `Button`s stretched to 2rem, so their
+  glyphs sat off-centre. They are `CircleButton`s now, sized through
+  `--circle-button-size` (32px, glyph centred at 16,16 measured), a step that
+  cannot be taken is disabled, and each carries the field's own name ("Less:
+  Multiply the recipe by") instead of a bare "Less". Used by the recipe
+  multiplier, yields, batches and the shopping-list multiplier.
+
 ## R4 — Account
 
 - [ ] **R4-1** API tokens: list, create (shown once), revoke — `screen-builder`
