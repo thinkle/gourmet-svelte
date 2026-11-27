@@ -6,9 +6,10 @@
 </script>
 
 {#if q}
-  <!-- Not `dismissible`: Contain's backdrop check reads a keyboard-made
-       click (Enter on a button, clientX/Y 0) as a click outside, so the
-       answer would always be "no". Escape still closes it. See CONTAIN_NOTES gap log. -->
+  <!-- Deliberately not `dismissible`: an unanswered question should not go
+       away on a stray click outside it. Escape still closes it, answering no.
+       (Contain 1.10.1 and earlier also read a keyboard-made click inside as a
+       click outside, which made the answer always "no"; fixed in 1.10.2.) -->
   <Dialog open modal onclose={() => reply(false)} aria-label={q.title}>
     <h2>{q.title}</h2>
     {#if q.body}<p>{q.body}</p>{/if}
