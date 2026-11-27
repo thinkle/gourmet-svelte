@@ -428,6 +428,28 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   pending their source location.
   See `specs/shopping-mcp.md` for the integration contract and trial steps.
 
+## I — Photos for agents
+
+- [x] **I-1 Image interface for API/MCP clients** — owner asked 2026-11-27.
+  Additive, no existing shape or semantics changed. Reads: `imageCount` on
+  every recipe response, `GET /recipes/{id}/images` for captions and sizes,
+  `GET /recipes/{id}/images/{index}` for one picture, opt-in
+  `include=imageCount` on summaries (opt-in because an existing contract test
+  pins the summary field set — left pinned on purpose). Writes: `imageUrls` on
+  create and update, which ADDS photos by public HTTPS link rather than
+  replacing them, and POST/PATCH/DELETE on `/recipes/{id}/images` for adding
+  inline or by link, captioning, reordering and removing. Links are fetched
+  through the existing guarded downloader; budgets mirror the browser editor's
+  (≈3 MB a photo, ≈3.4 MB a recipe) so the app can still save what the API
+  accepted; a failed fetch writes nothing. OpenAPI, `/recipes/schema` and
+  `specs/recipe-images-mcp.md` all describe it. Verified: 15 new contract
+  tests, 222 API tests (2 existing skips), 284 app tests, build, and a
+  standalone function bundle. No real-database writes.
+- [ ] **I-2 MCP worker tools** (separate repo, nutrition-tracker Cloudflare
+  worker): `imageUrls` on the existing create/update tools, plus the five
+  image tools in `specs/recipe-images-mcp.md`, then the trial steps there.
+  Planned at the owner's request, not implemented.
+
 ## R6 — Cutover
 
 - [ ] **R6-1** A week of daily use on the `dev` deploy — Tom

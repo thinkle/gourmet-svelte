@@ -20,6 +20,10 @@ import { getUserFromApiToken, touchApiToken } from './tokenFunctions.js';
 import { normalizeIngredients } from '../../utils/ingredientParsing.js';
 import { bareItem } from '../../utils/bareItem.js';
 import { reparseRecipeIngredients } from './reparseIngredientsFunction.js';
+import {
+    describeImages, imageInfo, imageIndex, insertImages, moveImage,
+    prepareImages, assertRecipeFits, MAX_IMAGES_PER_REQUEST,
+} from '../../../netlify/lib/recipeImages.js';
 
 function jsonResponse(statusCode, body) {
     return {
@@ -124,9 +128,14 @@ function stripImagesFromRecipe(recipe) {
     if (!recipe || typeof recipe !== 'object') {
         return recipe;
     }
+    // Image data never travels in a recipe response: one photo can be
+    // megabytes. The count does, so a client can tell a recipe with photos
+    // from one without and ask /recipes/{id}/images about them.
     if (Array.isArray(recipe.images)) {
+        recipe.imageCount = recipe.images.length;
         recipe.images = [];
     } else if (recipe.images) {
+        recipe.imageCount = 0;
         delete recipe.images;
     }
     return recipe;
@@ -170,6 +179,21 @@ function buildRecipeListParams(query) {
         params.page = Number(query.page);
     }
     return params;
+}
+
+const SUMMARY_FIELDS = ['_id', 'title', 'rating', 'last_modified', 'categories', 'yields', 'times', 'owner'];
+
+/**
+   A summary row stays a fixed, small set of fields. `include=imageCount` asks
+   for one more: how many photos the recipe has, for a client choosing which
+   recipes still need one. Only these sub-fields are read, so the pictures
+   themselves never leave the database.
+**/
+function summaryFields(query) {
+    const include = String(query.include ?? '').split(',').map((name) => name.trim());
+    return include.includes('imageCount')
+        ? [...SUMMARY_FIELDS, 'images.width', 'images.height', 'images.caption']
+        : SUMMARY_FIELDS;
 }
 
 function ensureScope(user, scope) {
@@ -315,6 +339,30 @@ const RECIPE_SHAPE = {
     yields: '[{amount, unit}]',
     times: '[{name, seconds, text}]',
     rating: 'number, 0-5',
+    images: {
+        note: 'A recipe\'s photos are stored with it, as data URLs, so they are NEVER ' +
+            'sent back with a recipe: `images` is always [] in a response. Read ' +
+            '`imageCount` to see whether a recipe has photos at all.',
+        reading: 'GET /recipes/{id}/images lists them ({index, caption, contentType, bytes, ' +
+            'width, height}) without the pictures. GET /recipes/{id}/images/{index} returns ' +
+            'that one picture as a data URL -- megabytes, so ask only when you need to look ' +
+            'at it. GET /recipes/summary?include=imageCount (or include: "imageCount" in a ' +
+            'summary query body) adds the count to each summary, for finding recipes with no photo.',
+        writing: 'Two ways in. (1) `imageUrls` on a create or an update: a public HTTPS link, ' +
+            'or a list of up to 4, each optionally {url, caption}. The server fetches each ' +
+            'picture and stores the bytes, so one call creates a recipe with its photo and the ' +
+            'recipe keeps working when the link rots. UNLIKE every other field, imageUrls ADDS: ' +
+            'on an update the photos join the ones already there. (2) POST /recipes/{id}/images ' +
+            'with {url} or {dataUrl} (the picture inline), plus optional {caption, index}; ' +
+            '`index: 0` makes it the main photo, which is the one the app shows. ' +
+            'PATCH /recipes/{id}/images/{index} takes {caption, index} to re-caption or move one; ' +
+            'DELETE /recipes/{id}/images/{index} removes one.',
+        limits: 'jpeg, png, webp, gif or avif; about 3 MB per photo and 3.4 MB per recipe all told ' +
+            '(the browser editor saves at 1200px on the longest edge, which is well inside that). ' +
+            'A picture too large, a link that is not a public HTTPS image, or a failed fetch is an ' +
+            'error and writes nothing. Sending `images` directly still replaces every photo on the ' +
+            'recipe; prefer imageUrls or the /images endpoints, which add.',
+    },
     updateSemantics:
         'Updates are partial at the field level: fields you omit keep their stored ' +
         'value. Fields you send replace what is stored -- sending `ingredients` ' +
@@ -326,6 +374,23 @@ const RECIPE_SHAPE = {
         'altAmounts loses them. The same goes for text: sending `instructions` replaces ' +
         'every text block; send `text: [{header, body}]` to keep several.',
 };
+
+/**
+   `imageUrls` on a create or an update: pictures named by link, fetched and
+   stored next to whatever images the recipe already has. A fetch that fails
+   fails the whole request, before anything is written, so a recipe is never
+   half-saved with a photo missing.
+**/
+async function withFetchedImages(recipe, base) {
+    const urls = recipe.imageUrls;
+    delete recipe.imageUrls;
+    if (urls === undefined || urls === null) { return recipe; }
+    const list = Array.isArray(urls) ? urls : [urls];
+    if (!list.length) { return recipe; }
+    const added = await prepareImages(list);
+    recipe.images = assertRecipeFits([...(Array.isArray(base) ? base : []), ...added]);
+    return recipe;
+}
 
 /**
    Apply a partial update to a stored recipe.
@@ -347,8 +412,92 @@ async function applyRecipeUpdate(user, recipeId, rawUpdate) {
     delete update._id;
     delete update.owner;
     delete update.last_remote_save;
+    // imageUrls adds photos; it never takes one away. On an update that means
+    // adding to the recipe's own photos, unless this same call replaced them.
+    await withFetchedImages(update, update.images !== undefined ? update.images : existing.images);
     const recipe = { ...existing, ...update, _id: recipeId };
     return await updateRecipe(user, { recipe, replace: true });
+}
+
+async function readRecipeOr404(user, recipeId) {
+    try {
+        return await getRecipe(user, { _id: recipeId });
+    } catch (err) {
+        throw makeError(404, `No recipe found with id ${recipeId}`);
+    }
+}
+
+/** Write a changed image list back, leaving the rest of the recipe alone. */
+async function saveImages(user, recipe, images) {
+    assertRecipeFits(images);
+    await updateRecipe(user, { recipe: { ...recipe, images }, replace: true });
+    return { _id: recipe._id, imageCount: images.length, images: describeImages(images) };
+}
+
+/**
+   /recipes/{id}/images -- the photos on a recipe, without the picture data
+   in the way. GET lists them, GET /{index} includes that one's data URL,
+   POST adds one (fetched from an HTTPS url, or sent inline as dataUrl),
+   PATCH re-captions or moves one, DELETE removes one.
+**/
+async function handleRecipeImages(method, pathParts, user, jsonBody) {
+    const recipeId = pathParts[1];
+    const position = pathParts[3];
+    if (pathParts[4]) {
+        throw makeError(404, 'No such path');
+    }
+    ensureScope(user, method === 'GET' ? 'recipes:read' : 'recipes:write');
+    const recipe = await readRecipeOr404(user, recipeId);
+    const images = Array.isArray(recipe.images) ? recipe.images : [];
+    const body = jsonBody || {};
+    if (method === 'GET') {
+        if (position === undefined) {
+            return { _id: recipeId, imageCount: images.length, images: describeImages(images) };
+        }
+        const index = imageIndex(position, images);
+        // The one call that does return a picture, because a client asked for it.
+        return { _id: recipeId, ...imageInfo(images[index], index), url: images[index].url };
+    }
+    if (method === 'POST') {
+        if (position !== undefined) {
+            throw makeError(405, 'POST /recipes/{id}/images adds an image; it takes no index.');
+        }
+        const sent = body.images !== undefined ? body.images : body;
+        const added = await prepareImages(sent);
+        return await saveImages(user, recipe, insertImages(images, added, body.index));
+    }
+    if (method === 'PATCH' || method === 'PUT') {
+        if (position === undefined) {
+            throw makeError(405, 'Name the image to change: PATCH /recipes/{id}/images/{index}.');
+        }
+        const index = imageIndex(position, images);
+        let next = [...images];
+        if (body.caption !== undefined) {
+            if (typeof body.caption !== 'string') {
+                throw makeError(400, 'caption must be a string.');
+            }
+            next[index] = { ...next[index], caption: body.caption };
+        }
+        if (body.index !== undefined) {
+            const to = Number(body.index);
+            if (!Number.isInteger(to) || to < 0 || to >= images.length) {
+                throw makeError(400, `index must be a whole number from 0 to ${images.length - 1}.`);
+            }
+            next = moveImage(next, index, to);
+        }
+        if (body.caption === undefined && body.index === undefined) {
+            throw makeError(400, 'Send caption, index, or both.');
+        }
+        return await saveImages(user, recipe, next);
+    }
+    if (method === 'DELETE') {
+        if (position === undefined) {
+            throw makeError(405, 'Name the image to remove: DELETE /recipes/{id}/images/{index}.');
+        }
+        const index = imageIndex(position, images);
+        return await saveImages(user, recipe, images.filter((_, at) => at !== index));
+    }
+    throw makeError(405, 'Method not allowed');
 }
 
 async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query) {
@@ -356,20 +505,14 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
         ensureScope(user, 'recipes:read');
         return RECIPE_SHAPE;
     }
+    if (pathParts[2] === 'images') {
+        return await handleRecipeImages(method, pathParts, user, jsonBody);
+    }
     if (method === 'GET') {
         ensureScope(user, 'recipes:read');
         if (pathParts[1] === 'summary') {
             const params = buildRecipeListParams(query);
-            params.fields = [
-                '_id',
-                'title',
-                'rating',
-                'last_modified',
-                'categories',
-                'yields',
-                'times',
-                'owner',
-            ];
+            params.fields = summaryFields(query);
             return await getRecipes(user, params);
         }
         if (pathParts[1]) {
@@ -385,16 +528,7 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
     if (method === 'POST' && pathParts[1] === 'summary' && pathParts[2] === 'query') {
         ensureScope(user, 'recipes:read');
         const params = buildRecipeListParams(jsonBody || {});
-        params.fields = [
-            '_id',
-            'title',
-            'rating',
-            'last_modified',
-            'categories',
-            'yields',
-            'times',
-            'owner',
-        ];
+        params.fields = summaryFields(jsonBody || {});
         return await getRecipes(user, params);
     }
     if (method === 'POST' && pathParts[1] === 'get') {
@@ -433,6 +567,7 @@ async function handleRecipeRestRequest(method, pathParts, user, jsonBody, query)
             throw makeError(405, 'Method not allowed');
         }
         const recipe = normalizeRecipeInput(jsonBody.recipe || jsonBody);
+        await withFetchedImages(recipe, recipe.images);
         return await addRecipe(user, { recipe });
     }
     if (method === 'PATCH' || method === 'PUT') {
@@ -521,7 +656,10 @@ const handler = async (event, context) => {
                 jsonBody,
                 params || {}
             );
-            return jsonResponse(200, stripImagesFromResponse(responseBody));
+            // The images sub-resource answers about images on purpose.
+            return jsonResponse(200, pathParts[2] === 'images'
+                ? responseBody
+                : stripImagesFromResponse(responseBody));
         } catch (err) {
             return jsonResponse(err.statusCode || 500, {
                 error: err.message || err.toString(),

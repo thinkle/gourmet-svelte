@@ -28,6 +28,15 @@ info:
 
     GET /recipes/schema returns this in machine-readable form.
 
+    Photos: a recipe's pictures are stored with it, so they never travel in a
+    recipe response -- read `imageCount`, and GET /recipes/{id}/images for
+    captions and sizes. To give a recipe a photo, send `imageUrls` with a
+    public HTTPS link when you create or update it (the server fetches and
+    stores the picture, and these ADD rather than replace), or POST
+    /recipes/{id}/images with `url` or an inline `dataUrl`. The first photo is
+    the one the app shows. Ask for `include=imageCount` on a summary query to
+    find the recipes that have no photo yet.
+
     Shopping: GET /shopping-list first for the merged list and exact item keys.
     Use the shopping commands to change this list without replacing its stored
     recipe document. Removing an item hides all its contributions from this
@@ -264,6 +273,124 @@ paths:
             application/json:
               schema:
                 type: integer
+  /.netlify/functions/api/recipes/{id}/images:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The recipe's _id, as search or GET returned it.
+    get:
+      summary: List a recipe's photos (no image data)
+      operationId: listRecipeImages
+      description: |
+        What photos this recipe has: position, caption, type and size, without
+        the pictures themselves. Recipe responses never carry image data, so
+        this (or `imageCount` on a recipe) is how a client knows a recipe has
+        a photo. Scope recipes:read.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/RecipeImageList"
+    post:
+      summary: Add a photo to a recipe
+      operationId: addRecipeImage
+      description: |
+        Give a recipe a picture. Send `url` -- a public HTTPS link -- and the
+        server fetches the picture and stores the bytes, so the recipe keeps
+        its photo when the link rots; or send `dataUrl` for a picture you
+        already hold. `caption` is optional; `index` says where it goes (0
+        makes it the recipe's main photo), otherwise it is added at the end.
+        `images: [...]` adds up to 4 at once. The first photo is the one the
+        app shows. Nothing is written if a picture cannot be fetched or is
+        too large. Scope recipes:write.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeImageAddRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/RecipeImageList"
+  /.netlify/functions/api/recipes/{id}/images/{index}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: index
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 0
+        description: The photo's position, as listRecipeImages reported it.
+    get:
+      summary: Get one photo, with its image data
+      operationId: getRecipeImage
+      description: |
+        This one call returns the picture itself, as `url` (a data URL). It
+        can be megabytes; list the images first and fetch one only when you
+        need to look at it. Scope recipes:read.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: One photo, including its image data.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/RecipeImageInfo"
+                  - type: object
+                    properties:
+                      _id:
+                        type: string
+                      url:
+                        type: string
+                        description: The picture, as a data URL.
+    patch:
+      summary: Re-caption or move a photo
+      operationId: updateRecipeImage
+      description: |
+        `caption` replaces this photo's caption (an empty string clears it);
+        `index` moves it (0 makes it the main photo). Send either or both.
+        Scope recipes:write.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                caption:
+                  type: string
+                  maxLength: 500
+                index:
+                  type: integer
+                  minimum: 0
+      responses:
+        "200":
+          $ref: "#/components/responses/RecipeImageList"
+    delete:
+      summary: Remove a photo from a recipe
+      operationId: deleteRecipeImage
+      description: |
+        Takes this photo off the recipe and leaves the rest of it alone.
+        Scope recipes:write.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/RecipeImageList"
   /.netlify/functions/api/shopping-list:
     get:
       summary: Read the merged shopping list
@@ -406,6 +533,21 @@ components:
             properties:
               error:
                 type: string
+    RecipeImageList:
+      description: The recipe's photos, without the pictures themselves.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              _id:
+                type: string
+              imageCount:
+                type: integer
+              images:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecipeImageInfo"
   securitySchemes:
     BearerAuth:
       type: http
@@ -709,6 +851,35 @@ components:
           type: number
           minimum: 0
           maximum: 5
+        imageUrls:
+          description: |
+            Photos to put on this recipe, by public HTTPS link (or an inline
+            data URL). The server fetches each one and stores the picture, so
+            a recipe can be created with its photo in a single call. These are
+            ADDED: on an update they join the photos already there rather than
+            replacing them, which is the one place a field on this API does
+            not replace what is stored. Up to 4 per request, each about 3 MB
+            at most. Use the /images endpoints to caption, reorder or remove.
+            Nothing is written if a picture cannot be fetched.
+          oneOf:
+            - type: string
+            - type: array
+              maxItems: 4
+              items:
+                oneOf:
+                  - type: string
+                  - $ref: "#/components/schemas/RecipeImageAddRequest"
+        images:
+          type: array
+          description: |
+            Stored photo objects ({url, caption}), where url holds the picture
+            itself as a data URL. ALWAYS EMPTY in a response -- image data is
+            never sent back with a recipe -- so read `imageCount` and the
+            /recipes/{id}/images endpoints instead. Sending it replaces every
+            photo on the recipe; prefer `imageUrls` or POST .../images, which
+            add. An update that does not mention it keeps the photos.
+          items:
+            $ref: "#/components/schemas/Image"
     Recipe:
       allOf:
         - $ref: "#/components/schemas/RecipeInput"
@@ -716,6 +887,11 @@ components:
           properties:
             _id:
               type: string
+            imageCount:
+              type: integer
+              description: |
+                How many photos this recipe has. `images` comes back empty
+                whatever this says: ask /recipes/{id}/images about them.
             owner:
               type: object
               properties:
@@ -939,6 +1115,54 @@ components:
           type: number
         text:
           type: string
+    RecipeImageInfo:
+      type: object
+      description: One photo on a recipe, described rather than sent.
+      properties:
+        index:
+          type: integer
+          description: Its position; 0 is the recipe's main photo.
+        caption:
+          type: string
+        contentType:
+          type: string
+          nullable: true
+          examples: ["image/jpeg"]
+        bytes:
+          type: integer
+          description: Roughly how big the stored picture is.
+        width:
+          type: number
+        height:
+          type: number
+        link:
+          type: string
+          description: Present only for an old entry that holds a link instead of a picture.
+    RecipeImageAddRequest:
+      type: object
+      description: |
+        One photo (url or dataUrl, never both), or several under `images`.
+      properties:
+        url:
+          type: string
+          description: A public HTTPS link to a jpeg, png, webp, gif or avif. Fetched and stored.
+          examples: ["https://example.com/apple-pie.jpg"]
+        dataUrl:
+          type: string
+          description: The picture inline, e.g. "data:image/jpeg;base64,...".
+        caption:
+          type: string
+          maxLength: 500
+        index:
+          type: integer
+          minimum: 0
+          description: Where to put it; 0 makes it the main photo. Added at the end by default.
+        images:
+          type: array
+          maxItems: 4
+          description: Several photos in one call; each entry is a url/dataUrl object.
+          items:
+            type: object
     Image:
       type: object
       properties:
