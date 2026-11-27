@@ -380,6 +380,19 @@ Back in scope; spec in `specs/shopping-list.md`. Branch `rb/shopping-list`.
   text. Links do not cross off items. Verified mouse/keyboard, tab reuse and
   phone layout with synthetic fixtures; build, 145 API tests and 166 Vitest
   tests pass. API, stored shape and recipe data are unchanged.
+- [x] **S-8 Clear the list** — owner requested 2026-11-27. One "Clear…" button
+  beside the screen's heading, shown only when the list holds anything. It
+  opens a confirmation naming what would go — "2 recipes", "3 items added by
+  hand" — as checkboxes, both ticked, so the confirm button reads "Clear 2
+  recipes and 3 items" and a narrower answer is a click away. Pantry items,
+  aisles, renames and exclusions are kept; the cart and this-trip marks are
+  dropped only when the list ends up empty. One new action (`clearList`) on
+  the existing save path; no API, stored shape or kept-logic change.
+  Verified: 5 action tests, 6 dialog tests, build, 284 app tests and 207 API
+  tests (2 existing skips). Browser (fixtures, no network): desktop and 390px,
+  clearing one group then the other, and the button disappearing when the list
+  empties.
+
 - [ ] **S-3 Tom checks it against real data**: dump first
   (`scripts/migrate/dump.mjs`); the fields above are new on list documents. Decide
   what to do about the spare empty shopping-list documents.

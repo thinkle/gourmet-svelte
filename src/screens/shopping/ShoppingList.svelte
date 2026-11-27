@@ -6,12 +6,14 @@
   // saving goes through app/shopping.svelte.js.
   import { Container, Inline, Input, Button, CircleButton, Checkbox, DataList, DataListItem, Dialog, Accordion, Text, Tooltip } from "contain-css-svelte";
   import { library } from "../../app/library.svelte.js";
-  import { buildList } from "../../app/shoppingList.js";
+  import { buildList, isRef } from "../../app/shoppingList.js";
+  import { formatAmount } from "../../utils/numbers.js";
   import {
     shopping, addItem, removeItem, removeRecipe, setRecipeMultiplier,
-    setCart, setAlreadyHave, wantThisTrip, doneShopping, setCategory, setCategoryOrder, renameItem,
+    setCart, setAlreadyHave, wantThisTrip, doneShopping, setCategory, setCategoryOrder, renameItem, clearList,
   } from "../../app/shopping.svelte.js";
   import RecipeOnList from "./RecipeOnList.svelte";
+  import ClearListDialog from "./ClearListDialog.svelte";
   import ShoppingIcon from "../../components/ShoppingIcon.svelte";
   import ShoppingItemEditor from "./ShoppingItemEditor.svelte";
   import AisleSection from "./AisleSection.svelte";
@@ -23,6 +25,28 @@
   const shoppingGroups = $derived([...list.categoryNames, null]
     .map((name) => ({ name, items: list.items.filter((item) => item.state !== "have" && item.aisle === name) }))
     .filter((group) => group.items.length));
+
+  // The items typed in by hand, as they were written: what "Clear" removes,
+  // one entry each, before any merging with the recipes' ingredients.
+  const looseItems = $derived((shopping.rec?.ingredients ?? [])
+    .filter((entry) => !isRef(entry) && entry?.text)
+    .map((entry) => ({
+      id: entry.id,
+      text: entry.originalText || [formatAmount(entry.amount), entry.amount?.unit, entry.text].filter(Boolean).join(" "),
+    })));
+
+  let clearingList = $state(false);
+  let clearBusy = $state(false);
+  async function clear(groups) {
+    if (clearBusy) return;
+    clearBusy = true;
+    try {
+      await clearList(groups);
+      if (!shopping.error) clearingList = false;
+    } finally {
+      clearBusy = false;
+    }
+  }
 
   let draft = $state("");
   async function add(e) {
@@ -135,7 +159,12 @@
 {/snippet}
 
 <Container maxWidth="40rem" height="auto" class="shopping-screen">
-  <h2>Shopping list</h2>
+  <div class="shopping-heading">
+    <h2>Shopping list</h2>
+    {#if list.recipes.length || looseItems.length}
+      <Button onclick={() => (clearingList = true)} aria-haspopup="dialog" aria-expanded={clearingList}>Clear…</Button>
+    {/if}
+  </div>
   {#if shopping.error}<p><Text warning>Could not save the list: {shopping.error}</Text></p>{/if}
 
   <form onsubmit={add}>
@@ -206,6 +235,15 @@
       </Accordion>
     {/if}
   {/if}
+
+  <Dialog open={clearingList} modal class="shopping-clear-dialog" aria-label="Clear the shopping list"
+    onclose={() => { if (!clearBusy) clearingList = false; }}
+    oncancel={(event) => { if (clearBusy) event.preventDefault(); }}>
+    {#if clearingList}
+      <ClearListDialog recipes={list.recipes} items={looseItems} clearing={clearBusy} error={shopping.error}
+        onclear={clear} oncancel={() => { if (!clearBusy) clearingList = false; }} />
+    {/if}
+  </Dialog>
 
   <Dialog open={!!picking} modal class="shopping-item-dialog" aria-label="Edit shopping item" onclose={closeItemEditor}
     oncancel={(event) => { if (savingItem) event.preventDefault(); }}>

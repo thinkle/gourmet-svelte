@@ -111,6 +111,23 @@ export const removeItem = (ids) => change((rec) => {
   rec.ingredients = rec.ingredients.filter((i) => !(i.id !== undefined && !isRef(i) && ids.includes(i.id)));
 });
 
+/**
+   Take whole groups off the list at once: the recipes on it, the items typed
+   in by hand, or both. What is remembered for every list -- pantry items,
+   aisles, item renames -- is never touched, so clearing the list does not
+   undo months of tidying.
+
+   The per-trip marks (cart, this-trip) are keyed by item, and an item only
+   exists while something on the list contributes to it; they are dropped only
+   when the list ends up empty, so that a half-cleared list keeps the items
+   still on it crossed off.
+*/
+export const clearList = ({ recipes = false, items = false } = {}) => change((rec) => {
+  if (!recipes && !items) return;
+  rec.ingredients = rec.ingredients.filter((i) => (isRef(i) ? !recipes : !items));
+  if (!rec.ingredients.length) { rec.cart = []; rec.trip = []; rec.excludedItems = []; }
+});
+
 const without = (arr, k) => (arr ?? []).filter((x) => x !== k);
 const withKey = (arr, k) => [...new Set([...(arr ?? []), k])];
 

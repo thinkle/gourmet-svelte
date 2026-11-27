@@ -334,14 +334,14 @@
   /* Contain publishes the current surface pair as the summary inverts. */
   --shopping-icon-fill: var(--current-bg, var(--bg));
 }
-.shopping-item-dialog {
+.shopping-item-dialog, .shopping-clear-dialog {
   --dialog-max-width: 30rem;
   --dialog-min-height: 0;
   --dialog-padding: 1rem;
   --circle-button-size: 2rem;
   --button-margin: 0;
 }
-.shopping-item-dialog .close-bar {
+.shopping-item-dialog .close-bar, .shopping-clear-dialog .close-bar {
   position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem;
   height: auto;
 }
@@ -359,6 +359,18 @@
 .shopping-edit-originals small, .shopping-editor-hint { font-size: 0.8125rem; }
 .shopping-custom-category > summary { cursor: pointer; font-size: 0.875rem; }
 .shopping-custom-category > label { margin-block-start: 0.75rem; }
+/* The screen's heading keeps the list-wide action beside it. */
+.shopping-heading {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  --button-margin: 0;
+}
+.shopping-heading h2 { margin-block-end: 0; }
+.shopping-clear fieldset { display: grid; gap: 1rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shopping-clear h3 { margin: 0; padding-inline-end: 2.5rem; }
+.shopping-clear p { margin: 0; }
+.shopping-clear-group > p { margin-inline-start: 1.9rem; }
+.shopping-clear-group small, .shopping-clear-hint { font-size: 0.8125rem; }
 .shopping-row { --data-list-item-icon-width: 1.75rem; }
 .shopping-item-name {
   --data-list-item-paragraph-font-size: 1rem;
