@@ -36,16 +36,24 @@
   --bg: light-dark(#fefffa, #1b1917);
   --fg: light-dark(#2b2622, #ece4d8);
 
-  /* The brand pair is Gourmet's default recipe colour: cream on brown. In
-     the dark the pair turns over -- a band of dark brown on a dark page is
-     a hole in it -- so the wheat becomes the fill and the brown the ink.
-     --primary-color is what links and headings are tinted towards, so it
-     follows the fill and stays the thing that reads against the page. */
-  --primary-bg: light-dark(#6b411d, #e7c391);
-  --primary-fg: light-dark(#fff0a3, #33200c);
+  /* The brand pair is Gourmet's default recipe colour: cream on brown, and
+     the same by night. Chrome stays dark in the dark -- a sandy bar across
+     the top of a dark app is the brightest thing on the screen and reads as
+     a mistake -- and the brown is already well clear of the page, so the
+     bar keeps the brand and sits down where it belongs.
+
+     --primary-color is the other half of the role: not the fill, but what
+     links, headings and quiet brand chrome are tinted towards, read against
+     the page rather than against the brown. That one has to lighten at
+     night, or it is brown on near-black. */
+  --primary-bg: #6b411d;
+  --primary-fg: #fff0a3;
   --primary-color: light-dark(#6b411d, #e7c391);
   --on-primary-heading-fg: var(--primary-fg);
   --on-primary-link-text-fg: var(--primary-fg);
+  /* The faintest wash of the brand, for a quiet control's hover: the cream
+     on paper, and at night a breath of the tint over the page. */
+  --brand-wash: light-dark(#fff0a3, color-mix(in oklab, var(--primary-color) 22%, var(--bg)));
 
   /* The highlighter, from old Gourmet: felt-tip yellow, turned down at
      night so a highlighted amount is not the brightest thing on screen.

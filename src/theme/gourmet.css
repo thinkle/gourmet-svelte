@@ -382,10 +382,12 @@
   --circle-button-size: 2.25rem;
   --button-margin: 0;
   --circle-button-bg: transparent;
-  --circle-button-fg: var(--aisle-fg, var(--primary-bg));
+  /* With no aisle to follow, the brand tint -- which reads against the
+     page in either scheme, where the filled pair does not. */
+  --circle-button-fg: var(--aisle-fg, var(--primary-color));
   --circle-button-border: none;
-  --circle-button-hover-bg: var(--aisle-bg, var(--primary-fg));
-  --circle-button-hover-fg: var(--aisle-fg, var(--primary-bg));
+  --circle-button-hover-bg: var(--aisle-bg, var(--brand-wash));
+  --circle-button-hover-fg: var(--aisle-fg, var(--primary-color));
 }
 /* A recipe on the list: its title on its own line, then multiplier and a remove button. */
 .shopping-recipe-link {
@@ -399,7 +401,7 @@
   --button-font-weight: inherit;
   --button-text-decoration: underline;
   --button-hover-bg: transparent;
-  --button-hover-fg: var(--primary-bg);
+  --button-hover-fg: var(--primary-color);
   --button-box-shadow: none;
 }
 .on-list { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.35rem 0.75rem; padding-block: 0.6rem; border-block-end: 1px solid color-mix(in oklab, currentColor 12%, transparent); }
