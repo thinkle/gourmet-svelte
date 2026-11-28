@@ -49,7 +49,7 @@
   function fromUrl(value) {
     const url = String(value ?? "").trim();
     if (!url) return;
-    return add(async (signal) => [await photoFromUrl(url, { token: get(user)?.access_token, signal })]);
+    return add(async (signal) => [await photoFromUrl(url, { user: get(user), signal })]);
   }
   function paste(e) {
     const files = Array.from(e.clipboardData?.files ?? []).filter((file) => file.type.startsWith("image/"));

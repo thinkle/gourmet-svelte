@@ -29,6 +29,7 @@
 */
 import validate from '../../utils/validator.js';
 import querystring from 'querystring'
+import { authenticatedFetch } from '../../auth/authenticatedFetch.js';
 
 
 // Function side...
@@ -67,7 +68,7 @@ export function Request ({
             try {
                 validate(params,requestDef);
                 if (chatty) {
-                    console.log(`RemoteAction ${name} Sending valid request `,user,params);
+                    console.log(`RemoteAction ${name} Sending valid request`);
                 }
             } catch (err) {
                 console.log(`$RemoteAction ${name} makeRequest called with invalid parameters:`,params);
@@ -78,31 +79,21 @@ export function Request ({
             let headers = {
                 Accept : 'application/json',
                 'Content-Type':'application/json',
-                Authorization : 'Bearer ' + (user && user.access_token || ''),
             }
             if (typeof DEV !== 'undefined' && DEV === true) {
                 // Local development only (see functions/localDevAuth.js). A
                 // deployed build must not send the user record in a header.
                 headers.localuser = user && JSON.stringify(user) || '';
             }
-            let result = await fetch(u(name),{
+            let result = await authenticatedFetch(user,u(name),{
                 method : 'post',
                 headers,
                 body : JSON.stringify(params)
             });
-            if (result.status==200) {
-                return result.json(); // return the promise from text...
-            } else if (result.status==400) {
-                let e = await result.json()
-                throw e;
-            }
-            else {
-                let e = Error('Error fetching');
-                e.status = result.status;
-                e.url = u(name,params)
-                e.error = await result.json();
-                throw e.error;
-            }
+            if (result.status === 200) return result.json();
+            const body = await result.json().catch(() => null);
+            if (result.status === 400 && body) throw body;
+            throw Object.assign(new Error(body?.error || "Error fetching"), { status: result.status });
         },
         /** 
         * @param {requestCallback} cb - callback(user, params) 

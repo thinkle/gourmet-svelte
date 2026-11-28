@@ -1,5 +1,6 @@
 /* See https://github.com/babycourageous/netlify-identity-demo-svelte/blob/master/src/store.js */
 import { writable, get } from 'svelte/store'
+import { bindIdentity } from '../auth/authenticatedFetch.js'
 
 import {
   getUserRequest,
@@ -13,75 +14,36 @@ import {
 
 } from '../data/requests/';
 
-function toStoredUser(identityUser) {
-  if (!identityUser) {
-    return null;
-  }
-  return {
-    username: identityUser?.user_metadata?.full_name,
-    email: identityUser.email,
-    access_token: identityUser?.token?.access_token,
-    expires_at: identityUser?.token?.expires_at,
-    refresh_token: identityUser?.token?.refresh_token,
-    token_type: identityUser?.token?.token_type,
-    id: identityUser.id,
-  };
-}
-
-function isExpired(userLike) {
-  return Boolean(userLike && userLike.expires_at && Number(userLike.expires_at) <= Date.now());
-}
-
-// Auth model in this store:
-// 1. Local auth snapshot (from gotrue.user): lightweight token + profile data.
-// 2. Remote app user (from API): includes DB-linked user metadata used by the app.
-// 3. Runtime behavior on startup:
-//    - load local snapshot
-//    - drop it if token is already expired
-//    - fetch remote user to validate session and hydrate DB user info
-//    - if validation fails, clear auth state so UI does not stay "half logged in"
-//
-// On interactive login we also call user.jwt() first, which lets Netlify refresh
-// an expiring access token using the refresh token when possible.
 function createUser() {
-  let localUser;
-  try {
-    localUser = JSON.parse(localStorage.getItem('gotrue.user'))
-  } catch (err) {
-    console.log('Bad localUser stored :(', localStorage.getItem('gotrue.user'))
-    localStorage.setItem('gotrue.user', 'null');
-  }
-
-  let u = toStoredUser(localUser)
-  if (isExpired(u)) {
-    u = null;
-  }
-
-  const userStore = writable(u)
+  const userStore = writable(null);
   const { subscribe, set } = userStore;
+  let activeIdentity;
 
   async function getRemoteUser() {
-    let $user = get(userStore);
-    if ($user) {
-      let remoteUser = await getUserRequest.makeRequest({ user: $user });
-      userStore.update(
-        ($user) => {
-          $user.remoteUser = remoteUser
-          return $user;
-        }
-      );
-      return remoteUser;
-    } else {
-      console.log('getRemoteUser: No user to fetch...');
-      throw Error('No user to fetch');
+    const profile = get(userStore);
+    if (!profile) throw new Error("Not signed in");
+    const remoteUser = await getUserRequest.makeRequest({ user: profile });
+    if (get(userStore) === profile) {
+      profile.remoteUser = remoteUser;
+      profile.signInError = null;
+      set(profile);
     }
+    return remoteUser;
   }
 
-  if (u) {
-    getRemoteUser().catch((err) => {
-      console.log('Unable to fetch remote user from cached session', err);
-      set(null);
-    });
+  async function retrySignIn() {
+    const profile = get(userStore);
+    if (!profile) return;
+    profile.signInError = null;
+    set(profile);
+    try {
+      await getRemoteUser();
+    } catch (error) {
+      if (get(userStore) === profile) {
+        profile.signInError = String(error?.error ?? error?.message ?? error);
+        set(profile);
+      }
+    }
   }
 
   function updateDBUser(dbUser) {
@@ -165,35 +127,30 @@ function createUser() {
       await getRemoteUser();
     },
     getRemoteUser,
-    async login(user) {
-      if (!user) {
-        set(null);
-        return;
-      }
-
-      if (typeof user.jwt === 'function') {
+    async login(identity) {
+      if (!identity || identity === activeIdentity) return;
+      activeIdentity = identity;
+      const profile = {
+        username: identity.user_metadata?.full_name,
+        email: identity.email,
+        id: identity.id,
+      };
+      const isCurrent = () => get(userStore) === profile;
+      bindIdentity(profile, identity, isCurrent, () => {
+        activeIdentity = null;
         try {
-          await user.jwt();
-        } catch (err) {
-          console.log('Unable to refresh JWT during login', err);
+          identity.clearSession?.();
+        } catch {
+          // The app session still ends if browser storage is unavailable.
         }
-      }
-
-      const currentUser = toStoredUser(user)
-      set(currentUser)
-
-      getUserRequest.makeRequest({ user: currentUser }).then(
-        (remoteUser) => {
-          currentUser.remoteUser = remoteUser
-          set(currentUser);
-        }
-      ).catch((err) => {
-        console.log('ERROR FETCHING USER FROM API', err)
-        console.log(err)
         set(null);
       });
+      set(profile);
+      return retrySignIn();
     },
+    retrySignIn,
     logout() {
+      activeIdentity = null;
       set(null)
     },
   }

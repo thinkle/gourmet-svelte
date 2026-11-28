@@ -7,7 +7,7 @@ import { library, reload } from "./library.svelte.js";
 
 vi.mock("../stores/userStore.js", async () => {
   const { writable } = await import("svelte/store");
-  return { user: writable(null) };
+  return { user: { ...writable(null), retrySignIn: vi.fn() } };
 });
 vi.mock("../auth/session.js", () => ({ signIn: vi.fn() }));
 vi.mock("../data/recipeData.js", () => ({ default: { sync: vi.fn() }, connectedRemote: {} }));
@@ -66,15 +66,22 @@ describe("in-app cloud sync", () => {
     expect(library.error).toBe(null);
     expect(recipeData.sync).toHaveBeenCalledTimes(1);
   });
-  it.each([null, "expired"])("offers sign-in before sync with a %s token", async (token) => {
-    // The account remains ready while its previously valid token expires.
-    user.set({ email: "test@example.invalid", access_token: token, expires_at: Date.now() - 1, remoteUser: { dbUser: {} } });
+  it("lets the request layer refresh credentials when syncing", async () => {
+    user.set({ email: "test@example.invalid", remoteUser: { dbUser: {} } });
     await reload();
-    expect(signIn).toHaveBeenCalledTimes(1);
-    expect(recipeData.sync).toHaveBeenCalledTimes(1);
-    expect(library.needsSignIn).toBe(true);
-    expect(library.error).toBe(null);
-    expect(library.recipes[0].title).toBe("Soup");
+    expect(signIn).not.toHaveBeenCalled();
+    expect(recipeData.sync).toHaveBeenCalledTimes(2);
+    expect(library.needsSignIn).toBe(false);
+  });
+
+  it("offers a retry if initial profile hydration fails", async () => {
+    user.set(null);
+    user.set({ email: "test@example.invalid", signInError: "Offline" });
+    expect(library.status).toBe("error");
+    expect(library.error).toBe("Offline");
+    await reload();
+    expect(user.retrySignIn).toHaveBeenCalledTimes(1);
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it.each([{ error: "Not signed in" }, { error: "Unauthorized" }, { status: 401 }])("offers sign-in on server auth rejection %j", async (error) => {

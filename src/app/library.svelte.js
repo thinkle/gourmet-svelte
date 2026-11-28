@@ -140,10 +140,8 @@ async function load(account, interactive = false) {
 export const reload = () => {
   if (fixturesMode || library.syncing) return;
   const current = get(user);
-  if (!current?.access_token || !running || library.needsSignIn
-      || (current.expires_at && Number(current.expires_at) <= Date.now())) {
-    return offerSignIn();
-  }
+  if (!current || library.needsSignIn) return offerSignIn();
+  if (!running) return user.retrySignIn();
   return load(running, true);
 };
 
@@ -159,7 +157,11 @@ user.subscribe((u) => {
   library.who = u.remoteUser?.dbUser?.name || u.username || u.email;
   const account = u.remoteUser?.dbUser && (u.remoteUser.account || u.email);
   library.account = account || null;
-  if (!account) { if (library.status === "signed-out") library.status = "signing-in"; return; }
+  if (!account) {
+    library.error = u.signInError ?? null;
+    library.status = u.signInError ? "error" : "signing-in";
+    return;
+  }
   if (running !== account || library.needsSignIn) load(account);
 });
 

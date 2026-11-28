@@ -111,7 +111,7 @@ describe('photo preparation', () => {
   });
   it('requests URL photos from the signed-in same-origin fetch endpoint', async () => {
     const fetcher=vi.fn(async()=>({ok:true,blob:async()=>new Blob(['photo'],{type:'image/png'})}));
-    const blob=await photoFromUrl('https://images.example/photo.png',{token:'synthetic',fetcher});
+    const blob=await photoFromUrl('https://images.example/photo.png',{user:{access_token:'synthetic'},fetcher});
     expect(blob.type).toBe('image/png');
     expect(fetcher.mock.calls[0][0]).toBe('/.netlify/functions/recipe-image');
     expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({url:'https://images.example/photo.png'});
@@ -119,7 +119,7 @@ describe('photo preparation', () => {
   it('rejects missing auth and bad URLs without fetching', async () => {
     const fetcher=vi.fn();
     await expect(photoFromUrl('https://images.example/photo',{fetcher})).rejects.toThrow(/Sign in/);
-    await expect(photoFromUrl('javascript:alert(1)',{token:'synthetic',fetcher})).rejects.toThrow(/HTTPS/);
+    await expect(photoFromUrl('javascript:alert(1)',{user:{access_token:'synthetic'},fetcher})).rejects.toThrow(/HTTPS/);
     expect(fetcher).not.toHaveBeenCalled();
   });
 });

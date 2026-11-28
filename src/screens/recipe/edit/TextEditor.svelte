@@ -13,7 +13,7 @@
   // from the desktop does not, so pasting a screenshot works signed out too.
   async function prepareImage(source) {
     const blob = typeof source === "string"
-      ? await photoFromUrl(source, { token: get(user)?.access_token })
+      ? await photoFromUrl(source, { user: get(user) })
       : source;
     const { url } = await preparePhoto(blob, { edge: INLINE_EDGE, maxData: MAX_INLINE_DATA });
     return url;

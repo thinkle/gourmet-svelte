@@ -1,3 +1,4 @@
+import { authenticatedFetch } from "../auth/authenticatedFetch.js";
 // Keep the desktop photo shape: {url, caption?}, with a 1200px longest edge.
 export const PHOTO_EDGE = 1200;
 export const MAX_PHOTO_DATA = 4000000;
@@ -142,16 +143,16 @@ export async function preparePhoto(file, { edge = PHOTO_EDGE, maxData = MAX_PHOT
   throw new Error('That photo is too large to save. Try a smaller image.');
 }
 
-export async function photoFromUrl(value, { token, signal, fetcher = fetch } = {}) {
+export async function photoFromUrl(value, { user, signal, fetcher = fetch } = {}) {
   let url;
   try { url = new URL(value); } catch { throw new Error('Paste the full HTTPS URL of an image.'); }
   if (url.protocol !== 'https:' || url.username || url.password) throw new Error('Use an HTTPS image URL without a username or password.');
-  if (!token) throw new Error('Sign in to import a photo URL.');
-  const response = await fetcher('/.netlify/functions/recipe-image', {
+  if (!user) throw new Error('Sign in to import a photo URL.');
+  const response = await authenticatedFetch(user, '/.netlify/functions/recipe-image', {
     method: 'POST', signal,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: url.href }),
-  });
+  }, fetcher);
   if (!response.ok) {
     if (response.status === 401) throw new Error('Sign in again to import a photo URL.');
     const result = await response.json().catch(() => ({}));

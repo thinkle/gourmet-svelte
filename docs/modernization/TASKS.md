@@ -106,7 +106,12 @@ R1-3, R2-2, R2-3 and R2-4 with it:
 - [ ] **R0-6 Theme** — lead
   `src/theme/gourmet.css` from the variable map in `CONTAIN_NOTES.md`. Recipe
   accent as a role. Fonts. Light and dark if Contain gives it for free.
-- [ ] **R0-7 Auth module** — lead
+- [~] **R0-7 Auth module** — lead
+  Session refresh slice: let the existing Identity widget restore the session
+  and supply a JWT per request. Retry an authenticated 401 once after refresh.
+  End the app session if Identity refresh fails or the retry is rejected.
+  Keep ordinary profile-fetch failures retryable. The widget replacement and
+  server-side user-cache work remain separate.
   `src/auth/` per the plan's design note, on `@netlify/identity`.
   `userStore.js` keeps profile + `remoteUser`, no token fields.
   `remoteRequest.js` calls `getToken()` per request, retries once on 401.
