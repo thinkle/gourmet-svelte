@@ -1,19 +1,13 @@
-/* Spike theme: the app-level look. Everything else is Contain's defaults. */
+/* The app-level look: how Gourmet is shaped. Everything else is Contain's
+   defaults -- and every colour the app names is in scheme.css, which writes
+   each one for daylight and for the dark. Keep raw colours out of this file
+   and out of components: name them there, so a theme can replace the scheme
+   without touching any of this, and the typography below without touching
+   the colours. */
 :root {
-  /* Old Gourmet: warm paper, Noto Sans for the interface, Lora for recipes. */
-  --bg: #fefffa;
-  --fg: #2b2622;
+  /* Old Gourmet: Noto Sans for the interface, Lora for recipes. */
   --font-family: "Noto Sans", system-ui, sans-serif;
   --recipe-font-family: Lora, Georgia, "Times New Roman", serif;
-  /* The brand pair is Gourmet's default recipe colour. */
-  --primary-bg: #6b411d;
-  --primary-fg: #fff0a3;
-  --primary-color: #6b411d;
-  --on-primary-heading-fg: var(--primary-fg);
-  --on-primary-link-text-fg: var(--primary-fg);
-  /* The highlighter, from old Gourmet. */
-  --note-bg: #ffffad;
-  --note-fg: #333;
 }
 
 /* ── App shell ─────────────────────────────────────────── */
@@ -91,7 +85,7 @@
   color: var(--muted-fg, color-mix(in oklab, currentColor 60%, transparent));
 }
 .recipe-list .facts { display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
-.stars { color: #b7791f; letter-spacing: 0.05em; white-space: nowrap; }
+.stars { color: var(--star-color); letter-spacing: 0.05em; white-space: nowrap; }
 
 /* ── One recipe: two panes that scroll on their own ────── */
 /* Set ingredients before the recipe Surface computes its text tones. Each
@@ -107,8 +101,13 @@
   --on-primary-link-text-fg: var(--primary-fg);
   /* A highlighted amount uses the highlighter's checked ink pair. */
   --on-note-primary-text-fg: var(--note-fg);
-  --link-color: var(--primary-color);
-  --heading-tint: var(--primary-color);
+  /* The tint the recipe lends its headings and links. A palette is designed
+     to be read inside its own filled band, not against the page, so at
+     night it is lifted to a lightness that works there and keeps its hue:
+     a near-black chocolate would otherwise leave nothing to read. */
+  --recipe-tint: light-dark(var(--recipe-color), oklch(from var(--recipe-color) max(l, 0.72) c h));
+  --link-color: var(--recipe-tint);
+  --heading-tint: var(--recipe-tint);
 }
 .amount-input.changed { --input-fg: var(--primary-text-fg); }
 .ingredients .ingredient.active:hover { --paint-bg-mix-amount: 0%; }
@@ -277,7 +276,7 @@
 .understood .unit, .understood .also { font-weight: 400; }
 .star-input { display: inline-flex; gap: 0.1rem; border-radius: 0.3rem; }
 .star-input .star { border: 0; background: none; padding: 0 0.1rem; font-size: 1.6rem; line-height: 1; cursor: pointer; color: color-mix(in oklab, currentColor 25%, transparent); }
-.star-input .star.lit { color: #b7791f; }
+.star-input .star.lit { color: var(--star-color); }
 .star-input:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .text-block-editor { display: grid; gap: 0.4rem; margin-block-end: 1rem; }
 .text-block-editor .rich-text { display: grid; gap: 0.4rem; }
@@ -309,25 +308,7 @@
   --shopping-icon-fill: var(--aisle-icon-fill);
 }
 .aisle-label svg { flex-shrink: 0; }
-.aisle-produce { --aisle-bg: #edf5e8; --aisle-fg: #295c38; }
-.aisle-meat { --aisle-bg: #faeee9; --aisle-fg: #8f4037; }
-.aisle-seafood { --aisle-bg: #eaf4f8; --aisle-fg: #285d78; }
-.aisle-deli { --aisle-bg: #fbf2dc; --aisle-fg: #765319; }
-.aisle-canned { --aisle-bg: #f8ecea; --aisle-fg: #8b453b; }
-.aisle-grains { --aisle-bg: #f5efde; --aisle-fg: #72551f; }
-.aisle-international { --aisle-bg: #f2ecf7; --aisle-fg: #674886; }
-.aisle-condiments { --aisle-bg: #eef3df; --aisle-fg: #50601f; }
-.aisle-dairy { --aisle-bg: #edf3f8; --aisle-fg: #355d7b; }
-.aisle-bakery { --aisle-bg: #fbf0dd; --aisle-fg: #82511e; }
-.aisle-baking { --aisle-bg: #f5edf3; --aisle-fg: #78516c; }
-.aisle-spices { --aisle-bg: #fbefdf; --aisle-fg: #8b4d23; }
-.aisle-pantry { --aisle-bg: #f4eee4; --aisle-fg: #6b411d; }
-.aisle-frozen { --aisle-bg: #eaf6f7; --aisle-fg: #286774; }
-.aisle-coffee { --aisle-bg: #f3eae4; --aisle-fg: #70462e; }
-.aisle-breakfast { --aisle-bg: #f8f0dd; --aisle-fg: #795820; }
-.aisle-soda { --aisle-bg: #e9f3f4; --aisle-fg: #2b6268; }
-.aisle-juice { --aisle-bg: #fff0df; --aisle-fg: #92501e; }
-.aisle-alcohol { --aisle-bg: #f5edf6; --aisle-fg: #6a436b; }
+/* The aisle pairs themselves are colour: see scheme.css. */
 .pantry-summary {
   display: inline-flex; align-items: center; gap: 0.5rem;
   /* Contain publishes the current surface pair as the summary inverts. */

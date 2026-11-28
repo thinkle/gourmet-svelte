@@ -20,6 +20,13 @@
     margin: 1.3cm 1.6cm;
   }
 
+  /* Paper has one scheme. Whatever the screen is wearing, every
+     light-dark() colour resolves to its daylight value here, and the ink
+     rules below take it from there. */
+  :root {
+    color-scheme: light;
+  }
+
   /* ── Let the content flow ─────────────────────────────────────────── */
   /* The app is one tall frame with scrolling panes; paper has none of that. */
   html,

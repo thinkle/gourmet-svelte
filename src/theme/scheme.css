@@ -1,0 +1,136 @@
+/* ── The colour scheme ──────────────────────────────────────────────────
+   Gourmet by daylight, and the same Gourmet at night.
+
+   Every colour the app names is written here once, as light-dark(day,
+   night). The browser's own preference decides between them, because :root
+   declares `color-scheme: light dark` -- which also hands the scheme to the
+   things the browser draws itself: scrollbars, form controls, the focus
+   ring, the canvas behind the page.
+
+   Nothing in the app has to know which scheme is on. Pinning one instead of
+   following the browser is a single attribute on <html>:
+
+       data-color-scheme="light"   always day
+       data-color-scheme="dark"    always night
+       (absent)                    follow the browser
+
+   src/app/colorScheme.js applies a stored choice before the app mounts, so
+   a Settings screen only has to call setColorScheme().
+
+   The rest follows from these tokens: Contain derives borders, quiet
+   controls, the surface ladder (raised, sunken, overlay), link colours and
+   heading tints from --bg/--fg at the element where they are used, so there
+   is no second set of colours to keep in step. That is why colour lives
+   here and shape lives in gourmet.css: a named theme can replace one
+   without touching the other.
+
+   light-dark() carries colours only. The two values that are not colours
+   are written out per scheme at the end of the file. */
+
+:root {
+  color-scheme: light dark;
+
+  /* The paper. Old Gourmet's warm white, and at night a warm near-black
+     rather than a neutral grey -- the brown-and-cream brand has to look at
+     home on it. */
+  --bg: light-dark(#fefffa, #1b1917);
+  --fg: light-dark(#2b2622, #ece4d8);
+
+  /* The brand pair is Gourmet's default recipe colour: cream on brown. In
+     the dark the pair turns over -- a band of dark brown on a dark page is
+     a hole in it -- so the wheat becomes the fill and the brown the ink.
+     --primary-color is what links and headings are tinted towards, so it
+     follows the fill and stays the thing that reads against the page. */
+  --primary-bg: light-dark(#6b411d, #e7c391);
+  --primary-fg: light-dark(#fff0a3, #33200c);
+  --primary-color: light-dark(#6b411d, #e7c391);
+  --on-primary-heading-fg: var(--primary-fg);
+  --on-primary-link-text-fg: var(--primary-fg);
+
+  /* The highlighter, from old Gourmet: felt-tip yellow, turned down at
+     night so a highlighted amount is not the brightest thing on screen.
+     Dark ink on it either way. */
+  --note-bg: light-dark(#ffffad, #c7a93c);
+  --note-fg: light-dark(#333, #241c05);
+
+  /* A recipe's stars. */
+  --star-color: light-dark(#b7791f, #e3ad46);
+
+  /* Contain's `inverse` is the opposite of the page (tooltips): the page's
+     own pair, the other way round. */
+  --inverse-bg: light-dark(#2b2622, #ece4d8);
+  --inverse-fg: light-dark(#fefffa, #221f1c);
+
+  /* The semantic fills. Contain's defaults are dark fills carrying white
+     text, which sink into a dark page; at night each one lightens and takes
+     dark ink instead. */
+  --danger-color: light-dark(var(--material-color-red-700), var(--material-color-red-300));
+  --danger-bg: var(--danger-color);
+  --danger-fg: light-dark(var(--white), #2b1a19);
+  --success-color: light-dark(var(--material-color-green-800), var(--material-color-green-300));
+  --success-bg: var(--success-color);
+  --success-fg: light-dark(var(--white), #16251a);
+  --info-color: light-dark(var(--material-color-light-blue-800), var(--material-color-light-blue-300));
+  --info-bg: var(--info-color);
+  --info-fg: light-dark(var(--white), #102129);
+  --warning-color: light-dark(var(--material-color-amber-400), var(--material-color-amber-300));
+  --warning-bg: var(--warning-color);
+  --warning-fg: #2a2205;
+}
+
+/* A pinned scheme: the same two tokens-worth of difference, decided by the
+   document instead of the browser. */
+:root[data-color-scheme="light"] { color-scheme: light; }
+:root[data-color-scheme="dark"] { color-scheme: dark; }
+
+/* ── Shopping aisles ───────────────────────────────────────────────────
+   Each aisle has a designed pair: a pale fill and an ink that names the
+   hue. At night the pair is read the other way round -- the ink, deepened
+   almost to the page, becomes the fill, and the pale colour becomes the
+   text -- so an aisle keeps its colour without nineteen pale blocks
+   glaring out of a dark screen. An aisle with no kind has neither, and its
+   consumers fall back as they always did. */
+.themed-aisle,
+.aisle-label {
+  --aisle-bg: light-dark(var(--aisle-pale), color-mix(in oklab, var(--aisle-ink) 40%, #15110f));
+  --aisle-fg: light-dark(var(--aisle-ink), var(--aisle-pale));
+}
+.aisle-produce { --aisle-pale: #edf5e8; --aisle-ink: #295c38; }
+.aisle-meat { --aisle-pale: #faeee9; --aisle-ink: #8f4037; }
+.aisle-seafood { --aisle-pale: #eaf4f8; --aisle-ink: #285d78; }
+.aisle-deli { --aisle-pale: #fbf2dc; --aisle-ink: #765319; }
+.aisle-canned { --aisle-pale: #f8ecea; --aisle-ink: #8b453b; }
+.aisle-grains { --aisle-pale: #f5efde; --aisle-ink: #72551f; }
+.aisle-international { --aisle-pale: #f2ecf7; --aisle-ink: #674886; }
+.aisle-condiments { --aisle-pale: #eef3df; --aisle-ink: #50601f; }
+.aisle-dairy { --aisle-pale: #edf3f8; --aisle-ink: #355d7b; }
+.aisle-bakery { --aisle-pale: #fbf0dd; --aisle-ink: #82511e; }
+.aisle-baking { --aisle-pale: #f5edf3; --aisle-ink: #78516c; }
+.aisle-spices { --aisle-pale: #fbefdf; --aisle-ink: #8b4d23; }
+.aisle-pantry { --aisle-pale: #f4eee4; --aisle-ink: #6b411d; }
+.aisle-frozen { --aisle-pale: #eaf6f7; --aisle-ink: #286774; }
+.aisle-coffee { --aisle-pale: #f3eae4; --aisle-ink: #70462e; }
+.aisle-breakfast { --aisle-pale: #f8f0dd; --aisle-ink: #795820; }
+.aisle-soda { --aisle-pale: #e9f3f4; --aisle-ink: #2b6268; }
+.aisle-juice { --aisle-pale: #fff0df; --aisle-ink: #92501e; }
+.aisle-alcohol { --aisle-pale: #f5edf6; --aisle-ink: #6a436b; }
+
+/* ── What light-dark() cannot carry ────────────────────────────────────
+   It takes colours only, so these are written per scheme: once for the
+   browser's preference (unless the document has pinned day), once for a
+   document that pinned night. Hover on a dark control has to lighten it;
+   on a light one Contain's own default already does. */
+:root {
+  --_hover-lift: brightness(1.22);
+  --_menu-hover-lift: brightness(1.3);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-color-scheme="light"]) {
+    --hover-filter-brightness-hack: var(--_hover-lift);
+    --menu-item-hover-filter-brightness-hack: var(--_menu-hover-lift);
+  }
+}
+:root[data-color-scheme="dark"] {
+  --hover-filter-brightness-hack: var(--_hover-lift);
+  --menu-item-hover-filter-brightness-hack: var(--_menu-hover-lift);
+}
