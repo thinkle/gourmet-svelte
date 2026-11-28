@@ -16,8 +16,11 @@
    as plain text beside the Ingredients heading. */
 
 @media print {
+  /* A line of text across a whole sheet is too long to read at a glance, so
+     the page is set with wide side margins: the recipe prints as one column
+     of about 16cm, the measure of a book page, on both Letter and A4. */
   @page {
-    margin: 1.5cm;
+    margin: 1.2cm 2.8cm;
   }
 
   /* ── Let the content flow ─────────────────────────────────────────── */
@@ -156,46 +159,59 @@
   }
 
   /* ── The head of the recipe ───────────────────────────────────────── */
+  /* The head is a caption, not a cover: the title, one line of categories and
+     one line of facts, so the recipe itself starts near the top of the sheet. */
   .hero {
-    gap: 0.4cm;
-    margin-block-end: 0.5cm;
+    gap: 0.3cm;
+    margin-block-end: 0.35cm;
     break-inside: avoid;
     break-after: avoid;
   }
   .hero.photo {
-    grid-template-columns: 4.5cm 1fr !important;
+    grid-template-columns: 4cm 1fr !important;
     align-items: start;
   }
   .hero img {
-    max-height: 5cm !important;
+    max-height: 4.5cm !important;
     aspect-ratio: auto !important;
     border-radius: 0 !important;
   }
   .hero .info {
-    gap: 0.3cm;
+    gap: 0.15cm;
   }
   /* The recipe's colour, where a border can still carry it. */
   .hero .band {
-    padding: 0 0 0 0.3cm !important;
+    padding: 0 0 0 0.25cm !important;
     border-radius: 0 !important;
     border-inline-start: 3pt solid var(--recipe-bg, #000) !important;
   }
   .hero h1 {
-    font-size: 19pt;
+    font-size: 16pt;
+    line-height: 1.1;
   }
+  /* Label and value sit on one line -- "RATING ★★★★★" -- so the whole row of
+     facts is a single line instead of a stacked two-line block. */
   .hero .facts {
-    gap: 0.2cm 0.8cm;
+    gap: 0.1cm 0.7cm;
     padding: 0;
+  }
+  .hero .facts div {
+    display: flex !important;
+    align-items: baseline;
+    gap: 0.15cm;
   }
   .hero dt {
     font-size: 7pt;
   }
   .hero dd {
-    font-size: 10pt;
+    font-size: 9.5pt;
   }
   .hero .cats,
   .hero .sources {
-    font-size: 9pt;
+    font-size: 8.5pt;
+  }
+  .hero .cats {
+    gap: 0 !important;
   }
   .hero .cats li {
     /* The category chips are fills; on paper they are a list of words. */
@@ -219,13 +235,17 @@
     border-block-end: 1pt solid currentColor !important;
     break-after: avoid;
   }
+  /* Half the width means less room for the amount: it keeps a column of its
+     own, narrower, and the name takes the rest. */
   .ingredients .ingredient {
+    grid-template-columns: fit-content(2.8cm) 1fr !important;
+    column-gap: 0.3cm !important;
     padding: 0.03cm 0 !important;
     break-inside: avoid;
     font-size: 10pt;
   }
   .ingredients .amount {
-    min-inline-size: 2.2cm;
+    min-inline-size: 1.7cm;
   }
   .ingredients .group {
     break-inside: avoid;
@@ -234,12 +254,21 @@
     margin: 0.25cm 0 0.1cm;
     break-after: avoid;
   }
-  /* A long list reads better in two columns than down a whole page; a short
-     one is left alone. (A browser without :has() simply keeps one column.) */
-  .recipe-view .ingredients-pane > .ingredients:has(li:nth-child(9)),
-  .recipe-view .ingredients-inline > .ingredients:has(li:nth-child(9)) {
+  /* A list of any length runs down the left of the sheet and leaves the right
+     half blank, so anything but a short one is set in two columns. Grouped
+     lists count their groups: five headed groups of one or two lines each is
+     a long list, even though the list itself has only five children. A browser
+     without :has() simply keeps one column. */
+  .recipe-view .ingredients-pane > .ingredients:has(> li:nth-child(7)),
+  .recipe-view .ingredients-inline > .ingredients:has(> li:nth-child(7)),
+  .recipe-view .ingredients-pane > .ingredients:has(> li.group:nth-child(3)),
+  .recipe-view .ingredients-inline > .ingredients:has(> li.group:nth-child(3)) {
     columns: 2;
-    column-gap: 1cm;
+    column-gap: 0.8cm;
+  }
+  /* A group inside the list is already in a column; it must not split again. */
+  .ingredients .ingredients {
+    columns: auto !important;
   }
 
   /* ── Method ───────────────────────────────────────────────────────── */

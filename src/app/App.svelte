@@ -105,6 +105,16 @@
   const hasLocalTabs = $derived(openTabs.some(({ recipe }) => recipe.id != null && !recipe._id));
   $effect(() => { if (tab !== "search" && tab !== "shopping" && !openTabs.some((t) => t.key === tab)) tab = "search"; });
 
+  // What you are looking at, in the browser's title bar. The browser prints
+  // the title at the head of every sheet and offers it as the file name for
+  // "Save as PDF", so an open recipe prints as its own name, not the app's.
+  const appTitle = document.title;
+  $effect(() => {
+    const open = openTabs.find((t) => t.key === tab)?.recipe?.title?.trim();
+    const what = open || (tab === "shopping" ? "Shopping list" : "");
+    document.title = what ? `${what} — ${appTitle}` : appTitle;
+  });
+
   function openRecipe(r) {
     // Beside the recipe it was opened from, not at the end of the strip.
     if (!openIds.includes(r.id)) openIds = insertBeside(openIds, r.id, tab);
