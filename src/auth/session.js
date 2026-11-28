@@ -1,9 +1,4 @@
-// The session: the only place that talks to Netlify Identity.
-//
-// For now this is a thin bridge from the Identity widget to the kept user
-// store (`stores/userStore.js`), which is what the request layer reads. Card
-// R0-7 replaces it with a proper module (token refresh per request, 401
-// retry); nothing outside this file should need to change when it does.
+// Netlify Identity owns the persisted session and refresh credentials.
 import netlifyIdentity from "netlify-identity-widget";
 import { user } from "../stores/userStore.js";
 
@@ -20,5 +15,8 @@ export function startSession() {
 
 export const signIn = () => netlifyIdentity.open("login");
 export const signUp = () => netlifyIdentity.open("signup");
-export const signOut = () => netlifyIdentity.logout();
+export function signOut() {
+  user.logout();
+  return netlifyIdentity.logout();
+}
 export { user };
