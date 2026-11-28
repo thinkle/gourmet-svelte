@@ -149,8 +149,7 @@
       {#snippet right()}
         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
         <article class="pane text-pane" bind:this={textEl} onclick={pickMention}>
-          <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
-          <RecipeHero {recipe} bind:mult />
+          <RecipeHero {recipe} bind:mult onedit={beginEdit} />
           {@render prose()}
         </article>
       {/snippet}
@@ -158,8 +157,7 @@
   {:else}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
     <article class="pane column" class:sheet-up={sheetOpen} bind:this={textEl} onclick={pickMention}>
-      <p class="recipe-actions"><Button onclick={beginEdit}>Edit</Button></p>
-      <RecipeHero {recipe} bind:mult />
+      <RecipeHero {recipe} bind:mult onedit={beginEdit} />
       <section class="ingredients-inline" bind:this={listEl} aria-label="Ingredients">
         {@render head()}{@render list()}
       </section>

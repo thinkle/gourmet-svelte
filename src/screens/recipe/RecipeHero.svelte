@@ -3,14 +3,14 @@
   // shape: a wide one runs across the top of the page, a tall one stands beside
   // the title. The recipe's colour is the title band; below it the facts are
   // labelled (Prep, Cook, Makes ...) and the categories get a row of their own.
-  import { Surface, Text } from "contain-css-svelte";
+  import { Button, Surface, Text } from "contain-css-svelte";
   import AmountInput from "../../components/AmountInput.svelte";
   import CategoryTag from "../../components/CategoryTag.svelte";
   import { fmtTime, stars, recipeRole, sourceItems } from "../../app/lib.js";
   import { floatToFrac } from "../../utils/numbers.js";
   // A yield scaled by the multiplier: "24 cookies" x 2 -> "48 cookies".
   const scaled = (n) => (Number(n) > 0 ? floatToFrac(Number(n) * mult) : (n ?? ""));
-  let { recipe, mult = $bindable(1) } = $props();
+  let { recipe, mult = $bindable(1), onedit } = $props();
 
   // "preptime", "Cook time", "total" -> "Prep", "Cook", "Total"
   const label = (n) => {
@@ -40,7 +40,10 @@
     <figure><img src={recipe.photo} alt="" {onload} /></figure>
   {/if}
   <div class="info">
-    <Surface colorRole="recipe" class="band"><h1>{recipe.title}</h1></Surface>
+    <Surface colorRole="recipe" class="band">
+      <h1>{recipe.title}</h1>
+      {#if onedit}<Button class="band-action" onclick={onedit}>Edit</Button>{/if}
+    </Surface>
     {#if cats.length}
       <ul class="cats" aria-label="Categories">{#each cats as c}<li><CategoryTag name={c} /></li>{/each}</ul>
     {/if}
@@ -86,10 +89,27 @@
     box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 0.18);
   }
   .info { display: grid; gap: 0.9rem; align-content: start; }
+  /* Edit belongs to the recipe, so it rides in the title band, at the end of
+     the title's own line, the way the app's own actions ride in the top bar. */
   .info :global(.band) {
+    display: flex;
+    align-items: start;
+    gap: 1rem;
     padding: 0.9rem 1.25rem 1rem;
     border-radius: 0.75rem;
     border-inline-start: 0.5rem solid var(--recipe-accent);
+  }
+  h1 { flex: 1; min-width: 0; }
+  /* Quiet until you point at it: the band's own colour, not a slab on top. */
+  .info :global(.band-action) {
+    flex: none;
+    --button-bg: transparent;
+    --button-fg: color-mix(in oklab, currentColor 72%, transparent);
+    --button-border-color: transparent;
+    --button-box-shadow: none;
+    --button-hover-bg: color-mix(in oklab, currentColor 18%, transparent);
+    --button-hover-fg: currentColor;
+    --button-hover-filter: none;
   }
   h1 {
     margin: 0;

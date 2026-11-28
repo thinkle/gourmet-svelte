@@ -86,7 +86,7 @@
   /* ── Only the recipe, none of the app ─────────────────────────────── */
   .gourmet-topbar,
   .gourmet-tabs,
-  .recipe-actions,
+  .hero .band button,
   .recipe-view .fab,
   .recipe-view .sheet,
   .split-pane > .resizer,

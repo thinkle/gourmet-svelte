@@ -258,7 +258,6 @@
 
 /* ── Recipe editor ─────────────────────────────────────── */
 .tab-dirty { margin-inline-start: 0.35em; font-weight: 700; }
-.recipe-actions { display: flex; justify-content: flex-end; margin: 0 0 0.5rem; }
 .recipe-editor .text-pane, .recipe-editor .column { display: grid; align-content: start; gap: 1rem; }
 .recipe-editor .bar { position: sticky; top: 0; z-index: 2; }
 .details-editor { display: grid; gap: 0.75rem; }
