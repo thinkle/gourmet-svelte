@@ -16,11 +16,8 @@
    as plain text beside the Ingredients heading. */
 
 @media print {
-  /* A line of text across a whole sheet is too long to read at a glance, so
-     the page is set with wide side margins: the recipe prints as one column
-     of about 16cm, the measure of a book page, on both Letter and A4. */
   @page {
-    margin: 1.2cm 2.8cm;
+    margin: 1.3cm 1.6cm;
   }
 
   /* ── Let the content flow ─────────────────────────────────────────── */
@@ -128,13 +125,23 @@
     }
   }
 
-  /* ── One column: title, ingredients, method ───────────────────────── */
-  /* On a wide screen the two panes sit side by side, with the title inside
-     the right-hand one. `display: contents` dissolves those wrappers so the
-     three parts become one column in the order a cook reads them. */
+  /* ── The shape of the page: a sidebar and a column ───────────────── */
+  /* Paper gets the same shape as a wide screen, which is the one that reads
+     well: the ingredients stand in a narrow column down the left, skimmable
+     at a glance while you cook, and the method runs beside them in a column
+     of its own. The method's column is what makes the text readable -- a line
+     of prose across a whole sheet is far too long to follow, and shrinking
+     the type to fix that only makes it worse.
+
+     On a phone the same three parts are one flat column, and in a wide window
+     the title sits inside the right-hand pane; `display: contents` dissolves
+     both sets of wrappers so that, either way, the hero, the ingredients and
+     the method become the three children this grid places. */
   .recipe-view {
-    display: flex !important;
-    flex-direction: column;
+    display: grid !important;
+    grid-template-columns: 5.4cm 1fr;
+    column-gap: 0.9cm;
+    align-items: start;
   }
   .split-pane,
   .split-pane > .left,
@@ -144,16 +151,17 @@
     display: contents !important;
   }
   .recipe-view .hero {
-    order: 1;
+    grid-area: 1 / 1 / 2 / -1;
   }
   .recipe-view .ingredients-pane,
   .recipe-view .ingredients-inline {
-    order: 2;
-    padding: 0 !important;
-    margin: 0 0 0.5cm !important;
+    grid-area: 2 / 1 / 3 / 2;
+    padding: 0 0.4cm 0 0 !important;
+    margin: 0 !important;
+    border-inline-end: 0.5pt solid #999 !important;
   }
   .recipe-view .recipe-prose {
-    order: 3;
+    grid-area: 2 / 2 / 3 / 3;
     max-width: none;
     margin: 0 !important;
   }
@@ -254,21 +262,10 @@
     margin: 0.25cm 0 0.1cm;
     break-after: avoid;
   }
-  /* A list of any length runs down the left of the sheet and leaves the right
-     half blank, so anything but a short one is set in two columns. Grouped
-     lists count their groups: five headed groups of one or two lines each is
-     a long list, even though the list itself has only five children. A browser
-     without :has() simply keeps one column. */
-  .recipe-view .ingredients-pane > .ingredients:has(> li:nth-child(7)),
-  .recipe-view .ingredients-inline > .ingredients:has(> li:nth-child(7)),
-  .recipe-view .ingredients-pane > .ingredients:has(> li.group:nth-child(3)),
-  .recipe-view .ingredients-inline > .ingredients:has(> li.group:nth-child(3)) {
-    columns: 2;
-    column-gap: 0.8cm;
-  }
-  /* A group inside the list is already in a column; it must not split again. */
-  .ingredients .ingredients {
-    columns: auto !important;
+  /* The sidebar is narrow, so a long ingredient wraps: the wrapped words line
+     up under the name rather than running back under the amount. */
+  .ingredients .item {
+    overflow-wrap: break-word;
   }
 
   /* ── Method ───────────────────────────────────────────────────────── */
