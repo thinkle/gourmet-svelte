@@ -139,8 +139,8 @@
      the method become the three children this grid places. */
   .recipe-view {
     display: grid !important;
-    grid-template-columns: 5.4cm 1fr;
-    column-gap: 0.9cm;
+    grid-template-columns: 6.3cm 1fr;
+    column-gap: 0.8cm;
     align-items: start;
   }
   .split-pane,
@@ -246,14 +246,14 @@
   /* Half the width means less room for the amount: it keeps a column of its
      own, narrower, and the name takes the rest. */
   .ingredients .ingredient {
-    grid-template-columns: fit-content(2.8cm) 1fr !important;
-    column-gap: 0.3cm !important;
+    grid-template-columns: fit-content(2.5cm) 1fr !important;
+    column-gap: 0.25cm !important;
     padding: 0.03cm 0 !important;
     break-inside: avoid;
     font-size: 10pt;
   }
   .ingredients .amount {
-    min-inline-size: 1.7cm;
+    min-inline-size: 1.5cm;
   }
   .ingredients .group {
     break-inside: avoid;
